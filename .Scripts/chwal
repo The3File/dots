@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+sel(){
+   current=$(awk -F/ 'NF>1{print $NF}' $HOME/.cache/wal/wal)
+   files=$(ls $HOME/Billeder/favoritter | sed '/.backend/d')
+   dir="$HOME/Billeder/favoritter"
+
+   if [[ $1 = "-r" ]]; then
+      next="$dir/$current"
+   else
+   [[ $(printf "$files\n" | tail -1) = ${current} || -z $(echo $files | grep $current) ]] &&
+      next="$dir/$(printf '%s' "$files" | head -1)" ||
+      next="$dir/$(printf '%s' "$files" | awk "/$current/{getline; print}")"
+   fi
+
+   backend="$(cat "${next%.*}.backend")"
+
+   wal -tqi $next --backend $backend
+   cp $next "$HOME/.config/wall.png"
+
+   $CONFIG &>/dev/null
+}
+
+fav(){
+   trap 'printf "\n"' EXIT
+
+   printf '\e[H\e[2J\e[1;34m%s\n\e[0;34m%s\n%s\n%s\n%s\n\e[1;32m%s\e[0m'\
+      "backends:" "w: wal" "c: colorz" "h: haishoku" "t: colorthief" "choose > "
+
+   read -rsn1; [[ ! $REPLY ]] && exit
+   case $REPLY in w) backend="wal" ;; c) backend="colorz" ;;
+      h) backend="haishoku" ;; t) backend="colorthief" ;; *) exit
+   esac
+
+   printf '%s' "$backend" > "$HOME/Billeder/favoritter/${1%.*}.backend"
+   cp "$1" "$HOME/Billeder/favoritter/${1##*/}"
+}
+
+main(){
+   case $1 in -f) [[ $2 ]] && fav $2 || exit 1;; *) sel "$@" ;; esac
+}
+
+main "$@"

@@ -1,0 +1,29 @@
+#!/usr/bin/env sh
+
+handler(){
+   case "$1" in
+      button/power) [[ $2 = "PBTN" ]] && "$HOME/.Scripts/byebye" ;;
+      button/screenlock)
+	 [[ $(<"$HOME/.keylock") = "enable" ]] && state="disable" || state="enable"
+
+	 xinput $state 'AT Translated Set 2 keyboard' && printf '%s' "$state" > "$HOME/.keylock"
+	 dunstify -C 90211; dunstify -r 90210 -t 4000 "" "<b>${state}d </b>  "
+      ;;
+      ac_adapter) [[ $2 = *ACPI* ]] && dunstbar ;;
+      button/prog1)
+	 run=$(ps aux | sed -n '/vim/d;/gass/p')
+	 [[ $run ]] && ukill gass || gass & disown 
+	 ;;
+   esac
+}
+
+main(){
+   coproc acpi_listen
+   trap 'kill $COPROC_PID' EXIT
+
+   while read -u "${COPROC[0]}" -a event; do
+      handler "${event[@]}"
+   done
+}
+
+main

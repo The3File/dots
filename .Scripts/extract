@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+getext(){
+   case ${1##*.} in
+      zip) zip $1 ;;
+      xz) xz $1 ;;
+      *) printf '%s\n' "\".${1##*.}\" not supported" ;;
+   esac
+}
+
+zip(){
+   unzip -Z -h $1 
+   read -r -p "Unpack \"$1\" [Y/n]: "
+   case $REPLY in
+      n) printf '%s\n' "No changes made"; exit ;;
+      *) unzip -x $1 -d "${1%.*}/"
+	 printf '%s\n' "done"
+   esac
+}
+
+xz(){ printf '%s\n' "\".xz\" files WIP"; }
+
+main(){
+   [[ -z $1 ]] && { printf '%s\n' "Usage: extract \"example.ext\""; exit; }
+   [[ -f $1 ]] && getext $1 || printf '%s\n' "Not a file"
+}
+
+main "$@"
