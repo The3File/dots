@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+case $1 in
+   push) 
+      config commit -a -m "test" &&
+      config push -u origin master
+      ;;
+   *)
+      git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME $@
+esac
