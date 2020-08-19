@@ -1,0 +1,36 @@
+$include /etc/inputrc
+set completion-ignore-case on
+set completion-map-case on
+set show-all-if-ambiguous off
+set mark-symlinked-directories on
+
+# Flip through autocompletion matches with Shift-Tab.
+"\e[Z": menu-complete
+#TAB:menu-complete
+# Filtered history search
+"\e[A": history-search-backward
+"\e[B": history-search-forward
+
+set editing-mode vi
+$if mode=vi
+set show-mode-in-prompt on
+
+#set vi-ins-mode-string "\1\e[1;31m\2[insert] \1\e[0m\2"
+#set vi-cmd-mode-string "\1\e[1;32m\2[comand] \1\e[0m\2"
+
+set vi-ins-mode-string \1\e[1;31m\2[insert] \1\e[0m\2\1\e[6 q\2
+set vi-cmd-mode-string \1\e[1;32m\2[comand] \1\e[0m\2\1\e[2 q\2
+set keymap vi-insert
+RETURN: "\e\n"
+
+set keymap vi-command
+# these are for vi-command mode
+Control-l: clear-screen
+Control-a: beginning-of-line
+
+set keymap vi-insert
+# these are for vi-insert mode
+Control-l: clear-screen
+Control-a: beginning-of-line
+
+$endif
