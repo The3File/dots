@@ -7,5 +7,5 @@ case $1 in
       config commit -a &&
       config push -u origin phone
       ;;
-   *) config $@
+   *) [[ -z $2 ]] && config $@
 esac
