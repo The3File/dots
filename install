@@ -10,4 +10,5 @@ config checkout || {
    mkdir -p .dotfiles-backup
    config checkout 2>&1 | egrep "\s+\." | awk {'print $1'} | xargs -I{} mv {} "$HOME/.dotfiles-backup/"{}
 }
+config checkout
 config config status.showUntrackedFiles no
