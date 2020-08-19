@@ -1,0 +1,46 @@
+# ~/.aliases
+
+alias con="nvim $CONFIG"
+alias bsp="~/.config/bspwm/bspwmrc"
+
+alias sshd="/bin/sshd"
+alias kdeconnectd="/usr/lib/kdeconnectd"
+alias hot="nmcli d w c Vedsidenaf"
+
+alias x="extract"
+
+alias spe="speedtest"
+alias vim="nvim"
+alias r="ranger"
+alias f="bfm"
+alias n="nmcli"
+
+alias arc="nvim ~/.aliases"
+alias brc="nvim ~/.bashrc"
+alias rrc="nvim ~/.config/ranger/rc.conf"
+alias vrc="nvim ~/.config/nvim/init.vim"
+alias crc="nvim ~/.config/compton.conf"
+alias prc="nvim ~/.config/polybar/config"
+alias src="nvim ~/.config/sxhkd/sxhkdrc"
+
+alias xrc="nvim ~/.Xresources"
+alias xr="xrdb ~/.Xresources"
+
+alias nf="clear -x && echo -e \ && neofetch"
+alias uf="ufetch"
+alias p="sudo pacman"
+
+alias c="clear"
+
+alias ls="ls --color=auto"
+alias la="ls -a"
+alias ll="ls -lh"
+alias lla="ls -lah"
+
+alias fastboot="sudo fastboot"
+alias fr="fastboot reboot"
+alias ff="fastboot flash"
+alias ap="adb push"
+alias arr="adb reboot recovery"
+
+alias hej="echo hej $USER!"
