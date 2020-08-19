@@ -1,7 +1,5 @@
 # ~/.aliases
 
-alias config='/usr/bin/git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME'
-
 alias con="nvim $CONFIG"
 alias bsp="~/.config/bspwm/bspwmrc"
 
