@@ -7,5 +7,5 @@ case $1 in
       config commit -a &&
       config push -u origin master
       ;;
-   *) config
+   *) config $@
 esac
