@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 net(){
    st="$(nmcli | sed -n "1s/.*: //p")"
