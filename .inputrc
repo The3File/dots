@@ -14,11 +14,11 @@ set mark-symlinked-directories on
 set editing-mode vi
 $if mode=vi
 set show-mode-in-prompt on
-
-set vi-ins-mode-string \1\e7\e[9999;0H\e[1;34m\2-- INDSÆT --\1\e8\e[0m\2\1\e[6 q\2
-set vi-cmd-mode-string \1\e[J\e[1;32m\e[0m\2\1\e[2 q\2
 set keymap vi-insert
 RETURN: "\e\n"
+
+set vi-ins-mode-string "\e7\e[9999;0H\e[1;34m-- INDSÆT --\e8\e[0m\e[6 q"
+set vi-cmd-mode-string "\e[J\e[1;32m\e[0m\e[2 q"
 
 set keymap vi-command
 # these are for vi-command mode
