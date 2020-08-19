@@ -29,7 +29,7 @@ config() {
 
    # gaps
       export GS="10"	# gaps size integer
-      export GN="4"	# number of windows before zero gaps
+      export GN="3"	# number of windows before zero gaps
 
    # left and right padding
       export PS="7"	# padding size integer
