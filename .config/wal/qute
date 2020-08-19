@@ -128,7 +128,7 @@ c.tabs.show_switching_delay = 2000
 # Default monospace fonts. Whenever "monospace" is used in a font
 # setting, it's replaced with the fonts listed here.
 # Type: Font
-c.fonts.monospace = 'SF Mono'
+#c.fonts.monospace = 'SF Mono'
 
 # Font used in the completion widget.
 # Type: Font
