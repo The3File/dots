@@ -25,5 +25,3 @@ HISTFILESIZE=100000
 HISTCONTROL="erasedups:ignoreboth"
 
 export HISTIGNORE="&:[ ]*:exit:ls:bg:fg:history:clear:c:ll:lla:la"
-
-eval "$(register-python-argcomplete pmbootstrap)"
