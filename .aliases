@@ -1,5 +1,7 @@
 # ~/.aliases
 
+alias q="exit"
+
 alias con="nvim $CONFIG"
 alias bsp="~/.config/bspwm/bspwmrc"
 

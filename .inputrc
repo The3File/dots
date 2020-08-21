@@ -15,8 +15,8 @@ set editing-mode vi
 $if mode=vi
 set show-mode-in-prompt on
 
-set vi-ins-mode-string \e7\e[J\e[9999;0H\e[1;34m-- INDSÆT --\e8\e[0m\e[6 q
-set vi-cmd-mode-string \e[J\e[1;32m\e[0m\e[2 q
+set vi-ins-mode-string \e[1;34m-- INDSÆT --\e[0m\e[6 q
+set vi-cmd-mode-string \e[2 q
 set keymap vi-insert
 RETURN: "\e\n"
 
