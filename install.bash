@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 config(){ /usr/bin/git --git-dir="$config" --work-tree="$HOME" "$@"; }
 
 backup(){
