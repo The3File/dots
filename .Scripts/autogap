@@ -20,5 +20,4 @@ main(){
    done < "$GAPFIFO";
 }
 
-config
 main
