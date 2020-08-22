@@ -1,4 +1,4 @@
-config(){ /usr/bin/git --git-dir="$config" --work-tree="$HOME" "$@"; }
+config(){ git --git-dir="$config" --work-tree="$HOME" "$@"; }
 
 backup(){
    printf '%s \"%s\"\n' "Conflicting files, backing to" "$backup/"
@@ -19,7 +19,8 @@ main(){
    config="$HOME/.dotfiles"
    backup="$HOME/.dotfiles-backup"
    
-   printf '%s\n%s' ".dotfiles" "install.bash"
+   printf '%s\n%s' ".dotfiles" "install.bash" >\
+      "$HOME.gitignore"
    if [[ -d "$config" || ! -e "$config/*" ]];then
       git clone --bare git@github.com:The3File/dots.git "$config"
       config checkout &>/dev/null || backup
