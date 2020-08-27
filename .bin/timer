@@ -11,7 +11,7 @@ check() {
 	 ((m=${k[0]},s=${k[1]},l=(m*60)+s)) ;;
       *[0-9]'m') ((l=${1%m}*60)) ;;
       *[0-9]'s') ((l=${1%s})) ;;
-      *) usage
+      *) printf '%s\n%s\n' "unknown option '$1'" "timer -h for help"; exit 1
    esac
 
    [[ $l ]] && l="$l-"
@@ -24,14 +24,18 @@ timer() {
       printf '\e[?25l\e[1;34m\r\e[J%02d:%02d' "$((s/60))" "$((s%60))"
       ((s<0)) && printf '\r%s\n' "times up!" && break; sleep 1
    }
-   beep
+   beep &>/dev/null
 }
 
 beep() { for ((i=0;i<3;i++)){ env -i beep &>/dev/null || sudo env -i beep;}; }
 
 main() {
    trap "stty echo; printf '\e[J\e[?25h'" EXIT
-   case $1 in "") timer ;; -l) check $2; loop ;; *) check $1; timer; esac
+   while getopts ":l:h" o; do case "${o}" in
+      l) check $2; loop ;;
+      h) usage; exit 0 ;;
+   esac; done
+   check $1; timer
 }
 
 main "$@"
