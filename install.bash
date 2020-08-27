@@ -16,7 +16,7 @@ main(){
    config="$HOME/.dotfiles"
    backup="$HOME/.dotfiles-backup"
 
-   if [[ ! -e "$config/*" ]];then
+   if [[ -e "$config/*" ]];then
       git clone --bare git@github.com:The3File/dots.git "$config"
    else
       printf '%s\n' "exiting: $config is not empty"
