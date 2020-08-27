@@ -3,11 +3,18 @@
 getext(){
    case ${1##*.} in
       zip) zip $1 ;;
-      xz) xz $1 ;;
+      .tar.bz|.tar.bz2|.tbz|.tbz2) tar xjvf $f;;
+      .tar.gz|.tgz) tar xzvf $f;;
+      .tar.xz|.txz) tar xJvf $f;;
+      #.zip) unzip $f;;
+      .rar) unrar x $f;;
+      .7z) 7z x $f;;
       *) printf '%s\n' "\".${1##*.}\" not supported" ;;
    esac
 }
 
+    case $f in
+    esac
 zip(){
    unzip -Z -h $1 
    read -r -p "Unpack \"$1\" [Y/n]: "
@@ -17,8 +24,6 @@ zip(){
 	 printf '%s\n' "done"
    esac
 }
-
-xz(){ printf '%s\n' "\".xz\" files WIP"; }
 
 main(){
    [[ -z $1 ]] && { printf '%s\n' "Usage: extract \"example.ext\""; exit; }

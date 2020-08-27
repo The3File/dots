@@ -27,7 +27,7 @@ super + {r,v,u}
    st -e {ranger,neomutt,rtv -s unixporn}
 
 super + {_,shift +} e
-   {st -e bfm, scratch files}
+   {st -e lf, scratch files}
 
 alt + button1
    drawterm
