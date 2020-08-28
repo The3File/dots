@@ -1,20 +1,40 @@
 #!/usr/bin/env bash
 
-con-up() { nmcli c u "$q";}
-con-down() { nmcli c d "$c";}
+con-up() { nmcli c u "$1" | dunstify $_ ;}
+con-down() { nmcli c d "$1" | dunstify $_ ;}
+
+new-con(){
+      ssid=$(nmcli -f SSID d w l | sed '/SSID/d;s/ *//g' |\
+	 rofi -dmenu -i -p "[ new connection ]")
+      [[ -z $ssid ]] && exit 0
+      
+      passwd=$(rofi -dmenu -p "[ passwd ]")
+      [[ -z $passwd ]] && exit 0
+
+      nmcli d w c "$ssid" password "$passwd"
+}
+
+del-con(){
+   ans=$(printf '%s\n' "$con" | rofi -dmenu -i -p "[ delete connection ]")
+   nmcli c d "$ans"
+}
 
 main() {
-   a=$(nmcli c s | awk '{if (NR!=1) {print $1}}')
-   c=$(nmcli c s -a | awk '{if (NR!=1){print $1}}')
-   e="** Active: [ $c ]"
+   con=$(nmcli -f NAME c s | sed '/NAME/d')
+   active_con=$(nmcli -f NAME c s -a | sed '/NAME/d')
+   active="[ active ] $active_con"
+   new="[+] New Connection"
+   del="[-] Delete Connection"
 
-   [[ $c ]] && a=$(printf '%s\n' "${a/$c/$e}")
+   [[ $active_con ]] && out=$(printf '%s\n' "${con/$active_con/$active}")
+   out=$(printf '%s\n%s\n%s' "$out" "$new" "$del")
+   ans=$(printf '%s\n' "$out" | rofi -dmenu -i -p "[ nmcli ]")
 
-   q=$(printf '%s\n%s\n' "$a" | rofi -dmenu -i -p "[ nmcli ]")
-
-   case $q in
-      "$e") con-down ;;
-      *"$c"*) con-up ;;
+   case $ans in
+      "$active") con-down $active_con ;;
+      "$new") new-con ;;
+      "$del") del-con ;;
+      *) con-up $ans ;;
    esac
 }
 
