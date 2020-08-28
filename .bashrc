@@ -1,8 +1,8 @@
 # ~/.bashrc
 
 set -o vi
-source $HOME/.aliases
-source $HOME/.bash_prompt
+[[ -f ~/.aliases ]] 	&& source ~/.aliases
+[[ -f ~/.bash_prompt ]] && source ~/.bash_prompt
 
 shopt -s histappend
 shopt -s cmdhist
