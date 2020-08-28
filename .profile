@@ -8,8 +8,8 @@ export EDITOR="nvim"
 export BROWSER="qutebrowser"
 
 export CONFIG="$HOME/.config/bspwm/bspwmrc"
-export PANELFIFO="/tmp/panel-fifo"
 
+export PANELFIFO="/tmp/panel-fifo"
 export GAPFIFO="/tmp/gap-fifo"
 export BARFIFO="/tmp/bar-fifo"
 export WORKFIFO="/tmp/work-fifo"

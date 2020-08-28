@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# Måske lidt overgjort? 
+
+noget(){ [[ $1 ]] && printf '\n%s\n\n' "$1" || printf '%s\n' "findes ikke"; }
+
+main(){
+   printf '%s' "Søger.."
+
+   ((i=1)) # definer i
+
+   ## Find ssid og printe tal
+   while read -r linje;do
+      # eksekver kun hvis linjen fra nmcli indeholder "SSID"
+      [[ $linje =~ ^SSID:.* ]] && {
+
+	 # fjern "SSID:" samt whitespace fra linjen
+	 : "${linje#"${linje%%[^SSID:[:space:]*]*}"}"
+
+	 # definer ssid_enkelt til at være outputtet af sidste kommando
+	 ssid_enkelt="$_"
+
+	 #  print dette ssid med tal. \e[K sletter linjen,
+	 #+ \r sender cursor tilbage til første karakter i terminalen
+	 printf '\e[K\r%s\n' "$i: $ssid_enkelt"
+
+	 #  tilføj dette ssid til et array sådan vi senere kan
+	 #+ vælge et med tal
+	 declare -a ssid
+	 IFS=$'\n' ssid+=($ssid_enkelt)
+
+	 ((i++)) # voks i til næste linje
+      }
+   done < <(nmcli -m multiline d w)
+
+   # Bed mennesket om at skrive et tal fra 0 til sidste($i)
+   read -rp "[1-$((i-1))]: "
+
+   #  hvis REPLY er et tal, træk 1 fra, så REPLY passer til vores array
+   ((REPLY)) && ((a=REPLY-1))
+
+   ## Gør noget med svaret
+   noget ${ssid[$a]}
+}
+main "$@"
