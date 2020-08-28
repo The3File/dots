@@ -1,19 +1,18 @@
 # ~/.aliases
 
-alias con="nvim $CONFIG"
-alias bsp="~/.config/bspwm/bspwmrc"
-
+##  APPLICATIONS
 alias sshd="/bin/sshd"
 alias kdeconnectd="/usr/lib/kdeconnectd"
-alias hot="nmcli d w c Vedsidenaf"
 
 alias x="extract"
-
 alias spe="speedtest"
 alias vim="nvim"
 alias r="ranger"
 alias f="bfm"
 alias n="nmcli"
+
+##  CONFIGS
+alias con="nvim $CONFIG"
 
 alias arc="nvim ~/.aliases"
 alias brc="nvim ~/.bashrc"
@@ -23,26 +22,26 @@ alias vrc="nvim ~/.config/nvim/init.vim"
 alias crc="nvim ~/.config/compton.conf"
 alias prc="nvim ~/.config/polybar/config"
 alias src="nvim ~/.config/sxhkd/sxhkdrc"
-
 alias xrc="nvim ~/.Xresources"
-alias xr="xrdb ~/.Xresources"
 
+##  QOL
+alias bsp="~/.config/bspwm/bspwmrc"
+alias xr="xrdb ~/.Xresources"
 alias nf="clear -x && echo -e \ && neofetch"
 alias uf="ufetch"
 alias p="sudo pacman"
-
 alias c="clear"
-
 alias ls="ls --color=auto"
 alias la="ls -a"
 alias ll="ls -lh"
 alias lla="ls -lah"
+## JC
+alias hej="echo hej $USER!"
 
+## PHONE
 alias fastboot="sudo fastboot"
 alias fr="fastboot reboot"
 alias ff="fastboot flash"
 alias ap="adb push"
 alias arr="adb reboot recovery"
-
 alias sshfon="ssh $(ip r | awk '{getline $1; print $3}') -p 8022 -i '$HOME/.ssh/id_rsa'"
-alias hej="echo hej $USER!"
