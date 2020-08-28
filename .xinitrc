@@ -20,4 +20,5 @@ exec feh --bg-fill $HOME/.config/wall.png &
 exec dunst &
 exec acpid_events &
 exec sxhkd &
-exec bspwm
+#exec bspwm
+exec dwm

@@ -23,8 +23,8 @@ super + b
 super + {_,shift +} {Return}
    st {_,-c float -g 88x25}
 
-super + {r,v,u}
-   st -e {ranger,neomutt,rtv -s unixporn}
+super + {v,u}
+   st -e {neomutt,rtv -s unixporn}
 
 super + {_,shift +} e
    {st -e lf, scratch files}
