@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-theme() {
+on() {
    theme="base16-isotope"
    #theme="base16-brewer"
    #theme="base16-atelier-heath"
@@ -9,11 +9,6 @@ theme() {
    #theme="base16-rebecca"
 
    wal --theme $theme &>/dev/null
-}
-
-on() {
-
-   theme
 
    source /home/ringdal/.cache/wal/colors.sh
 
@@ -21,9 +16,7 @@ on() {
    xsetroot -solid "$background"
 
    pkill dunst && dunst &>/dev/null & disown
-   pkill compton
-   ukill dunstbar
-   ukill autogap
+   pkill compton; ukill dunstbar; ukill autogap
 
    for i in {1..10}; do
       bspc config -d $i left_padding 0
@@ -36,8 +29,6 @@ on() {
    bspc config border_width 1
 
    $CONFIG qute
-
-   #echo on > $fifo &
 
 }
 
@@ -55,17 +46,8 @@ off() {
    sleep .1
    echo > "$GAPFIFO" &
 
-   #echo off > $fifo &
-
 }
 
-main(){
-
-#fifo="$WORKFIFO"
-#[[ -e "$fifo" ]] && rm "$fifo"; mkfifo "$fifo"
-
-case $1 in on) on ;; off) off; esac
-
-}
+main(){ case $1 in on) on ;; off) off; esac; }
 
 main "$@"

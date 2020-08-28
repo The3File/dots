@@ -2,7 +2,7 @@
 
 files(){
    id=$(xdotool search --class files)
-   [[ -z "$id" ]] && st -c files -g 80x15+30-20 -e ranger || bspc node "$id" --flag hidden -f
+   [[ -z "$id" ]] && st -c files -g 80x15+30-20 -e lf || bspc node "$id" --flag hidden -f
 }
 
 term(){
@@ -10,7 +10,7 @@ term(){
    opts=( -c scratchterm -g 100x28+30+30 -e )
 
    [[ -z "$id" ]] && {
-      st ${opts[@]} tmux new -s 'scratch' || st ${opts[@]} tmux a -t '=scratch' 
+      st ${opts[@]} tmux new -s 'scratch' -c neofetch || st ${opts[@]} tmux a -t '=scratch' 
    } || bspc node "$id" --flag hidden -f
 }
 

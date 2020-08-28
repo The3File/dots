@@ -1,12 +1,3 @@
 #!/usr/bin/env bash
-
 config(){ git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME $@; }
-
-case $1 in
-   push) 
-      config commit -a &&
-	 [[ $2 ]] ||
-	    config push -u origin master
-      ;;
-   *) config $@
-esac
+case $1 in up) config commit -a && config push -u origin master ;; *) config $@; esac

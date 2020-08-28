@@ -1,12 +1,6 @@
 #!/usr/bin/env bash
-main(){
-   [[ ! -f "$HOME/.fontawesome" ]] && exit
-
+main(){ [[ ! -f "$HOME/.fontawesome" ]] && exit
    IFS=$'\n' read -d '' -r -a icn < "$HOME/.fontawesome"
-
    read -d '' -r -a answ < <(printf '%s\n' "${icn[@]}" | rofi -dmenu -i -p "Symboler: ")
-
-   printf '%s' "${answ[0]}" | xclip -selection c
-}
-
+   printf '%s' "${answ[0]}" | xclip -selection c; }
 main "$@"
