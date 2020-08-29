@@ -21,7 +21,8 @@ main(){
 
 	 #  print dette ssid med tal. \e[K sletter linjen,
 	 #+ \r sender cursor tilbage til første karakter i terminalen
-	 printf '\e[K\r%s\n' "$i: $ssid_enkelt"
+	 space=""; ((i<10)) && space=" "
+	 printf '\e[K\r%s%s\n' "$i: $space" "$ssid_enkelt"
 
 	 #  tilføj dette ssid til et array sådan vi senere kan
 	 #+ vælge et med tal
@@ -30,7 +31,7 @@ main(){
 
 	 ((i++)) # voks i til næste linje
       }
-   done < <(nmcli -m multiline d w)
+   done < <(cat ~/test)
 
    # Bed mennesket om at skrive et tal fra 0 til sidste($i)
    read -rp "[1-$((i-1))]: "
