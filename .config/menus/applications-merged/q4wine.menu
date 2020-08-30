@@ -1,0 +1,21 @@
+<!DOCTYPE Menu PUBLIC "-//freedesktop//DTD Menu 1.0//EN" "http://www.freedesktop.org/standards/menu-spec/menu-1.0.dtd">
+<Menu>
+ <Name>Applications</Name>
+ <Menu>
+  <Name>q4wine-q4wine</Name>
+  <Directory>q4wine-q4wine.directory</Directory>
+  <Menu>
+   <Name>q4wine-Default</Name>
+   <Directory>q4wine-Default.directory</Directory>
+   <Menu>
+    <Name>q4wine-Default-autostart</Name>
+    <Directory>q4wine-Default-autostart.directory</Directory>
+   </Menu>
+   <Menu>
+    <Name>q4wine-Default-import</Name>
+    <Directory>q4wine-Default-import.directory</Directory>
+   </Menu>
+  </Menu>
+ </Menu>
+</Menu>
+

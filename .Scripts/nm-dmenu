@@ -23,18 +23,18 @@ del-con(){
 }
 
 main() {
-   con=$(nmcli -f NAME c s -o +a:-type | sed '/NAME/d')
-   active_con=$(nmcli -f NAME c s -a | sed '/NAME/d')
+   con=$(nmcli -f NAME c s -o +a:-type | sed '/NAME/d;s/ *//g')
+   active_con=$(nmcli -f NAME c s -a | sed '/NAME/d;s/ *//g')
    active="[ active ] $active_con"
    new="[+] New Connection"
    del="[-] Delete Connection"
 
-   [[ $active_con ]] && out=$(printf '%s\n' "${con/$active_con/$active}")
-   out=$(printf '%s\n%s\n%s' "$out" "$new" "$del")
+   [[ $active_con ]] && con=$(printf '%s\n' "${con/$active_con/$active}")
+   out=$(printf '%s\n%s\n%s' "$con" "$new" "$del")
    ans=$(printf '%s\n' "$out" | rofi -dmenu -i -p "[ nmcli ]")
 
    case $ans in
-      "$active") con-down "$active_con" ;;
+      "$active") con-down "${active_con}" ;;
       "$new") new-con ;;
       "$del") del-con ;;
       *) con-up "$ans" ;;

@@ -1,0 +1,6 @@
+2019/05/12-23:56:51.131 7063 Reusing MANIFEST /home/ringdal/.config/google-chrome/Default/IndexedDB/https_www.netflix.com_0.indexeddb.leveldb/MANIFEST-000001
+2019/05/12-23:56:51.131 7063 Recovering log #3
+2019/05/12-23:56:51.148 7063 Reusing old log /home/ringdal/.config/google-chrome/Default/IndexedDB/https_www.netflix.com_0.indexeddb.leveldb/000003.log 
+2019/05/13-00:38:09.472 733d Level-0 table #5: started
+2019/05/13-00:38:09.517 733d Level-0 table #5: 2091765 bytes OK
+2019/05/13-00:38:09.522 733d Delete type=0 #3

@@ -1,0 +1,19 @@
+00:00:00.310972 VirtualBox GUI VM Selector Window 6.1.10 r138449 linux.amd64 (Jun  8 2020 08:33:44) release log
+00:00:00.310974 Log opened 2020-07-14T18:14:59.308458000Z
+00:00:00.310975 Build Type: release
+00:00:00.310977 OS Product: Linux
+00:00:00.310978 OS Release: 5.7.2-arch1-1
+00:00:00.310978 OS Version: #1 SMP PREEMPT Wed, 10 Jun 2020 20:36:24 +0000
+00:00:00.310999 DMI Product Name: 4291W5X
+00:00:00.311006 DMI Product Version: ThinkPad X220
+00:00:00.311014 Firmware type: BIOS
+00:00:00.311044 Host RAM: 7842MB (7.6GB) total, 7613MB (7.4GB) available
+00:00:00.311046 Executable: /usr/lib/virtualbox/VirtualBox
+00:00:00.311047 Process ID: 1867
+00:00:00.311047 Package type: LINUX_64BITS_GENERIC (OSE)
+00:00:00.311073 Qt version: 5.15.0
+00:00:00.346573 GUI: UIMediumEnumerator: Medium-enumeration started...
+00:00:00.900545 GUI: UIDesktopWidgetWatchdog::sltHandleHostScreenAvailableGeometryCalculated: Screen 0 work area is actually resized to: 107x26 x 559x712
+00:00:00.905319 GUI: UIMediumEnumerator: Medium-enumeration finished!
+00:02:11.854160 GUI: UIMediumEnumerator: Medium-enumeration finished!
+00:02:11.880841 GUI: UIMediumEnumerator: Medium-enumeration finished!
