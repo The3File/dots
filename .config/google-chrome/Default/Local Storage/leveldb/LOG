@@ -1,0 +1,15 @@
+2020/06/03-21:33:05.581 9f3 Reusing MANIFEST /home/ringdal/.config/google-chrome/Default/Local Storage/leveldb/MANIFEST-000001
+2020/06/03-21:33:05.581 9f3 Recovering log #620
+2020/06/03-21:33:05.586 9f3 Reusing old log /home/ringdal/.config/google-chrome/Default/Local Storage/leveldb/000620.log 
+2020/06/03-21:53:49.400 1062 Level-0 table #624: started
+2020/06/03-21:53:49.415 1062 Level-0 table #624: 16911 bytes OK
+2020/06/03-21:53:49.419 1062 Delete type=0 #620
+2020/06/03-21:53:49.419 1062 Compacting 4@0 + 1@1 files
+2020/06/03-21:53:49.443 1062 Generated table #625@0: 472 keys, 725003 bytes
+2020/06/03-21:53:49.443 1062 Compacted 4@0 + 1@1 files => 725003 bytes
+2020/06/03-21:53:49.446 1062 compacted to: files[ 0 1 1 0 0 0 0 ]
+2020/06/03-21:53:49.446 1062 Delete type=2 #619
+2020/06/03-21:53:49.446 1062 Delete type=2 #624
+2020/06/03-21:53:49.446 1062 Delete type=2 #621
+2020/06/03-21:53:49.446 1062 Delete type=2 #615
+2020/06/03-21:53:49.446 1062 Delete type=2 #617

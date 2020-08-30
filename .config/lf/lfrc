@@ -1,0 +1,117 @@
+set shell bash
+set shellopts '-eu'
+set ifs "\n"
+set scrolloff 10
+set previewer ~/.Scripts/preview
+#### BINDINGS ####
+
+map . set hidden!
+map zr set reverse!
+map zn set info
+map zs set info size
+map zt set info time
+map za set info size:time
+map sn :set sortby natural; set info
+map ss :set sortby size; set info size
+map st :set sortby time; set info time
+map sa :set sortby atime; set info atime
+map sc :set sortby ctime; set info ctime
+map se :set sortby ext; set info
+map <space> :toggle; down
+map r push :rename<space>
+
+map D trash
+map tc trash-clear
+map tr $trash-restore
+
+map B new-script
+
+# execute current file (must be executable)
+map x $$f
+map X !$f
+
+# dedicated keys for file opener actions
+map o &mimeopen $f
+map O $mimeopen --ask $f
+
+# use enter for shell commands
+map <enter> shell
+
+#	GOTO
+map gS cd ~/.Scripts
+map gb cd ~/.bin
+map g/ cd /
+map ga cd ~/.apps
+map gh cd ~/Hentet
+map gH cd ~/
+map gb cd ~/.bin
+map gB cd ~/Dokumenter/bible
+map gs cd ~/Dokumenter/Skole
+map gS cd ~/.Scripts
+map gp cd ~/Projekter
+map gd cd ~/.dotfiles
+map gD cd ~/Dokumenter
+map gc cd ~/.config
+map gl cd ~/.local
+map gw cd ~/Billeder/wallpapers
+map gt cd $trash
+map gy cd ~/Movies/youtube
+
+##################
+
+cmd open ${{
+    case $(file --mime-type $f -b) in
+        text/*) $EDITOR $fx;;
+        *) for f in $fx; do setsid $OPENER $f > /dev/null 2> /dev/null & done;;
+    esac
+}}
+
+cmd rename %[ -e $1 ] && printf "file exists" || mv $f $1
+
+cmd trash %{{
+   printf "delete? [y/n]: "
+   read -rsn1
+   [[ $REPLY == "y" ]] && {
+      trash "$fx"
+      printf "deleted"
+   }
+}}
+cmd trash-clear %{{
+   printf "clear trash? [y/n]: "
+   read -rsn1 a
+   [[ $a = "y" ]] && {
+      trash-empty
+      printf "cleared trash"
+   }
+}}
+
+cmd new-script ${{
+   printf "new bash script: "; read a
+   [[ "$a" ]] && {
+      [[ ! -f "$a" ]] && { 
+	 printf "#!/usr/bin/env bash\n\nmain(){\n<++>\n}\n\nmain \"\$@\"" > "$a"
+      	 chmod a+x "$a"
+      }
+   nvim "$a"
+   }
+}}
+
+cmd new-text %[[ "$a" ]] && { reset_terminal; nvim "$a"; }
+
+cmd extract $extract
+
+cmd tar ${{
+    set -f
+    mkdir $1
+    cp -r $fx $1
+    tar czf $1.tar.gz $1
+    rm -rf $1
+}}
+
+cmd zip ${{
+    set -f
+    mkdir $1
+    cp -r $fx $1
+    zip -r $1.zip $1
+    rm -rf $1
+}}
