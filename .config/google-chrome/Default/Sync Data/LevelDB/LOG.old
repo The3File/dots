@@ -1,9 +1,0 @@
-2020/03/16-11:21:21.435 e08b Reusing MANIFEST /home/ringdal/.config/google-chrome/Default/Sync Data/LevelDB/MANIFEST-000001
-2020/03/16-11:21:21.436 e08b Recovering log #201
-2020/03/16-11:21:21.456 e08b Reusing old log /home/ringdal/.config/google-chrome/Default/Sync Data/LevelDB/000201.log 
-2020/03/16-11:21:21.496 e0b6 Level-0 table #205: started
-2020/03/16-11:21:21.504 e0b6 Level-0 table #205: 96810 bytes OK
-2020/03/16-11:21:21.507 e0b6 Delete type=0 #201
-2020/03/16-11:23:22.689 e0b6 Level-0 table #207: started
-2020/03/16-11:23:22.702 e0b6 Level-0 table #207: 215467 bytes OK
-2020/03/16-11:23:22.710 e0b6 Delete type=0 #204

@@ -1,5 +1,0 @@
-2020/03/16-11:23:03.377 e099 Reusing MANIFEST /home/ringdal/.config/google-chrome/Default/IndexedDB/https_app.sketchup.com_0.indexeddb.leveldb/MANIFEST-000001
-2020/03/16-11:23:16.102 e4fa Level-0 table #5: started
-2020/03/16-11:23:16.105 e4fa Level-0 table #5: 4344 bytes OK
-2020/03/16-11:23:16.111 e4fa Delete type=0 #3
-2020/03/16-11:23:16.111 e4fa Manual compaction at level-0 from '\x00\x01\x00\x00\x00' @ 72057594037927935 : 1 .. '\x00\x02\x00\x00\x00' @ 0 : 0; will stop at (end)
