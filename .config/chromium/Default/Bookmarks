@@ -1,0 +1,39 @@
+{
+   "checksum": "40b1d98392a54c0cb621a77e8ce5554f",
+   "roots": {
+      "bookmark_bar": {
+         "children": [ {
+            "date_added": "13179832374798432",
+            "id": "5",
+            "meta_info": {
+               "last_visited_desktop": "13179832374799917"
+            },
+            "name": "DuckDuckGo",
+            "type": "url",
+            "url": "https://duckduckgo.com/install?t=hg"
+         } ],
+         "date_added": "13179832223894301",
+         "date_modified": "13179832374798432",
+         "id": "1",
+         "name": "Bogmærkelinje",
+         "type": "folder"
+      },
+      "other": {
+         "children": [  ],
+         "date_added": "13179832223894306",
+         "date_modified": "0",
+         "id": "2",
+         "name": "Andre bogmærker",
+         "type": "folder"
+      },
+      "synced": {
+         "children": [  ],
+         "date_added": "13179832223894308",
+         "date_modified": "0",
+         "id": "3",
+         "name": "Bogmærker på mobil",
+         "type": "folder"
+      }
+   },
+   "version": 1
+}

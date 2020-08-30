@@ -1,0 +1,22 @@
+*, div, pre, textarea, body, input, td, tr, p {
+  background-color: #060509 !important;
+  color: #d14445 !important; }
+
+header, h1, h2, h3, h4, h5, h6 {
+  background-color: #060509 !important;
+  color: #d14445 !important; }
+
+a {
+  color: #d14445 !important; }
+
+a:hover, a:focus {
+  color: #d14445 !important; }
+
+a:visited {
+  color: #d14445 !important; }
+
+img {
+  opacity: 1; }
+
+img:hover {
+  opacity: 1; }

@@ -1,0 +1,60 @@
+/**
+ * ROFI Color theme
+ * User: Qball
+ * Copyright: Dave Davenport
+ */
+* {
+    background-color:      color2;
+    border-color:          #0000ff;
+    text-color:           White;
+    font:            "Inconsolata 10";
+}
+
+configuration {
+}
+
+#window {
+    anchor:     south;
+    location:   south;
+    width:      98.4%;
+    height: 	30px;
+    padding:    4px;
+    y-offset:	-5;
+    border: 2 2 2;
+    children:   [ horibox ];
+}
+
+#horibox {
+    orientation: horizontal;
+    children:   [ prompt, entry, listview ];
+}
+
+#listview {
+    layout:     horizontal;
+    spacing:    6px;
+    lines:      100;
+   margin: 0 0 0 100;
+}
+
+#entry {
+    expand:     false;
+    width:      10em;
+   margin: 0 0 0 100;
+}
+
+#element {
+    padding: 0px 2px;
+}
+#element selected {
+    background-color: #200994;
+}
+#button.selected {
+    text-color:				#00ff00;
+   margin: 0 0 0 0;
+}
+#entry {
+   background-color:	#00ffff;
+   text-color:			#ffffff;
+   padding:				0px;
+   margin: 0 0 0 0;
+}

@@ -1,0 +1,19 @@
+{
+   "app": {
+      "launch": {
+         "web_url": "http://pixlr.com/o-matic/"
+      },
+      "urls": [ "http://pixlr.com/o-matic/" ]
+   },
+   "author": "Autodesk",
+   "description": "Pixlr-o-matic is a fun photography/darkroom tool that makes it easy to add style to photos using effects, overlays, and borders.",
+   "icons": {
+      "128": "128x128.png",
+      "512": "512x512.png"
+   },
+   "key": "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC4SWFsrsMultUCV1RXurchz5IetM6jyE7a6vTh8zRTdrlg1Vzo0p9mTzT545++3IndMR5KbyEREz+37+A8eYxtfplwvgi/Hl4Gnx/e3TvJ2lyhPevmE8QAFB9u+Xhspism0uw1Dd6Gb015o6XaXIjs93y1zQqr+He7i00Iztr/TQIDAQAB",
+   "manifest_version": 2,
+   "name": "Pixlr-o-matic",
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "1.3"
+}
