@@ -11,7 +11,7 @@ backup(){ printf '%s \"%s\"\n' "Conflicting files, backing to" "$backup/"
       file=$(printf '%s\n' "$line" | awk '{print $1}')
       [[ -e $file ]] && { mkdir -p "$backup/$file"
          mv "$file" "$backup/$file"; }
-   done; config checkout; config config status.showUntrackedFiles no; }
+   done; config checkout; config config --local status.showUntrackedFiles no; }
 
 printf '%s\n%s\n%s' ".dotfiles" "install.bash" "README.md" > "$HOME.gitignore"
 git clone --bare git@github.com:The3File/dots.git "$config"
