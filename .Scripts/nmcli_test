@@ -2,29 +2,17 @@
 # Måske lidt overgjort? 
 
 selekt(){
-   printf '%s' "Søger.."
+   printf '%s' "Søger.."; get="$1"; shift
 
-   ((i=1))
-   while read -r linje;do
-      [[ $linje =~ ^$1:.* ]] && {
-
-	 ssid_enkelt="${linje#"${linje%%[^$1:[:space:]*]*}"}"
-
-	 space=""; ((i<10)) && space=" "
-	 printf '\e[K\r%s%s\n' "$i: $space" "$ssid_enkelt"
-
-	 declare -a ssid
-	 IFS=$'\n' ssid+=($ssid_enkelt)
-
-	 ((i++))
-      }
-   done < <(nmcli -f $1 -m multiline d w)
+   ((i=1)); while read -r linje;do
+      ssid_enkelt="${linje#"${linje%%[^"$get":[:space:]]*}"}"
+      space=""; ((i<10)) && space=" "
+      printf '\e[K\r%s%s\n' "$i: $space" "$ssid_enkelt"
+      declare -a ssid; IFS=$'\n' ssid+=($ssid_enkelt); ((i++))
+   done < <(nmcli -f "$get" -m multiline "${@}")
 
    read -rp "[1-$((i-1))]: "
-   
-   ((REPLY)) && ((a=REPLY-1))
-   
-   printf "${ssid[$a]}"
+   printf '%s\n' "${ssid[((REPLY-1))]}"
 }
 
-selekt SSID
+[[ "$@" ]] && selekt $@
