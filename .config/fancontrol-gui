@@ -1,7 +1,0 @@
-[preferences]
-ProfileNames=normal
-Profiles=# This file was created by Fancontrol-GUI\nINTERVAL=10\nDEVPATH=hwmon3=devices/platform/thinkpad_hwmon \nDEVNAME=hwmon3=thinkpad \n
-
-[window]
-Height 768=712
-Width 1366=1148
