@@ -7,9 +7,6 @@ alias kdeconnectd="/usr/lib/kdeconnectd"
 alias x="extract"
 alias spe="speedtest"
 alias vim="nvim"
-alias r="ranger"
-alias f="bfm"
-alias n="nmcli"
 
 ##  CONFIGS
 alias con="nvim $CONFIG"
@@ -35,6 +32,7 @@ alias ls="ls --color=auto"
 alias la="ls -a"
 alias ll="ls -lh"
 alias lla="ls -lah"
+
 ## JC
 alias hej="echo hej $USER!"
 
