@@ -4,11 +4,11 @@ reset(){ printf '\e[?25l\e[2J\e[7H%s\e[H%s\n'\
       "[q] quit" "power_menu:"; }
 
 confirm(){
-   printf '\e[H\e[J%s' "want to ${o[p]}? [y/N]"
+   printf '\e[H\e[J%s\e[?25h' "want to ${o[$p]}? [y/N] "
 
    while read -rsn1 a
    do
-      case $a in y|Y) "${o[$p]}" ;; n|N) exit 0; esac
+      case $a in y|Y)"${o[$p]}";; n|N)exit 0;; *)break; esac
    done
 }
 
