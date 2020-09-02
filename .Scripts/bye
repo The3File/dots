@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+reset(){ printf '\e[?25l\e[2J\e[7H%s\e[H%s\n'\
+      "[q] quit" "power_menu:"; }
+
+confirm(){
+   printf '\e[H\e[J%s' "want to ${o[p]}? [y/N]"
+
+   while read -rsn1 a
+   do
+      case $a in y|Y) "${o[$p]}" ;; n|N) exit 0; esac
+   done
+}
+
+printl(){ for((i=0;i<3;i++)){
+   case $i in
+      $p) printf '\n\e[7m%s\e[m' "${o[$i]} " ;;
+      *) printf '\n\e[m%s' "${o[$i]}"
+   esac
+}; }
+
+key(){
+   case $1 in
+      k) ((p>0))&&((p--)) ;;
+      j) ((p<2))&&((p++)) ;;
+      '') confirm ;;
+      q) exit 0
+   esac
+}
+
+main(){
+   trap "printf '\e[m\e[2J\e[H\e[?25h'" EXIT
+
+   ((p=0)); o=("shutnown now" "reboot" "kill xinit")
+   for((;;)){ reset; printl; read -rsn1 a; key "$a"; }
+}
+
+main
