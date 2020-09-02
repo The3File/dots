@@ -1,21 +1,15 @@
 #!/usr/bin/env bash
-
-reset(){ printf '\e[?25l\e[2J\e[7H%s\e[H%s\n'\
-      "[q] quit" "power_menu:"; }
+# \e[7H%s
+reset(){ printf '\e[?25l\e[2J\e[H%s' ""; }
 
 confirm(){
    printf '\e[H\e[J%s\e[?25h' "want to ${o[$p]}? [y/N] "
-
-   while read -rsn1 a
-   do
-      case $a in y|Y)"${o[$p]}";; n|N)exit 0;; *)break; esac
-   done
+   while read -rsn1 a; do case $a in y|Y)"${o[$p]}";; n|N)break;; q)exit 0; esac; done
 }
 
 printl(){ for((i=0;i<3;i++)){
-   case $i in
-      $p) printf '\n\e[7m%s\e[m' "${o[$i]} " ;;
-      *) printf '\n\e[m%s' "${o[$i]}"
+   case $i in $p) printf '\n\e[2C\e[7m%s\e[m' "${o[$i]} " ;;
+      *) printf '\n\e[2C%s' "${o[$i]}"
    esac
 }; }
 
@@ -24,14 +18,14 @@ key(){
       k) ((p>0))&&((p--)) ;;
       j) ((p<2))&&((p++)) ;;
       '') confirm ;;
-      q) exit 0
+      q|$'\x1b') exit 0
    esac
 }
 
 main(){
    trap "printf '\e[m\e[2J\e[H\e[?25h'" EXIT
 
-   ((p=0)); o=("shutnown now" "reboot" "kill xinit")
+   ((p=0)); o=("shutnown now" "reboot" "killall xinit")
    for((;;)){ reset; printl; read -rsn1 a; key "$a"; }
 }
 

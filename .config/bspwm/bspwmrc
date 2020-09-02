@@ -46,7 +46,7 @@ config() {
 
 apps() {
 
-   for a in autogap dunstbar dunst acpid_events; do
+   for a in autogap dunstbar dunst acpid_events bsp_swallow; do
 
       case $a in
 	 dunstbar) 	o=(--boot) ;;
@@ -68,32 +68,22 @@ apps() {
 
 }
 
-
 rules() {
 
    printf '\e[33m%s...' "setting rules"
-   bspc rule -r Zathura
+   bspc rule -r "*"
    bspc rule -a Zathura state=tiled
-
-   bspc rule -r float
    bspc rule -a float sticky=off state=floating 
 
-   bspc rule -r gass
    bspc rule -a gass sticky=on state=floating focus=off border=on
-
-   bspc rule -r files
    bspc rule -a files locked=on sticky=on state=floating hidden=on
 
-   bspc rule -r scratchterm
    bspc rule -a scratchterm locked=on sticky=on state=floating hidden=on
-
-   bspc rule -r scratchmath
    bspc rule -a scratchmath locked=on sticky=on state=floating hidden=on
 
-   bspc rule -r "VirtualBox Machine"
    bspc rule -a "VirtualBox Machine" desktop=8
-   bspc rule -r "virtualbox"
    bspc rule -a "virtualbox" desktop=8
+
    printf '\e[34m%s\n\n' "done."
 
 }
@@ -141,6 +131,7 @@ main() {
    for fifo in $GAPFIFO $BARFIFO; do
       [[ -e "$fifo" ]] && rm "$fifo"; mkfifo "$fifo"
       bspc subscribe node_add node_remove desktop_focus > $fifo &
+      printf '%s\n' "mkfifo $fifo"
    done
    # ------------------- #
 
@@ -148,4 +139,7 @@ main() {
 
 }
 
-main "$@" && printf '\e[m\n%s\n' "..all done"
+main "$@" && {
+   printf '\e[m\n%s\n' "..all done";
+   dunstify "bspwmrc reloaded"
+}

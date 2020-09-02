@@ -76,7 +76,6 @@ main(){
    for((;;)){ echo > "$PANELFIFO"; sleep $updint; } &
 
    ws; printb
-
    wait
 }
 

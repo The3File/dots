@@ -7,11 +7,12 @@ new-con(){
    dunstify -t 10000 -r 202 "" "<b>nmcli searching.. please wait</b>"
    ssid=$(nmcli -f SSID d w l | sed '/SSID/d;s/ *//g')
    dunstify -C 202
+
    ans=$(echo "$ssid" | rofi -dmenu -i -p "[ new connection ]")
    [[ $ans ]] || exit 0
       
-      passwd=$(rofi -dmenu -p "[ passwd ]")
-      [[ $passwd ]] || exit 0
+   passwd=$(rofi -dmenu -p "[ passwd ]")
+   [[ $passwd ]] || exit 0
 
       nmcli d w c "$ssid" password "$passwd"
 }
@@ -19,12 +20,12 @@ new-con(){
 del-con(){
    ans=$(printf '%s\n' "$con" | rofi -dmenu -i -p "[ delete connection ]" |\
       sed 's/\ *$//g')
-   nmcli c de "${ans}"
+   nmcli c de "$ans"
 }
 
 main() {
-   con=$(nmcli -f NAME c s -o +a:-type | sed '/NAME/d;s/ *//g')
-   active_con=$(nmcli -f NAME c s -a | sed '/NAME/d;s/ *//g')
+   con=$(nmcli -f NAME c s -o +a:-type | sed '/NAME/d;s/ *$//g')
+   active_con=$(nmcli -f NAME c s -a | sed '/NAME/d;s/ *$//g')
    active="[ active ] $active_con"
    new="[+] New Connection"
    del="[-] Delete Connection"
