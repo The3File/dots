@@ -13,7 +13,8 @@ backup(){ printf '%s \"%s\"\n' "Conflicting files, attempting backup to" "$backu
          mv "$file" "$backup/$file"; }
    done; config checkout; config config --local status.showUntrackedFiles no; }
 
-printf '%s\n%s\n%s' ".dotfiles" "install.bash" "README.md" > "$HOME.gitignore"
+printf '%s\n%s\n%s' ".dotfiles" "install.bash" "README.md" > "$HOME/.gitignore"
+
 read -rp "[ssh/url]: "
 case $REPLY in
    s|ssh) git clone --bare git@github.com:The3File/dots.git "$config" ;;
