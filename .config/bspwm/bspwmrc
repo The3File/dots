@@ -70,7 +70,7 @@ apps() {
 
 rules() {
 
-   printf '\e[33m%s...' "setting rules"
+   printf '\n\e[33m%s...' "setting rules"
    bspc rule -r "*"
    bspc rule -a Zathura state=tiled
    bspc rule -a float sticky=off state=floating 
@@ -141,5 +141,5 @@ main() {
 
 main "$@" && {
    printf '\e[m\n%s\n' "..all done";
-   dunstify "bspwmrc reloaded"
+   dunstify "bspwmrc reloaded" -t 2000
 }
