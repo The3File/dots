@@ -78,6 +78,9 @@ super + x
 super + Escape
    pkill -USR1 -x sxhkd
 
+super + alt + Escape
+   st -c float -g 30x5+600-10 -e bye
+
 #################
 # bspwm hotkeys #
 #################
