@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# \e[7H%s
+
 reset(){ printf '\e[?25l\e[2J\e[H%s' ""; }
 
 confirm(){
@@ -25,7 +25,7 @@ key(){
 main(){
    trap "printf '\e[m\e[2J\e[H\e[?25h'" EXIT
 
-   ((p=0)); o=("shutnown now" "reboot" "killall xinit")
+   ((p=0)); o=("poweroff" "reboot" "killall xinit")
    for((;;)){ reset; printl; read -rsn1 a; key "$a"; }
 }
 

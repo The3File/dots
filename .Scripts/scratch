@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 files(){ id=$(xdotool search --class files)
    [[ -z "$id" ]] && st -c files -g 80x15+30-20 -e lf ||
       bspc node "$id" --flag hidden -f; }
