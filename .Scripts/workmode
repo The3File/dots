@@ -13,7 +13,8 @@ on() {
    source /home/ringdal/.cache/wal/colors.sh
 
    ln -sf "$HOME/.cache/wal/dunstrc" "$HOME/.config/dunst/dunstrc" &
-   xsetroot -solid "$background"
+   #xsetroot -solid "$background"
+   feh --bg-fill $HOME/Billeder/wallpapers/arch/black_arch.png &
 
    pkill dunst && dunst &>/dev/null & disown
    pkill compton; ukill dunstbar; ukill autogap

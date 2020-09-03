@@ -8,6 +8,8 @@ alias x="extract"
 alias spe="speedtest"
 alias vim="nvim"
 
+alias spit="bspc node "$(bspc query -N -n .local.hidden)" --flag hidden=off"
+
 ##  CONFIGS
 alias con="nvim $CONFIG"
 
