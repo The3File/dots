@@ -4,7 +4,7 @@ reset(){ printf '\e[?25l\e[2J\e[H%s' ""; }
 
 confirm(){
    printf '\e[H\e[J%s\e[?25h' "want to ${o[$p]}? [y/N] "
-   while read -rsn1 a; do case $a in y|Y)"${o[$p]}";; n|N)break;; q)exit 0; esac; done
+   while read -rsn1 a; do case $a in y|Y)"${o[$p]}";; n|N)break;; q|$'\x1b')exit 0; esac; done
 }
 
 printl(){ for((i=0;i<3;i++)){
