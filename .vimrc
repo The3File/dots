@@ -2,6 +2,7 @@ call plug#begin()
 Plug 'junegunn/goyo.vim'
 Plug 'junegunn/limelight.vim'
 Plug 'lervag/vimtex'
+Plug 'neomake/neomake'
 call plug#end()
 
 syntax enable
