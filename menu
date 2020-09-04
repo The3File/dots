@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
-reset(){ printf '\e[?25l\e[2J\e[7H%s\e[H%s\n'\
-      "[q] quit" "power_menu:"; }
+reset(){
+   printf '\e[?25l\e[2J\e[H'
+   [[ $m ]] && printf '%s\n' "$m"
+}
 
 confirm(){
    printf '\e[H\e[J%s\e[?25h' "want to ${o[$p]}? [y/N] "
@@ -15,8 +17,8 @@ confirm(){
 printl(){ 
    for s in "${o[@]}"; do
       case $s in
-         ${o[$p]}) printf '\n\e[7m%s\e[m' " $s " ;;
-         *) printf '\n\e[m%s' " $s"
+         ${o[$p]}) printf '\n\e[7m%s\e[m' "$s" ;;
+         *) printf '\n\e[m%s' "$s"
       esac
    done
 }
@@ -32,11 +34,13 @@ key(){
 
 main(){
    trap "printf '\e[m\e[2J\e[H\e[?25h'" EXIT
+
    p=0;o=()
-   while [[ $1 ]]; do
-      o+=($1); shift
-   done
+
+   getopts "m:" s && m="${OPTARG}" && shift 2
+   while [[ $1 ]]; do o+=($1); shift; done
+
    for((;;)){ reset; printl "${o[@]}"; read -rsn1 a; key "$a"; }
-}
+   }
 
 main "$@"

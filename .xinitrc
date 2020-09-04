@@ -21,4 +21,3 @@ exec dunst &
 exec acpid_events &
 exec sxhkd &
 exec bspwm
-#exec dwm
