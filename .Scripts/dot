@@ -1,8 +1,16 @@
-#!/usr/bin/env sh
-config(){ git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME $@; }
+#!/usr/bin/env bash
+
+dot(){
+   #echo "${op[@]}"
+   git "${op[@]}"
+}
+
+o=(--git-dir=$HOME/.dotfiles/ --work-tree=$HOME)
+
 case $1 in 
-   up) shift
-      config commit -a &&
-	 config push -u origin master ;;
-   *) config $@
+   up)
+      op=(${o[@]} commit -a -m from_script); dot
+      op=(${o[@]} push -u origin master); dot
+         ;;
+   *) [[ "$@" ]] && op=(${o[@]})
 esac
