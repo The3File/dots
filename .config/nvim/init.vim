@@ -7,6 +7,7 @@ Plug 'lervag/vimtex'
 Plug 'dylanaraps/wal.vim'
 Plug 'gioele/vim-autoswap'
 Plug 'sheerun/vim-polyglot'
+Plug 'neomake/neomake'
 "Plug 'kovetskiy/sxhkd-vim'
 call plug#end()
 

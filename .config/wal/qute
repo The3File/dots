@@ -84,7 +84,7 @@ config.set('content.javascript.enabled', True, 'qute://*/*')
 c.downloads.remove_finished = 2000
 
 # Hide the statusbar unless a message is shown.
-c.statusbar.hide = False
+c.statusbar.show = 'in-mode'
 c.statusbar.padding = {'top': 0, 'bottom': 0, 'left': 0, 'right': 0}
 
 # Position of the status bar.
@@ -164,7 +164,7 @@ c.fonts.statusbar = '9pt monospace'
 
 # Font used in the tab bar.
 # Type: QtFont
-c.fonts.tabs = '9pt monospace'
+#c.fonts.tabs = '9pt monospace'
 
 # Default font size (in pixels) for regular text.
 # Type: Int
