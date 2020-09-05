@@ -8,8 +8,7 @@ reset(){
 confirm(){
    printf '\e[H\e[J%s\e[?25h' "want to ${o[$p]}? [y/N] "
 
-   while read -rsn1 a
-   do
+   while read -rsn1 a; do
       case $a in y|Y) bash "${o[$p]}";; n|N)exit 0;; *)break; esac
    done
 }
