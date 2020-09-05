@@ -13,7 +13,7 @@
 config() {
 
    # check for display server every second
-   while [[ ! $DISPLAY && $XDG_VTNR -eq 1 ]]; do sleep 1; done
+   while [[ ! $DISPLAY ]]; do sleep 1; done
 
    printf '\e[33m%s...' "applying configs"
 
