@@ -12,5 +12,5 @@ case $1 in
       op=(${o[@]} commit -a -m from_script); dot
       op=(${o[@]} push -u origin master); dot
          ;;
-   *) [[ "$@" ]] && op=(${o[@]})
+   *) [[ "$1" ]] && op=(${o[@]} $@); dot
 esac
