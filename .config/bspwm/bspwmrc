@@ -24,7 +24,7 @@ config() {
       bspc config gapless_monocle	true
 
       bspc config center_pseudo_tiled 	false
-      bspc config split_ratio		0.5
+      bspc config split_ratio		0.55
 
       bspc config initial_polarity	first_child
       bspc config automatic_scheme	spiral
@@ -144,5 +144,5 @@ main() {
 
 main "$@" && {
    printf '\e[m\n%s\n' "..all done";
-   dunstify "bspwmrc reloaded" -t 2000
+   dunstify "bspwmrc reloaded" -t 2000 -r 90211
 }

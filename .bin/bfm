@@ -281,7 +281,7 @@ print_line() {
 	 file_name="${file_name//[^[:print:]]/^[}"
 
 	 printf '\r%b%s\e[m\r' "$format" "${file_name}${suffix}"
-						      }
+}
 
 draw_dir() {
    local scroll_start="$scroll"; local scroll_new_pos; local scroll_end
