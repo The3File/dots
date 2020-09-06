@@ -2,34 +2,53 @@
 
 net(){
    st="$(nmcli | sed -n "1s/.*: //p")"
-   inf="$(networkctl status | grep Address | sed -n 's/Address://g;s/  *//g; s/on/ /g; P; Q' | awk '{print $2}')"
+   inf="$(networkctl status | grep Address |\
+      sed -n 's/Address://g;s/  *//g; s/on/ /g; P; Q' | awk '{print $2}')"
    [[ "$st" = "tilsluttet"* && "$inf" = "wlp3s0" ]] && {
       sn=$(iwlist wlp3s0 scan | sed -n '5P' | awk -F'=' '{print $3}' | awk -F' ' '{print $1}')
-      ((sn<=-20)) && i=" ****"; ((sn<=-45)) && i=" ***"; ((sn<=-60)) && i=" **"; ((sn<=-75)) && i=" *";
-   }; net="$st$i"
+      ((sn>-20)) && i="****"
+      ((sn<-20)) && i="***"
+      ((sn<-45)) && i="**"
+      ((sn<-60)) && i="*"
+   }
+   net="$st <b>$sn</b>"
 }
 
 bat(){
    p="$(acpi -b | sed 's/,//g;s/://g;s/%//g' | awk '{print $4}')"
    s="$(acpi -b | sed 's/,//g;s/://g;s/%//g' | awk '{print $3}')"
-   case $s in Charging) l="" ;; Unknown) l="" ;; Full) l="" ;;
-      Discharging) ((p>80)) && l=""; ((p<80)) && l=""; ((p<65)) && l=""; ((p<40)) && l=""; ((p<20)) && l="" ;;
-      *) l="?"
-   esac; bat="$l $p%"
+   case $s in
+      Charging) l="" ;;
+      Unknown) l="" ;;
+      Full) l="" ;;
+      Discharging)
+	 ((p>80)) && l=""
+	 ((p<80)) && l=""
+	 ((p<65)) && l=""
+	 ((p<40)) && l=""
+	 ((p<20)) && l=""
+	 ;;
+      *) l="[error]"
+   esac; bat="$l <b>$p%</b>"
 }
 
 barnot(){
    case $1 in
-      -c) mem="[mem] $(free -h | awk '/Mem:/ {print $3 "/" $2}')"
+      -c)
+	 mem="[mem] $(free -h | awk '/Mem:/ {print $3 "/" $2}')"
 	 temp="[temp]$(acpi -t | sed 's/Thermal 0: ok,//g' | awk -F . '{print $1}')°C"
 	 cpu="[cpu] $(mpstat | grep all | awk '{print $3}' | awk -F"," '{print $1}')%"
 	 out=("$mem $cpu $temp") ;;
-      -d) d=$(date +%d" "%B);dy=$(date +%A);dt=$(date +%d/%m/%y)
+      -d)
+	 d=$(date +%d" "%B);dy=$(date +%A);dt=$(date +%d/%m/%y)
 	 out=("$dy, $d" "<b>($dt)</b>") ;;
-      -b) out=( "$(light | awk -F"." '{print $1}')%") ;;
-      -v) volume="$(pamixer --get-volume)%"
+      -b)
+	 out=( "$(light | awk -F"." '{print $1}')%") ;;
+      -v)
+	 volume="$(pamixer --get-volume)%"
 	 [[ $(pamixer --get-mute) = "true" ]] && out=(" ($volume)") || out=(" $volume ") ;;
-      *) bat; net; out=("$bat | $net | " "<b>$(date '+%R')</b>") || exit 1
+      *)
+	 bat; net; out=("" "$bat | $net | <b>$(date '+%R')</b>") || exit 1
    esac
 
    dunstify "${out[@]}" -t "$t" -r 90211
@@ -42,9 +61,9 @@ bar(){
       ((w<=0)) && sleep 1.2 && loop & loop="$!"
       [[ "$line" = *focus* ]] && {
 	 ws=$(xprop -root _NET_CURRENT_DESKTOP | awk '{print $3+1}')
-	 dunstify -C 90210; sleep .05; dunstify "" "<b>$ws </b>" -t 1250 -r 90211
+	 dunstify -C 90210; ((;:;)); dunstify "" "<b>$ws </b>" -t 1250 -r 90211
       }
-      done < "$BARFIFO"
+   done < "$BARFIFO"
 }
 
 loop(){ for ((;;)){ barnot;sleep 10;}; }
