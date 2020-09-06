@@ -2,9 +2,23 @@
 
 reset(){ printf '\e[?25l\e[2J\e[H%s' ""; }
 
+execute(){
+   case $1 in
+      "poweroff") poweroff ;;
+      "reboot") reboot ;;
+      "exit shell") bspc quit || killall xinit ;;
+   esac
+}
+
 confirm(){
    printf '\e[H\e[J%s\e[?25h' "want to ${o[$p]}? [y/N] "
-   while read -rsn1 a; do case $a in y|Y)"${o[$p]}";; n|N)break;; q|$'\x1b')exit 0; esac; done
+   while read -rsn1 a; do
+      case $a in
+         y|Y) execute "${o[$p]}" ;;
+         n|N) break ;;
+         q|$'\x1b') exit 0;
+      esac
+   done
 }
 
 printl(){ for((i=0;i<3;i++)){
@@ -25,7 +39,7 @@ key(){
 main(){
    trap "printf '\e[m\e[2J\e[H\e[?25h'" EXIT
 
-   ((p=0)); o=("poweroff" "reboot" "killall xinit")
+   ((p=0)); o=("poweroff" "reboot" "exit shell")
    for((;;)){ reset; printl; read -rsn1 a; key "$a"; }
 }
 
