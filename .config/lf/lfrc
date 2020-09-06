@@ -3,6 +3,7 @@ set shellopts '-eu'
 set ifs "\n"
 set scrolloff 10
 set previewer ~/.Scripts/preview
+set drawbox on
 #### BINDINGS ####
 
 map . set hidden!
