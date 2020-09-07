@@ -45,3 +45,5 @@ alias ff="fastboot flash"
 alias ap="adb push"
 alias arr="adb reboot recovery"
 alias sshfon="ssh $(ip r | awk '{getline $1; print $3}') -p 8022 -i '$HOME/.ssh/id_rsa'"
+
+[[ $(uname -o) = "Android" ]] && alias xdg-open="termux-open"
