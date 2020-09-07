@@ -14,9 +14,9 @@ refresh(){ reset; get_size; o=(); op=()
 search(){ printf '\e[?6l\e[%sH\e[?25h' "$LINES"
    while IFS= read -rsn 1 -p $'\r\e[K'"/${srch}" search; do
       case $search in
-	 $'\177'|$'\b') [[ -z $srch ]] && break; srch="${srch%?}" ;;
-         $'\e') refresh; srch=""; break ;;
-	 $'\015'|"") ((${#o[@]}<=1)) && nvim "${o[$p]}"; break ;;
+	 $'\177') [[ -z $srch ]] && break; srch="${srch%?}" ;;
+         $'\033') refresh; srch=""; break ;;
+	 $'\015') ((${#o[@]}<=1)) && nvim "${o[$p]}"; break ;;
 	 " "|*) srch+="$search";;
       esac
       printf '\e[?6l\e[2J\e[%sH\e[?25h' "$LINES"
@@ -36,7 +36,7 @@ key(){ case $1 in
       g) read -rsn1 a;[[ $a = "g" ]]&&p=0 ;;
       G) ((p=${#o[@]}-1)) ;;
       c) read -rsn1 a; [[ $a = "c" ]]&& p=0 && refresh; ;;
-      ''|l) nvim "${op[$p]}" ;;
+      $'\015'|l) nvim "${op[$p]}" ;;
       /) search ;;
       q) exit 0
    esac; }
