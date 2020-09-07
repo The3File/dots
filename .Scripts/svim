@@ -20,6 +20,7 @@ refresh(){
    o=(${op[@]}); print_l "${o[@]}"; }
 
 search(){
+   refresh
    printf '\e[?6l\e[%sH\e[?25h' "$LINES"
    while IFS= read -rsn 1 -p $'\r\e[K'"/${srch}" search; do
       case $search in
