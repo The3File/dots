@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+bash_script(){ 
+   printf '%s\n\n%s\n\n%s' "#!/usr/bin/env bash"\
+      "main(){<++>}" "main \"\$@\"" > "$n"
+   chmod a+x "$n"; nvim "$a"
+}
+
+main(){
+   read -rp "name: " n || exit 0
+   case "$a" in
+      bash) bash_script ;;
+      sh) possix_script ;;
+      *) exit 1
+   esac
+}
+
+main "$@"
