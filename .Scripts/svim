@@ -24,10 +24,10 @@ search(){
    printf '\e[?6l\e[%sH\e[?25h' "$LINES"
    while IFS= read -rsn 1 -p $'\r\e[K'"/${srch}" search; do
       case $search in
-	       $'\177') [[ -z $srch ]] && break; srch="${srch%?}" ;;
-         $'\033') refresh; srch=""; break ;;
-	       $'\015'|"") ((${#o[@]}<=1)) && nvim "${o[$p]}"; break ;;
-	       " "|*) srch+="$search";;
+	 $'\177') [[ -z $srch ]] && break; srch="${srch%?}" ;;
+	 $'\033') refresh; srch=""; break ;;
+	 $'\015'|"") ((${#o[@]}<=1)) && nvim "${o[$p]}"; break ;;
+	 " "|*) srch+="$search";;
       esac
       o=();p=0; printf '\e[?6l\e[2J\e[%sH\e[?25h' "$LINES"
       for s in ${op[@]}; do o+=(${s%"${s%/"$srch"*}"}); done
