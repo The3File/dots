@@ -46,7 +46,7 @@ config() {
 
 apps() {
 
-   for a in autogap dunstbar dunst acpid_events bsp_swallow; do
+   for a in autogap herbar dunst acpid_events bsp_swallow; do
    case $a in dunstbar) o=(--boot);; *) o=(); esac
 
       if [[ $(ps ax | sed -n "/sed/d;/\<$a\>/p") ]]; then

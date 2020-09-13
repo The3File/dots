@@ -11,11 +11,8 @@ alt + shift + Pause
 
 # bar replacement
 
-super + {_,shift +} c
-   dunstbar {-d,-c}
-
-super + b
-   dunstbar -o
+super + {c,shift + c,b}
+   pkill -SIGUSR1 herbe; herbar {-d,-c,-o}
 
 #super + shift + y
 
@@ -189,11 +186,13 @@ alt + ctrl + {h,j,k,l}
 
 # LIGHT | BRIGHTNESS
 XF86MonBrightness{Up,Down}
-   xbacklight -time 100 -{inc,dec} 5;((;:;))& dunstbar -b
+   xbacklight -time 100 -{inc,dec} 5;((;:;))& herbar -b
+      #xbacklight -time 100 -{inc,dec} 5;((;:;))& dunstbar -b
 
 # SOUND
 {_,super + } XF86Audio{Raise,Lower}Volume
-   pamixer {_,--allow-boost} {-i,-d}5 && dunstbar -v
+   pamixer {_,--allow-boost} {-i,-d}5 && herbar -v
+      #pamixer {_,--allow-boost} {-i,-d}5 && dunstbar -v
 
 # mute sound
 XF86AudioMute
