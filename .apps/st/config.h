@@ -9,7 +9,7 @@
 static char *font = "ypn envypn:style=Regular:pixelsize=15:antialias=false:autohint=false";
 /*static char *font = "SF Mono:style=Light:pixelsize=12:antialias=true:autohint=true";
 static char *font = "Hack Nerd Font Mono:style=Regular:pixelsize=12:antialias=false:autohint=true";*/
-static int borderpx = 19;
+static int borderpx = 10;
 
 /*
  * What program is execed by st depends of these precedence rules:

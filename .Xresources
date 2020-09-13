@@ -62,4 +62,8 @@
 !*.alpha:	250
 
 *bg: color0
-*fg: color2
+*fg: color4
+
+*herbe.background_color: .color0
+*herbe.border_color: #ffffff
+*herbe.font_color: color7
