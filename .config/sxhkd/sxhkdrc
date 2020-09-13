@@ -23,8 +23,8 @@ super + b
 super + {_,shift +} {Return}
    st {_,-c float -g 88x25}
 
-super + {v,u,s}
-   st -e {neomutt,rtv -s unixporn,svim}
+super + {v,u,s,shift+s}
+   st -e {neomutt,rtv -s unixporn,svim,scli}
 
 super + {_,shift +} e
    {st -e lf, scratch files}
@@ -41,7 +41,7 @@ super + space
 
 # program launcher
 super + d
-   rofi -show drun
+   rofi -show run
 
 super + shift + w
    nm-dmenu
@@ -79,7 +79,7 @@ super + Escape
    pkill -USR1 -x sxhkd
 
 super + alt + shift + q
-   st -c float -g 30x5+600-10 -e bye
+   st -c float -g 30x5+30-30 -e bye
 
 #################
 # bspwm hotkeys #
