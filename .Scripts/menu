@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+
+reset(){ printf '\e[?25l\e[2J\e[H'; [[ $m ]] && printf '%s\n' "$m"; }
+
+printl(){ 
+   for s in "${o[@]}"; do
+      case $s in
+         ${o[$p]}) printf '\n\e[7m%s\e[m' "$s" ;;
+         *) printf '\n\e[m%s' "$s"
+      esac
+   done
+}
+
+key(){
+   case $1 in
+      k) ((p>0))&&((p--)) ;;
+      j) (((p+1)<${#o[@]}))&&((p++)) ;;
+      g) ((p=0)) ;;
+      G) ((p=${#o[@]}-1)) ;;
+      ''|l) REPLY="${o[$p]}"; reset; echo $REPLY; read ;;
+      q) exit 0
+   esac
+}
+
+main(){
+   trap "printf '\e[m\e[2J\e[H\e[?25h'" EXIT
+   shopt -s lastpipe
+
+   p=0;o=();IFS='\n' 
+
+   while getopts "m:" s; do
+      case $s in
+         m)
+            m="${OPTARG}"
+            shift 2
+            ;;
+      esac
+   done
+
+   while [[ $1 ]]; do o+=($1); shift; done
+   
+   for((;;)){ reset; printl "${o[@]}" >&2; read -rsn1 a; key "$a";}
+}
+
+main "$@"
