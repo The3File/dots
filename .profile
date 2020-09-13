@@ -2,6 +2,8 @@
 
 [[ -f ~/.bashrc ]] && source ~/.bashrc
 
+export XDG_CONFIG_HOME="$HOME/.config"
+
 export PATH=$HOME/.bin:/usr/local/bin:$HOME/.Scripts/:$PATH
 export VISUAL="nvim"
 export EDITOR="nvim"

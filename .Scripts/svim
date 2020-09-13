@@ -17,30 +17,31 @@ reset(){ printf '\e[?25l\e[2J\e[0;%sr\e[H' "$((LINES-1))"; }
 refresh(){
    reset; get_size; o=(); op=(); p=0
    for f in "${DIRS[@]}"; do op+=($f); done
-   o=(${op[@]}); print_l "${o[@]}"; }
+   o=(${op[@]}); print_l; }
 
 search(){
-   refresh
+   refresh; srch=
    printf '\e[?6l\e[%sH\e[?25h' "$LINES"
-   while IFS= read -rsn 1 -p $'\r\e[K'"/${srch}" search; do
+   while IFS= read -rsn 1 -p $'\r\e[K'"filter: ${srch}" search; do
       case $search in
          $'\177') [[ -z $srch ]] && break; srch="${srch%?}" ;;
          $'\033') refresh; srch=""; break ;;
-         $'\015'|"")
-            ((${#o[@]}<=1)) && nvim "${o[$p]}"; break ;;
-         " "|*) srch+="$search";;
+         $'\015'|"") ((${#o[@]}<=1)) && nvim "${o[$p]}"; break ;;
+         " "|*) srch+="$search" ;;
       esac
       o=();p=0; printf '\e[?6l\e[2J\e[%sH\e[?25h' "$LINES"
-      for s in ${op[@]}; do o+=(${s%"${s%/"$srch"*}"}); done
+      for s in "${op[@]}"; do o+=(${s%"${s%/"$srch"*}"}); done
       print_l; printf '\e[%sH' "$LINES"
    done; printf '\e[2K\e[?6h\e[?25l'; }
 
 print_l(){
    printf '\e[H'
    for s in "${o[@]}"; do case $s in
-	    ${o[$p]}) printf '\e[7m%s\e[m\n' "${s##*/}" ;;
+	    "${o[$p]}") printf '\e[7m%s\e[m\n' "${s##*/}" ;;
       *) printf '\e[m%s\n' "${s##*/}"
    esac; done; }
+
+confirm(){ read -rsn1; [[ "$1" = "$REPLY" ]] && return 0 || return 1; }
 
 key(){
    case $1 in
@@ -48,21 +49,22 @@ key(){
       K) ((p>5))&&((p-=5))||((p=0)) ;;
       j) ((p<(${#o[@]})-1)) && ((p++)) ;;
       J) ((p<(${#o[@]})-6))&&((p+=5))||((p=${#o[@]}-1)) ;;
-      g) read -rsn1 a;[[ $a = "g" ]]&&p=0 ;;
       G) ((p=${#o[@]}-1)) ;;
-      B) cd "" && printf '\e[?25h' &&
-         read -rp $'\e['$LINES'H'"new in [bash|sh]: " &&
-         [[ $REPLY ]] && new "$REPLY" ;;
-      c) read -rsn1 a; [[ $a = "c" ]]&& p=0 && refresh; ;;
-      $'\015'|""|l) nvim "${o[$p]}" ;;
+      g) confirm "$1" && p=0 ;;
+      $'\033'|c) confirm "$1" && { p=0; srch=""; refresh; } ;;
+      n) cd "$HOME/.Scripts" && printf '\e[?25h' &&
+         read -rsn1 -p $'\e['"${LINES}"'H'"new [b]ash/[s]h: " a &&
+         case "$a" in b) a="bash" ;; s) a="sh";; *) return; esac; new "$a"
+         ;;
       /|f) search ;;
-      q) exit 0
+      $'\015'|""|l) nvim "${o[$p]}" ;;
+      q) exit 0 ;;
    esac; }
 
 main(){
    trap "printf '\e[m\e[2J\e[H\e[?25h'" EXIT
    trap "get_size" WINCH
-   config; refresh; (($SON>0))&&search
+   config; refresh; ((SON>0))&&search
    for((;;)){ read -rsn1 a; key "$a"; reset; print_l;};}
 
 main

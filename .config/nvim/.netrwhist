@@ -1,9 +1,12 @@
 let g:netrw_dirhistmax  =10
-let g:netrw_dirhistcnt =7
+let g:netrw_dirhistcnt =4
+let g:netrw_dirhist_4='/etc/fonts/conf.d'
+let g:netrw_dirhist_3='/etc/fonts'
+let g:netrw_dirhist_2='/etc/fonts/conf.avail'
+let g:netrw_dirhist_1='/etc/fonts'
+let g:netrw_dirhist_0='/etc/fonts/conf.avail'
+let g:netrw_dirhist_9='/etc/fonts'
+let g:netrw_dirhist_8='/etc/fonts/conf.avail'
 let g:netrw_dirhist_7='/home/ringdal/Projekter/chat/.git'
 let g:netrw_dirhist_6='/home/ringdal/.Scripts'
 let g:netrw_dirhist_5='/home/ringdal'
-let g:netrw_dirhist_4='/home/ringdal/.telegram-cli'
-let g:netrw_dirhist_3='/home/ringdal/.telegram-cli/downloads'
-let g:netrw_dirhist_2='/home/ringdal/.telegram-cli'
-let g:netrw_dirhist_1='/home/ringdal/.minecraft'

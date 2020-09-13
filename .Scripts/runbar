@@ -43,9 +43,11 @@ out(){
 	 *) 
 	    B=$(acpi | sed 's/ 0//g;s/%,.*//g')
 	    D="$(date '+%a %d %b %H:%M')"
+	    R="$(df -h --output="avail" | sed -n '4p')"
+	    H="$(df -h --output="avail" | sed -n '9p')"
 	    ;;
       esac
-      printf '%s\n' " | $W |%{r}| $B% | $N | $D | "
+      printf '%s\n' " | $W |%{r}| free /$R /home$H | $B% | $N | $D | "
    done
 }
 
@@ -53,7 +55,7 @@ printb(){
    cat "$PANELFIFO" | out |
       lemonbar -p ${opt[@]}\
       -g 1366x20\
-      -f "SF Mono:size=9"\
+      -f "ypn envypn:size=10"\
       -o 1\
       -B "$background"\
       -F "$foreground"\

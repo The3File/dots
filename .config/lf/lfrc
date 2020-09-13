@@ -3,7 +3,7 @@ set shellopts '-eu'
 set ifs "\n"
 set scrolloff 10
 set previewer ~/.Scripts/preview
-set drawbox on
+#set drawbox on
 #### BINDINGS ####
 
 map . set hidden!
@@ -20,6 +20,8 @@ map sc :set sortby ctime; set info ctime
 map se :set sortby ext; set info
 map <space> :toggle; down
 map r push :rename<space>
+
+map S $$SHELL
 
 map D trash
 map tc trash-clear

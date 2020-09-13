@@ -15,8 +15,8 @@ confirm(){
    while read -rsn1 a; do
       case $a in
          y|Y) execute "${o[$p]}" ;;
-         n|N) break ;;
-         q|$'\x1b') exit 0;
+         $'\033'|n|N) break ;;
+         q) exit 0;
       esac
    done
 }
@@ -29,10 +29,10 @@ printl(){ for((i=0;i<3;i++)){
 
 key(){
    case $1 in
-      k|$'\x41') ((p>0))&&((p--)) ;;
-      j|$'\x42') ((p<2))&&((p++)) ;;
+      $'\101'|k) ((p>0))&&((p--)) ;;
+      $'\102'|j) ((p<2))&&((p++)) ;;
       '') confirm ;;
-      q|$'\x1b') exit 0
+      $'\033'|q) exit 0
    esac
 }
 

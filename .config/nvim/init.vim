@@ -1,5 +1,5 @@
 call plug#begin()
-"Plug 'rrethy/vim-hexokinase', { 'do': 'make hexokinase' }
+Plug 'rrethy/vim-hexokinase', { 'do': 'make hexokinase' }
 Plug 'junegunn/goyo.vim'
 Plug 'junegunn/limelight.vim'
 Plug 'lervag/vimtex'
@@ -8,10 +8,10 @@ Plug 'dylanaraps/wal.vim'
 Plug 'gioele/vim-autoswap'
 Plug 'sheerun/vim-polyglot'
 Plug 'neomake/neomake'
-"Plug 'kovetskiy/sxhkd-vim'
+Plug 'kovetskiy/sxhkd-vim'
 call plug#end()
 
-"let g:Hexokinase_highlighters = ['foregroundfull']
+let g:Hexokinase_highlighters = ['foregroundfull']
 
 syntax enable
 
@@ -22,8 +22,8 @@ filetype plugin on
 set number
 set relativenumber
 
-set smartindent
 set autoindent
+set smartindent
 set shiftwidth=3
 
 "colorscheme wal
