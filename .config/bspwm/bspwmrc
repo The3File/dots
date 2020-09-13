@@ -12,10 +12,7 @@
 
 config() {
 
-   # check for display server every second
-   while [[ ! $DISPLAY ]]; do sleep 1; done
-
-   printf '\e[33m%s...' "applying configs"
+      printf '\e[33m%s...' "applying configs"
 
    # -- BSPWM -- #
 
@@ -42,7 +39,7 @@ config() {
       export PS="7"	# padding size integer
       export PN="2"	# number of windows before zero padding
 
-   printf '\e[34m%s\n' "done."
+   printf '\e[36m %s\n' "done."
 
 }
 
@@ -50,11 +47,7 @@ config() {
 apps() {
 
    for a in autogap dunstbar dunst acpid_events bsp_swallow; do
-
-      case $a in
-	 dunstbar) 	o=(--boot) ;;
-	 *) 		o=()
-      esac
+   case $a in dunstbar) o=(--boot);; *) o=(); esac
 
       if [[ $(ps ax | sed -n "/sed/d;/\<$a\>/p") ]]; then
 	 ukill "$a" 1>/dev/null && {
@@ -87,7 +80,7 @@ rules() {
    bspc rule -a "VirtualBox Machine" desktop=8
    bspc rule -a "virtualbox" desktop=8
 
-   printf '\e[34m%s\n\n' "done."
+   printf '\e[36m %s\n\n' "done."
 
 }
 
@@ -97,27 +90,29 @@ qute() {
    printf '\e[33m\n%s...' "linking files"
    ln -sf "$HOME/.cache/wal/dunstrc" "$HOME/.config/dunst/dunstrc" &
    ln -sf "$HOME/.cache/wal/zathurarc" "$HOME/.config/zathura/zathurarc" &
-   printf '\e[34m%s\n' "done."
+   printf '\e[36m %s\n' "done"
 
    printf '\e[33m%s...' "creating style"
    qute="$HOME/.config/qutebrowser"
    sassc "$qute/style.scss" > "$qute/style.css"
-   printf '\e[34m%s\n' "done."
+   printf '\e[36m %s\n' "done"
 
    printf '\e[33m%s...' "applying colors"
    sed 's/{color4}/'$color4'/p;s/{color2}/'$color2'/g;s/{color0}/'$color0'/g'\
       $HOME/.config/wal/qute >\
       $HOME/.config/qutebrowser/config.py
-   printf '\e[34m%s\n' "done."
+   printf '\e[36m %s\n' "done"
 
    printf '\e[33m%s...' "reloading qutebrowser"
    [[ ! -z $(pgrep -x qutebrowser) ]] && qutebrowser :config-source &>/dev/null
-   printf '\e[34m%s %s\n\n' "done."
+   printf '\e[36m %s\n\n' "done"
 
 }
 
 
 main() {
+   # check for display server every second
+   while [[ ! $DISPLAY ]]; do sleep 1; done
 
    xmodmap -e "keycode 135 = Super_R"
    source "$HOME/.cache/wal/colors.sh"
@@ -131,10 +126,11 @@ main() {
    esac && exit 0
 
    # -- BSP SUBSCRIBE -- #
+   printf '%s' "mkfifo $fifo"
    for fifo in $GAPFIFO $BARFIFO; do
       [[ -e "$fifo" ]] && rm "$fifo"; mkfifo "$fifo"
       bspc subscribe node_add node_remove desktop_focus > $fifo &
-      printf '%s\n' "mkfifo $fifo"
+      printf '%s' " \"$fifo\""
    done
    # ------------------- #
 

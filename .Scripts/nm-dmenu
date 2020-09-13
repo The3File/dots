@@ -32,7 +32,7 @@ main() {
 
    [[ $active_con ]] && con=$(printf '%s\n' "${con/$active_con/$active}")
    out=$(printf '%s\n%s\n%s' "$con" "$new" "$del")
-   ans=$(printf '%s\n' "$out" | rofi -dmenu -i -p "[ nmcli ]")
+   ans=$(printf '%s\n' "$out" | rofi -dmenu -i -p "")
 
    case $ans in
       "$active") con-down "${active_con}" ;;

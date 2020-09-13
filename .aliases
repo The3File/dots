@@ -8,7 +8,6 @@ alias x="extract"
 alias spe="speedtest"
 alias vim="nvim"
 
-#alias spit="bspc node '$(bspc query -N -n .local.hidden)' --flag hidden=off"
 
 ##  CONFIGS
 alias con="nvim $CONFIG"
@@ -19,7 +18,7 @@ alias rrc="nvim ~/.config/ranger/rc.conf"
 alias lrc="nvim ~/.config/lf/lfrc"
 alias vrc="nvim ~/.config/nvim/init.vim"
 alias crc="nvim ~/.config/compton.conf"
-alias prc="nvim ~/.config/polybar/config"
+alias prc="nvim ~/.profile"
 alias src="nvim ~/.config/sxhkd/sxhkdrc"
 alias xrc="nvim ~/.Xresources"
 
@@ -30,10 +29,11 @@ alias nf="clear -x && echo -e \ && neofetch"
 alias pf="pfetch"
 alias p="sudo pacman"
 alias c="clear"
-alias ls="ls --color=auto"
+alias ls="ls --color=auto --group-directories-first"
 alias la="ls -a"
 alias ll="ls -lh"
 alias lla="ls -lah"
+alias here="st &>/dev/null &disown"
 
 ## JC
 alias hej="echo hej $USER!"

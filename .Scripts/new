@@ -7,7 +7,7 @@ bash_script(){
 }
 
 main(){
-   read -rp "name: " n || exit 0
+   read -rp $'\r\e[K'"name: " n || exit 0
    case "$a" in
       bash) bash_script ;;
       sh) possix_script ;;
