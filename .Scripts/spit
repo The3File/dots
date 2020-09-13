@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+nodes=$(bspc query -N -n any.local.hidden)
+[[ ! "${nodes[@]}" ]] && printf "nothing to spit\n"
+for i in "${nodes[@]}"; do
+   bspc node "${i}" --flag hidden=off
+done

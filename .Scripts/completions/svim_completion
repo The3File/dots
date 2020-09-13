@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+_svim_completions() {
+
+   local cur prev opts
+
+   COMPREPLY=()
+
+   cur=${COMP_WORDS[COMP_CWORD]}
+   prev=${COMP_WORDS[COMP_CWORD-1]}
+
+   for file in "$HOME/.Scripts/"* "$HOME/.bin/"*; do
+      opts+=("${file##*/}")
+   done
+
+   COMPREPLY=( $(compgen -W $(echo "${opts[@]}") ${cur}) )
+
+}
+
+complete -F _svim_completions svim
