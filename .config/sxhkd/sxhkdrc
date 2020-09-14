@@ -12,7 +12,8 @@ alt + shift + Pause
 # bar replacement
 
 super + {c,shift + c,b}
-   pkill -SIGUSR1 herbe; herbar {-d,-c,-o}
+   dunstbar {-d,-c,-o}
+#pkill -SIGUSR1 herbe; herbar {-d,-c,-o}
 
 #super + shift + y
 
@@ -66,7 +67,7 @@ super + alt + shift + w
    chwal
 
 super + alt + shift + r
-   wal -Rgt
+   chwal -r
 
 super + x
    lock
@@ -96,7 +97,7 @@ super + y
 
 # swap the current node and the biggest node
 super + g
-   bspc node -s biggest
+   bspc node -s biggest.current
 
 ###############
 # state/flags #
@@ -186,13 +187,13 @@ alt + ctrl + {h,j,k,l}
 
 # LIGHT | BRIGHTNESS
 XF86MonBrightness{Up,Down}
-   xbacklight -time 100 -{inc,dec} 5;((;:;))& herbar -b
-      #xbacklight -time 100 -{inc,dec} 5;((;:;))& dunstbar -b
+   xbacklight -time 100 -{inc,dec} 5;((;:;)); dunstbar -b
+      #xbacklight -time 100 -{inc,dec} 5;((;:;))& herbar -b
 
 # SOUND
 {_,super + } XF86Audio{Raise,Lower}Volume
-   pamixer {_,--allow-boost} {-i,-d}5 && herbar -v
-      #pamixer {_,--allow-boost} {-i,-d}5 && dunstbar -v
+   pamixer {_,--allow-boost} {-i,-d}5 && dunstbar -v
+      #pamixer {_,--allow-boost} {-i,-d}5 && herbar -v
 
 # mute sound
 XF86AudioMute
