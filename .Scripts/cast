@@ -13,12 +13,12 @@ get_prog(){
    echo "found prog file: $progfile"
    read -r prog < "$progfile"
    o+=("--seek" "$prog")
-
 }
 
 cast(){ screen -d -m -S cast castnow "${o[@]}"; }
 
 player_ctl(){
+   
    cmd=(screen -S cast -X stuff)
    while read -rsn1;do
       case $REPLY in
@@ -43,7 +43,6 @@ player_ctl(){
 
 get_devices(){ ((i=0))
    printf '\n%s' "Searching local network..."
-
    while read -r line; do
       ((i<1)) && printf '\r\e[K%s\t\t\t\t%s\n' "IP Address:" "MAC Address:"
       [[ "$line" =~ ^[0-9][0-9][0-9].* ]] || { printf '\t%s\t%s\n' "-" "$line"; return;}
@@ -54,9 +53,7 @@ get_devices(){ ((i=0))
    done < <(\
    sudo nmap -sn $local_ip | awk -F" " '
       /MAC Address:/ {print $3" "$4" "$5}
-      /Nmap scan/ {print $5}'
-   )
-
+      /Nmap scan/ {print $5}')
    read -rp $'\n\n'"ip to use: "
    ip="${ip[((REPLY-1))]}"
 }
