@@ -17,11 +17,12 @@ config() {
    # -- BSPWM -- #
 
       bspc config focused_border_color	"$color4"
-      bspc config border_width		2
+      bspc config normal_border_color	"$color0"
+      bspc config border_width		3
       bspc config gapless_monocle	true
 
       bspc config center_pseudo_tiled 	false
-      bspc config split_ratio		0.55
+      bspc config split_ratio		0.60
 
       bspc config initial_polarity	first_child
       bspc config automatic_scheme	spiral
@@ -33,7 +34,8 @@ config() {
 
    # gaps
       export GS="10"	# gaps size integer
-      export GN="3"	# number of windows before zero gaps
+      export G0="2"	# gaps size integer
+      export GN="4"	# number of windows before $G0 gaps
 
    # left and right padding
       export PS="7"	# padding size integer
@@ -46,7 +48,7 @@ config() {
 
 apps() {
 
-   for a in autogap herbar dunst acpid_events bsp_swallow; do
+   for a in autogap dunstbar dunst acpid_events bsp_swallow; do
    case $a in dunstbar) o=(--boot);; *) o=(); esac
 
       if [[ $(ps ax | sed -n "/sed/d;/\<$a\>/p") ]]; then

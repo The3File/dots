@@ -12,8 +12,7 @@
    selected-urgent-foreground: @foreground;
 
    /*font: "SFNS Display 11";*/
-   /*font: "SFNS Display 13.97";*/
-   font: "ypn envypn 11";
+   font: "GohuNew 12";
    background-color: @transparent;
    /*background: #000000e9;*/
    background: {color0};
@@ -30,7 +29,7 @@
    location:	center;
    orientation: vertical;
    width: 	30%;
-   height: 	61%;
+   height: 	59%;
    /*y-offset:	190;
    x-offset:	-370;*/
 }}
@@ -144,7 +143,7 @@
 }}
 
 #prompt {{
-   padding:		6px 0px 6px 10px;
+   padding:		6px 5px 6px 10px;
    /*padding:		9 1% 9;*/
    spacing: 		0;
    /*text-color:		@normal-foreground;*/
