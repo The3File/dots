@@ -24,18 +24,19 @@ timer() {
       printf '\e[?25l\e[1;34m\r\e[J%02d:%02d' "$((s/60))" "$((s%60))"
       ((s<0)) && printf '\r%s\n' "times up!" && break; sleep 1
    }
-   beep &>/dev/null
+   dunstify "" "<b>timer done</b>"
+   beep
 }
 
-beep() { for ((i=0;i<3;i++)){ env -i beep &>/dev/null || sudo env -i beep;}; }
+beep() { for ((i=0;i<3;i++)){ env -i beep &>/dev/null || sudo env -i beep;((;:;));}; }
 
 main() {
    trap "stty echo; printf '\e[J\e[?25h'" EXIT
    while getopts ":l:h" o; do case "${o}" in
-      l) check $2; loop ;;
+      l) shift; check $OPTARG; loop ;;
       h) usage; exit 0 ;;
    esac; done
-   check $1; timer
+   [[ $1 ]] && check $1; timer
 }
 
 main "$@"
