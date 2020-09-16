@@ -5,8 +5,8 @@
  *
  * font: see http://freedesktop.org/software/fontconfig/fontconfig-user.html */
 /*static char *font = "Misc Tamsyn:style=Regular:pixelsize=15:antialias=false:autohint=false";*/
-/*static char *font = "Gohu GohuFont:style=Regular:pixelsize=13:antialias=false:autohint=false";*/
-static char *font = "ypn envypn:style=Regular:pixelsize=15:antialias=false:autohint=false";
+/*static char *font = "GohuNew:style=Regular:pixelsize=12:antialias=false:autohint=true";*/
+static char *font = "ypn envypn:style=Regular:pixelsize=16:antialias=false:autohint=false";
 /*static char *font = "SF Mono:style=Light:pixelsize=12:antialias=true:autohint=true";
 static char *font = "Hack Nerd Font Mono:style=Regular:pixelsize=12:antialias=false:autohint=true";*/
 static int borderpx = 10;

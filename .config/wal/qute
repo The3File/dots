@@ -6,6 +6,8 @@
 c.url.start_pages = 'file:///home/ringdal/Projekter/html/startskærm/index.html'
 c.url.default_page = 'file:///home/ringdal/Projekter/html/startskærm/index.html'
 
+c.colors.webpage.bg = '{color0}'
+
 c.colors.completion.fg = '{color4}'
 c.colors.completion.odd.bg = '{color0}'
 c.colors.completion.even.bg = '{color0}'
@@ -29,18 +31,23 @@ c.colors.statusbar.url.success.https.fg = '{color4}'
 c.colors.statusbar.normal.bg = '{color0}'
 c.colors.statusbar.normal.fg = '{color4}'
 
-c.colors.tabs.bar.bg = '{color0}'
-c.colors.tabs.odd.bg = '{color0}'
-c.colors.tabs.odd.fg = '{color4}'
-c.colors.tabs.even.bg = '{color0}'
-c.colors.tabs.even.fg = '{color4}'
-c.colors.tabs.selected.odd.bg = '{color4}'
-c.colors.tabs.selected.even.bg = '{color4}'
-c.colors.tabs.selected.odd.fg = '{color0}'
-c.colors.tabs.selected.even.fg = '{color0}'
+## TABS
 
-c.colors.tabs.selected.odd.fg = '{color0}'
-c.colors.tabs.selected.even.fg = '{color0}'
+c.tabs.title.alignment = 'center'
+c.tabs.max_width = -1
+c.tabs.position = 'top'
+c.tabs.show = 'always'
+c.tabs.show_switching_delay = 2000
+
+c.colors.tabs.bar.bg = '{color4}'
+c.colors.tabs.odd.bg = '{color4}'
+c.colors.tabs.odd.fg = '{color0}'
+c.colors.tabs.even.bg = '{color4}'
+c.colors.tabs.even.fg = '{color0}'
+c.colors.tabs.selected.odd.bg = '{color0}'
+c.colors.tabs.selected.even.bg = '{color0}'
+c.colors.tabs.selected.odd.fg = '{color4}'
+c.colors.tabs.selected.even.fg = '{color4}'
 
 c.colors.tabs.indicator.start = '{color4}'
 c.colors.tabs.indicator.stop = '{color4}'
@@ -105,76 +112,47 @@ c.statusbar.position = 'bottom'
 #   - keypress: Display pressed keys when composing a vi command.
 #   - progress: Progress bar for the current page loading.
 c.statusbar.widgets = ['keypress', 'progress', 'url']
-
-# Padding (in pixels) around text for tabs.
-# Type: Padding
 c.tabs.padding = {'top': 3, 'bottom': 3, 'left': 0, 'right': 0}
 
-# Position of the tab bar.
-c.tabs.position = 'top'
-c.tabs.max_width = 200
 
-# When to show the tab bar.
-# Type: String
-# Valid values:
-c.tabs.show = 'always'
-
-# Duration (in milliseconds) to show the tab bar before hiding it when
-# tabs.show is set to 'switching'.
-# Type: Int
-c.tabs.show_switching_delay = 2000
-
+## FONTS
 
 # Default monospace fonts. Whenever "monospace" is used in a font
 # setting, it's replaced with the fonts listed here.
-# Type: Font
 #c.fonts.monospace = 'SF Mono'
 
 # Font used in the completion widget.
-# Type: Font
 c.fonts.completion.entry = '9pt monospace'
 
 # Font used for the debugging console.
-# Type: QtFont
 c.fonts.debug_console = '9pt monospace'
 
 # Font used for the downloadbar.
-# Type: Font
 c.fonts.downloads = '9pt monospace'
 
 # Font used in the keyhint widget.
-# Type: Font
 c.fonts.keyhint = '9pt monospace'
 
 # Font used for error messages.
-# Type: Font
 c.fonts.messages.error = '9pt monospace'
 
 # Font used for info messages.
-# Type: Font
 c.fonts.messages.info = '9pt monospace'
 
 # Font used for warning messages.
-# Type: Font
 c.fonts.messages.warning = '9pt monospace'
 
 # Font used in the statusbar.
-# Type: Font
 c.fonts.statusbar = '9pt monospace'
 
 # Font used in the tab bar.
-# Type: QtFont
 #c.fonts.tabs = '9pt monospace'
 
 # Default font size (in pixels) for regular text.
-# Type: Int
 c.fonts.web.size.default = 17
 
 # Default font size (in pixels) for fixed-pitch text.
-# Type: Int
 c.fonts.web.size.default_fixed = 14
-
-c.colors.webpage.bg = '{color0}'
 
 # c.content.user_stylesheets = ['style.css']
 #
