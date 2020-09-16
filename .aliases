@@ -1,7 +1,7 @@
 # ~/.aliases
 
 ##  APPLICATIONS
-alias sshd="/bin/sshd"
+alias sshde="sudo /bin/sshd"
 alias kdeconnectd="/usr/lib/kdeconnectd"
 
 alias x="extract"
@@ -11,6 +11,8 @@ alias vim="nvim"
 
 ##  CONFIGS
 alias con="nvim $CONFIG"
+
+alias deps="nvim ~/.config/bspwm/dependencies.md"
 
 alias arc="nvim ~/.aliases"
 alias brc="nvim ~/.bashrc"
