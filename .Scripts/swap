@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+IFS=$'\n' read -r -d '' -a leafs < <(bspc query -N -n .leaf.local.tiled)
+focused="$(bspc query -N -n focused.local)"
+biggest="$(bspc query -N -n biggest.local)"
+
+if [[ "$biggest" = "$focused" ]]; then
+   bspc node -s "${leafs[1]}"
+   bspc node -f biggest.local
+else
+   bspc node -n biggest.local -s "${leafs[1]}"
+   bspc node -s biggest.local --follow
+fi

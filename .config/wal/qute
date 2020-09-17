@@ -36,7 +36,7 @@ c.colors.statusbar.normal.fg = '{color4}'
 c.tabs.title.alignment = 'center'
 c.tabs.max_width = -1
 c.tabs.position = 'top'
-c.tabs.show = 'always'
+c.tabs.show = 'multiple'
 c.tabs.show_switching_delay = 2000
 
 c.colors.tabs.bar.bg = '{color4}'
