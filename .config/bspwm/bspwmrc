@@ -17,6 +17,7 @@ config() {
    # -- BSPWM -- #
 
       bspc config focused_border_color	"$color4"
+      bspc config presel_feedback_color "$color4"
       bspc config normal_border_color	"$color0"
       bspc config border_width		2
       bspc config gapless_monocle	true
@@ -36,8 +37,8 @@ config() {
       #export BO=3
 
    # gaps
-      export GS=10	# gaps size integer
-      export G0=0	# WIP
+      export GS=7	# gaps size integer
+      export GO=0	# WIP
       export GN=4	# number of windows before $G0 gaps
 
    # left and right padding
@@ -74,14 +75,16 @@ rules() {
 
    bspc rule -r "*"
 
+   bspc config external_rules_command "$(which external_rules)"
+
    bspc rule -a Zathura state=tiled
    bspc rule -a float sticky=off state=floating 
 
    bspc rule -a gass sticky=on state=floating focus=off border=on
-   bspc rule -a files locked=on sticky=on state=floating hidden=on
+   bspc rule -a files layer=above locked=on sticky=on state=floating hidden=on
 
-   bspc rule -a scratchterm locked=on sticky=on state=floating hidden=on
-   bspc rule -a scratchmath locked=on sticky=on state=floating hidden=on
+   bspc rule -a scratchterm layer=above locked=on sticky=on state=floating hidden=on
+   bspc rule -a scratchmath layer=above locked=on sticky=on state=floating hidden=on
 
    printf '\e[36m %s\n\n' "done."
 
@@ -141,7 +144,8 @@ main() {
 
 }
 
-main "$@" && {
-   printf '\e[m\n%s\n' "..all done";
-   dunstify "bspwmrc reloaded" -t 2000 -r 90211
-}
+main "$@" &&
+   {
+      printf '\e[m\n%s\n' "..all done";
+      dunstify "bspwmrc reloaded" -t 2000 -r 90211
+   }

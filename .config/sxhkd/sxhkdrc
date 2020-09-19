@@ -65,8 +65,9 @@ super + alt + shift + w
 super + alt + shift + r
    chwal -r
 
-super + x
-   lock
+#super + x
+      #env XSECURELOCK_PASSWORD_PROMPT=time_hex xsecurelock -- systemctl suspend
+#xsecurelock & ((;:;)); systemctl suspend
 
 # make sxhkd reload its configuration files:
 super + Escape
@@ -130,7 +131,7 @@ super + {_,shift + }{1-9,0}
 
 # set the window state
 super + {t,shift + t,shift + space,f}
- bspc node -t {tiled,pseudo_tiled,floating,fullscreen}
+ bspc node -t ~{tiled,pseudo_tiled,floating,fullscreen}
 
 # set the node flags
 super + ctrl + {m,q,s,p}

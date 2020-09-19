@@ -20,13 +20,22 @@ on() {
       #bsp-layout set tall $i
    done
 
-   bspc config initial_polarity first_child
-   bspc config automatic_scheme alternate
+   bspc config focused_border_color "$color6"
+   bspc config normal_border_color "$color4"
+   #bspc config initial_polarity first_child
+   #bspc config automatic_scheme alternate
+   [[ $(pgrep -f runbar) ]] && pkill -f runbar
    runbar -b & disown
 
    bspc config split_ratio 0.6
-   bspc config window_gap 0
-   bspc config border_width 1
+
+   border=2
+   bspc config window_gap -$border
+   bspc config border_width $border
+   for side in top left right; do
+      bspc config ${side}_padding $border
+   done
+   bspc config bottom_padding $((border+20))
 
    $CONFIG qute
 }
@@ -45,6 +54,4 @@ off() {
    echo > "$GAPFIFO" &
 }
 
-main(){ case $1 in on) on ;; off) off; esac; }
-
-main "$@"
+case $1 in on) on ;; off) off; esac
