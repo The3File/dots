@@ -1,17 +1,22 @@
-## Beginnig to slowly add my deps
+# Beginnig to slowly add my deps
 
-# wm
+### wm
 
       pkg: bspwm
       pkg: sxkhd
       pkg: dunst
       pkg: <++>
 
-# file managment
+### file managment
 
       pkg: lf
       pkg: <++>
 
-# creating .css from .scss
+### files
+
+      pkg: neovim
+      pkg: <++>
+
+### creating .css from .scss
 
       pkg: sassc

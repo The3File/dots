@@ -68,7 +68,7 @@ key(){
 
 main(){
    trap "printf '\e[m\e[2J\e[H\e[?25h'" EXIT
-   trap "get_size" WINCH
+   trap "refresh" WINCH
    config; refresh; ((SON>0))&&search
    for((;;)){ read -rsn1 a; key "$a"; reset; print_l;};}
 

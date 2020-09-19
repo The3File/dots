@@ -9,10 +9,7 @@ handler(){ case "$1" in
 	 dunstify -C 90211; dunstify -r 90210 -t 4000 "" "<b>${state}d </b>  "
 	 ;;
       ac_adapter) [[ $2 = *ACPI* ]] && dunstbar ;;
-      button/prog1)
-	 run=$(ps aux | sed -n '/vim/d;/gass/p')
-	 [[ $run ]] && ukill gass || gass & disown 
-	 ;;
+      button/prog1) lock ;;
    esac; }
 
 main(){ coproc acpi_listen
