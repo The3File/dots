@@ -3,8 +3,7 @@
 config(){
 
    # Dirs to include
-   DIRS=("$HOME/.Scripts/*" "$HOME/.bin/*"
-      "$HOME/.config/bspwm/bspwmrc")
+   DIRS=("$HOME/.Scripts/*" "$HOME/.bin/*")
 
    # Search on open 1=on 0=off
    SON="1"
@@ -12,7 +11,9 @@ config(){
 }
 
 get_size(){ read -r LINES COLUMNS < <(stty size); }
+
 reset(){ printf '\e[?25l\e[2J\e[0;%sr\e[H' "$((LINES-1))"; }
+
 open() { printf '\e[?6l\e[?7h\e[?25h\e[2J\e[;r'
    nvim "$1"; refresh; }
 
@@ -67,7 +68,7 @@ key(){
 
 main(){
    trap "printf '\e[m\e[2J\e[H\e[?25h'" EXIT
-   trap "get_size" WINCH
+   trap "refresh" WINCH
    config; refresh; ((SON>0))&&search
    for((;;)){ read -rsn1 a; key "$a"; reset; print_l;};}
 
