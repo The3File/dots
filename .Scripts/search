@@ -1,7 +1,0 @@
-#!/usr/bin/env sh
-s="$(cat $HOME/.searched | head -7)"
-ask="$(printf "$s" | rofi -dmenu -i -p "search: ")" 
-[ ! -z $ask ] && {
-   [ "$s" !=~ ^"${ask}" ] && printf "$ask\n$s" > $HOME/.searched
-   sr $ask #& disown
-}

@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+# cast
+# small cli wrapper for the program castnow from xat/castnow
+
+setup(){ printf '\e[H\e[J%s' ""; }
+
+get_opts(){ movie="$1"; shift; o=("$movie" "$@"); }
+
+get_prog(){
+   progfile="${movie%.*}.prog"
+   [[ ! -a "$progfile" ]] && return 1
+
+   read -r prog < "$progfile"
+   echo "found prog file: $progfile ($prog)"
+   o+=("--seek" "$prog")
+   IFS=':' read -r h m s < "harrypotter6.prog"
+   ((prog=(h*60*60)+(m*60)+s,sec+=prog))
+}
+
+write_prog(){
+   ((sec+=SECONDS-paused))
+   ((SECONDS>60)) && read -rp "save proggress? ($sec) [y/N]: "
+   [[ "$REPLY" = "y" ]] && printf '%02d:%02d:%02d' "$((sec/60/60))"\
+	    "$((sec/60%60))" "$((sec%60))" > "$progfile"
+}
+
+cast(){ castnow --address $ip ${o[@]}; }
+
+player_ctl(){
+   setup; cmd=("screen" "-S" "cast" "-X" "stuff")
+   #screen -DmS castproc cast
+   ((pause=SECONDS))
+   while read -rsn1;do
+      case $REPLY in
+              q) screen -S castproc -X quit; break ;;
+         \ |' ') "${cmd[@]}" ' '
+                 ((paused=SECONDS-pause)) ;;
+              m) cmd+=("m"); "${cmd[@]}" 'm' ;;
+              t) cmd+=("t"); "${cmd[@]}" ;;
+              n) cmd+=("n"); "${cmd[@]}" ;;
+              s) cmd+=("s"); "${cmd[@]}" ;;
+      k|$'\e[A') cmd+=("$'\e[A'"); "${cmd[@]}" ;;
+      j|$'\e[B') cmd+=("$'\e[B'"); "${cmd[@]}" ;;
+      h|$'\e[D') cmd+=("$'\e[D'"); "${cmd[@]}" ;;
+      l|$'\e[C') cmd+=("$'\e[C'"); "${cmd[@]}" ;;
+      esac
+   done
+
+}
+
+get_devices(){
+   printf '\n%s' "Searching local network..."
+   while read -r line; do
+      ((i<1)) && printf '\r\e[K%s\t\t\t\t%s\n' "IP Address:" "MAC Address:"
+
+      [[ "$line" =~ ^[0-9][0-9][0-9].* ]] && {
+         ip+=($line); ((i++))
+         printf '%s ' "$i: $line"
+      } || printf '\t%s\t%s\n' "-" "$line"
+
+   done < <(sudo nmap -sn $local_ip | awk -F" " '
+      /MAC Address:/ {print $3" "$4" "$5}
+      /Nmap scan/ {print $5}')
+
+   read -rp $'\n\n'"ip to use: "
+   ip="${ip[((REPLY-1))]}"
+}
+
+main(){
+   local_ip=$(ip a show wlp3s0 | awk '/inet / {print $2}')
+   [[ "$local_ip" ]] || { echo "no connection"; exit 1; }
+   ((sec=0,i=0))
+
+   get_opts "$@"
+   get_prog
+   get_devices
+   cast
+   #player_ctl
+   write_prog
+}
+
+main "$@"
