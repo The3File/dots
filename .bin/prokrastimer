@@ -2,16 +2,16 @@
 # Prokrastimer
 # Over-engineered pomodoro timer
 
-clean() { [[ ${FUNCNAME[1]} != "prompt" ]] && printf '\e[2J\e[H\e[1;34m%s' "$logo"; }
+clean() { [[ "${FUNCNAME[1]}" != "prompt" ]] && printf '\e[2J\e[H\e[1;34m%s' "$logo"; }
 
 prompt() {
    printf '\e[10;0H\e[1;37m%s\e[m' "work in min. (25): "; read -r work
    printf '\e[1;37m%s\e[m' "breaks in min. (5): "; read -r break
    printf '\e[1;37m%s\e[m' "number of sessions (2): "; read -r s
 
-   [[ -n $work ]]  &&  ((work*=60)) ||  ((work=1500))
-   [[ -n $break ]] && ((break*=60)) || ((break=300))
-   [[ -n $s ]] 	   &&     ((s*=2))  ||     ((s=4))
+   [[ -n "$work" ]]  &&  ((work*=60)) ||  ((work=1500))
+   [[ -n "$break" ]] && ((break*=60)) || ((break=300))
+   [[ -n "$s" ]] 	   &&     ((s*=2))  ||     ((s=4))
 }
 
 timer() {
@@ -24,8 +24,8 @@ timer() {
       bar $((SECONDS-start_time)) "$state"; sleep 1
    done
 
-   [[ $state == "work" ]] && ((count++))
-   play ~/.bin/.prokrastimer/gong.wav 2>/dev/null &
+   [[ "$state" == "work" ]] && ((count++))
+   play "$HOME/.bin/.prokrastimer/gong.wav" 2>/dev/null &
    dunstify "$state completed" -t 5000
 }
 
@@ -49,7 +49,7 @@ complet() {
 }
 
 main() {
-   logo=$(figlet -f big prokrastimer); state=work; count=1
+   logo=$(figlet -f big prokrastimer); state="work"; count=1
    trap "((count-=1)); complet; stty echo" EXIT; trap 'clean' SIGWINCH
 
    clean; prompt; stty -echo
