@@ -49,9 +49,6 @@ super + i
 super + w
    qutebrowser
 
-super + shift + b
-   electron /usr/lib/android-messages-desktop/resources/app.asar
-
 super + shift + r
    ukill bspwmrc; "$CONFIG"
 
@@ -64,6 +61,12 @@ super + alt + shift + w
 
 super + alt + shift + r
    chwal -r
+
+super + shift + a ; {j,k}
+      bspc node @/ -R {90,-90}
+
+super + shift + b
+      bspc node @/ -E
 
 #super + x
       #env XSECURELOCK_PASSWORD_PROMPT=time_hex xsecurelock -- systemctl suspend

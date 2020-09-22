@@ -1,15 +1,15 @@
-# Beginnig to slowly add my deps
+# Langsom migræring af deps
 
 ### wm
 
       pkg: bspwm
       pkg: sxkhd
-      pkg: dunst
+      pkg: dunst-git
       pkg: <++>
 
 ### file managment
 
-      pkg: lf
+      pkg: lf-git
       pkg: <++>
 
 ### files
@@ -20,3 +20,16 @@
 ### creating .css from .scss
 
       pkg: sassc
+
+### groups ( dobbelt tjek! )
+
+      grp: ladspa-plugins
+      grp: base
+      grp: base-devel
+      grp: vamp-plugins
+      grp: non-daw
+      grp: xorg
+      grp: xorg-apps
+      grp: xorg-fonts
+
+### SORTER:
