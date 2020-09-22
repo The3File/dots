@@ -9,7 +9,6 @@
 #                                               __/ |
 #                                              |___/
 
-
 config() {
 
       printf '\e[33m%s...' "applying configs"
@@ -117,9 +116,6 @@ qute() {
 
 
 main() {
-   # check for display server every second
-   while [[ ! $DISPLAY ]]; do sleep 1; done
-
    xmodmap -e "keycode 135 = Super_R"
    source "$HOME/.cache/wal/colors.sh"
 
@@ -147,5 +143,5 @@ main() {
 main "$@" &&
    {
       printf '\e[m\n%s\n' "..all done";
-      dunstify "bspwmrc reloaded" -t 2000 -r 90211
+      dunstify "bspwmrc reloaded" -t 2000 -r 90211 &
    }
