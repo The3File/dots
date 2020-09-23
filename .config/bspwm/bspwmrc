@@ -37,7 +37,6 @@ config() {
 
    # gaps
       export GS=7	# gaps size integer
-      export GO=0	# WIP
       export GN=4	# number of windows before $G0 gaps
 
    # left and right padding
@@ -139,6 +138,8 @@ main() {
    rules; config; qute; apps
 
 }
+
+case $1 in 1|0) reason="$1"; shift; echo yes; esac
 
 main "$@" &&
    {

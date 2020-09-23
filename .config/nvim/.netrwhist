@@ -1,5 +1,6 @@
 let g:netrw_dirhistmax  =10
-let g:netrw_dirhistcnt =0
+let g:netrw_dirhistcnt =1
+let g:netrw_dirhist_1='/home/ringdal/Dokumenter/Skole'
 let g:netrw_dirhist_0='/etc/udev/hwdb.d'
 let g:netrw_dirhist_9='/home/ringdal/.config/fontconfig'
 let g:netrw_dirhist_8='/home/ringdal'
@@ -9,4 +10,3 @@ let g:netrw_dirhist_5='/home/ringdal/.config/fontconfig'
 let g:netrw_dirhist_4='/etc/fonts/conf.d'
 let g:netrw_dirhist_3='/etc/fonts'
 let g:netrw_dirhist_2='/etc/fonts/conf.avail'
-let g:netrw_dirhist_1='/etc/fonts'

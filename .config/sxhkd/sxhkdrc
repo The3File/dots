@@ -10,26 +10,26 @@ alt + shift + Pause
 ##########################
 
 # bar replacement
-
 super + {c,shift + c,b}
    dunstbar {-d,-c,-o}
-#pkill -SIGUSR1 herbe; herbar {-d,-c,-o}
-
-#super + shift + y
 
 # terminal emulator
 super + {_,shift +} {Return}
    st {_,-c float -g 88x25}
 
+# tui apps
 super + {v,u,s,shift+s}
    st -e {neomutt,rtv -s unixporn,svim,scli}
 
+# cli apps
 super + {_,shift +} e
    {st -e lf, scratch files}
 
+# draw terminal
 alt + button1
    drawterm
 
+# scratchpad
 super + {p,a}
    scratch {term,math}
 
@@ -37,44 +37,49 @@ super + {p,a}
 super + d
    rofi -show run
 
+# wifi menu
 super + shift + w
    nm-dmenu
 
+# rofi clipboard menu
 super + Insert
    rofi -modi "clipboard:greenclip print" -show clipboard -run-command '{cmd}'
 
+# emoji menu
 super + i
    fontawesome
 
+# browser
 super + w
    qutebrowser
 
+# restart bspwm
 super + shift + r
    ukill bspwmrc; "$CONFIG"
-
-#super + b
-#	runpoly toggle
 
 # change toggle wal colorschemes
 super + alt + shift + w
    chwal
 
+# reload wal colorschemes
 super + alt + shift + r
    chwal -r
 
+# rotate root node
 super + shift + a ; {j,k}
-      bspc node @/ -R {90,-90}
+   bspc node @/ -R {90,-90}
 
+# balance root node
 super + shift + b
-      bspc node @/ -E
+   bspc node @/ -E
 
 #super + x
-      #env XSECURELOCK_PASSWORD_PROMPT=time_hex xsecurelock -- systemctl suspend
-#xsecurelock & ((;:;)); systemctl suspend
+   #env XSECURELOCK_PASSWORD_PROMPT=time_hex xsecurelock -- systemctl suspend
+   #xsecurelock & ((;:;)); systemctl suspend
 
-# make sxhkd reload its configuration files:
+# reload sxhkd
 super + Escape
- pkill -USR1 -x sxhkd
+   pkill -USR1 -x sxhkd
 
 super + alt + shift + q
  st -c float -g 30x5+30-30 -e bye
@@ -85,16 +90,17 @@ super + alt + shift + q
 
 # close and kill
 super + {_,shift + }q
- bspc node -{c,k}
+   bspc node -{c,k}
 
 # alternate between the tiled and monocle layout
 super + End
- bspc desktop -l next
+   bspc desktop -l next
 
 # send the newest marked node to the newest preselected node
 super + y
- bspc node newest.marked.local -n newest.!automatic.local
+   bspc node newest.marked.local -n newest.!automatic.local
 
+# swap biggest and last node
 super + space
    swap
 
@@ -104,11 +110,11 @@ super + space
 
 # focus the node in the given direction
 super + {_,shift + }{h,j,k,l}
- bspc node -{f,s} {west,south,north,east}
+   bspc node -{f,s} {west,south,north,east}
 
 # focus the node for the given path jump
 super + {comma,period}
- bspc node -f @{parent,brother}
+   bspc node -f @{parent,brother}
 
 # focus the next/previous desktop in the current monitor
 super + {,shift + Tab,Tab}
@@ -134,11 +140,11 @@ super + {_,shift + }{1-9,0}
 
 # set the window state
 super + {t,shift + t,shift + space,f}
- bspc node -t ~{tiled,pseudo_tiled,floating,fullscreen}
+   bspc node -t ~{tiled,pseudo_tiled,floating,fullscreen}
 
 # set the node flags
 super + ctrl + {m,q,s,p}
- bspc node -g {marked,locked,sticky,private}
+   bspc node -g {marked,locked,sticky,private}
 
 ###############
 # move/resize #
@@ -146,15 +152,15 @@ super + ctrl + {m,q,s,p}
 
 # expand a window by moving one of its side outward
 super + alt + {h,j,k,l}
- bspc node -z {left -20 0,bottom 0 20,top 0 -20,right 20 0}
+   bspc node -z {left -20 0,bottom 0 20,top 0 -20,right 20 0}
 
 # contract a window by moving one of its side inward
 super + alt + shift + {h,j,k,l}
- bspc node -z {right -20 0,top 0 20,bottom 0 -20,left 20 0}
+   bspc node -z {right -20 0,top 0 20,bottom 0 -20,left 20 0}
 
 # move a floating window
 alt + shift + {h,j,k,l}
- bspc node -v {-20 0,0 20,0 -20,20 0}
+   bspc node -v {-20 0,0 20,0 -20,20 0}
 
 #############
 # preselect #
@@ -187,12 +193,10 @@ alt + ctrl + {h,j,k,l}
 # LIGHT | BRIGHTNESS
 XF86MonBrightness{Up,Down}
    xbacklight -time 100 -{inc,dec} 5;((;:;)); dunstbar -b
-      #xbacklight -time 100 -{inc,dec} 5;((;:;))& herbar -b
 
 # SOUND
 {_,super + } XF86Audio{Raise,Lower}Volume
    pamixer {_,--allow-boost} {-i,-d}5 && dunstbar -v
-      #pamixer {_,--allow-boost} {-i,-d}5 && herbar -v
 
 # mute sound
 XF86AudioMute
@@ -202,11 +206,12 @@ XF86AudioMute
 XF86AudioMicMute
    amixer sset Capture toggle
 
-super + shift + n 		
-   xbacklight -time 400 -set 1 && dunstbar -b
-super + n 			
-   redshift -m vidmode -P
-super + shift + m
-   xbacklight -time 400 -set 100 && dunstbar -b
-super + m
-   killall redshift && redshift -x -m vidmode
+# dark light, night mode
+super + {_,shift +} n
+   {xbacklight -time 400 -set 1 && dunstbar -b,\
+   redshift -m vidmode -P}
+
+# normal light, day mode
+super + {_,shift +} m
+   {xbacklight -time 400 -set 100 && dunstbar -b,\
+   killall redshift && redshift -x -m vidmode}
