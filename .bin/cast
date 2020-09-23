@@ -13,14 +13,14 @@ get_prog(){
    read -r prog < "$progfile"
    echo "found prog file: $progfile ($prog)"
    o+=("--seek" "$prog")
-   IFS=':' read -r h m s < "harrypotter6.prog"
+   IFS=':' read -r h m s < "$prog"
    ((prog=(h*60*60)+(m*60)+s,sec+=prog))
 }
 
 write_prog(){
    ((sec+=SECONDS-paused))
-   ((SECONDS>60)) && read -rp "save proggress? ($sec) [y/N]: "
-   [[ "$REPLY" = "y" ]] && printf '%02d:%02d:%02d' "$((sec/60/60))"\
+   ((SECONDS>60)) && read -rp "save proggress? ($((sec/3600)):$((sec/60%60)):$((sec%60))) [y/N]: "
+   [[ "$REPLY" = "y" ]] && printf '%02d:%02d:%02d\n' "$((sec/3600))"\
 	    "$((sec/60%60))" "$((sec%60))" > "$progfile"
 }
 
