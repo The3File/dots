@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# edit scripts tui written in bash
+# stole a bit from dylanaraps/fff 
 
 config(){
 

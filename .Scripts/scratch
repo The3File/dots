@@ -1,13 +1,24 @@
 #!/usr/bin/env bash
-files(){ id=$(xdotool search --class files)
-   [[ -z "$id" ]] && st -c files -g 80x15+30-20 -e lf ||
-      bspc node "$id" --flag hidden -f; }
-term(){ id=$(xdotool search --class scratchterm)
+
+files(){
+   id=$(xdotool search --class files)
+   if [[ -z "$id" ]]
+   then st -c files -g 80x15+30-20 -e lf
+   else bspc node "$id" --flag hidden -f; fi
+}
+
+term(){
+   id=$(xdotool search --class scratchterm)
    opts=( -c scratchterm -g 100x28+30+30 -e )
    [[ -z "$id" ]] && { st ${opts[@]} tmux new -s 'scratch' ||
       st ${opts[@]} tmux a -t '=scratch'; } ||
-      bspc node "$id" --flag hidden -f; }
-math(){ id=$(xdotool search --class scratchmath)
+      bspc node "$id" --flag hidden -f
+}
+
+math(){
+   id=$(xdotool search --class scratchmath)
    [[ -z "$id" ]] && st -c scratchmath -g 100x17-30-30 -e qalc ||
-      bspc node "$id" --flag hidden -f; }
+   bspc node "$id" --flag hidden -f
+}
+
 $1

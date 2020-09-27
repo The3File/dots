@@ -1,11 +1,8 @@
 #!/usr/bin/env bash
 
-dot(){
-   #echo "${op[@]}"
-   git "${op[@]}"
-}
-
 o=(--git-dir=$HOME/.dotfiles/ --work-tree=$HOME)
+
+dot(){ git "${op[@]}"; }
 
 case $1 in 
    up)

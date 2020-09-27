@@ -27,8 +27,8 @@ set smartindent
 set shiftwidth=3
 
 "colorscheme wal
-"colorscheme zellner
-colorscheme default
+colorscheme zellner
+"colorscheme default
 
 set clipboard=unnamedplus
 set nohlsearch

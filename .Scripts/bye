@@ -11,7 +11,7 @@ execute(){
 }
 
 confirm(){
-   printf '\e[H\e[J%s\e[?25h' "want to ${o[$p]}? [y/N] "
+   printf '\e[H\e[J%s\e[?25h' "${o[$p]}? [y/N] "
    while read -rsn1 a; do
       case $a in
          y|Y) execute "${o[$p]}" ;;
@@ -31,7 +31,7 @@ key(){
    case $1 in
       $'\101'|k) ((p>0))&&((p--)) ;;
       $'\102'|j) ((p<2))&&((p++)) ;;
-      '') confirm ;;
+      ''|l) confirm ;;
       $'\033'|q) exit 0
    esac
 }
