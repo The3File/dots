@@ -1,21 +1,31 @@
 #!/usr/bin/env bash
 
-handler(){ case "$1" in
-      button/power) [[ $2 = "PBTN" ]] && st -c float -g 30x5+600-10 -e bye ;;
-      button/screenlock)
-	 [[ $(<"$HOME/.keylock") = "enable" ]] && state="disable" || state="enable"
+coproc acpi_listen
+trap 'kill $COPROC_PID' EXIT
 
-	 xinput $state 'AT Translated Set 2 keyboard' && printf '%s' "$state" > "$HOME/.keylock"
-	 dunstify -C 90211; dunstify -r 90210 -t 4000 "" "<b>${state}d </b>  "
-	 ;;
-      ac_adapter) [[ $2 = *ACPI* ]] && dunstbar ;;
-      button/prog1) lock ;;
-   esac; }
+notify_plugged(){ [[ $2 = *ACPI* ]] && dunstbar; }
 
-main(){ coproc acpi_listen
-   trap 'kill $COPROC_PID' EXIT
+power_menu(){ [[ $2 = "PBTN" ]] && st -c float -g 30x5+600-10 -e bye; }
 
-   while read -u "${COPROC[0]}" -a event; do
-      handler "${event[@]}"
-   done; }
-main
+lockscreen(){
+env XSECURELOCK_PASSWORD_PROMPT=time_hex xsecurelock -- systemctl suspend
+}
+
+lock_keys(){
+   [[ $(<"$HOME/.keylock") = "enable" ]] && state="disable" || state="enable"
+   xinput $state 'AT Translated Set 2 keyboard' && printf '%s' "$state" > "$HOME/.keylock"
+   dunstify -C 90211; dunstify -r 90210 -t 4000 "" "<b>${state}d </b>  "
+}
+
+handler(){
+   case "$1" in
+      button/power) power_menu ;;
+      button/screenlock) lock_keys ;;
+      ac_adapter) notify_plugged ;;
+      button/prog1) lockscreen ;;
+   esac
+}
+
+while read -u "${COPROC[0]}" -a event; do
+   handler "${event[@]}"
+done

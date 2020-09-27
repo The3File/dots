@@ -33,7 +33,7 @@ push() {
 
    git add . 
    git commit -a -m "$a" &&
-      git push -u origin master
+   git push -u origin master
 }
 
 main() { o=("-n"); sync; prompt; }

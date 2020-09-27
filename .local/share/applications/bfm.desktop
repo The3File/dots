@@ -1,4 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=Bash file browser
-Exec=/usr/local/bin/st -e bfm %u
