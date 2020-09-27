@@ -1,46 +1,52 @@
 #!/usr/bin/env bash
 
-reset(){ printf '\e[?25l\e[2J\e[H%s' ""; }
+reset(){ printf '\e[?25l\e[2J\e[H'; }
 
 execute(){
    case $1 in
-      "poweroff") poweroff ;;
-      "reboot") reboot ;;
-      "exit shell") bspc quit || killall xinit ;;
+       poweroff) poweroff ;;
+         reboot) reboot ;;
+   "exit shell") bspc quit || killall xinit ;;
    esac
 }
 
 confirm(){
-   printf '\e[H\e[J%s\e[?25h' "${o[$p]}? [y/N] "
-   while read -rsn1 a; do
-      case $a in
-         y|Y) execute "${o[$p]}" ;;
-         $'\033'|n|N) break ;;
-         q) exit 0;
-      esac
-   done
+   printf '\e[%sH\e[2J%s\e[?25h\n\e[2C' "$((p+1))"
+   read -rsn1 -p "${options[$p]}? [y/N] "
+   case_confirm "$REPLY"
 }
 
-printl(){ for((i=0;i<3;i++)){
-   case $i in $p) printf '\n\e[2C\e[7m%s\e[m' "${o[$i]} " ;;
-      *) printf '\n\e[2C%s' "${o[$i]}"
-   esac
-}; }
-
-key(){
+case_confirm(){
    case $1 in
-      $'\101'|k) ((p>0))&&((p--)) ;;
-      $'\102'|j) ((p<2))&&((p++)) ;;
-      ''|l) confirm ;;
-      $'\033'|q) exit 0
+      y|Y) execute "${options[$p]}" ;;
+      $'\033'|n|N) break ;;
+      q) exit 0;
+   esac
+}
+
+printl(){
+   for((i=0;i<"${#options[@]}";i++)){
+      case $i in
+         $p) printf '\n\e[2C\e[7m%s\e[m' "${options[$i]} " ;;
+         *) printf '\n\e[2C%s' "${options[$i]}"
+      esac
+   }
+}
+
+case_key(){
+   case $1 in
+   $'\101'|k) ((p>0))&&((p--)) ;;
+   $'\102'|j) ((p<${#options[@]}-1))&&((p++)) ;;
+        ''|l) confirm ;;
+   $'\033'|q) exit 0
    esac
 }
 
 main(){
    trap "printf '\e[m\e[2J\e[H\e[?25h'" EXIT
 
-   ((p=0)); o=("poweroff" "reboot" "exit shell")
-   for((;;)){ reset; printl; read -rsn1 a; key "$a"; }
+   ((p=0)); options=("poweroff" "reboot" "exit shell")
+   for((;;)){ reset; printl; read -rsn1 key; case_key "$key"; }
 }
 
 main
