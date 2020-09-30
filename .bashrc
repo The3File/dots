@@ -2,10 +2,12 @@
 
 [[ -f ~/.aliases ]] 	&& source ~/.aliases
 [[ -f ~/.bash_prompt ]] && source ~/.bash_prompt
+[[ $(uname -o) = "Android" ]] || eval "$(thefuck --alias)"
+[[ $(uname -o) = "Android" && $TERM != "screen" ]] &&
+   exec tmux
 
 #expressvpn status | sed 2Q
 #bspc query -N -n focused.local
-eval "$(thefuck --alias)"
 
 set -o vi
 shopt -s histappend
