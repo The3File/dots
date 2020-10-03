@@ -25,6 +25,7 @@ set relativenumber
 set autoindent
 set smartindent
 set shiftwidth=3
+set softtabstop=-1
 
 "colorscheme wal
 "colorscheme zellner
@@ -46,6 +47,13 @@ autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown
 
 nnoremap ,n :next<CR>
 nnoremap ,p :previous<CR>
+
+" BASH
+
+autocmd FileType sh nnoremap ,c :!shellcheck %<CR>
+autocmd FileType sh nnoremap ,f i<CR>(){<CR><tab><++><CR>}<CR><ESC>3ki
+autocmd FileType sh inoremap ;e printf '' "<++>"<ESC>F'i
+
 
 " LATEX
 
