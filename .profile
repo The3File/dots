@@ -10,6 +10,7 @@ export EDITOR="nvim"
 export BROWSER="qutebrowser"
 
 export CONFIG="$HOME/.config/bspwm/bspwmrc"
+export NOTES="$HOME/Dokumenter/Noter"
 
 export PANELFIFO="/tmp/panel-fifo"
 export GAPFIFO="/tmp/gap-fifo"
