@@ -1,9 +1,20 @@
 #!/usr/bin/env bash
+
 _restart(){ _kill $@; $@ &>/dev/null & disown; }
-_kill(){ a="$1"
+
+_kill(){
+   a="$1"
    for((;;)){ IFS=$' ' read -d '' -r -a p < \
       <(ps ax | sed -n "/vim/d;/ukill/d;/.*\<"$a"\>.*/p");
-	 ((p[0])) || break
-	 kill -9 "${p[0]}" && echo "[$p] killed" || exit 1; }; }
-main(){ case "$@" in -r) _restart "$@" ;; *) for((;;)){ _kill "$@"; exit; } ;; esac; }
+   ((p)) || break
+   kill -9 "${p[0]}" && echo "[$p] killed" || exit 1; }
+}
+
+main(){
+   case "$@" in
+      -r) _restart "$@" ;;
+      *) for((;;)){ _kill "$@"; exit; }
+   esac
+}
+
 main "$@"
