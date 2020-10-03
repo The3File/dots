@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 
+main(){
+   case $1 in 
+      up)
+         git "${o[@]}" commit -am "$changes"
+         git "${o[@]}" push -u origin master
+      ;;
+      *) [[ "$1" ]] && git "${o[@]}" $@
+   esac
+}
+
 o=(--git-dir=$HOME/.dotfiles/ --work-tree=$HOME)
 
-dot(){ git "${op[@]}"; }
-
-case $1 in 
-   up)
-      op=(${o[@]} commit -a -m from_script); dot
-      op=(${o[@]} push -u origin master); dot
-         ;;
-   *) [[ "$1" ]] && op=(${o[@]} $@); dot
-esac
+changes=$(git ${o[@]} status --porcelain)
+main $1
