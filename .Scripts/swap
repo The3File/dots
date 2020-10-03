@@ -20,12 +20,8 @@ move_biggest(){
    bspc node -s biggest.local --follow
 }
 
-main(){
-   if [[ "$biggest" = "$focused" ]]
-   then get_smaller
-   else move_biggest; fi
-}
+query_nodes; read_leafs
 
-query_nodes
-read_leafs
-main
+if [[ "$biggest" = "$focused" ]]
+then get_smaller
+else move_biggest; fi
