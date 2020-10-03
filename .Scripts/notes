@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+new(){
+   echo
+}
+
+edit(){
+   get_notes | fzf --info=inline --tabstop=12
+}
+
+parse_out(){
+   printf '%s\n' "${notes[@]##*/}"
+}
+
+get_notes(){
+   IFS=$'\n' read -rd '' -a notes < <(fd .md "$NOTES")
+   for note in "${notes[@]}"; do
+      tags="$(cat "$note" | tail -1)"
+      tags="${tags##*tags: \[}"
+      printf '%s\t%s\n' "${note}" "${tags%%])}"
+   done
+}
+
+case $1 in
+   *) edit
+esac
