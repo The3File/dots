@@ -3,8 +3,6 @@
 [[ -f ~/.aliases ]] 	&& source ~/.aliases
 [[ -f ~/.bash_prompt ]] && source ~/.bash_prompt
 [[ $(uname -o) = "Android" ]] || eval "$(thefuck --alias)"
-[[ $(uname -o) = "Android" && $TERM != "screen" ]] &&
-   exec tmux
 
 #expressvpn status | sed 2Q
 #bspc query -N -n focused.local
@@ -21,6 +19,11 @@ HISTFILESIZE=100000
 HISTCONTROL="erasedups:ignoreboth"
 HISTIGNORE="&:[ ]*:exit:ls:bg:fg:history:clear:c:ll:lla:la"
 
+<<<<<<< HEAD
 open_with_fzf() { fd -t f -H -I | fzf -m --preview="xdg-mime query default {}" | xargs -ro -d "\n" xdg-open 2>&-; }
 cdc() { cd $HOME && cd "$(fd -t d | fzf --preview="tree -L 1 {}" --bind="space:toggle-preview" --preview-window=:hidden)"; }
 pacs() { sudo pacman -Syy $(pacman -Ssq | fzf -m --preview="pacman -Si {}" --preview-window=:hidden --bind=space:toggle-preview); }
+=======
+[[ $(uname -o) = "Android" && $TERM != "screen" ]] &&
+   exec tmux new -A -s termux
+>>>>>>> 9c483e10423d92d9170d2ab871ef383ae6eabd38
