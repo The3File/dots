@@ -18,4 +18,3 @@ export BARFIFO="/tmp/bar-fifo"
 export WORKFIFO="/tmp/work-fifo"
 
 [[ ! $DISPLAY && $XDG_VTNR -eq 1 ]] && exec startx &>/dev/null
-#[[ $DISPLAY && -f ~/.Xmodmap ]] && xmodmap ~/.Xmodmap
