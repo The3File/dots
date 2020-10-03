@@ -3,8 +3,6 @@
 [[ -f ~/.aliases ]] 	&& source ~/.aliases
 [[ -f ~/.bash_prompt ]] && source ~/.bash_prompt
 [[ $(uname -o) = "Android" ]] || eval "$(thefuck --alias)"
-[[ $(uname -o) = "Android" && $TERM != "screen" ]] &&
-   exec tmux
 
 #expressvpn status | sed 2Q
 #bspc query -N -n focused.local
@@ -20,3 +18,6 @@ HISTSIZE=500000
 HISTFILESIZE=100000
 HISTCONTROL="erasedups:ignoreboth"
 HISTIGNORE="&:[ ]*:exit:ls:bg:fg:history:clear:c:ll:lla:la"
+
+[[ $(uname -o) = "Android" && $TERM != "screen" ]] &&
+   exec tmux new -A -s termux
