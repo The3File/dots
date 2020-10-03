@@ -26,4 +26,3 @@ pacs() { sudo pacman -Syy $(pacman -Ssq | fzf -m --preview="pacman -Si {}" --pre
 =======
 [[ $(uname -o) = "Android" && $TERM != "screen" ]] &&
    exec tmux new -A -s termux
->>>>>>> 9c483e10423d92d9170d2ab871ef383ae6eabd38
