@@ -13,4 +13,4 @@ main(){
 o=(--git-dir=$HOME/.dotfiles/ --work-tree=$HOME)
 
 changes=$(git ${o[@]} status --porcelain)
-main $1
+main "$@"
