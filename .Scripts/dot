@@ -1,16 +1,28 @@
 #!/usr/bin/env bash
 
-main(){
+git_do(){ git "${o[@]}" "$@"; }
+
+up(){
+   git_do commit -am "$changes"
+   git_do push -u origin master
+}
+
+case_opts(){
    case $1 in 
-      up)
-         git "${o[@]}" commit -am "$changes"
-         git "${o[@]}" push -u origin master
-      ;;
-      *) git "${o[@]}" $@
+      up) up ;;
+      *) git_do "$@"
    esac
 }
 
-o=(--git-dir=$HOME/.dotfiles/ --work-tree=$HOME)
+get_status(){
+   commit_status=$(git ${o[@]} commit --status --short)
+   changes=$(git ${o[@]} status --porcelain)
+}
 
-changes=$(git ${o[@]} status --porcelain)
+main(){
+   o=(--git-dir=$HOME/.dotfiles/ --work-tree=$HOME)
+   get_status
+   case_opts "$@"
+}
+
 main "$@"
