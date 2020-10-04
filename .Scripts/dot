@@ -1,26 +1,34 @@
 #!/usr/bin/env bash
 
-git_do(){ git "${o[@]}" "$@"; }
+git_do(){ git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME "$@"; }
 
-up(){
-   git_do commit -am "$changes"
-   git_do push -u origin master
+commit(){ git_do commit -am "$changes"; }
+
+push(){ git_do push; }
+
+get_status(){
+   commit_status=$(git_do commit --status --porcelain)
+   changes=$(git_do status --porcelain)
 }
 
+print_status(){
+   [[ ! -z $commit_status ]] &&
+      printf '%s\n' "committed: $commit_status"
+   [[ ! -z $changes ]] &&
+      printf '%s\n' "uncommitted: $changes"
+}
+
+up(){ [[ $commit_status ]] && commit; push; }
+
 case_opts(){
-   case $1 in 
+   case $1 in
       up) up ;;
+      status) print_status ;;
       *) git_do "$@"
    esac
 }
 
-get_status(){
-   commit_status=$(git ${o[@]} commit --status --short)
-   changes=$(git ${o[@]} status --porcelain)
-}
-
 main(){
-   o=(--git-dir=$HOME/.dotfiles/ --work-tree=$HOME)
    get_status
    case_opts "$@"
 }
