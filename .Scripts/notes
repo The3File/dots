@@ -1,26 +1,12 @@
 #!/usr/bin/env bash
 
+edit(){ fd .md $NOTES | fzf | xargs -r nvim; }
+
 new(){
-   echo
+   cd $HOME/storage/shared/Noter
+   printf '\n\n%s\n%s' "[//]: # ($(date -Iseconds))"\
+   "[//]: # (tags: [<++>])" |\
+   nvim -c startinsert -c Goyo -- "$note"
 }
 
-edit(){
-   get_notes | fzf --info=inline --tabstop=12
-}
-
-parse_out(){
-   printf '%s\n' "${notes[@]##*/}"
-}
-
-get_notes(){
-   IFS=$'\n' read -rd '' -a notes < <(fd .md "$NOTES")
-   for note in "${notes[@]}"; do
-      tags="$(cat "$note" | tail -1)"
-      tags="${tags##*tags: \[}"
-      printf '%s\t%s\n' "${note}" "${tags%%])}"
-   done
-}
-
-case $1 in
-   *) edit
-esac
+case $1 in new) new ;; *) edit; esac
