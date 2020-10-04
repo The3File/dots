@@ -33,7 +33,9 @@ cdc() {
 pac() { pacman -Ssq | fzf -m --preview="pacman -Si {}" --preview-window=:hidden --bind=space:toggle-preview | xargs -r sudo pacman -S; }
 
 if [[ $(uname -o) = "Android" ]];then
-   [[ $TERM != "screen" ]] && exec tmux new -A -s termux
+   [[ $TERM != "screen-256color" ]] &&
+      exec tmux new -A -s termux
+   export NOTES="/sdcard/Noter"
 else
    eval "$(thefuck --alias)"
 fi

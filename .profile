@@ -1,7 +1,5 @@
 #!/bin/sh
 
-[[ -f ~/.bashrc ]] && source ~/.bashrc
-
 export XDG_CONFIG_HOME="$HOME/.config"
 
 export PATH=$HOME/.bin:/usr/local/bin:$HOME/.Scripts/:$PATH
@@ -17,4 +15,5 @@ export GAPFIFO="/tmp/gap-fifo"
 export BARFIFO="/tmp/bar-fifo"
 export WORKFIFO="/tmp/work-fifo"
 
+[[ -f ~/.bashrc ]] && source ~/.bashrc
 [[ ! $DISPLAY && $XDG_VTNR -eq 1 ]] && exec startx &>/dev/null
