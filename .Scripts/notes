@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-fz(){ fzf --height 40% --reverse "$@"; }
+fz(){ fzf --ansi --height 40% --reverse "$@"; }
 
 new(){
    cd $NOTES
-   print_tags | nvim -c startinsert
+   print_tags | nvim -c startinsert .md
 }
 
 edit(){
@@ -35,8 +35,8 @@ pull(){
 }
 
 print_notes(){
-   IFS=$'\n' read -rd '' -a notes < <(fd .md $NOTES)
-   printf '%s\n' "${notes[@]#$NOTES/*}"
+   IFS=$'\n' read -rd '' -a notes < <(fd -c always .md $NOTES)
+   printf '%s\n' "${notes[@]#*${NOTES##*/}/}"
 }
 
 print_tags(){
@@ -56,6 +56,7 @@ get_opts(){
 
 main(){
    get_opts $1 || exit
+   printf '\e[A\e[K%s\n' "$PS1 notes $opt"
    case $opt in new) new ;; sync) sync ;; edit) edit; esac
 }
 
