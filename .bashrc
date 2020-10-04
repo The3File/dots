@@ -30,9 +30,9 @@ cdc() {
 pac() { pacman -Ssq | fzf -m --preview="pacman -Si {}" --preview-window=:hidden --bind=space:toggle-preview | xargs -r sudo pacman -S; }
 
 if [[ $(uname -o) = "Android" ]];then
-   [[ $TERM != "screen-256color" ]] &&
-      exec tmux new -A -s termux
    export NOTES="/sdcard/Noter"
+   [[ $TERM =~ "screen" ]] &&
+      exec tmux new -A -s termux
 else
    eval "$(thefuck --alias)"
    #expressvpn status | sed 2Q
