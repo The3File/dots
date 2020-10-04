@@ -13,7 +13,7 @@ get_status(){
 
 print_status(){
    [[ ! -z $commit_status ]] &&
-      printf '%s\n' "uncommitted: $commit_status"
+      printf '%s\n' "$commit_status"
    #[[ ! -z $changes ]] &&
       #printf '%s\n' "committed: $changes"
 }
@@ -30,11 +30,8 @@ case_opts(){
    esac
 }
 
-main(){
-   get_status
-   print_status
-   [[ $1 ]] || exit
-   case_opts "$@"
-}
+get_status
+print_status
 
-main "$@"
+[[ $1 ]] || exit
+case_opts "$@"

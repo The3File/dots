@@ -28,7 +28,11 @@ cdc() {
 }
 
 sv(){
-   fd -c always -t f . $HOME/.Scripts/ $HOME/.bin/ | sort | fzf --ansi --preview "bat --theme="OneHalfDark" --style=numbers,changes --color always {}" | xargs -r nvim
+   files=$(fd -c always -t f . $HOME/.Scripts/ $HOME/.bin/)
+   printf '%s\n' ${files[@]//$HOME\/} | fzf --ansi\
+   --preview "bat --theme="OneHalfDark"\
+   --style=numbers,changes --color always {}" |
+   xargs -r -i nvim $HOME/{}
 }
 
 pac() { pacman -Ssq | fzf -m --preview="pacman -Si {}" --preview-window=:hidden --bind=space:toggle-preview | xargs -r sudo pacman -S; }
