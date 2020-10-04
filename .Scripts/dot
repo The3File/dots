@@ -12,10 +12,8 @@ get_status(){
 }
 
 print_status(){
-   [[ ! -z $commit_status ]] &&
-      printf '%s\n' "committed: $commit_status"
    [[ ! -z $changes ]] &&
-      printf '%s\n' "uncommitted: $changes"
+      printf '%s\n' "changes: $changes"
 }
 
 up(){ [[ $commit_status ]] && commit; push; }
