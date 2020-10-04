@@ -3,9 +3,6 @@
 [[ -f ~/.aliases ]] 	&& source ~/.aliases
 [[ -f ~/.bash_prompt ]] && source ~/.bash_prompt
 
-#expressvpn status | sed 2Q
-#bspc query -N -n focused.local
-
 # set vi mode
 set -o vi
 
@@ -38,4 +35,6 @@ if [[ $(uname -o) = "Android" ]];then
    export NOTES="/sdcard/Noter"
 else
    eval "$(thefuck --alias)"
+   #expressvpn status | sed 2Q
+   #bspc query -N -n focused.local
 fi

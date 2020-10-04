@@ -7,6 +7,7 @@ alias kdeconnectd="/usr/lib/kdeconnectd"
 alias x="extract"
 alias spe="speedtest"
 alias vim="nvim"
+alias nts="notes"
 
 
 ##  CONFIGS
