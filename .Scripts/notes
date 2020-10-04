@@ -9,7 +9,7 @@ new(){
 
 edit(){
    note="$NOTES/$(print_notes | fz)"
-   [[ -f "$note" ]] && nvim "$note"
+   [[ -f "$note" ]] && nvim -c Goyo "$note"
    exit 0
 }
 

@@ -156,19 +156,19 @@ let g:airline_powerline_fonts = 1
 "Goyo
 
 nnoremap gf :!bspc node -t ~fullscreen<CR><CR>:G<ENTER>
-nnoremap g<ESC> :G<CR>
+nnoremap g<ESC> :G<CR>:<ESC>:<BACKSPACE>
 
 let g:goyo_width = 100
 let g:goyo_margin_top = 0
 let g:goyo_margin_bottom = 0
 
 function! s:goyo_enter()
-   silent !tmux set status off
-   silent !tmux list-panes -F '\#F' | grep -q Z || tm
+   silent ![[ $TERM =~ "screen" ]] && tmux set status off
+   silent ![[ $TERM =~ "screen" ]] && tmux list-panes -F '\#F' | grep -q Z || tm
    set noshowmode
    set noshowcmd
    set scrolloff=999
-   Limelight
+   "Limelight
 endfunction
 
 function! s:goyo_leave()
@@ -177,7 +177,7 @@ function! s:goyo_leave()
    set showmode
    set showcmd
    set scrolloff=5
-   Limelight!
+   "Limelight!
 endfunction
 
 autocmd! User GoyoEnter nested call <SID>goyo_enter()
