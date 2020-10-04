@@ -11,14 +11,12 @@ swallow() {
    query_desktop || return
    query_swallower "$1" || return
    query_swallowing || return
-   echo hide
    hide_node
 }
 
 spit() {
    query_spitter "$1" || return
    query_spitting_desktop || pull_node_desktop
-   echo show
    show_node
 }
 
@@ -28,14 +26,18 @@ query_desktop(){
 }
 
 query_swallower(){
-   swallower=$1
+   swallower=$(probe $1)
    read -r do_swallow <"$HOME/.config/bspwm/swallow"
-   [[ "$swallower" =~ "$do_swallow" ]] || false
+   [[ "$do_swallow" =~ $swallower ]] || false
 }
 
+probe(){
+   xprop -id "$1" |\
+      sed -n '/WM_CLASS\|WM_COMMAND/s/.*"\(.*\)".*/\1/p'
+}
 query_swallowing(){
-   swallowing=$(xprop -id "$swallower" | sed -n '/WM_CLASS\|WM_COMMAND/s/.*"\(.*\)".*/\1/p')
-   [[ "$swallowing" = "$swallower" ]] || false
+   swallowing=$(probe "$1")
+   [[ "$swallowing" = "St" ]] || false
 }
 
 query_spitter(){
@@ -62,15 +64,16 @@ show_node(){
 }
 
 pull_node_desktop(){
-   bspc node "$spitting" -d "$spitterdesktop"
+   bspc node "$spitting" -d "$spitting_desktop"
 }
 
 main(){
-   IFS=' '; while read -rd ' ' -a evt; do
+   bspc subscribe node_add node_remove |
+   while read -r -a evt; do
       swallowed="/tmp/swallowed"
       desktop="${evt[2]}"
       case_event "${evt[0]}"
-   done < <(bspc subscribe node_add node_remove)
+   done
 }
 
 main

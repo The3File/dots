@@ -9,7 +9,6 @@ alias spe="speedtest"
 alias vim="nvim"
 alias nts="notes"
 
-
 ##  CONFIGS
 alias con="nvim $CONFIG"
 
