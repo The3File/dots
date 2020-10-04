@@ -3,7 +3,6 @@
 git_do(){ git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME "$@"; }
 
 commit(){ git_do commit -am "$changes"; }
-
 push(){ git_do push; }
 
 get_status(){
@@ -16,7 +15,10 @@ print_status(){
       printf '%s\n' "changes: $changes"
 }
 
-up(){ [[ $commit_status ]] && commit; push; }
+up(){
+   [[ $commit_status ]] && commit
+   push
+}
 
 case_opts(){
    case $1 in
