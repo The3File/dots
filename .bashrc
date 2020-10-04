@@ -31,7 +31,7 @@ pac() { pacman -Ssq | fzf -m --preview="pacman -Si {}" --preview-window=:hidden 
 
 if [[ $(uname -o) = "Android" ]];then
    export NOTES="/sdcard/Noter"
-   [[ $TERM =~ "screen" ]] &&
+   [[ $TERM =~ "screen" ]] ||
       exec tmux new -A -s termux
 else
    eval "$(thefuck --alias)"
