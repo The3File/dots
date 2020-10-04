@@ -19,7 +19,7 @@ print_status(){
 }
 
 up(){
-   [[ $commit_status ]] && commit
+   [[ $changes ]] && commit
    push
 }
 

@@ -13,7 +13,7 @@ edit(){
    exit 0
 }
 
-sync_notes(){
+sync(){
    cd $NOTES
    status=$(git status --porcelain)
    [[ -z "$status" ]] && pull || push
@@ -56,7 +56,7 @@ get_opts(){
 
 main(){
    get_opts $1 || exit
-   case $opt in new) new ;; sync) sync_notes ;; edit) edit; esac
+   case $opt in new) new ;; sync) sync ;; edit) edit; esac
 }
 
 main "$@"
