@@ -27,6 +27,10 @@ cdc() {
    [[ ! -z $dir ]] && cd $dir
 }
 
+sv(){
+   fd -c always -t f . $HOME/.Scripts/ $HOME/.bin/ | sort | fzf --ansi --preview "bat --theme="OneHalfDark" --style=numbers,changes --color always {}" | xargs -r nvim
+}
+
 pac() { pacman -Ssq | fzf -m --preview="pacman -Si {}" --preview-window=:hidden --bind=space:toggle-preview | xargs -r sudo pacman -S; }
 
 if [[ $(uname -o) = "Android" ]];then
