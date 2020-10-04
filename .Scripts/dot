@@ -3,6 +3,7 @@
 git_do(){ git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME "$@"; }
 
 commit(){ git_do commit -am "$changes"; }
+
 push(){ git_do push; }
 
 get_status(){
@@ -11,8 +12,10 @@ get_status(){
 }
 
 print_status(){
+   [[ ! -z $commit_status ]] &&
+      printf '%s\n' "committed: $commit_status"
    [[ ! -z $changes ]] &&
-      printf '%s\n' "changes: $changes"
+      printf '%s\n' "uncommitted: $changes"
 }
 
 up(){
