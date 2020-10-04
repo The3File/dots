@@ -26,6 +26,7 @@ set autoindent
 set smartindent
 set shiftwidth=3
 set softtabstop=-1
+set linebreak
 
 "colorscheme wal
 "colorscheme zellner
@@ -161,6 +162,26 @@ let g:goyo_width = 100
 let g:goyo_margin_top = 0
 let g:goyo_margin_bottom = 0
 
+function! s:goyo_enter()
+   silent !tmux set status off
+   silent !tmux list-panes -F '\#F' | grep -q Z || tm
+   set noshowmode
+   set noshowcmd
+   set scrolloff=999
+   Limelight
+endfunction
+
+function! s:goyo_leave()
+   silent !tmux set status on
+   silent !tmux list-panes -F '\#F' | grep -q Z && tm
+   set showmode
+   set showcmd
+   set scrolloff=5
+   Limelight!
+endfunction
+
+autocmd! User GoyoEnter nested call <SID>goyo_enter()
+autocmd! User GoyoLeave nested call <SID>goyo_leave()
 "autocmd! User GoyoEnter Limelight
 "autocmd! User GoyoLeave Limelight!
 
