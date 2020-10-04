@@ -9,6 +9,7 @@ _svim_completions() {
    cur=${COMP_WORDS[COMP_CWORD]}
    prev=${COMP_WORDS[COMP_CWORD-1]}
 
+   opts=()
    for file in "$HOME/.Scripts/"* "$HOME/.bin/"*; do
       opts+=("${file##*/}")
    done
