@@ -155,8 +155,8 @@ let g:airline_powerline_fonts = 1
 
 "Goyo
 
-nnoremap gf :G<ENTER>:!bspc node -t fullscreen<CR><CR>
-nnoremap g<ESC> :G<CR>:!bspc node -t tiled<CR><CR>
+nnoremap gf :!bspc node -t ~fullscreen<CR><CR>:G<ENTER>
+nnoremap g<ESC> :G<CR>
 
 let g:goyo_width = 100
 let g:goyo_margin_top = 0

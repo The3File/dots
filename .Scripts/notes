@@ -1,12 +1,22 @@
 #!/usr/bin/env bash
 
-edit(){ fd .md $NOTES | fzf | xargs -r nvim; }
+edit(){
+   note="$NOTES/$(echo_out | fz)"
+   nvim "$note"
+}
+
+echo_out(){
+   IFS=$'\n' read -rd '' -a notes < <(fd .md $NOTES)
+   printf '%s\n' "${notes[@]#$NOTES/*}"
+}
+
+fz(){ fzf --height 40% --reverse; }
 
 new(){
    cd $HOME/storage/shared/Noter
    printf '\n\n%s\n%s' "[//]: # ($(date -Iseconds))"\
    "[//]: # (tags: [<++>])" |\
-   nvim -c startinsert -c Goyo -- "$note"
+   nvim -c startinsert -- new_note.md
 }
 
 case $1 in new) new ;; *) edit; esac
