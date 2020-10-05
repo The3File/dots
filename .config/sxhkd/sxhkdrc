@@ -50,7 +50,7 @@ super + i
    fontawesome
 
 # browser
-super + w
+super + {o,w}
    qutebrowser
 
 # restart bspwm
