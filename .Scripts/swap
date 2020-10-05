@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+main(){
+   if [[ "$biggest" = "$focused" ]]
+   then get_smaller
+   else move_biggest; fi
+}
+
 read_leafs(){
    IFS=$'\n' read -r -d '' -a leafs <\
    <(bspc query -N -n .leaf.local.tiled)
@@ -20,8 +26,6 @@ move_biggest(){
    bspc node -s biggest.local --follow
 }
 
-query_nodes; read_leafs
-
-if [[ "$biggest" = "$focused" ]]
-then get_smaller
-else move_biggest; fi
+read_leafs
+query_nodes
+main
