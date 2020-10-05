@@ -29,11 +29,11 @@ cdc() {
 }
 
 sv(){
-   local files=($(fd -c always -t f . $HOME/.Scripts/ $HOME/.bin/))
-   file=$(printf '%s\n' "${files[@]#*${HOME##*/}/}" | fzf --ansi\
+   local files=($(fd -c always -d 1 -t x . $HOME/.Scripts/ $HOME/.bin/))
+   file=$(printf '%s\n' "${files[@]#*${HOME##*/}/}" | fzf --ansi -0 -1 -q "$1"\
    --preview "bat --theme="OneHalfDark"\
    --style=numbers,changes --color always {}")
-   nvim "$HOME/$file"
+   [[ $file ]] && nvim "$HOME/$file"
    unset files file
 }
 

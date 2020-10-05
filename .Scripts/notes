@@ -3,7 +3,7 @@
 fz(){ fzf --ansi --height 40% --reverse "$@"; }
 
 new(){
-   cd $NOTES
+   cd "$NOTES"
    print_tags | nvim +startinsert +"set ft=markdown"\
       +"file new_note.md"
 }
@@ -15,7 +15,7 @@ edit(){
 }
 
 sync(){
-   cd $NOTES
+   cd "$NOTES"
    status=$(git status --porcelain)
    [[ -z "$status" ]] && pull || push
 }
