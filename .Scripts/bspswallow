@@ -8,14 +8,14 @@ case_event(){
 }
 
 swallow() {
-   query_desktop || return
-   query_swallower "$1" || return
-   query_swallowing || return
+   query_desktop || return 1
+   query_swallower "$1" || return 1
+   query_swallowing || return 1
    hide_node
 }
 
 spit() {
-   query_spitter "$1" || return
+   query_spitter "$1" || return 1
    query_spitting_desktop || pull_node_desktop
    show_node
 }
