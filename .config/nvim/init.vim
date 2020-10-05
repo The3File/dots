@@ -48,11 +48,15 @@ autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown
 
 nnoremap ,n :next<CR>
 nnoremap ,p :previous<CR>
+nnoremap ;s" ciW""<esc>P
+vnoremap ;s" c""<esc>P
+
+"nnoremap ;s<++> ciW<++><esc>P
 
 " BASH
 
 autocmd FileType sh nnoremap ,c :!shellcheck %<CR>
-autocmd FileType sh nnoremap ,f i<CR>(){<CR><tab><++><CR>}<CR><ESC>3ki
+autocmd FileType sh nnoremap ,f i<CR>(){<CR>}<CR><ESC>2ki
 autocmd FileType sh inoremap ;e printf '' "<++>"<ESC>F'i
 
 
@@ -87,6 +91,10 @@ autocmd FileType tex nnoremap ;g i\begin{figure}[h!]<Enter>\caption{<++>}<Enter>
 
 "" MARKDOWN
 
+" surrounding
+autocmd FileType markdown nnoremap ;s* ciW**<esc>P
+
+" math
 autocmd FileType markdown inoremap ;m $$$$<++><ESC>5hi
 autocmd FileType markdown inoremap ;f \frac{}{<++>}<++><ESC>Fcf}i
 autocmd FileType markdown inoremap ;t \times
