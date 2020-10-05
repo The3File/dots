@@ -28,15 +28,6 @@ cdc() {
    [[ ! -z $dir ]] && cd $dir
 }
 
-sv(){
-   local files=($(fd -c always -d 1 -t x . $HOME/.Scripts/ $HOME/.bin/))
-   file=$(printf '%s\n' "${files[@]#*${HOME##*/}/}" | fzf --ansi -0 -1 -q "$1"\
-   --preview "bat --theme="OneHalfDark"\
-   --style=numbers,changes --color always {}")
-   [[ $file ]] && nvim "$HOME/$file"
-   unset files file
-}
-
 pac() {
    pacman -Ssq | fzf -m --preview="pacman -Si {}"\
    --preview-window=:hidden --bind=space:toggle-preview |
@@ -52,3 +43,5 @@ else
    #expressvpn status | sed 2Q
    #bspc query -N -n focused.local
 fi
+
+$HOME/.Scripts/dot
