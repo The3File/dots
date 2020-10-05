@@ -2,27 +2,25 @@
 
 getext(){
    case ${1##*.} in
-      zip) zip $1 ;;
+      zip) _zip $1 ;;
       .tar.bz|.tar.bz2|.tbz|.tbz2) tar xjvf $f;;
       .tar.gz|.tgz) tar xzvf $f;;
       .tar.xz|.txz) tar xJvf $f;;
-      #.zip) unzip $f;;
       .rar) unrar x $f;;
       .7z) 7z x $f;;
       *) printf '%s\n' "\".${1##*.}\" not supported" ;;
    esac
 }
 
-    case $f in
-    esac
-zip(){
-   unzip -Z -h $1 
+confirm(){
    read -r -p "Unpack \"$1\" [Y/n]: "
-   case $REPLY in
-      n) printf '%s\n' "No changes made"; exit ;;
-      *) unzip -x $1 -d "${1%.*}/"
-	 printf '%s\n' "done"
-   esac
+   [[ "$REPLY" = "n" ]] && false
+}
+
+_zip(){
+   unzip -Z -h $1 
+   confirm $1 || exit
+   unzip -x $1 -d "${1%.*}/"
 }
 
 main(){
