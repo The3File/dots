@@ -15,9 +15,9 @@ let g:Hexokinase_highlighters = ['foregroundfull']
 
 syntax enable
 
-filetype plugin indent on
 filetype indent on
 filetype plugin on
+filetype plugin indent on
 
 set number
 set relativenumber
@@ -192,7 +192,8 @@ let g:limelight_conceal_ctermfg = 240
 let g:limelight_priority = -1
 let g:limelight_default_coefficient = 0.7
 
-set title titlestring=hej
+set title titlestring=titlestring
 
 """"
 set grepprg=grep\ -nH\ $*
+set shiftwidth=3

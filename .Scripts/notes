@@ -4,7 +4,7 @@ fz(){ fzf --ansi --height 40% --reverse "$@"; }
 
 new(){
    cd $NOTES
-   print_tags | nvim -c startinsert .md
+   print_tags | nvim +startinsert +"set filetype=markdown" - .md
 }
 
 edit(){
@@ -30,7 +30,7 @@ push(){
 }
 
 pull(){
-   printf '%s\n%s\n' "ingen ændinger" "tjekker remote"
+   printf '%s\n' "No changes, checking remote.."
    git pull
 }
 
@@ -56,7 +56,7 @@ get_opts(){
 
 main(){
    get_opts $1 || exit
-   printf '\e[A\e[K%s\n' "$PS1 notes $opt"
+   #printf '\e[A\e[K%s\n' "$PS1 notes $opt"
    case $opt in new) new ;; sync) sync ;; edit) edit; esac
 }
 
