@@ -29,9 +29,8 @@ cdc() {
 }
 
 pac() {
-   pacman -Ssq | fzf -m --preview="pacman -Si {}"\
-   --preview-window=:hidden --bind=space:toggle-preview |
-   xargs -r sudo pacman -S
+   sudo pacman -S $(pacman -Ssq | fzf -m --preview="pacman -Si {}"\
+      --preview-window=:hidden --bind=space:toggle-preview)
 }
 
 if [[ $(uname -o) = "Android" ]];then
