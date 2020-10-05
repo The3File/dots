@@ -1,37 +1,34 @@
 #!/usr/bin/env bash
 
-git_do(){ git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME "$@"; }
-
-commit(){ git_do commit -am "$changes"; }
-
-push(){ git_do push; }
-
-get_status(){
-   commit_status=$(git_do commit --dry-run --porcelain)
-   changes=$(git_do status --porcelain)
-}
-
-print_status(){
-   [[ ! -z $commit_status ]] &&
-      printf '%s\n' "$commit_status"
-   #[[ ! -z $changes ]] &&
-      #printf '%s\n' "committed: $changes"
+git_do(){
+   git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME "$@"
 }
 
 up(){
-   [[ $changes ]] && commit
-   push
+   [[ $changes ]] && commit; push
+}
+
+commit(){
+   git_do commit -am "$changes"
+}
+
+push(){
+   git_do push
+}
+
+print_status(){
+   changes=$(git_do status --porcelain)
+   [[ ! -z $changes ]] && printf '%s\n' "$changes"
 }
 
 case_opts(){
-   case $1 in
-      up) up ;;
-      *) git_do "$@"
-   esac
+   case $1 in up) up ;; *) git_do "$@"; esac
 }
 
-get_status
-print_status
+main(){
+   [[ $1 ]] || exit
+   case_opts "$@"
+}
 
-[[ $1 ]] || exit
-case_opts "$@"
+print_status
+main "$@"
