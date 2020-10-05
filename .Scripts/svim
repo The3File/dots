@@ -1,18 +1,25 @@
 #!/usr/bin/env bash
 
-fz(){
-   fzf --ansi -0 -1 -q "$1"\
-   --preview "bat -l bash --theme='OneHalfDark'\
-   --style=numbers,changes --color always {}"
-}
-
-print_files(){ printf '%s\n' "${files[@]#*${HOME##*/}/}"; }
-
 main(){
    dir=( "$HOME/.Scripts/" "$HOME/.bin/" )
-   files=($(fd -c always -d 1 -t x . "${dir[@]}" ))
-   file=$(print_files | fz "$1")
-   [[ $file ]] && nvim "$HOME/$file"
+   get_file && nvim "$HOME/$file"
 }
 
-main "$@"
+get_file(){
+   file=$(print_files | fz)
+   [[ $file ]] || false
+}
+
+print_files(){
+   files=($(fd -c always -d 1 -t x . "${dir[@]}" ))
+   printf '%s\n' "${files[@]#*${HOME##*/}/}"
+}
+
+fz(){
+   fzf --ansi -0 -1 -q "$query" --preview\
+      "bat -l bash --theme='OneHalfDark'\
+      --style=numbers,changes --color always {}"
+}
+
+query="$1"
+main
