@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+trap '_exit' SIGINT
+printf '\e[?25l%s\e[K' "whitenoise starter"
+
+_exit(){
+   printf '\e[K\e[A\r%s\e[K\n' "whitenoise stopper"
+   play -nq synth whitenoise fade t 1 10 7 &
+   sleep 2
+   kill -9 $whitenoise >&-
+   stty echo
+   printf '\e[?25h'
+   exit 0
+}
+
+play -nq synth whitenoise fade t 7 & whitenoise="$!" &&
+   sleep 7 && printf '\r%s\n\e[K' "whitenoise afspiller"
+
+while read -rsn1 -p $'\r\e[K'"tryk q for at afslutte"; do
+   [[ "$REPLY" = "q" ]] && _exit
+done
