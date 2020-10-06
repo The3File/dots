@@ -6,8 +6,12 @@ set show-all-if-ambiguous off
 set mark-symlinked-directories on
 
 "\e[Z": menu-complete
-"\e[A": history-search-backward
-"\e[B": history-search-forward
+
+Control-r:"reverse_search"'
+Control-h:"history -r<Up>"'
+Control-o:"cdc"'
+Control-g:"gotop"'
+Control-k:"fuzzy_kill"'
 
 ##  VI MODE
 set editing-mode vi
