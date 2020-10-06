@@ -45,7 +45,7 @@ barnot(){
       -v)
 	 volume="$(pamixer --get-volume)%"
 	 [[ $(pamixer --get-mute) = "true" ]] && out=(" ($volume)") || out=(" $volume ") ;;
-      *)
+      -o)
 	 bat; net; out=("" "$bat | $net | <b>$(date '+%R')</b>") || exit 1
    esac
 
@@ -66,12 +66,14 @@ bar(){
 
 loop(){ for ((;;)){ barnot;sleep 10;}; }
 
+running(){ printf '%s.\n' "An instance is already running"; exit 1; }
+
 main(){
-   #w=$(bspc query -N -n .local.\!floating | wc -l)
-
    [[ "$1" ]] && { t=5000; barnot "$1"; }
-
-   t=11000; bar
+   #running=$(ps aux | sed '/nvim/d;/sed/d' | awk -F"/" '/dunstbar/ {print $5}' | head -1)
+   #[[ $running =~ "dunstbar" ]] && running || {
+      t=11000; bar;
+   #}
 }
 
 main "$@"

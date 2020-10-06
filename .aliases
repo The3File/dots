@@ -8,6 +8,8 @@ alias es="expressvpn status"
 alias ec="expressvpn connect"
 alias ed="expressvpn disconnect"
 
+alias fuzzy_kill="ps aux | sort | fzf | awk '{print $2}' | xargs -r kill -9"
+
 alias x="extract"
 alias spe="speedtest"
 alias vim="nvim"
