@@ -1,16 +1,17 @@
 #!/usr/bin/env bash
 
-fz(){ fzf --ansi --height 40% --reverse "$@"; }
+fz(){ fzf --ansi --height 40% --reverse "$@";}
+
+editor(){ nvim +"set ft=markdown" +"Goyo" "$@";}
 
 new(){
    cd "$NOTES"
-   print_tags | nvim +startinsert +"set ft=markdown"\
-      +"file new_note.md"
+   print_tags | editor +startinsert +"file new_note.md"
 }
 
 edit(){
    note="$NOTES/$(print_notes | fz)"
-   [[ -f "$note" ]] && nvim -c Goyo "$note"
+   [[ -f "$note" ]] && editor "$note"
    exit 0
 }
 
@@ -20,13 +21,8 @@ sync(){
    [[ -z "$status" ]] && pull || push
 }
 
-commit(){
-   printf '%s\n' "$status"
-   git add .; git commit -am "$status"
-}
-
 push(){
-   commit
+   git add .; git commit -m "$status"
    git push -u origin master
 }
 
@@ -57,7 +53,6 @@ get_opts(){
 
 main(){
    get_opts $1 || exit
-   #printf '\e[A\e[K%s\n' "$PS1 notes $opt"
    case $opt in new) new ;; sync) sync ;; edit) edit; esac
 }
 
