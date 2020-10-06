@@ -17,8 +17,8 @@ exec_(){
 
 
 one_border(){
-   for side in bottom top; do
-      bspc config -d 10 ${side}_padding $P
+   for side in bottom top left right; do
+      bspc config -d focused ${side}_padding $P
    done
 }
 
@@ -26,7 +26,7 @@ main(){
    while read -r _; do
       xprop="$(xprop -root _NET_CURRENT_DESKTOP)"
       case "${xprop##*= }" in
-         9) P=0; G=0; one_border; exec_
+         9) continue #P=0; G=0; one_border; exec_
             ;;
          *) logic; exec_
       esac
