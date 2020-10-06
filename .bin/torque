@@ -58,13 +58,12 @@ main() {
    refresh
    trap $"printf '\e[?25h\e[?7h\e[999B\e[0H\e[2J'" EXIT
    trap  'refresh; k=0' SIGWINCH
-   [[ -z $(pgrep transmission-da) ]] && {
-      transmission-daemon
-      printf '\e[H\e[2J\r%s\n' "Launching daemon"
-      sleep 1
-   }
-
    for ((;;)); { get_torrents; read -rsN1 -t1 && prompt "$REPLY"; }
 }
+
+printf '%s\n' "Launching daemon"
+transmission-daemon
+
+while [[ -z $(pgrep transmission-da) ]]; do continue; done
 
 main

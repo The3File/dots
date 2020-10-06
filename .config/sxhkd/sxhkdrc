@@ -19,7 +19,7 @@ super + {_,shift +} {Return}
 
 # tui apps
 super + {v,u,s,shift+s,shift+m}
-   st -e {neomutt,rtv -s unixporn,svim,scli,neomutt}
+   st -e {mbsync -a; neomutt,rtv -s unixporn,svim,scli,neomutt}
 
 # cli apps
 super + {_,shift +} e
