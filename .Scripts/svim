@@ -17,8 +17,8 @@ print_files(){
 
 fz(){
    fzf --ansi -0 -1 -q "$query" --preview\
-      "bat -l bash --theme='OneHalfDark'\
-      --style=numbers,changes --color always {}"
+   "bat -l bash --theme='OneHalfDark'\
+   --style=numbers,changes --color always {}"
 }
 
 query="$1"
