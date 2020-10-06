@@ -3,6 +3,10 @@
 [[ -f ~/.aliases ]] 	&& source ~/.aliases
 [[ -f ~/.bash_prompt ]] && source ~/.bash_prompt
 
+bind -u reverse-search-history
+bind -u reverse-search-history
+bind '"\C-r":"reverse_fzf_history"'
+bind '"\C-h":"history -r<Up>"'
 bind '"\C-o":"cdc"'
 bind '"\C-g":"gotop"'
 bind '"\C-k":"fuzzy_kill"'
@@ -22,14 +26,22 @@ shopt -s expand_aliases
 HISTSIZE=500000
 HISTFILESIZE=100000
 HISTCONTROL="erasedups:ignoreboth"
-HISTIGNORE="&:[ ]*:exit:ls:bg:fg:history:clear:c:ll:lla:la"
+HISTIGNORE="&:[ ]*:exit:ls:bg:fg:history:history -r:clear:c:ll:lla:la"
 
 # aliases
 
+reverse_fzf_history(){
+   local cmd="$(history | sort | fzf --height 40% --reverse | cut -d ' ' -f 4-)"
+   printf '%s\n' "$cmd"
+   eval "$cmd"
+   unset cmd
+}
+
 cdc() {
-   dir=$(fd -H -t d . $HOME | fzf --preview="tree -L 1 {}"\
+   local dir=$(fd -H -t d . $HOME | fzf --preview="tree -L 1 {}"\
       --bind="space:toggle-preview" --preview-window=:hidden)
    [[ ! -z $dir ]] && cd $dir
+   unset dir
 }
 
 pac() {

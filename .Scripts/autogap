@@ -26,8 +26,8 @@ main(){
    while read -r _; do
       xprop="$(xprop -root _NET_CURRENT_DESKTOP)"
       case "${xprop##*= }" in
-         9) continue #P=0; G=0; one_border; exec_
-            ;;
+         #9) continue #P=0; G=0; one_border; exec_
+         #   ;;
          *) logic; exec_
       esac
    done < "$GAPFIFO"
