@@ -207,11 +207,11 @@ XF86AudioMicMute
    amixer sset Capture toggle
 
 # dark light, night mode
-super + {_,shift +} n
+super + alt {_,shift +} n
    {xbacklight -time 400 -set 1 && dunstbar -b,\
    redshift -m vidmode -P}
 
 # normal light, day mode
-super + {_,shift +} m
+super + alt {_,shift +} m
    {xbacklight -time 400 -set 100 && dunstbar -b,\
    killall redshift && redshift -x -m vidmode}
