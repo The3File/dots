@@ -18,7 +18,7 @@ push(){
 
 print_status(){
    changes=$(git_do status --porcelain)
-   [[ ! -z $changes ]] && printf '%s\n' "$changes"
+   [[ -z "$1" && ! -z $changes ]] && printf '%s\n' "$changes"
 }
 
 case_opts(){
@@ -30,5 +30,5 @@ main(){
    case_opts "$@"
 }
 
-print_status
+print_status "$1"
 main "$@"
