@@ -29,11 +29,11 @@ parse_git_dirty(){
 #reset_readline_prompt_mode_strings () {
 #EMBEDDED_PS1="\[\e[K\]\[\e[0;36m\]\w\[\e[m\] \[\e[1;35m\]\`parse_git_branch\`\[\e[m\]\[\e[0;33m\]\\$\[\e[m\]"
 #   bind "set vi-ins-mode-string \"${EMBEDDED_PS1@P}\1\e7\e[9999;0H\e[1;34m-- INDSÆT --\e8\e[m\e[6 q\2\""
-#   bind "set vi-cmd-mode-string \"${EMBEDDED_PS1@P}\1\e[9999;0H\e8\e[2 q\2\""
+#   bind "set vi-cmd-mode-string \"${EMBEDDED_PS1@P}\1\e[9999;0H\e[K\e8\e[2 q\2\""
 #}
-##
+#
 #export PROMPT_COMMAND=reset_readline_prompt_mode_strings
 #export PS1=" "
-#export PS1="\[\e[K\]\[\e[0;36m\]\w\[\e[m\] \[\e[1;35m\]\`parse_git_branch\`\[\e[m\]\[\e[0;33m\]\\$\[\e[m\] "
+
 export PS1="\[\e[0;36m\]\w\[\e[m\] \[\e[1;35m\]\`parse_git_branch\`\[\e[m\]\[\e[0;33m\]\\$\[\e[m\] "
 export PROMPT_COMMAND='history -a'
