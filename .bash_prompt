@@ -35,6 +35,6 @@ parse_git_dirty(){
 #export PROMPT_COMMAND=reset_readline_prompt_mode_strings
 #export PS1=" "
 
-[[ $(dot) ]] && dots="!" || dots=
+[[ $(dot) ]] && dots="!" || dots=""
 export PS1="\[\e[0;36m\]\w\[\e[m\] \[\e[1;35m\]\`parse_git_branch\`\[\e[m\]\[\e[0;33m\]$dots\\$\[\e[m\] "
 export PROMPT_COMMAND='history -a; history -r'
