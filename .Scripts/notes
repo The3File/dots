@@ -2,15 +2,18 @@
 
 fz(){ fzf --ansi --height 40% --reverse "$@"; }
 
+editor(){
+   nvim +"set ft=markdown" +"Goyo" "$@"
+}
+
 new(){
    cd "$NOTES"
-   print_tags | nvim +startinsert +"set ft=markdown"\
-      +"file new_note.md"
+   print_tags | editor +startinsert +"file new_note.md"
 }
 
 edit(){
    note="$NOTES/$(print_notes | fz)"
-   [[ -f "$note" ]] && nvim -c Goyo "$note"
+   [[ -f "$note" ]] && editor "$note"
    exit 0
 }
 
