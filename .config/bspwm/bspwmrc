@@ -54,7 +54,7 @@ rules() { printf '\n\e[33m%s...' "setting rules"
 apps() {
 
    for app in autogap dunstbar dunst acpid_events; do
-      case $app in dunstbar) o=("--boot");; *) o=(); esac
+      #case $app in dunstbar) o=("--boot");; *) o=(); esac
 
       app_is_running="$(ps ax | sed -n "/nvim/d;/sed/d;/\<$app\>/p")"
 
