@@ -58,6 +58,3 @@ else
    #expressvpn status | sed 2Q
    #bspc query -N -n focused.local
 fi
-
-[[ $($HOME/.Scripts/dot) ]] &&
-   printf '\e[999H\e[33m%s\e[H\e[m' "[dots changed] "
