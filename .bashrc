@@ -44,4 +44,4 @@ else
 fi
 
 [[ $($HOME/.Scripts/dot) ]] &&
-   printf '\e[999H%s\e[H' "[dots changed] "
+   printf '\e[999H\e[33m%s\e[H\e[m' "[dots changed] "
