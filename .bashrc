@@ -3,6 +3,8 @@
 [[ -f ~/.aliases ]] 	&& source ~/.aliases
 [[ -f ~/.bash_prompt ]] && source ~/.bash_prompt
 
+bind '"\C-o":"cdc"'
+
 # set vi mode
 set -o vi
 
