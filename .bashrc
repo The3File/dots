@@ -4,6 +4,8 @@
 [[ -f ~/.bash_prompt ]] && source ~/.bash_prompt
 
 bind '"\C-o":"cdc"'
+bind '"\C-g":"gotop"'
+bind '"\C-k":"fuzzy_kill"'
 
 # set vi mode
 set -o vi
