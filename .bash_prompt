@@ -35,7 +35,7 @@ parse_git_dirty(){
 #export PROMPT_COMMAND=reset_readline_prompt_mode_strings
 #export PS1=" "
 
-if [ -z $(dot) ]; then
+if [ ! -z "$(dot)" ]; then
    dots="!" 
 else
    dots=""
