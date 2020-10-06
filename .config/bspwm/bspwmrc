@@ -9,37 +9,33 @@ autogap_settings() {
 
    # left and right padding
       export PS=9	# padding size integer
-      export PN=2	# number of windows before zero padding
-
+      export PN=2       # number of windows before zero padding
 }
+
 
 config() { printf '\e[33m%s...' "applying configs"
 
-   bspc config focused_border_color	"${color4}"
-   bspc config presel_feedback_color "${color4}"
-   bspc config normal_border_color	"${color0}"
-   bspc config border_width		2
-   bspc config gapless_monocle	true
-
-   bspc config bottom_padding 0
-   bspc config top_padding 0
-
-   bspc config center_pseudo_tiled 	true
-   bspc config split_ratio		0.60
-
-   bspc config initial_polarity	first_child
-   bspc config automatic_scheme	spiral
-
    bspc monitor -d 1 2 3 4 5 6 7 8 9 10
 
-   printf '\e[36m %s\n' "done."
+   bspc config focused_border_color    "${color4}"
+   bspc config presel_feedback_color   "${color4}"
+   bspc config normal_border_color     "${color0}"
+   bspc config border_width            2
+   bspc config gapless_monocle         true
 
-}
+   bspc config bottom_padding          0
+   bspc config top_padding             0
+
+   bspc config center_pseudo_tiled     true
+   bspc config split_ratio             0.60
+
+   bspc config automatic_scheme	       spiral
+   bspc config initial_polarity	       first_child
+
+   printf '\e[36m %s\n' "done."; }
 
 
-rules() {
-
-   printf '\n\e[33m%s...' "setting rules"
+rules() { printf '\n\e[33m%s...' "setting rules"
 
    bspc rule -r "*"
 
@@ -52,48 +48,46 @@ rules() {
    bspc rule -a scratchterm layer=above locked=on sticky=on state=floating hidden=on
    bspc rule -a scratchmath layer=above locked=on sticky=on state=floating hidden=on
 
-printf '\e[36m %s\n\n' "done."; }
+   printf '\e[36m %s\n\n' "done."; }
 
 
 apps() {
 
    for app in autogap dunstbar dunst acpid_events; do
 
-      case $app in dunstbar) o=(--boot);; *) o=(); esac
-
-      app_is_running="$(ps ax | sed -n "/sed/d;/\<$a\>/p")"
+      app_is_running="$(ps ax | sed -n "/sed/d;/\<$app\>/p")"
 
       if [[ "$app_is_running" ]]
       then _restart $app
       else _start $app
       fi
 
-   done
+   done; }
 
-}
 
 _restart(){
+
    ukill "$1" 1>/dev/null &&
       {
          "$1" "${o[@]}" &>/dev/null & disown
          printf '\e[33m%s: %s\n' "$1" "restarted"
       } || {
          printf '\e[31m%s: %s %s\n' "$1" "ukill" "failed"
-      }
-}
+      };}
+
 
 _start(){
+
    "$1" "${o[@]}" &>/dev/null & disown &&
       {
          printf '\e[37m%s: %s\n' "$1" "started"
       } || {
          printf '\e[31m%s: %s %s\n' "$1" "failed"
-      }
-}
+      };}
 
 
-qute(){
-   printf '\e[33m\n%s...' "linking files"
+qute(){ printf '\e[33m\n%s...' "linking files"
+
    ln -sf "$HOME/.cache/wal/dunstrc" "$HOME/.config/dunst/dunstrc" &
    ln -sf "$HOME/.cache/wal/zathurarc" "$HOME/.config/zathura/zathurarc" &
    printf '\e[36m %s\n' "done"
@@ -111,44 +105,49 @@ qute(){
 
    printf '\e[33m%s...' "reloading qutebrowser"
    [[ ! -z $(pgrep -x qutebrowser) ]] && qutebrowser :config-source &>/dev/null
-   printf '\e[36m %s\n\n' "done"
+   printf '\e[36m %s\n\n' "done"; }
 
+
+make_fifo(){
+   for fifo in $GAPFIFO $BARFIFO; do
+      [[ -e "$fifo" ]] && rm "$fifo"
+      mkfifo "$fifo"
+      bspc subscribe node_add node_remove desktop_focus > $fifo &
+      printf '%s\n' "mkfifo: \"$fifo\""
+   done
 }
-
 
 main(){
    xmodmap -e "keycode 135 = Super_R"
    source "$HOME/.cache/wal/colors.sh"
+   case $1 in 1|0) reason="$1"; shift; echo yes; esac
 
-   [[ $@ ]] &&
-   case "$@" in
-      rules) rules ;;
-      config) config ;;
-      qute) qute ;;
-      apps) apps ;;
-   esac && exit 0
+   [[ "$1" ]] && {
+      case "$1" in
+         rules) rules ;;
+         config) config ;;
+         qute) qute ;;
+         apps) apps ;;
+      esac || exit 1
+      exit 0
+   }
 
-   # -- BSP SUBSCRIBE -- #
-   printf '%s' "mkfifo $fifo"
-   for fifo in $GAPFIFO $BARFIFO; do
-      [[ -e "$fifo" ]] && rm "$fifo"; mkfifo "$fifo"
-      bspc subscribe node_add node_remove desktop_focus > $fifo &
-      printf '%s' " \"$fifo\""
-   done
-   # ------------------- #
+   # bspwm settings
+      config
+      rules
 
-   config
-   rules
-   autogap_settings
-   qute
-   apps
+   # external settings
+      autogap_settings
+      qute
+
+   # start/restart apps
+      make_fifo
+      apps
 
 }
 
-case $1 in 1|0) reason="$1"; shift; echo yes; esac
 
-main "$@" &&
-   {
-      printf '\e[m\n%s\n' "..all done";
-      dunstify "bspwmrc reloaded" -t 2000 -r 90211 &
-   }
+main "$@" && {
+   printf '\e[m\n%s\n' "..all done";
+   dunstify "bspwmrc reloaded" -t 2000 -r 90211 &
+}
