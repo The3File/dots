@@ -59,12 +59,12 @@ bar(){
       ((w<=0)) && sleep 1.2 && loop & loop="$!"
       [[ "$line" = *focus* ]] && {
 	 ws=$(xprop -root _NET_CURRENT_DESKTOP | awk '{print $3+1}')
-	 dunstify -C 90210; ((;:;)); dunstify "$ws" -t 1250 -r 90211
+	 dunstify -C 90210; sleep .01; dunstify "$ws" -t 1250 -r 90211
       }
    done < "$BARFIFO"
 }
 
-loop(){ for ((;;)){ barnot;sleep 10;}; }
+loop(){ for ((;;)){ barnot -o;sleep 10;}; }
 
 running(){ printf '%s.\n' "An instance is already running"; exit 1; }
 
