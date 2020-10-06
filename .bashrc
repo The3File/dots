@@ -43,4 +43,5 @@ else
    #bspc query -N -n focused.local
 fi
 
-$HOME/.Scripts/dot
+[[ $($HOME/.Scripts/dot) ]] &&
+   printf '\e[999H%s\e[H' "[dots changed] "
