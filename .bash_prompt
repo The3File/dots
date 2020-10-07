@@ -1,10 +1,11 @@
 # get current branch in git repo
 parse_git_branch(){
-	BRANCH=`git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/'`
-	[[ ! "${BRANCH}" == "" ]] && {
-		STAT=`parse_git_dirty`
-		echo "[${BRANCH}${STAT}] "
-	} || echo ""
+   BRANCH=`git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/'`
+
+   [[ ! "${BRANCH}" == "" ]] && {
+      STAT=`parse_git_dirty`
+	 echo "[${BRANCH}${STAT}] "
+      } || echo ""
 }
 
 dots(){
@@ -16,14 +17,20 @@ dots(){
 # get current status of git repo
 parse_git_dirty(){
 
-
    status=`git status 2>&1 | tee`
-   dirty=`echo -n "${status}" 2> /dev/null | grep "modified:" &> /dev/null; echo "$?"`
-   untracked=`echo -n "${status}" 2> /dev/null | grep "Untracked files" &> /dev/null; echo "$?"`
-   ahead=`echo -n "${status}" 2> /dev/null | grep "Your branch is ahead of" &> /dev/null; echo "$?"`
-   newfile=`echo -n "${status}" 2> /dev/null | grep "new file:" &> /dev/null; echo "$?"`
-   renamed=`echo -n "${status}" 2> /dev/null | grep "renamed:" &> /dev/null; echo "$?"`
-   deleted=`echo -n "${status}" 2> /dev/null | grep "deleted:" &> /dev/null; echo "$?"`
+
+   dirty=`echo -n "${status}" 2> /dev/null |\
+      grep "modified:" &> /dev/null; echo "$?"`
+   untracked=`echo -n "${status}" 2> /dev/null |\
+      grep "Untracked files" &> /dev/null; echo "$?"`
+   ahead=`echo -n "${status}" 2> /dev/null |\
+      grep "Your branch is ahead of" &> /dev/null; echo "$?"`
+   newfile=`echo -n "${status}" 2> /dev/null |\
+      grep "new file:" &> /dev/null; echo "$?"`
+   renamed=`echo -n "${status}" 2> /dev/null |\
+      grep "renamed:" &> /dev/null; echo "$?"`
+   deleted=`echo -n "${status}" 2> /dev/null |\
+      grep "deleted:" &> /dev/null; echo "$?"`
    bits=''
    [[ "${renamed}" == "0" ]] && bits=">${bits}"
    [[ "${ahead}" == "0" ]] && bits="*${bits}"
@@ -31,17 +38,8 @@ parse_git_dirty(){
    [[ "${untracked}" == "0" ]] && bits="?${bits}"
    [[ "${deleted}" == "0" ]] && bits="x${bits}"
    [[ "${dirty}" == "0" ]] && bits="!${bits}"
-   [[ ! "${bits}" == "" ]] && echo " ${bits}" || echo ""
+   [[ ! "${bits}" == "" ]] && echo " ${bits}"
 }
-
-#reset_readline_prompt_mode_strings () {
-#EMBEDDED_PS1="\[\e[K\]\[\e[0;36m\]\w\[\e[m\] \[\e[1;35m\]\`parse_git_branch\`\[\e[m\]\[\e[0;33m\]\\$\[\e[m\]"
-#   bind "set vi-ins-mode-string \"${EMBEDDED_PS1@P}\1\e7\e[9999;0H\e[1;34m-- INDSÆT --\e8\e[m\e[6 q\2\""
-#   bind "set vi-cmd-mode-string \"${EMBEDDED_PS1@P}\1\e[9999;0H\e[K\e8\e[2 q\2\""
-#}
-#
-#export PROMPT_COMMAND=reset_readline_prompt_mode_strings
-#export PS1=" "
 
 export PS1="\[\e[0;36m\]\w\[\e[m\] \[\e[1;35m\]\`parse_git_branch\`\[\e[m\]\[\e[0;33m\]\`dots\`\\$\[\e[m\] "
 export PROMPT_COMMAND='history -a; history -r'
