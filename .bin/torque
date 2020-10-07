@@ -23,7 +23,8 @@ get_torrents() {
    t=("${t[@]//     None/0 MB}")
 
    for((i=${k:=0};i<(j=j>${#t[@]}?${#t[@]}:j);i++));{ t_print "${t[i]/n\/a/0}";}
-      status "[s]tart [p]ause [r]emove [o]pen [j/k] scroll ($j/${#t[@]})"$'\e[H'
+      #status "[s]tart pau[S]e [r]emove [a]dd [j/k] scroll ($j/${#t[@]})"$'\e[H'
+      status $'\e[H'
 }
 
 t_print() {
@@ -39,13 +40,14 @@ t_print() {
 
 prompt() {
    send() { transmission-remote "$@" >/dev/null; }
+   dir() { read -rsn1 -p "[D]ownloads|[M]ovies"; }
    status $'\e[B\e[?25h'
 
    case "$1" in
       s) read -rp "start torrent: #";  send -t "$REPLY" -s ;;
-      p) read -rp "pause torrent: #";  send -t "$REPLY" -S ;;
+      a) read -rp "load magnet: ";     send -a "$REPLY"; k=0 ;;
+      S) read -rp "pause torrent: #";  send -t "$REPLY" -S ;;
       r) read -rp "remove torrent: #"; send -t "$REPLY" -r; k=0 ;;
-      o) read -rp "load magnet: ";     send -a "$REPLY"; k=0 ;;
       j) ((j==${#t[@]}))||((k=k>=j?k:++k,j=j<${#t[@]}?++j:j)) ;;
       k) ((k==0))||((k=k<=j?k>0?--k:0:j,j=j>0?--j:j)) ;;
       q) exit 0 ;;
@@ -61,8 +63,7 @@ main() {
    for ((;;)); { get_torrents; read -rsN1 -t1 && prompt "$REPLY"; }
 }
 
-printf '%s\n' "Launching daemon"
-transmission-daemon
+transmission-daemon && printf '%s\n' "Launching daemon"
 
 while [[ -z $(pgrep transmission-da) ]]; do continue; done
 
