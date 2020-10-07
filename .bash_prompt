@@ -2,7 +2,7 @@
 parse_git_branch(){
    BRANCH=`git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/'`
 
-   [[ ! "${BRANCH}" == "" ]] && {
+   [[ "${BRANCH}" ]] && {
       STAT=`parse_git_dirty`
 	 echo "[${BRANCH}${STAT}] "
       } || echo ""
@@ -11,7 +11,7 @@ parse_git_branch(){
 dots(){
    dots=$(git --git-dir=$HOME/.dotfiles/\
       --work-tree=$HOME status --porcelain)
-   [ ! -z "$dots" ] && echo "!"
+   [ "$dots" ] && echo "!"
 }
 
 # get current status of git repo
