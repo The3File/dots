@@ -6,8 +6,7 @@
 bind -u reverse-search-history
 bind -u reverse-search-history
 bind '"\C-r":"reverse_fzf_history"'
-bind '"\C-h":"history -r<Up>"'
-bind '"\C-o":"cdc"'
+bind '"\C-f":"fuzzy_cd"'
 bind '"\C-g":"gotop"'
 bind '"\C-k":"fuzzy_kill"'
 
@@ -36,7 +35,7 @@ reverse_fzf_history(){
    unset cmd
 }
 
-cdc() {
+fuzzy_cd() {
    local dir=$(fd -H -t d . $HOME | fzf --preview="tree -L 1 {}"\
       --bind="space:toggle-preview" --preview-window=:hidden)
    [[ ! -z $dir ]] && cd $dir
@@ -54,6 +53,4 @@ if [[ $(uname -o) = "Android" ]];then
       exec tmux new -A -s termux
 #else
 #   eval "$(thefuck --alias)"
-#   #expressvpn status | sed 2Q
-#   #bspc query -N -n focused.local
 fi
