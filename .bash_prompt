@@ -11,7 +11,7 @@ parse_git_branch(){
 dots(){
    dots=$(git --git-dir=$HOME/.dotfiles/\
       --work-tree=$HOME status --porcelain)
-   [ "$dots" ] && echo "!"
+   [[ "$dots" ]] && echo "!"
 }
 
 # get current status of git repo
@@ -31,6 +31,7 @@ parse_git_dirty(){
       grep "renamed:" &> /dev/null; echo "$?"`
    deleted=`echo -n "${status}" 2> /dev/null |\
       grep "deleted:" &> /dev/null; echo "$?"`
+
    bits=''
    [[ "${renamed}" == "0" ]] && bits=">${bits}"
    [[ "${ahead}" == "0" ]] && bits="*${bits}"
@@ -41,5 +42,5 @@ parse_git_dirty(){
    [[ ! "${bits}" == "" ]] && echo " ${bits}"
 }
 
-export PS1="\[\e[0;36m\]\w\[\e[m\] \[\e[1;35m\]\`parse_git_branch\`\[\e[m\]\[\e[0;33m\]\`dots\`\\$\[\e[m\] "
 export PROMPT_COMMAND='history -a; history -r'
+export PS1="\[\e[0;36m\]\w\[\e[m\] \[\e[1;35m\]\`parse_git_branch\`\[\e[m\]\[\e[0;33m\]\`dots\`\\$\[\e[m\] "
