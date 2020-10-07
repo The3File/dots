@@ -52,8 +52,8 @@ if [[ $(uname -o) = "Android" ]];then
    export NOTES="/sdcard/Noter"
    [[ $TERM =~ "screen" ]] ||
       exec tmux new -A -s termux
-else
-   eval "$(thefuck --alias)"
-   #expressvpn status | sed 2Q
-   #bspc query -N -n focused.local
+#else
+#   eval "$(thefuck --alias)"
+#   #expressvpn status | sed 2Q
+#   #bspc query -N -n focused.local
 fi
