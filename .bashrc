@@ -29,7 +29,6 @@ HISTCONTROL="erasedups:ignoreboth"
 HISTIGNORE="&:[ ]*:exit:ls:bg:fg:history:history -r:clear:c:ll:lla:la"
 
 # aliases
-
 reverse_fzf_history(){
    local cmd="$(history | sort | fzf --height 40% --reverse | cut -d ' ' -f 4-)"
    printf '%s\n' "$cmd"

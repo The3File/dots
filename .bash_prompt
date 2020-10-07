@@ -8,11 +8,9 @@ parse_git_branch(){
 }
 
 dots(){
-if [ ! -z "$(dot)" ]; then
-   echo "!" 
-else
-   echo ""
-fi
+   dots=$(git --git-dir=$HOME/.dotfiles/\
+      --work-tree=$HOME status --porcelain)
+   [ ! -z "$dots" ] && echo "!"
 }
 
 # get current status of git repo
