@@ -2,60 +2,85 @@
 # cast
 # small cli wrapper for the program castnow from xat/castnow
 
-get_opts(){ movie="$1"; shift; o=("$movie" "$@"); }
+start_cast(){
+   castnow_(){ castnow --address "$ip" "${o[@]}"; }
+   ((start=SECONDS)); castnow_; ((sec=SECONDS-start)); write_prog
+}
 
 get_prog(){
-   progfile="${movie%.*}.prog"
-   [[ ! -a "$progfile" ]] && return 1
+   query_progfile || return 1
+   read_progfile
+   parse_prog
+}
 
+query_progfile(){
+   progfile="${movie%.*}.prog"
+   [[ -a "$progfile" ]] || false
+}
+
+read_progfile(){
    read -r prog < "$progfile"
-   echo "found prog file: $progfile ($prog)"
+   printf '%s\n' "found prog file: $progfile ($prog)"
+}
+
+parse_prog(){
+   IFS=':' read -r -d '' h m s <<< "$prog"
+   ((prog=(h*60*60)+(m*60)+s))
    o+=("--seek" "$prog")
-   IFS=':' read -r h m s < "$prog"
-   ((prog=(h*60*60)+(m*60)+s,sec+=prog))
 }
 
 write_prog(){
-   ((sec=SECONDS-sec))
-   read -rp "save proggress? ($((sec/3600)):$((sec/60%60)):$((sec%60))) [y/N]: "
-   case "$REPLY" in 
+   echo $prog
+   ((sec+=prog))
+   printf '%s%02d:%02d:%02d%s' "save proggress? "\
+      "$((sec/3600))" "$((sec/60%60))" "$((sec%60))" "[y/N]: "
+   read -r; case_prog_save "$REPLY"
+}
+
+case_prog_save(){
+   case "$1" in 
       y|Y) printf '%02d:%02d:%02d\n' "$((sec/3600))"\
-	 "$((sec/60%60))" "$((sec%60))" > "$progfile"
-	 ;;
+         "$((sec/60%60))" "$((sec%60))" > "$progfile" ;;
      *) printf '%s\n' "Proggress not saved."
   esac
 }
 
-_cast(){ ((sec=SECONDS)); castnow --address "$ip" "${o[@]}" || echo "vpn?"; }
-
 get_devices(){
-   printf '\n%s' "Searching local network..."
+   printf '%s' "Searching local network..."
+
    while read -r line; do
-      ((i<1)) && printf '\r\e[K%s\t\t\t\t%s\n' "IP Address:" "MAC Address:"
+      ((i<1)) && printf '\r\e[K\n\e[4m%s\t\t\t\t%s\e[m\n'\
+         "IP Address:" "MAC Address:"
+      [[ "$line" =~ ^[0-9][0-9][0-9].* ]] ||
+	 { printf '\t%s\t%s\n' "-" "$line"; continue; } 
+      ipa+=("$line"); ((i++))
+      printf '%s ' "$i: $line"
+   done < <(devs_on_network)
+   prompt_device
+}
 
-      [[ "$line" =~ ^[0-9][0-9][0-9].* ]] && {
-         ipa+=("$line"); ((i++))
-         printf '%s ' "$i: $line"
-      } || printf '\t%s\t%s\n' "-" "$line"
-
-   done < <(sudo nmap -sn "$local_ip" | awk -F" " '
+devs_on_network(){
+   sudo nmap -sn "$local_ip" | awk -F" " '
       /MAC Address:/ {print $3" "$4" "$5}
-      /Nmap scan/ {print $5}')
+      /Nmap scan/ {print $5}' | sed "/${local_ip%/*}/d"
+}
 
-   read -rp $'\n\n'"ip to use: "
+prompt_device(){
+   read -rp $'\n'"ip to use [1-${#ipa[@]}]: "
+   [[ $REPLY ]] || return 1
    ip="${ipa[((REPLY-1))]}"
 }
 
+get_opts(){ movie="$1"; shift; o=("$movie" "$@"); get_prog; }
+
 main(){
    local_ip=$(ip a show wlp3s0 | awk '/inet / {print $2}')
-   [[ "$local_ip" ]] || { echo "no connection"; exit 1; }
-   [[ "$1" ]] && get_opts "$@" || exit 1
+   [[ "$local_ip" || "$1" ]] || exit 1
    ((sec=0,i=0))
 
-   get_prog
-   get_devices
-   _cast
-   write_prog
+   get_opts "$@"
+   get_devices || exit 1
+   start_cast
 }
 
 main "$@"
