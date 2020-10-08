@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# cast
-# small cli wrapper for the program castnow from xat/castnow
+# cast - small cli wrapper for the program castnow from xat/castnow
+
+castnow_(){ castnow --address "$ip" "${o[@]}"; }
 
 start_cast(){
-   castnow_(){ castnow --address "$ip" "${o[@]}"; }
    ((start=SECONDS)); castnow_; ((sec=SECONDS-start)); write_prog
 }
 
