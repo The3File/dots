@@ -13,30 +13,25 @@ call plug#end()
 
 let g:Hexokinase_highlighters = ['foregroundfull']
 
-syntax enable
-
-filetype indent on
-filetype plugin on
 filetype plugin indent on
-
-set number
-set relativenumber
-
-set autoindent
-set smartindent
-set shiftwidth=3
-set softtabstop=-1
-set linebreak
-
-"colorscheme wal
-"colorscheme zellner
-colorscheme default
+syntax enable
 
 set clipboard=unnamedplus
 set nohlsearch
 
-inoremap <C-Space> <ESC>/<++><Enter>"_c4l
-nnoremap <C-Space> <ESC>/<++><Enter>"_c4l
+set number
+set relativenumber
+
+set linebreak
+set autoindent
+set smartindent
+set shiftwidth=3
+set softtabstop=-1
+autocmd BufNewFile,BufRead * set shiftwidth=3
+
+"colorscheme wal
+"colorscheme zellner
+colorscheme default
 
 autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown
 
@@ -45,6 +40,9 @@ autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown
 "#####################################"
 
 " GLOBAL
+
+inoremap <C-Space> <ESC>/<++><Enter>"_c4l
+nnoremap <C-Space> <ESC>/<++><Enter>"_c4l
 
 nnoremap ,n :next<CR>
 nnoremap ,p :previous<CR>
@@ -175,7 +173,7 @@ function! s:goyo_enter()
    silent ![[ $TERM =~ "screen" ]] && tmux list-panes -F '\#F' | grep -q Z || tm
    set noshowmode
    set noshowcmd
-   set scrolloff=999
+   "set scrolloff=999
    "Limelight
 endfunction
 
@@ -184,24 +182,20 @@ function! s:goyo_leave()
    silent !tmux list-panes -F '\#F' | grep -q Z && tm
    set showmode
    set showcmd
-   set scrolloff=5
+   "set scrolloff=5
    "Limelight!
 endfunction
 
 autocmd! User GoyoEnter nested call <SID>goyo_enter()
 autocmd! User GoyoLeave nested call <SID>goyo_leave()
-"autocmd! User GoyoEnter Limelight
-"autocmd! User GoyoLeave Limelight!
 
 "LimeLight
-
 let g:limelight_conceal_ctermfg = 'gray'
 let g:limelight_conceal_ctermfg = 240
 let g:limelight_priority = -1
-let g:limelight_default_coefficient = 0.7
+let g:limelight_default_coefficient = 1.7
 
 set title titlestring=titlestring
 
 """"
 set grepprg=grep\ -nH\ $*
-set shiftwidth=3
