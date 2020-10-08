@@ -1,12 +1,8 @@
 # ~/.aliases
 
-##  APPLICATIONS
+##  APL
 alias sshde="sudo /bin/sshd"
 alias kdeconnectd="/usr/lib/kdeconnectd"
-
-alias es="expressvpn status"
-alias ec="expressvpn connect"
-alias ed="expressvpn disconnect"
 
 alias fuzzy_kill="ps aux | sort | fzf | awk '{print $2}' | xargs -r kill -9"
 
@@ -16,35 +12,41 @@ alias vim="nvim"
 alias nts="notes"
 alias sv="svim"
 
-##  CONFIGS
-alias con="nvim $CONFIG"
+##  CFG
 
-alias deps="nvim ~/.config/bspwm/dependencies.md"
+alias deps="nvim ${CONFIG%/*}/dependencies.md"
+
+alias con="nvim $CONFIG"
 
 alias arc="nvim ~/.aliases"
 alias brc="nvim ~/.bashrc"
-alias rrc="nvim ~/.config/ranger/rc.conf"
-alias lrc="nvim ~/.config/lf/lfrc"
-alias vrc="nvim ~/.config/nvim/init.vim"
-alias crc="nvim ~/.config/compton.conf"
 alias prc="nvim ~/.profile"
-alias src="nvim ~/.config/sxhkd/sxhkdrc"
 alias xrc="nvim ~/.Xresources"
+alias lrc="nvim ~/.config/lf/lfrc"
+alias crc="nvim ~/.config/compton.conf"
+alias src="nvim ~/.config/sxhkd/sxhkdrc"
+alias vrc="nvim ~/.config/nvim/init.vim"
+alias trc="nvim ~/.config/tmux/tmux.conf"
 
 ##  QOL
+alias here="st &>/dev/null &disown"
+
+alias es="expressvpn status"
+alias ec="expressvpn connect"
+alias ed="expressvpn disconnect"
+
 alias bsp="~/.config/bspwm/bspwmrc"
 alias xr="xrdb ~/.Xresources"
-alias nf="clear -x && echo -e \ && neofetch"
 alias pf="pfetch"
 alias p="sudo pacman"
 alias c="clear"
+alias nf="clear -x && echo -e \ && neofetch"
 alias ls="ls --color=auto --group-directories-first"
 alias la="ls -a"
 alias ll="ls -lh"
 alias lla="ls -lah"
-alias here="st &>/dev/null &disown"
 
-## JC
+## at overraske mig
 alias hej="echo hej $USER!"
 
 ## PHONE
