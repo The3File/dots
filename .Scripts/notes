@@ -6,7 +6,8 @@ editor(){ nvim +"set ft=markdown" +"Goyo" "$@";}
 
 new(){
    cd "$NOTES"
-   print_tags | editor +startinsert +"file new_note.md"
+   #print_tags | editor +startinsert +"file new_note.md"
+   editor +startinsert +"file new_note.md"
 }
 
 edit(){

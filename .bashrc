@@ -29,16 +29,17 @@ HISTIGNORE="&:[ ]*:exit:ls:bg:fg:history:history -r:clear:c:ll:lla:la"
 
 # aliases
 reverse_fzf_history(){
-   local cmd="$(history | sort | fzf --height 40% --reverse | cut -d ' ' -f 4-)"
-   printf '%s\n' "$cmd"
-   eval "$cmd"
+   local cmd="$(history | fzf --height 40% --reverse | cut -d ' ' -f 4-)"
+   printf '%s' "${cmd}" >> "$HOME/.bash_history"
+   eval -- "${cmd}"
+   history -r
    unset cmd
 }
 
 fuzzy_cd() {
-   local dir=$(fd -H -t d . $HOME | fzf --preview="tree -L 1 {}"\
-      --bind="space:toggle-preview" --preview-window=:hidden)
-   [[ ! -z $dir ]] && cd $dir
+   local dir="$(fd -H -t d . $HOME | fzf --preview='tree -L 1 {}'\
+      --bind='space:toggle-preview' --preview-window=:hidden)"
+   [[ ! -z "$dir" ]] && cd "$dir"
    unset dir
 }
 

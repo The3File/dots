@@ -3,8 +3,7 @@ parse_git_branch(){
    BRANCH=`git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/'`
 
    [[ "${BRANCH}" ]] && {
-      STAT=`parse_git_dirty`
-	 echo "[${BRANCH}${STAT}] "
+      echo "[${BRANCH}$(parse_git_dirty)] "
       } || echo ""
 }
 
@@ -12,6 +11,21 @@ dots(){
    dots=$(git --git-dir=$HOME/.dotfiles/\
       --work-tree=$HOME status --porcelain)
    [[ "$dots" ]] && echo "!"
+}
+
+git_status(){
+   IFS=$'\n' read -d '' -ra status < <(git status --porcelain 2>/dev/null)
+   stat="${status[@]%[[:space:]]*}}"
+   for s in ${stat[@]};do case $s in
+      "M"*) bits="!${bits}" ;;
+      "A"*) bits="+${bits}" ;;
+      "D"*) bits="x${bits}" ;;
+      "R"*) bits=">${bits}" ;;
+      "?"*) bits="?${bits}" ;;
+   esac; done
+   printf '%s\n' " ${bits}"
+   #[[ "${ahead}" == "0" ]] && bits="*${bits}"
+   #[[ ! "${bits}" == "" ]] && echo " ${bits}"
 }
 
 # get current status of git repo
@@ -24,7 +38,7 @@ parse_git_dirty(){
    untracked=`echo -n "${status}" 2> /dev/null |\
       grep "Untracked files" &> /dev/null; echo "$?"`
    ahead=`echo -n "${status}" 2> /dev/null |\
-      grep "Your branch is ahead of" &> /dev/null; echo "$?"`
+      grep "branch is ahead" &> /dev/null; echo "$?"`
    newfile=`echo -n "${status}" 2> /dev/null |\
       grep "new file:" &> /dev/null; echo "$?"`
    renamed=`echo -n "${status}" 2> /dev/null |\
@@ -33,13 +47,13 @@ parse_git_dirty(){
       grep "deleted:" &> /dev/null; echo "$?"`
 
    bits=''
-   [[ "${renamed}" == "0" ]] && bits=">${bits}"
-   [[ "${ahead}" == "0" ]] && bits="*${bits}"
-   [[ "${newfile}" == "0" ]] && bits="+${bits}"
+   [[ "${renamed}"   == "0" ]] && bits=">${bits}"
+   [[ "${ahead}"     == "0" ]] && bits="*${bits}"
+   [[ "${newfile}"   == "0" ]] && bits="+${bits}"
    [[ "${untracked}" == "0" ]] && bits="?${bits}"
-   [[ "${deleted}" == "0" ]] && bits="x${bits}"
-   [[ "${dirty}" == "0" ]] && bits="!${bits}"
-   [[ ! "${bits}" == "" ]] && echo " ${bits}"
+   [[ "${deleted}"   == "0" ]] && bits="x${bits}"
+   [[ "${dirty}"     == "0" ]] && bits="!${bits}"
+   [[ ! "${bits}"    == ""  ]] && echo " ${bits}"
 }
 
 export PROMPT_COMMAND='history -a; history -r'
