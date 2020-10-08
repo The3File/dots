@@ -25,11 +25,11 @@ shopt -s expand_aliases
 HISTSIZE=500000
 HISTFILESIZE=100000
 HISTCONTROL="erasedups:ignoreboth"
-HISTIGNORE="&:[ ]*:exit:ls:bg:fg:history:history -r:clear:c:ll:lla:la"
+HISTIGNORE="&:[ ]*:exit:ls:bg:fg:history:history -r:clear:c:ll:lla:la:reverse_fzf_history:fuzzy_cd"
 
 # aliases
 reverse_fzf_history(){
-   local cmd="$(history | sort | fzf --height 40% --reverse | cut -d ' ' -f 4-)"
+   local cmd="$(history | sort -nr | fzf --height 40% --reverse | cut -d ' ' -f 4-)"
    printf '%s\n' "$cmd"
    eval "$cmd"
    unset cmd
