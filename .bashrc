@@ -52,6 +52,4 @@ if [[ $(uname -o) = "Android" ]];then
    export NOTES="/sdcard/Noter"
    [[ $TERM =~ "screen" ]] ||
       exec tmux new -A -s termux
-#else
-#   eval "$(thefuck --alias)"
 fi
