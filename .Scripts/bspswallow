@@ -22,13 +22,13 @@ spit() {
 
 query_desktop(){
    last_desktop=$(bspc query -D -n last)
-   [[ "$desktop" = "$last_desktop" ]] || false
+   [[ "$desktop" = "$last_desktop" ]]
 }
 
 query_swallower(){
    swallower=$(probe $1)
    read -r do_swallow <"$HOME/.config/bspwm/swallow"
-   [[ "$do_swallow" =~ $swallower ]] || false
+   [[ "$do_swallow" =~ $swallower ]]
 }
 
 probe(){
@@ -37,19 +37,19 @@ probe(){
 }
 query_swallowing(){
    swallowing=$(probe "$1")
-   [[ "$swallowing" = "St" ]] || false
+   [[ "$swallowing" = "St" ]]
 }
 
 query_spitter(){
    spitter=$1
-   grep "^$spitter" "$swallowed" || false
+   grep "^$spitter" "$swallowed" &>/dev/null
 }
 
 query_spitting_desktop(){
    spitting=$(grep "^$spitter" "$swallowed" |\
       head -n1 | awk '{print $2}')
    spitting_desktop=$(bspc query -D -n "$spitting")
-   [[ "$spitting_desktop" = "$desktop" ]] || false
+   [[ "$spitting_desktop" = "$desktop" ]]
 }
 
 hide_node(){
