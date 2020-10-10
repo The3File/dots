@@ -15,10 +15,15 @@ print_files(){
    printf '%s\n' "${files[@]#*${HOME##*/}/}"
 }
 
-fz(){
+fz1(){
    fzf --ansi -0 -1 -q "$query" --preview\
    "bat -l bash --theme='OneHalfDark'\
-   --style=numbers,changes --color always {}"
+   --style=numbers,changes --color always $HOME/{}"
+}
+
+fz(){
+   fzf --ansi -0 -1 -q "$query" --preview\
+   "$HOME/vimpager/vimcat $HOME/{}"
 }
 
 query="$1"
