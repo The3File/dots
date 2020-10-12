@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-main(){
-   [[ ! -f "$HOME/.fontawesome" ]] && exit
-   IFS=$'\n' read -d '' -r -a icn < "$HOME/.fontawesome"
-   read -d '' -r -a answ < <(printf '%s\n' "${icn[@]}" | rofi -dmenu -i -p "symboler:")
-   printf '%s' "${answ[0]}" | xclip -selection c &&
-      dunstify "copied: ${answ[0]}"
-}
-main "$@"
+
+[[ ! -f "$HOME/.fontawesome" ]] && exit
+
+IFS=$'\n' read -d '' -r -a icn < "$HOME/.fontawesome"
+
+read -d '' -r -a answ < <(printf '%s\n' "${icn[@]}" | rofi -dmenu -i -p "symboler:")
+
+printf '%s' "${answ[0]}" | xclip -selection c &&
+   dunstify "copied: ${answ[0]}"
