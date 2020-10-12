@@ -21,5 +21,10 @@ fz(){
    --style=numbers,changes --color always $HOME/{}"
 }
 
+altfz(){
+   fzf --ansi -0 -1 -q "$query" --preview\
+   "$HOME/vimpager/vimcat -c AnsiEsc -c 'set ft=&ft' $HOME/{}"
+}
+
 query="$1"
 main
