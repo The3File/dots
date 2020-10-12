@@ -141,6 +141,9 @@ key() {
 		  cmd_line "warn: no write access to dir."
 	    } ;;
       x) clear_screen; stat "${list[scroll]}"; read -rn 1; redraw ;;
+      e) reset_terminal
+	 ~/vimpager/vimpager --no-passthrough -- "${list[scroll]}"
+	 setup_terminal; redraw full ;;
       c) read -rsn 1
 	 case $REPLY in
 	    d) cmd_line "go to dir: " "dirs"
