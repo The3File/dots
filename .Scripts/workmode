@@ -54,6 +54,8 @@ off() {
    bspc config top_padding 0
    bspc config bottom_padding 0
 
+   picom -b
+
    chwal -r
 
    "$CONFIG" &>/dev/null
