@@ -5,7 +5,7 @@ logic(){
    $((P=(PN-W)*PS*10))
    $((G=(GN-W)*GS))
    [ "$P" -le 0 ] && P=0
-   [ "$G" -le "0" ] && { G="-2"; P="2"; one_border; }
+   [ "$G" -le "0" ] && G="$G0"
 }
 
 exec_(){
