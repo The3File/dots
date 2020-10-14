@@ -13,48 +13,20 @@ dots(){
    [[ "$dots" ]] && echo "!"
 }
 
-git_status(){
-   IFS=$'\n' read -d '' -ra status < <(git status --porcelain 2>/dev/null)
-   stat="${status[@]%[[:space:]]*}}"
-   for s in ${stat[@]};do case $s in
-      "M"*) bits="!${bits}" ;;
-      "A"*) bits="+${bits}" ;;
-      "D"*) bits="x${bits}" ;;
-      "R"*) bits=">${bits}" ;;
-      "?"*) bits="?${bits}" ;;
-   esac; done
-   printf '%s\n' " ${bits}"
-   #[[ "${ahead}" == "0" ]] && bits="*${bits}"
-   #[[ ! "${bits}" == "" ]] && echo " ${bits}"
-}
-
 # get current status of git repo
 parse_git_dirty(){
 
-   status=`git status 2>&1 | tee`
-
-   dirty=`echo -n "${status}" 2> /dev/null |\
-      grep "modified:" &> /dev/null; echo "$?"`
-   untracked=`echo -n "${status}" 2> /dev/null |\
-      grep "Untracked files" &> /dev/null; echo "$?"`
-   ahead=`echo -n "${status}" 2> /dev/null |\
-      grep "branch is ahead" &> /dev/null; echo "$?"`
-   newfile=`echo -n "${status}" 2> /dev/null |\
-      grep "new file:" &> /dev/null; echo "$?"`
-   renamed=`echo -n "${status}" 2> /dev/null |\
-      grep "renamed:" &> /dev/null; echo "$?"`
-   deleted=`echo -n "${status}" 2> /dev/null |\
-      grep "deleted:" &> /dev/null; echo "$?"`
-
+   status=$(git status 2>&1 | tee)
    bits=''
-   [[ "${renamed}"   == "0" ]] && bits=">${bits}"
-   [[ "${ahead}"     == "0" ]] && bits="*${bits}"
-   [[ "${newfile}"   == "0" ]] && bits="+${bits}"
-   [[ "${untracked}" == "0" ]] && bits="?${bits}"
-   [[ "${deleted}"   == "0" ]] && bits="x${bits}"
-   [[ "${dirty}"     == "0" ]] && bits="!${bits}"
-   [[ ! "${bits}"    == ""  ]] && echo " ${bits}"
+
+   [[ $status == ${status/modified:} ]] || bits="!${bits}"
+   [[ $status == ${status/untracked files} ]] || bits="?${bits}"
+   [[ $status == ${status/branch is ahead} ]] || bits="*${bits}"
+   [[ $status == ${status/new file:} ]] || bits="+${bits}"
+   [[ $status == ${status/renamed:} ]] || bits=">${bits}"
+   [[ $status == ${status/deleted:} ]] || bits="x${bits}"
+   [[ ! "${bits}" == ""  ]] && echo " ${bits}"
 }
 
-export PROMPT_COMMAND='history -a; history -r'
-export PS1="\[\e[0;36m\]\w\[\e[m\] \[\e[1;35m\]\`parse_git_branch\`\[\e[m\]\[\e[0;33m\]\`dots\`\\$\[\e[m\] "
+export PROMPT_COMMAND='history -a'
+export PS1="\[\e[0;36m\]\w\[\e[m\] \[\e[1;35m\]\`parse_git_branch\`\[\e[m\e[0;33m\]\`dots\`\\$\[\e[m\] "
