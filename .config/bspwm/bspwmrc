@@ -4,12 +4,13 @@
 autogap_settings() {
 
    # gaps
+      export G0=5	# minimum gap size
       export GS=5	# gaps size integer
-      export GN=4	# number of windows before $G0 gaps
+      export GN=4	# number of windows
 
    # left and right padding
       export PS=9	# padding size integer
-      export PN=2       # number of windows before zero padding
+      export PN=2       # number of windows
 }
 
 
