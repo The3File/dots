@@ -29,7 +29,7 @@ HISTIGNORE="&:[ ]*:exit:ls:bg:fg:history:history -r:clear:c:ll:lla:la:reverse_fz
 
 # aliases
 reverse_fzf_history(){
-   local cmd="$(history | fzf --height 40% --reverse | cut -d ' ' -f 4-)"
+   local cmd="$(history | sort -nr | fzf --height 40% --reverse | cut -d ' ' -f 4-)"
    printf '%s' "${cmd}" >> "$HOME/.bash_history"
    eval -- "${cmd}"
    history -r
