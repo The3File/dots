@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/env bash
+#!/bin/bash
 termux-wake-lock; trap 'q' INT; trap 'e' EXIT
 q(){ play -nq synth whitenoise fade t 1 20 15 &
 printf '\e[K\e[A\r%s\e[K\n\e[J' "whitenoise stopper"
