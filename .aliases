@@ -4,7 +4,7 @@
 alias sshde="sudo /bin/sshd"
 alias kdeconnectd="/usr/lib/kdeconnectd"
 
-alias ccp="rsync --proggress"
+alias ccp="rsync --progress"
 
 alias fuzzy_kill="ps aux | sort | fzf | awk '{print $2}' | xargs -r kill -9"
 
