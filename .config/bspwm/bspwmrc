@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
 
-
+#{{{ AUTOGAP
 autogap_settings() {
-
    # gaps
-      export G0=5	# minimum gap size
-      export GS=5	# gaps size integer
-      export GN=4	# number of windows
+   export G0=5    # minimum gap size
+   export GS=5    # gaps size integer
+   export GN=4    # number of windows
 
    # left and right padding
-      export PS=9	# padding size integer
-      export PN=2       # number of windows
+   export PS=9    # padding size integer
+   export PN=2    # number of windows
 }
-
-
-config() { printf '\e[33m%s...' "applying configs"
+#}}}
+#{{{ CONFIG
+config() {
+   printf '\e[33m%s...' "applying configs"
 
    bspc monitor -d 1 2 3 4 5 6 7 8 9 10
 
@@ -34,9 +34,10 @@ config() { printf '\e[33m%s...' "applying configs"
    bspc config initial_polarity	       first_child
 
    printf '\e[36m %s\n' "done."; }
-
-
-rules() { printf '\n\e[33m%s...' "setting rules"
+#}}}
+#{{{ RULES
+rules() {
+   printf '\n\e[33m%s...' "setting rules"
 
    bspc rule -r "*"
 
@@ -49,11 +50,11 @@ rules() { printf '\n\e[33m%s...' "setting rules"
    bspc rule -a scratchterm layer=above locked=on sticky=on state=floating hidden=on
    bspc rule -a scratchmath layer=above locked=on sticky=on state=floating hidden=on
 
-   printf '\e[36m %s\n\n' "done."; }
-
-
+   printf '\e[36m %s\n\n' "done."
+}
+#}}}
+#{{{ APPS
 apps() {
-
    for app in autogap dunstbar dunst acpid_events; do
       #case $app in dunstbar) o=("--boot");; *) o=(); esac
 
@@ -64,32 +65,31 @@ apps() {
       else _start $app
       fi
 
-   done; }
-
+   done
+}
 
 _restart(){
-
    ukill "$1" 1>/dev/null &&
       {
          "$1" "${o[@]}" &>/dev/null & disown
          printf '\e[33m%s: %s\n' "$1" "restarted"
       } || {
          printf '\e[31m%s: %s %s\n' "$1" "ukill" "failed"
-      };}
-
+      }
+}
 
 _start(){
-
    "$1" "${o[@]}" &>/dev/null & disown &&
       {
          printf '\e[37m%s: %s\n' "$1" "started"
       } || {
          printf '\e[31m%s: %s %s\n' "$1" "failed"
-      };}
-
-
-qute(){ printf '\e[33m\n%s...' "linking files"
-
+      }
+}
+#}}}
+#{{{ QUTEBROWSER
+qute(){
+   printf '\e[33m\n%s...' "linking files"
    ln -sf "$HOME/.cache/wal/dunstrc" "$HOME/.config/dunst/dunstrc" &
    ln -sf "$HOME/.cache/wal/zathurarc" "$HOME/.config/zathura/zathurarc" &
    printf '\e[36m %s\n' "done"
@@ -107,9 +107,10 @@ qute(){ printf '\e[33m\n%s...' "linking files"
 
    printf '\e[33m%s...' "reloading qutebrowser"
    [[ ! -z $(pgrep -x qutebrowser) ]] && qutebrowser :config-source &>/dev/null
-   printf '\e[36m %s\n\n' "done"; }
-
-
+   printf '\e[36m %s\n\n' "done"
+}
+#}}}
+#{{{ FIFO
 make_fifo(){
    for fifo in $GAPFIFO $BARFIFO; do
       [[ -e "$fifo" ]] && rm "$fifo"
@@ -118,7 +119,8 @@ make_fifo(){
       printf '%s\n' "mkfifo: \"$fifo\""
    done
 }
-
+#}}}
+#{{{ MAIN
 main(){
    xmodmap -e "keycode 135 = Super_R"
    source "$HOME/.cache/wal/colors.sh"
@@ -145,11 +147,13 @@ main(){
    # start/restart apps
       make_fifo
       apps
-
 }
-
-
-main "$@" && {
-   printf '\e[m\n%s\n' "..all done";
-   dunstify "bspwmrc reloaded" -t 2000 -r 90211 &
-}
+#}}}
+#{{{ START
+main "$@" &&
+   {
+      printf '\e[m\n%s\n' "..all done";
+      dunstify "bspwmrc reloaded" -t 2000 -r 90211 &
+   }
+# vim: fdm=marker
+#}}}
