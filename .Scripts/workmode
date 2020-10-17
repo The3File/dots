@@ -3,8 +3,8 @@
 on() {
    mkfifo "$PANELFIFO"
 
-   theme="gruvbox"
    theme="base16-isotope"
+   theme="gruvbox"
 
    wal --theme $theme &>/dev/null
 
