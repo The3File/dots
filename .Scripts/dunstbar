@@ -4,10 +4,11 @@ loop(){ sleep 1.2; for ((;;)){ barnot -o;sleep 10;}; }
 kill_loop(){ kill -9 "$loop"; dunstify -C 90211; }
 
 bar(){
-   while read -r line; do
-      query_windows || loop & loop="$!"
-      [[ "$line" = *remove* ]] || kill_loop
-      [[ "$line" = *focus* ]] && print_ws
+   while read -r event; do
+      #w=$(bspc query -N -n .local.\!hidden.window)
+      #((w<=0)) && loop & loop="$!"
+      [[ "$event" =~ remove ]] || kill_loop
+      [[ "$event" =~ focus ]] && print_ws
    done < "$BARFIFO"
 }
 
@@ -41,11 +42,6 @@ get_date(){
    d=$(date +%d" "%B)
    dy=$(date +%A)
    dt=$(date +%d/%m/%y)
-}
-
-query_hidden(){
-   w=$(bspc query -N -n .local.!hidden | wc -l)
-   ((w>0)) || false
 }
 
 get_net(){

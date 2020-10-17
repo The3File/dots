@@ -1,25 +1,17 @@
 # ~/.aliases
-
-##  APL
+## APL
 alias sshde="sudo /bin/sshd"
 alias kdeconnectd="/usr/lib/kdeconnectd"
-
 alias ccp="rsync --progress"
-
 alias fuzzy_kill="ps aux | sort | fzf | awk '{print $2}' | xargs -r kill -9"
-
 alias x="extract"
 alias spe="speedtest"
 alias vim="nvim"
 alias nts="notes"
 alias sv="svim"
-
-##  CFG
-
+## CFG
 alias deps="nvim ${CONFIG%/*}/dependencies.md"
-
 alias con="nvim $CONFIG"
-
 alias arc="nvim ~/.aliases"
 alias brc="nvim ~/.bashrc"
 alias prc="nvim ~/.profile"
@@ -29,14 +21,11 @@ alias crc="nvim ~/.config/compton.conf"
 alias src="nvim ~/.config/sxhkd/sxhkdrc"
 alias vrc="nvim ~/.config/nvim/init.vim"
 alias trc="nvim ~/.config/tmux/tmux.conf"
-
-##  QOL
+## QOL
 alias here="st &>/dev/null &disown"
-
 alias es="expressvpn status"
 alias ec="expressvpn connect"
 alias ed="expressvpn disconnect"
-
 alias bsp="~/.config/bspwm/bspwmrc"
 alias xr="xrdb ~/.Xresources"
 alias pf="pfetch"
@@ -47,10 +36,8 @@ alias ls="ls --color=auto --group-directories-first"
 alias la="ls -a"
 alias ll="ls -lh"
 alias lla="ls -lah"
-
-## at overraske mig
+## TSM
 alias hej="echo hej $USER!"
-
 ## PHONE
 alias fastboot="sudo fastboot"
 alias fr="fastboot reboot"
