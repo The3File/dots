@@ -44,7 +44,6 @@ case_key(){
 
 main(){
    trap "printf '\e[m\e[2J\e[H\e[?25h'" EXIT
-
    ((p=0)); options=("poweroff" "reboot" "exit shell")
    for((;;)){ reset; printl; read -rsn1 key; case_key "$key"; }
 }
