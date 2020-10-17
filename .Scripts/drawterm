@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+main(){
+   get_size
+   query_min_size || return
+   st -c "float" -g ${W}x${H}+${X}+${Y}
+}
+
 prompt_draw(){
    slop -f "%x %y %w %h" -b 2 -t 0 -q
 }
@@ -13,6 +19,4 @@ query_min_size(){
    (( W>=10 && H>=1 )) || false
 }
 
-get_size
-query_min_size || exit
-st -c "float" -g ${W}x${H}+${X}+${Y}
+main

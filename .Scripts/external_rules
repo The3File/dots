@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 wid=$1
 class=$2
@@ -6,8 +6,5 @@ instance=$3
 consequences=$4
 
 case "$class" in
-   Lutris|Liferea)
-   eval "$consequences"
-   [ "$state" ] || echo "state=pseudo_tiled"
-   ;;
+   *) echo "" ;;
 esac
