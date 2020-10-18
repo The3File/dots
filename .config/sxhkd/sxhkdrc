@@ -70,8 +70,11 @@ super + shift + a ; {j,k}
    bspc node @/ -R {90,-90}
 
 # balance root node
-super + shift + a ; {b,e}
-   bspc node @/1/2 -{B,E}
+super + shift + a ; b
+   bspc node @/1/2 -B
+
+super + shift + a ; e
+   bspc node @/ -E
 
 #super + x
    #env XSECURELOCK_PASSWORD_PROMPT=time_hex xsecurelock -- systemctl suspend
