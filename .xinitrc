@@ -15,7 +15,7 @@ exec xset s off &
 exec setxkbmap -layout dk -variant nodeadkeys -option caps:escape &
 
 # Daemons
-exec picom --experimental-backends --config .config/compton.conf &
+#exec picom --experimental-backends --config .config/compton.conf &
 exec xbanish -i Mod1 -i Mod4 &
 exec networkd-dispatcher &
 exec /usr/lib/kdeconnectd &
