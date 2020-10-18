@@ -1,5 +1,18 @@
-# ~/.aliases
-## APL
+# ~/.aliases vim: fdm=marker
+## CFG{{{
+alias deps="nvim ${CONFIG%/*}/dependencies.md"
+alias con="nvim $CONFIG"
+alias arc="nvim ~/.aliases"
+alias brc="nvim ~/.bashrc"
+alias prc="nvim ~/.profile"
+alias xrc="nvim ~/.Xresources"
+alias lrc="nvim ~/.config/lf/lfrc"
+alias crc="nvim ~/.config/picom.conf"
+alias src="nvim ~/.config/sxhkd/sxhkdrc"
+alias vrc="nvim ~/.config/nvim/init.vim"
+alias trc="nvim ~/.config/tmux/tmux.conf"
+# }}}
+## APL{{{
 alias sshde="sudo /bin/sshd"
 alias kdeconnectd="/usr/lib/kdeconnectd"
 alias ccp="rsync --progress"
@@ -9,19 +22,8 @@ alias spe="speedtest"
 alias vim="nvim"
 alias nts="notes"
 alias sv="svim"
-## CFG
-alias deps="nvim ${CONFIG%/*}/dependencies.md"
-alias con="nvim $CONFIG"
-alias arc="nvim ~/.aliases"
-alias brc="nvim ~/.bashrc"
-alias prc="nvim ~/.profile"
-alias xrc="nvim ~/.Xresources"
-alias lrc="nvim ~/.config/lf/lfrc"
-alias crc="nvim ~/.config/compton.conf"
-alias src="nvim ~/.config/sxhkd/sxhkdrc"
-alias vrc="nvim ~/.config/nvim/init.vim"
-alias trc="nvim ~/.config/tmux/tmux.conf"
-## QOL
+# }}}
+## QOL{{{
 alias here="st &>/dev/null &disown"
 alias es="expressvpn status"
 alias ec="expressvpn connect"
@@ -36,14 +38,16 @@ alias ls="ls --color=auto --group-directories-first"
 alias la="ls -a"
 alias ll="ls -lh"
 alias lla="ls -lah"
-## TSM
+# }}}
+## TSM{{{
 alias hej="echo hej $USER!"
-## PHONE
+# }}}
+## PHONE{{{
 alias fastboot="sudo fastboot"
 alias fr="fastboot reboot"
 alias ff="fastboot flash"
 alias ap="adb push"
 alias arr="adb reboot recovery"
 alias sshfon="ssh $(ip r | awk '{getline $1; print $3}') -p 8022 -i '$HOME/.ssh/id_rsa'"
-
+# }}}
 [[ $(uname -o) = "Android" ]] && alias xdg-open="termux-open"
