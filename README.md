@@ -1,4 +1,3 @@
-
 # dots
 
 to install paste into terminal
