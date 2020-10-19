@@ -11,6 +11,7 @@ alias crc="nvim ~/.config/picom.conf"
 alias src="nvim ~/.config/sxhkd/sxhkdrc"
 alias vrc="nvim ~/.config/nvim/init.vim"
 alias trc="nvim ~/.config/tmux/tmux.conf"
+alias drc="nvim ~/.config/wal/templates/dunstrc"
 # }}}
 ## APL{{{
 alias sshde="sudo /bin/sshd"
@@ -50,4 +51,3 @@ alias ap="adb push"
 alias arr="adb reboot recovery"
 alias sshfon="ssh $(ip r | awk '{getline $1; print $3}') -p 8022 -i '$HOME/.ssh/id_rsa'"
 # }}}
-[[ $(uname -o) = "Android" ]] && alias xdg-open="termux-open"
