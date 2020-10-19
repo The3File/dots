@@ -28,9 +28,9 @@ set softtabstop=-1
 autocmd BufNewFile,BufRead * set shiftwidth=3
 set grepprg=grep\ -nH\ $*
 
-"colorscheme wal
+colorscheme wal
 "colorscheme zellner
-colorscheme default
+"colorscheme default
 
 autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown"}}}
 " Bindings{{{
