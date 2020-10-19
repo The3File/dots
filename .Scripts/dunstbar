@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
 
 loop(){ sleep 1.2; for ((;;)){ barnot -o;sleep 10;}; }
-kill_loop(){ kill -9 "$loop"; dunstify -C 90211; }
+
+kill_loop(){
+   #kill -9 "$loop"
+   dunstify -C 90211
+}
 
 bar(){
    while read -r event; do
       #w=$(bspc query -N -n .local.\!hidden.window)
       #((w<=0)) && loop & loop="$!"
-      #[[ "$event" =~ remove ]] || kill_loop
+      [[ "$event" =~ remove ]] || kill_loop
       [[ "$event" =~ focus ]] && print_ws
    done < "$BARFIFO"
 }
