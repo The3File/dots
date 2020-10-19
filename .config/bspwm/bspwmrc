@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
-#{{{ CONFIG
-config() { printf '\e[33m%s...' "applying configs"
+config() { #{{{
+   printf '\e[33m%s...' "applying configs"
    bspc monitor -d 1 2 3 4 5 6 7 8 9 10
 
    bspc config focused_border_color    "${color4}"
@@ -20,10 +20,26 @@ config() { printf '\e[33m%s...' "applying configs"
    bspc config automatic_scheme	       spiral
    bspc config initial_polarity	       first_child
 
-   printf '\e[36m %s\n' "done."; }
+printf '\e[36m %s\n' "done."; }
+
 #}}}
-#{{{ RULES
-rules() { printf '\n\e[33m%s...' "setting rules"
+autogap_settings() { #{{{
+   # gaps
+      export GAPS=0  # enable or disable automatic gaps
+      export G0=10    # minimum gap size
+      export GS=2    # gaps size integer
+      export GN=3    # number of windows
+
+   # left and right padding
+      export PADD=1  # enable or disable automatic padding
+      export PS=2    # padding size integer
+      export PN=2    # number of windows
+}
+
+#}}}
+
+rules() { #{{{
+   printf '\n\e[33m%s...' "setting rules"
    bspc rule -r "*"
 
    bspc config external_rules_command "$(which external_rules)"
@@ -37,45 +53,25 @@ rules() { printf '\n\e[33m%s...' "setting rules"
 
    printf '\e[36m %s\n\n' "done."
 }
+
 #}}}
-
-#{{{ AUTOGAP
-autogap_settings() {
-   # gaps
-   export G0=10    # minimum gap size
-   export GS=7    # gaps size integer
-   export GN=3    # number of windows
-
-   # left and right padding
-   export PS=9    # padding size integer
-   export PN=2    # number of windows
-}
-#}}}
-
-#{{{ APPS
-apps() {
-   for app in autogap dunstbar dunst acpid_events; do
-      #case $app in dunstbar) o=("--boot");; *) o=(); esac
-
-      app_is_running="$(ps ax | sed -n "/nvim/d;/sed/d;/\<$app\>/p")"
-
-      if [[ "$app_is_running" ]]
-      then _restart $app || printf '\e[31m%s: %s\n' "$app" "restart failed"
-      else _start $app || printf '\e[31m%s: %s\n' "$app" "failed"
-      fi
-
-   done
-}
-
-_restart(){ ukill "$1" 1>/dev/null || return 1
+apps() { #{{{
+   _restart(){ ukill "$1" 1>/dev/null || return 1
    "$1" "${o[@]}" &>/dev/null & disown &&
-      printf '\e[33m%s: %s\n' "$1" "restarted"; }
-
-_start(){ "$1" "${o[@]}" &>/dev/null & disown || return 1
+   printf '\e[33m%s: %s\n' "$1" "restarted"; }
+   _start(){ "$1" "${o[@]}" &>/dev/null & disown || return 1
    printf '\e[37m%s: %s\n' "$1" "started"; }
+
+   for app in autogap dunstbar dunst acpid_events
+   do; app_is_running="$(ps ax | sed -n "/nvim/d;/sed/d;/\<$app\>/p")"
+   if [[ "$app_is_running" ]]
+   then _restart $app || printf '\e[31m%s: %s\n' "$app" "restart failed"
+   else _start $app || printf '\e[31m%s: %s\n' "$app" "failed"
+   fi; done
+}
 #}}}
-#{{{ QUTEBROWSER
-qute(){
+
+link_wal(){ #{{{
    printf '\e[33m\n%s...' "linking files"
    ln -sf "$HOME/.cache/wal/dunstrc" "$HOME/.config/dunst/dunstrc" &
    ln -sf "$HOME/.cache/wal/zathurarc" "$HOME/.config/zathura/zathurarc" &
@@ -92,24 +88,24 @@ qute(){
       $HOME/.config/qutebrowser/config.py
    printf '\e[36m %s\n' "done"
 
+   [[ -z $(pgrep -x qutebrowser) ]] && return
    printf '\e[33m%s...' "reloading qutebrowser"
-   [[ ! -z $(pgrep -x qutebrowser) ]] && qutebrowser :config-source &>/dev/null
+   qutebrowser :config-source &>/dev/null
    printf '\e[36m %s\n\n' "done"
 }
 #}}}
-#{{{ FIFO
-make_fifo(){
-   for fifo in $GAPFIFO $BARFIFO; do
-      [[ -e "$fifo" ]] && rm "$fifo"
-      mkfifo "$fifo"
-      bspc subscribe node_add node_remove desktop_focus > $fifo &
-      printf '%s\n' "mkfifo: \"$fifo\""
-   done
-}
-#}}}
 
-#{{{ MAIN
-main(){
+make_fifo(){ #{{{
+for fifo in $GAPFIFO $BARFIFO; do
+   [[ -e "$fifo" ]] && rm "$fifo"
+   mkfifo "$fifo"
+   bspc subscribe node_add node_remove desktop_focus > $fifo &
+   printf '%s\n' "mkfifo: \"$fifo\""
+done
+}
+
+#}}}
+main(){ #{{{
    xmodmap -e "keycode 135 = Super_R"
    source "$HOME/.cache/wal/colors.sh"
    case $1 in 1|0) reason="$1"; shift; echo yes; esac
@@ -130,19 +126,20 @@ main(){
 
    # external settings
       autogap_settings
-      qute
+      link_wal
 
    # start/restart apps
       make_fifo
       apps
 }
+
 #}}}
-#{{{ START
+
+#{{{ INIT
 main "$@" &&
-   {
-      printf '\e[m\n%s\n' "..all done";
-      dunstify "bspwmrc reloaded" -t 2000 -r 90211 &
-      echo > $GAPFIFO
-   }
-# vim: fdm=marker
-#}}}
+{
+   printf '\e[m\n%s\n' "..all done";
+   dunstify "bspwmrc reloaded" -t 2000 -r 90211 &
+   echo > $GAPFIFO
+}
+# }}} vim: fdm=marker
