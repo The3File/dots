@@ -15,6 +15,8 @@ set -o vi
 #}}}
 #{{{ settings
 
+export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+
 [[ -f ~/.bash_prompt ]] && source ~/.bash_prompt
 
 shopt -s histappend
@@ -30,7 +32,8 @@ shopt -s expand_aliases
 HISTSIZE=500000
 HISTFILESIZE=100000
 HISTCONTROL="erasedups:ignoreboth"
-HISTIGNORE="&:[ ]*:exit:ls:bg:fg:history:history -r:clear:c:ll:lla:la:reverse_fzf_history:fuzzy_cd"
+HISTIGNORE="&:[ ]*:exit:ls:bg:fg:history:history -r:clear:c:ll:lla:la:reverse_fzf_history:fuzzy_cd:fuzzy_kill"
+
 #}}}
 #{{{ aliases
 [[ -f ~/.aliases ]] 	&& source ~/.aliases
