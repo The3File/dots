@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# simple timer written in bash by the3file
+# simple timer written in bash
 # https://github.com/the3file
 
 usage(){
