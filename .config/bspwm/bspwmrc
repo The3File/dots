@@ -63,7 +63,7 @@ apps() { #{{{
    printf '\e[37m%s: %s\n' "$1" "started"; }
 
    for app in autogap dunstbar dunst acpid_events
-   do; app_is_running="$(ps ax | sed -n "/nvim/d;/sed/d;/\<$app\>/p")"
+   do app_is_running="$(ps ax | sed -n "/nvim/d;/sed/d;/\<$app\>/p")"
    if [[ "$app_is_running" ]]
    then _restart $app || printf '\e[31m%s: %s\n' "$app" "restart failed"
    else _start $app || printf '\e[31m%s: %s\n' "$app" "failed"
