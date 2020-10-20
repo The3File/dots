@@ -7,6 +7,7 @@ set -o vi
 
 [[ -f ~/.bash_prompt ]] && source ~/.bash_prompt
 
+export MANPAGER="sh -c 'col -bx | bat -l man -p'"
 PROMPT_DIRTRIM=2
 
 bind Space:magic-space
@@ -33,7 +34,6 @@ HISTIGNORE="&:[ ]*:exit:ls:bg:fg:history:history -r:clear:c:ll:lla:la:reverse_fz
 #{{{ aliases
 
 [[ -f ~/.aliases ]] 	&& source ~/.aliases
-export MANPAGER="sh -c 'col -bx | bat -l man -p'"
 
 reverse_fzf_history(){
    local cmd="$(history | sort -nr | fzf --height 40% --reverse | cut -d ' ' -f 4-)"
