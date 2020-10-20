@@ -5,13 +5,19 @@ set completion-map-case on
 set show-all-if-ambiguous off
 set mark-symlinked-directories on
 
-"\e[Z": menu-complete
+Control-r:"reverse_fzf_history"
+Control-f:"fuzzy_cd"
+Control-h:"here"
+Control-g:"gotop"
+Control-k:"fuzzy_kill"
 
-Control-r:"reverse_search"'
-Control-h:"history -r<Up>"'
-Control-o:"cdc"'
-Control-g:"gotop"'
-Control-k:"fuzzy_kill"'
+#"\e[Z": menu-complete
+
+# SEARCH HISTORY WITH UP/DOWN
+"\e[A": history-search-backward
+"\e[B": history-search-forward
+"\e[C": forward-char
+"\e[D": backward-char
 
 ##  VI MODE
 set editing-mode vi
