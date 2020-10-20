@@ -1,42 +1,79 @@
 #!/usr/bin/env bash
+# simple timer written in bash by the3file
+# https://github.com/the3file
 
-loop() { for ((;;)){ timer; printf '%s\e[1A' "press [ENTER] to restart"; read;};}
-
-usage() { printf '\e[0;34m%s%s\n' "Usage: $(basename $0) "\
-      "[-l <opt>] [<number>m|s] [<min>:<sec>]"; }
-
-check() {
-   case $1 in
-      *[0-9]':'[0-9][0-9]) IFS=':' read -r -a k <<< "$1"
-	 ((m=${k[0]},s=${k[1]},l=(m*60)+s)) ;;
-      *[0-9]'m') ((l=${1%m}*60)) ;;
-      *[0-9]'s') ((l=${1%s})) ;;
-      *) printf '%s\n%s\n' "unknown option '$1'" "timer -h for help"; exit 1
-   esac
-
-   [[ $l ]] && l="$l-"
+usage(){
+   basename="${0##*/}"
+   printf '%s\n%s%s\n' "$basename: $1: invalid argument" "usage: $basename "\
+   "<hrs|mins|secs>{h|m|s} | [<hrs>:]<mins>:<secs>" >&2
 }
 
-timer() { 
-   stty -echo; st=$(date +%s)
-   for ((;;)){
-      ((c=$(date +%s),s=$l(c-st)))
-      printf '\e[?25l\e[1;34m\r\e[J%02d:%02d' "$((s/60))" "$((s%60))"
-      ((s<0)) && printf '\r%s\n' "times up!" && break; sleep 1
+disable_cursor(){
+   stty -echo
+   printf '\e[?25l'
+}
+
+reset_cursor(){
+   stty echo
+   printf '\e[?25h'
+}
+
+get_opts(){
+   while [ $1 ]; do
+      case $1 in
+         *[0-9]':'[0-9][0-9]) parse_colons $1
+	    ((count_down=(h*3600)+(m*60)+s)) ;;
+         *[0-9]'h') ((count_down+=${1%h}*3600)) ;;
+         *[0-9]'m') ((count_down+=${1%m}*60)) ;;
+         *[0-9]'s') ((count_down+=${1%s})) ;;
+	 '') count_down="" ;;
+         *) usage "$1"; exit 1
+      esac; shift
+   done
+
+   [[ $count_down ]] && count_down+="-"
+}
+
+parse_colons(){
+   s="${1##*:}"
+
+   : "${1%%:$s}"
+   m="${_##*:}"
+
+   : "${1%%$m:$s}"
+   h="${_%:}"
+}
+
+timer(){ 
+   disable_cursor; start_time=$SECONDS
+
+   for ((;;)) {
+      ((time=SECONDS,seconds=$count_down(time-start_time)))
+
+      printf '\e[1;34m\r\e[K%02d:%02d:%02d' "$((seconds/3600))"\
+	 "$((seconds/60%60))" "$((seconds%60))"
+
+      [[ $seconds -lt 0 ]] && { completed; break; }
+      sleep 1
    }
-   dunstify "" "<b>timer done</b>"
-   beep
 }
 
-beep() { for ((i=0;i<3;i++)){ env -i beep &>/dev/null || sudo env -i beep;((;:;));}; }
+play_bell(){
+   bell="/usr/share/sounds/freedesktop/stereo/alarm-clock-elapsed.oga"
+   paplay $bell 2>/dev/null & b=$!
+   while read -rsn1; do kill -9 $b &>/dev/null; wait $b &>/dev/null; break; done
+}
 
-main() {
-   trap "stty echo; printf '\e[J\e[?25h'" EXIT
-   while getopts ":l:h" o; do case "${o}" in
-      l) shift; check $OPTARG; loop ;;
-      h) usage; exit 0 ;;
-   esac; done
-   [[ $1 ]] && check $1; timer
+completed(){
+   printf '\r\e[K%s\e[m' "times up!"
+   notify-send "${0//$HOME/\~}: $_"
+   play_bell
+}
+
+main(){
+   trap "reset_cursor" EXIT
+   get_opts "$@"; timer
+   printf '\n'
 }
 
 main "$@"
