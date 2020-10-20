@@ -18,6 +18,37 @@ reset_cursor(){
    printf '\e[?25h'
 }
 
+parse_colons(){
+   s="${1##*:}"
+   : "${1%%:$s}"
+   m="${_##*:}"
+   : "${1%%$m:$s}"
+   h="${_%:}"
+}
+
+completed(){
+   printf '\r\e[K%s\e[m' "times up!"
+   notify-send "${0//$HOME/\~}: $_"
+   play_bell
+}
+
+play_bell(){
+   bell="/usr/share/sounds/freedesktop/stereo/alarm-clock-elapsed.oga"
+   coproc paplay $bell
+   while read -rsn1; do kill -9 $COPROC_PID; break; done
+}
+
+timer(){ 
+   disable_cursor; start_time=$SECONDS
+   for ((;;)) {
+      ((time=SECONDS,seconds=$count_down(time-start_time)))
+      printf '\e[1;34m\r\e[K%02d:%02d:%02d' "$((seconds/3600))"\
+	 "$((seconds/60%60))" "$((seconds%60))"
+      [[ $seconds -lt 0 ]] && { completed; break; }
+      sleep 1
+   }
+}
+
 get_opts(){
    while [ $1 ]; do
       case $1 in
@@ -30,44 +61,7 @@ get_opts(){
          *) usage "$1"; exit 1
       esac; shift
    done
-
    [[ $count_down ]] && count_down+="-"
-}
-
-parse_colons(){
-   s="${1##*:}"
-
-   : "${1%%:$s}"
-   m="${_##*:}"
-
-   : "${1%%$m:$s}"
-   h="${_%:}"
-}
-
-timer(){ 
-   disable_cursor; start_time=$SECONDS
-
-   for ((;;)) {
-      ((time=SECONDS,seconds=$count_down(time-start_time)))
-
-      printf '\e[1;34m\r\e[K%02d:%02d:%02d' "$((seconds/3600))"\
-	 "$((seconds/60%60))" "$((seconds%60))"
-
-      [[ $seconds -lt 0 ]] && { completed; break; }
-      sleep 1
-   }
-}
-
-play_bell(){
-   bell="/usr/share/sounds/freedesktop/stereo/alarm-clock-elapsed.oga"
-   coproc paplay $bell
-   while read -rsn1; do kill -9 $COPROC_PID; break; done
-}
-
-completed(){
-   printf '\r\e[K%s\e[m' "times up!"
-   notify-send "${0//$HOME/\~}: $_"
-   play_bell
 }
 
 main(){
