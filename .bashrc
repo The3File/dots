@@ -2,24 +2,32 @@
 #{{{ bindings
 
 bind -u reverse-search-history
-bind -u reverse-search-history
 bind '"\C-r":"reverse_fzf_history"'
 bind '"\C-f":"fuzzy_cd"'
 bind '"\C-h":"here"'
 bind '"\C-g":"gotop"'
 bind '"\C-k":"fuzzy_kill"'
 
+bind '"\e[A": history-search-backward'
+bind '"\e[B": history-search-forward'
+bind '"\e[C": forward-char'
+bind '"\e[D": backward-char'
+
 # set vi mode
 set -o vi
 
 #}}}
-#{{{ settings
+#{{{ sane settings
 
-export MANPAGER="sh -c 'col -bx | bat -l man -p'"
 
 [[ -f ~/.bash_prompt ]] && source ~/.bash_prompt
 
-shopt -s histappend
+PROMPT_DIRTRIM=2
+
+bind Space:magic-space
+bind "set show-all-if-ambiguous on"
+
+shopt -s globstar 2> /dev/null
 shopt -s cmdhist
 shopt -s autocd 2> /dev/null
 shopt -s dirspell 2> /dev/null
@@ -29,6 +37,8 @@ shopt -s expand_aliases
 #}}}
 #{{{ history
 
+shopt -s histappend
+
 HISTSIZE=500000
 HISTFILESIZE=100000
 HISTCONTROL="erasedups:ignoreboth"
@@ -37,6 +47,7 @@ HISTIGNORE="&:[ ]*:exit:ls:bg:fg:history:history -r:clear:c:ll:lla:la:reverse_fz
 #}}}
 #{{{ aliases
 [[ -f ~/.aliases ]] 	&& source ~/.aliases
+export MANPAGER="sh -c 'col -bx | bat -l man -p'"
 
 reverse_fzf_history(){
    local cmd="$(history | sort -nr | fzf --height 40% --reverse | cut -d ' ' -f 4-)"
