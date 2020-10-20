@@ -60,8 +60,8 @@ timer(){
 
 play_bell(){
    bell="/usr/share/sounds/freedesktop/stereo/alarm-clock-elapsed.oga"
-   paplay $bell 2>/dev/null & b=$!
-   while read -rsn1; do kill -9 $b &>/dev/null; wait $b &>/dev/null; break; done
+   coproc paplay $bell
+   while read -rsn1; do kill -9 $COPROC_PID; break; done
 }
 
 completed(){
