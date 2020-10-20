@@ -1,24 +1,9 @@
 # ~/.bashrc
-#{{{ bindings
-
-bind -u reverse-search-history
-bind '"\C-r":"reverse_fzf_history"'
-bind '"\C-f":"fuzzy_cd"'
-bind '"\C-h":"here"'
-bind '"\C-g":"gotop"'
-bind '"\C-k":"fuzzy_kill"'
-
-bind '"\e[A": history-search-backward'
-bind '"\e[B": history-search-forward'
-bind '"\e[C": forward-char'
-bind '"\e[D": backward-char'
 
 # set vi mode
 set -o vi
 
-#}}}
 #{{{ sane settings
-
 
 [[ -f ~/.bash_prompt ]] && source ~/.bash_prompt
 
@@ -46,6 +31,7 @@ HISTIGNORE="&:[ ]*:exit:ls:bg:fg:history:history -r:clear:c:ll:lla:la:reverse_fz
 
 #}}}
 #{{{ aliases
+
 [[ -f ~/.aliases ]] 	&& source ~/.aliases
 export MANPAGER="sh -c 'col -bx | bat -l man -p'"
 
@@ -68,8 +54,10 @@ pac() {
    sudo pacman -S $(pacman -Ssq | fzf -m --preview="pacman -Si {}"\
       --preview-window=:hidden --bind=space:toggle-preview)
 }
+
 #}}}
 #{{{ termux
+
 if [[ $(uname -o) = "Android" ]];then
    export NOTES="/sdcard/Noter"
    alias xdg-open="termux-open"
@@ -77,5 +65,6 @@ if [[ $(uname -o) = "Android" ]];then
    [[ $TERM =~ "screen" ]] ||
       exec tmux new -A -s termux
 fi
+
 #}}}
 # vim: fdm=marker
