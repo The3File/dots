@@ -23,9 +23,9 @@ set relativenumber
 set linebreak
 set autoindent
 set smartindent
-set shiftwidth=3
-set softtabstop=-1
-autocmd BufNewFile,BufRead * set shiftwidth=3
+"set noexpandtab
+autocmd BufNewFile,BufRead * set noexpandtab
+set tabstop=3
 set grepprg=grep\ -nH\ $*
 
 colorscheme wal
