@@ -11,7 +11,7 @@ FILE_EXTENSION_LOWER=$(echo ${FILE_EXTENSION} | tr '[:upper:]' '[:lower:]')
 
 # Settings
 export BAT_THEME="Sublime Snazzy"
-export BAT_STYLE="numbers,changes,snip,grid"
+export BAT_STYLE="numbers,changes,snip"
 
 handle_extension() {
     case "${FILE_EXTENSION_LOWER}" in

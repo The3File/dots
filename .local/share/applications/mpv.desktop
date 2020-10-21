@@ -1,4 +1,4 @@
 [Desktop Entry]
 Type=Application
-Name=Bash file browser
+Name=Terminal audio player
 Exec=/usr/local/bin/st -e mpv %u
