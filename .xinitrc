@@ -14,18 +14,18 @@ exec xset -dpms &
 exec xset s off &
 exec setxkbmap -layout dk -variant nodeadkeys -option caps:escape &
 
-# Daemons
-#exec picom --experimental-backends --config .config/compton.conf &
+# User apps
+exec picom --experimental-backends &
 exec xbanish -i Mod1 -i Mod4 &
 exec networkd-dispatcher &
 exec /usr/lib/kdeconnectd &
 exec dunst &
 exec acpid_events &
+exec bspswallow &
 exec greenclip daemon &
-exec sxhkd &
-
-# Wallpaper & colorscheme
 exec wal -Rtn &
 exec feh --bg-fill $HOME/.config/wall.png &
 
+# WM
+exec sxhkd &
 bspwm
