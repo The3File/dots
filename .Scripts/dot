@@ -5,7 +5,7 @@ git_do(){
 }
 
 commit(){
-	git_do commit -am "$changes"
+	git_do commit -am "$message"
 }
 
 push(){
