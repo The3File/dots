@@ -25,15 +25,26 @@ fav(){
    trap 'printf "\n"' EXIT
 
    printf '\e[H\e[2J\e[1;34m%s\n\e[0;34m%s\n%s\n%s\n%s\n\e[1;32m%s\e[0m'\
-      "backends:" "w: wal" "c: colorz" "h: haishoku" "t: colorthief" "choose > "
+      "backends:"\
+		"w: wal"\
+		"c: colorz"\
+		"h: haishoku"\
+		"t: colorthief"\
+		"choose > "
 
-   read -rsn1; [[ ! $REPLY ]] && exit
-   case $REPLY in w) backend="wal" ;; c) backend="colorz" ;;
-      h) backend="haishoku" ;; t) backend="colorthief" ;; *) exit
+   read -rs; [[ ! $REPLY ]] && exit
+   case $REPLY in
+		w) backend="wal" ;;
+		c) backend="colorz" ;;
+      h) backend="haishoku" ;;
+		t) backend="colorthief" ;;
+		*) exit 1
    esac
 
-   printf '%s' "$backend" > "$HOME/Billeder/favoritter/${1%.*}.backend"
-   cp "$1" "$HOME/Billeder/favoritter/${1##*/}"
+   [[ $backend ]] && {
+		printf '%s' "$backend" > "$HOME/Billeder/favoritter/${1%.*}.backend"
+   	cp "$1" "$HOME/Billeder/favoritter/${1##*/}"
+	}
 }
 
 main(){
