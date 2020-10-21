@@ -100,7 +100,10 @@ cmd new-script ${{
    }
 }}
 
-map bw change_wal
+
+map bf change_wal fav
+map bw change_wal sel
+
 cmd change_wal %{{
 	[[ -f "$fx" ]] || { printf "wal: $fx: not a picture"; exit; }
 	printf '\r%s' "backend: [c]olorthief color[z] [h]aishoku [w]al "
@@ -112,8 +115,14 @@ cmd change_wal %{{
 		h) backend="haishoku" ;;
 		*) exit
 	esac
-	wal --backend $backend -i "$fx"
-	. ~/.config/bspwm/bspwmrc config
+	case $1 in
+		fav) printf '%s' "$backend" >\
+			"$HOME/Billeder/favoritter/${1%.*}.backend"
+   		cp "$fx" "$HOME/Billeder/favoritter/${1##*/}"
+		;;
+		set) wal --backend $backend -i "$fx"
+			. ~/.config/bspwm/bspwmrc config
+	esac
 }}
 
 cmd new-text %[[ "$a" ]] && { reset_terminal; nvim "$a"; }
