@@ -20,8 +20,10 @@ reset_cursor(){
 
 parse_colons(){
    s="${1##*:}"
+
    : "${1%%:$s}"
    m="${_##*:}"
+
    : "${1%%$m:$s}"
    h="${_%:}"
 }
@@ -29,13 +31,19 @@ parse_colons(){
 completed(){
    printf '\r\e[K%s\e[m' "times up!"
    notify-send "${0//$HOME/\~}: $_"
-   play_bell
+
+   play_bell; wait_bell
+}
+
+wait_bell(){
+   read -rsn1
+   kill -9 $COPROC_PID
+   wait $_ &>/dev/null
 }
 
 play_bell(){
    bell="/usr/share/sounds/freedesktop/stereo/alarm-clock-elapsed.oga"
    coproc paplay $bell
-   while read -rsn1; do kill -9 $COPROC_PID; break; done
 }
 
 timer(){ 
