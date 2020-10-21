@@ -62,7 +62,7 @@ apps() { #{{{
    _start(){ "$1" "${o[@]}" &>/dev/null & disown || return 1
    printf '\e[37m%s: %s\n' "$1" "started"; }
 
-   for app in autogap dunstbar dunst acpid_events bspswallow
+   for app in autogap dunstbar dunst acpid_events
    do app_is_running="$(ps ax | sed -n "/nvim/d;/sed/d;/\<$app\>/p")"
    if [[ "$app_is_running" ]]
    then _restart $app || printf '\e[31m%s: %s\n' "$app" "restart failed"
@@ -105,10 +105,11 @@ done
 }
 
 #}}}
+
 main(){ #{{{
    xmodmap -e "keycode 135 = Super_R"
    source "$HOME/.cache/wal/colors.sh"
-   case $1 in 1|0) reason="$1"; shift; echo yes; esac
+	case $1 in 1|0) reason="$1"; shift; esac
 
    [[ "$1" ]] && {
       case "$1" in
