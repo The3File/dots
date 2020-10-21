@@ -1,19 +1,20 @@
 #!/usr/bin/env bash
 
 git_do(){
-   git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME "$@"
-}
-
-up(){
-   [[ $changes ]] && commit; push
+	git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME "$@"
 }
 
 commit(){
-   git_do commit -am "$changes"
+	git_do commit -am "$changes"
 }
 
 push(){
-   git_do push
+	[[ $changes ]] && commit
+	git_do push
+}
+
+case_opts(){ 
+	case $1 in up) push ;; *) git_do "$@"; esac
 }
 
 print_status(){
@@ -21,14 +22,6 @@ print_status(){
    [[ -z "$1" && ! -z $changes ]] && printf '%s\n' "$changes"
 }
 
-case_opts(){
-   case $1 in up) up ;; *) git_do "$@"; esac
-}
-
-main(){
-   [[ $1 ]] || exit
-   case_opts "$@"
-}
-
 print_status "$1"
-main "$@"
+[[ $1 ]] || exit
+case_opts "$@"
