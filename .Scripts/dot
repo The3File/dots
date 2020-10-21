@@ -5,6 +5,7 @@ git_do(){
 }
 
 commit(){
+	[[ "$message" ]] || message="$changes"
 	git_do commit -am "$message"
 }
 
@@ -14,7 +15,10 @@ push(){
 }
 
 case_opts(){ 
-	case $1 in up) push ;; *) git_do "$@"; esac
+	case $1 in
+		up) shift; message="$@"; push ;;
+		*) git_do "$@"
+	esac
 }
 
 print_status(){
@@ -24,14 +28,6 @@ print_status(){
 
 print_status "$1"
 
-opts=("$@")
-for opt in "${opts[@]}"; do
-	[[ $1 = up ]] || break
-	[[ $opt = -m ]] && m=1
-	((m>0)) && message="$opt"
-done
-
-[[ "$message" ]] || message="$changes"
 
 [[ $1 ]] || exit
 case_opts "$@"
