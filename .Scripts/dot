@@ -23,5 +23,14 @@ print_status(){
 }
 
 print_status "$1"
+
+opts=("$@")
+for opt in "${opts[@]}"; do
+	[[ $opt = -m ]] && m=1
+	((m>0)) && message="$opt"
+done
+
+[[ "$message" ]] || message="$changes"
+
 [[ $1 ]] || exit
 case_opts "$@"

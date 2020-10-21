@@ -1,79 +1,84 @@
 #!/usr/bin/env bash
 
 case_event(){
-   case $1 in
-      node_add) swallow "${evt[4]}" ;;
-      node_remove) spit "${evt[3]}" ;;
-   esac
+	case $1 in
+		node_add) swallow ;;
+		node_remove) spit ;;
+	esac
 }
 
 swallow() {
-   query_desktop || return 1
-   query_swallower "$1" || return 1
-   query_swallowing || return 1
-   hide_node
+	query_desktop || return 1
+	query_swallower || return 1
+	query_swallowing || return 1
+	hide_node
 }
 
 spit() {
-   query_spitter "$1" || return 1
-   query_spitting_desktop || pull_node_desktop
-   show_node
+	get_spitting
+	query_spitting_desktop || pull_node_desktop
+	show_node
 }
 
 query_desktop(){
-   last_desktop=$(bspc query -D -n last)
-   [[ "$desktop" = "$last_desktop" ]]
+	last_desktop=$(bspc query -D -n last)
+	[[ "$desktop" = "$last_desktop" ]] || false
 }
 
 query_swallower(){
-   swallower=$(probe $1)
-   read -r do_swallow <"$HOME/.config/bspwm/swallow"
-   [[ "$do_swallow" =~ $swallower ]]
+	do_swallow="Sxiv Zathura"
+	[[ "$do_swallow" =~ $(probe "$node_added") ]] || false
 }
 
-probe(){
-   xprop -id "$1" |\
-      sed -n '/WM_CLASS\|WM_COMMAND/s/.*"\(.*\)".*/\1/p'
-}
 query_swallowing(){
-   swallowing=$(probe "$1")
-   [[ "$swallowing" = "St" ]]
-}
-
-query_spitter(){
-   spitter=$1
-   grep "^$spitter" "$swallowed" &>/dev/null
-}
-
-query_spitting_desktop(){
-   spitting=$(grep "^$spitter" "$swallowed" |\
-      head -n1 | awk '{print $2}')
-   spitting_desktop=$(bspc query -D -n "$spitting")
-   [[ "$spitting_desktop" = "$desktop" ]]
+	[[ $(probe "$node_swallow") = "St" ]] || false
 }
 
 hide_node(){
-   bspc node "$swallowing" --flag hidden=on &&
-      echo "$swallower $swallowing" >> "$swallowed"
+	bspc node "$node_swallow" --flag hidden=on
+	swallowed+=("$node_added $node_swallow")
+	echo ${swallowed[@]}
+}
+
+query_spitting_desktop(){
+	spitting_desktop=$(bspc query -D -n "$node_spit")
+	[[ "$spitting_desktop" = "$desktop" ]] || false
+}
+
+get_spitting(){
+	for node in "${swallowed[@]}"; do
+		[[ "$node" =~ ^$node_removed ]] || continue
+		set $node; node_spit="$2"
+	done
 }
 
 show_node(){
-   bspc node "$spitting" --flag hidden=off
-   bspc node "$spitting" -f
-   sed -i "/^$spitter/d" "$swallowed"
+	bspc node "$node_spit" --flag hidden=off
+	bspc node "$node_spit" -f
+	unset 'swallowed[i]'
 }
 
 pull_node_desktop(){
-   bspc node "$spitting" -d "$spitting_desktop"
+	bspc node "$node_spit" -d "$desktop"
+}
+
+probe(){
+	xprop -id "$1" | sed -n '/WM_CLASS\|WM_COMMAND/s/.*"\(.*\)".*/\1/p'
+}
+
+define_events(){
+	node_swallow="$4"
+	node_added="$5"
+	node_removed="$4"
+	desktop="$3"
 }
 
 main(){
-   bspc subscribe node_add node_remove |
-   while read -r -a evt; do
-      swallowed="/tmp/swallowed"
-      desktop="${evt[2]}"
-      case_event "${evt[0]}"
-   done
+	while read -r -a evt; do
+		define_events "${evt[@]}"
+		case_event "${evt[0]}"
+		echo > $GAPFIFO
+	done < <(bspc subscribe node_add node_remove)
 }
 
 main

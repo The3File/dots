@@ -15,7 +15,7 @@ call plug#end()"}}}
 "
 filetype plugin indent on
 syntax enable
-set title titlestring=titlestring
+set title titlestring=nvim
 set clipboard=unnamedplus
 set nohlsearch
 set number
