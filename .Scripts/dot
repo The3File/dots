@@ -9,7 +9,6 @@ commit(){
 }
 
 push(){
-	get_message
 	[[ $changes ]] && commit
 	git_do push
 }
