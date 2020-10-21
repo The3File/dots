@@ -79,6 +79,7 @@ cmd trash %{{
       printf "deleted"
    }
 }}
+
 cmd trash-clear %{{
    printf "clear trash? [y/n]: "
    read -rsn1 a
@@ -97,6 +98,22 @@ cmd new-script ${{
       }
    nvim "$a"
    }
+}}
+
+map bw change_wal
+cmd change_wal %{{
+	[[ -f "$fx" ]] || { printf "wal: $fx: not a picture"; exit; }
+	printf '\r%s' "backend: [c]olorthief color[z] [h]aishoku [w]al "
+	read -rsn1 backend
+	case $backend in
+		c) backend="colorthief" ;;
+		w) backend="wal" ;;
+		z) backend="colorz" ;;
+		h) backend="haishoku" ;;
+		*) exit
+	esac
+	wal --backend $backend -i "$fx"
+	. ~/.config/bspwm/bspwmrc config
 }}
 
 cmd new-text %[[ "$a" ]] && { reset_terminal; nvim "$a"; }
