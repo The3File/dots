@@ -32,12 +32,16 @@ parse_colons(){
 completed(){
    printf '\r\e[K%s\e[m\n' "times up!"
    notify-send "${0//$HOME/\~}: $_"
-
-   play_bell; wait_bell
+	bell
 }
 
-wait_bell(){
-   read -rsn1
+bell(){
+   play_bell
+	read -rsn1
+	kill_bell
+}
+
+kill_bell(){
    kill -9 $COPROC_PID
    wait $_ &>/dev/null
 }
@@ -53,9 +57,9 @@ timer(){
       ((time=SECONDS,seconds=$count_down(time-start_time)))
       printf '\e[1;34m\r\e[K%02d:%02d:%02d' "$((seconds/3600))"\
          "$((seconds/60%60))" "$((seconds%60))"
-         [[ $seconds -lt 0 ]] && { completed; break; }
-         sleep 1
-      }
+		[[ $seconds -lt 0 ]] && { completed; break; }
+		sleep 1
+	}
 }
 
 get_opts(){
@@ -68,9 +72,9 @@ get_opts(){
             *[0-9]'s') ((count_down+=${1%s})) ;;
             '') count_down="" ;;
             *) usage "$1"; exit 1
-         esac; shift
-      done
-      [[ $count_down ]] && count_down+="-"
+		esac; shift
+	done
+	[[ $count_down ]] && count_down+="-"
 }
 
 main(){
