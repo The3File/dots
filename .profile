@@ -15,5 +15,13 @@ export GAPFIFO="/tmp/gap-fifo"
 export BARFIFO="/tmp/bar-fifo"
 export WORKFIFO="/tmp/work-fifo"
 
+if [[ $(uname -o) = "Android" ]];then
+   export NOTES="/sdcard/Noter"
+   alias xdg-open="termux-open"
+	alias notify-send="termux-notification -c"
+   [[ $TERM =~ "screen" ]] ||
+      exec tmux new -A -s termux
+fi
+
 [[ -f ~/.bashrc ]] && source ~/.bashrc
 [[ ! $DISPLAY && $XDG_VTNR -eq 1 ]] && exec startx &>/dev/null

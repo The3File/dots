@@ -56,15 +56,4 @@ pac() {
 }
 
 #}}}
-#{{{ termux
-
-if [[ $(uname -o) = "Android" ]];then
-   export NOTES="/sdcard/Noter"
-   alias xdg-open="termux-open"
-   notify-send(){ termux-notification -c "$1";}
-   [[ $TERM =~ "screen" ]] ||
-      exec tmux new -A -s termux
-fi
-
-#}}}
 # vim: fdm=marker
