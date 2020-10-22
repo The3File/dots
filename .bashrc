@@ -20,6 +20,8 @@ shopt -s dirspell 2> /dev/null
 shopt -s cdspell 2> /dev/null
 shopt -s expand_aliases
 
+timer="$HOME/Projekter/scripts/timer"
+
 #}}}
 #{{{ history
 
