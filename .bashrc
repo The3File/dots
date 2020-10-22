@@ -7,7 +7,7 @@ set -o vi
 
 [[ -f ~/.bash_prompt ]] && source ~/.bash_prompt
 
-export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+export MANPAGER="bat -l man -p --"
 PROMPT_DIRTRIM=2
 
 bind Space:magic-space
@@ -29,6 +29,8 @@ HISTSIZE=500000
 HISTFILESIZE=100000
 HISTCONTROL="erasedups:ignoreboth"
 HISTIGNORE="&:[ ]*:exit:ls:bg:fg:history:history -r:clear:c:ll:lla:la:reverse_fzf_history:fuzzy_cd:fuzzy_kill"
+#read -r tac "$HISTFILE" | awk '!x[$0]++' > /tmp/tmpfile  && f $(< "$hist")
+
 
 #}}}
 #{{{ aliases
