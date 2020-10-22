@@ -7,11 +7,8 @@ set -o vi
 
 [[ -f ~/.bash_prompt ]] && source ~/.bash_prompt
 
-<<<<<<< HEAD
 export MANPAGER="sh -c 'col -bx | bat -l man -p --paging always'"
-=======
 export MANPAGER="bat -l man -p --"
->>>>>>> 437ca0969ca51fc60747f8da29519531812823b5
 PROMPT_DIRTRIM=2
 
 bind Space:magic-space
