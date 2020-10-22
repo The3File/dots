@@ -7,7 +7,11 @@ set -o vi
 
 [[ -f ~/.bash_prompt ]] && source ~/.bash_prompt
 
+<<<<<<< HEAD
 export MANPAGER="sh -c 'col -bx | bat -l man -p --paging always'"
+=======
+export MANPAGER="bat -l man -p --"
+>>>>>>> 437ca0969ca51fc60747f8da29519531812823b5
 PROMPT_DIRTRIM=2
 
 bind Space:magic-space
@@ -20,6 +24,8 @@ shopt -s dirspell 2> /dev/null
 shopt -s cdspell 2> /dev/null
 shopt -s expand_aliases
 
+timer="$HOME/Projekter/scripts/timer"
+
 #}}}
 #{{{ history
 
@@ -29,6 +35,8 @@ HISTSIZE=500000
 HISTFILESIZE=100000
 HISTCONTROL="erasedups:ignoreboth"
 HISTIGNORE="&:[ ]*:exit:ls:bg:fg:history:history -r:clear:c:ll:lla:la:reverse_fzf_history:fuzzy_cd:fuzzy_kill"
+#read -r tac "$HISTFILE" | awk '!x[$0]++' > /tmp/tmpfile  && f $(< "$hist")
+
 
 #}}}
 #{{{ aliases
@@ -54,17 +62,6 @@ pac() {
    sudo pacman -S $(pacman -Ssq | fzf -m --preview="pacman -Si {}"\
       --preview-window=:hidden --bind=space:toggle-preview)
 }
-
-#}}}
-#{{{ termux
-
-if [[ $(uname -o) = "Android" ]];then
-   export NOTES="/sdcard/Noter"
-   alias xdg-open="termux-open"
-   notify-send(){ termux-notification -c "$1";}
-   [[ $TERM =~ "screen" ]] ||
-      exec tmux new -A -s termux
-fi
 
 #}}}
 # vim: fdm=marker
