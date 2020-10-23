@@ -17,7 +17,6 @@ export WORKFIFO="/tmp/work-fifo"
 
 if [[ $(uname -o) = "Android" ]];then
    export NOTES="/sdcard/Noter"
-	export MANPAGER="less"
    alias xdg-open="termux-open"
 	alias notify-send="termux-notification -c"
    [[ $TERM =~ "screen" ]] ||
