@@ -23,5 +23,6 @@ if [[ $(uname -o) = "Android" ]];then
       exec tmux new -A -s termux
 fi
 
+dot pull
 [[ -f ~/.bashrc ]] && source ~/.bashrc
 [[ ! $DISPLAY && $XDG_VTNR -eq 1 ]] && exec startx &>/dev/null
