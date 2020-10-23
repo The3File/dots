@@ -10,6 +10,8 @@ Plug 'gioele/vim-autoswap'
 Plug 'sheerun/vim-polyglot'
 Plug 'neomake/neomake'
 Plug 'kovetskiy/sxhkd-vim'
+Plug 'plasticboy/vim-markdown'
+"Plug 'gabrielelana/vim-markdown'
 call plug#end()"}}}
 " Options{{{
 "
@@ -32,7 +34,7 @@ colorscheme wal
 "colorscheme zellner
 "colorscheme default
 
-autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown"}}}
+"autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown"}}}
 " Bindings{{{
 
 " GLOBAL{{{
