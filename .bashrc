@@ -20,8 +20,6 @@ shopt -s dirspell 2> /dev/null
 shopt -s cdspell 2> /dev/null
 shopt -s expand_aliases
 
-timer="$HOME/Projekter/scripts/timer"
-
 #}}}
 #{{{ history
 
@@ -35,9 +33,11 @@ HISTIGNORE="&:[ ]*:exit:ls:bg:fg:history:history -r:clear:c:ll:lla:la:reverse_fz
 
 
 #}}}
-#{{{ aliases
+#{{{ shortcuts
 
 [[ -f ~/.aliases ]] 	&& source ~/.aliases
+
+for dir in ~/Projekter/*;{ [[ -d $dir ]] && declare "${dir##*/}"="$dir"; }
 
 reverse_fzf_history(){
    local cmd="$(history | sort -nr | fzf --height 40% --reverse | cut -d ' ' -f 4-)"
