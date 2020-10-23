@@ -15,7 +15,7 @@ bind "set show-all-if-ambiguous on"
 
 shopt -s globstar 2> /dev/null
 shopt -s cmdhist
-shopt -s autocd 2> /dev/null
+shopt -s autocd 2>/dev/null
 shopt -s dirspell 2> /dev/null
 shopt -s cdspell 2> /dev/null
 shopt -s expand_aliases
