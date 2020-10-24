@@ -3,49 +3,49 @@
 reset(){ printf '\e[?25l\e[2J\e[H'; }
 
 execute(){
-   case $1 in
-       poweroff) poweroff ;;
-         reboot) reboot ;;
-   "exit shell") bspc quit || killall xinit ;;
-   esac
+	case $1 in
+		poweroff) poweroff ;;
+		reboot) reboot ;;
+		"exit shell") bspc quit || killall xinit ;;
+	esac
 }
 
 confirm(){
-   printf '\e[%sH\e[2J%s\e[?25h\n\e[2C' "$((p+1))"
-   read -rsn1 -p $'\e[7m'"${o[p]}? [y/N] "$'\e[m'
-   case_confirm "$REPLY"
+	printf '\e[%sH\e[2J%s\e[?25h\n\e[2C' "$((p+1))"
+	read -rsn1 -p $'\e[7m'"${o[p]}? [y/N] "$'\e[m'
+	case_confirm "$REPLY"
 }
 
 case_confirm(){
-   case $1 in
-      y|Y) execute "${o[p]}" ;;
-      $'\033'|n|N) break ;;
-      q) exit 0 ;;
-   esac
+	case $1 in
+		y|Y) execute "${o[p]}" ;;
+		$'\033'|n|N) break ;;
+		q) exit 0 ;;
+	esac
 }
 
 printl(){
-   for i in {0..3}; do
-      case $i in
-         $p) printf '\n\e[2C\e[7m%s \e[m' "${o[i]}" ;;
-         *) printf '\n\e[2C%s' "${o[i]}"
-      esac
-   done
+	for i in {0..3}; do
+		case $i in
+			$p) printf '\n\e[2C\e[7m%s \e[m' "${o[i]}" ;;
+			*) printf '\n\e[2C%s' "${o[i]}"
+		esac
+	done
 }
 
 case_key(){
-   case $1 in
-   	k) ((p>0))&&((p--)) ;;
-   	j) ((p<${#o[@]}-1))&&((p++)) ;;
-   	l) confirm ;;
-	 q|h) exit 0 ;;
-   esac
+	case $1 in
+		k) ((p>0))&&((p--)) ;;
+		j) ((p<${#o[@]}-1))&&((p++)) ;;
+		l) confirm ;;
+		q) exit 0 ;;
+	esac
 }
 
 main(){
-   trap "printf '\e[m\e[2J\e[H\e[?25h'" EXIT
+	trap "printf '\e[m\e[2J\e[H\e[?25h'" EXIT
 	p=0;o=("poweroff" "reboot" "exit shell")
-   for((;;)){ reset; printl; read -rsn1 key; case_key "$key"; }
+	for((;;)){ reset; printl; read -rsn1 key; case_key "$key"; }
 }
 
 main
