@@ -30,9 +30,10 @@ autocmd BufNewFile,BufRead * set noexpandtab
 set tabstop=3
 set grepprg=grep\ -nH\ $*
 
-colorscheme wal
+"colorscheme wal
 "colorscheme zellner
 "colorscheme default
+colorscheme delek
 
 "autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown"}}}
 " Bindings{{{
