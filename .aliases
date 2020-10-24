@@ -26,6 +26,7 @@ alias fuzzy_kill="ps aux | sort | fzf | awk '{print $2}' | xargs -r kill -9"
 # }}}
 ## QOL{{{
 alias here="st &>/dev/null &disown"
+alias graph="git log --all --decorate --oneline --graph"
 alias es="expressvpn status"
 alias ec="expressvpn connect"
 alias ed="expressvpn disconnect"
