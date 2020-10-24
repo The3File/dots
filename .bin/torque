@@ -23,8 +23,8 @@ get_torrents() {
    t=("${t[@]//     None/0 MB}")
 
    for((i=${k:=0};i<(j=j>${#t[@]}?${#t[@]}:j);i++));{ t_print "${t[i]/n\/a/0}";}
-      #status "[s]tart pau[S]e [r]emove [a]dd [j/k] scroll ($j/${#t[@]})"$'\e[H'
-      status $'\e[H'
+      status "[s]tart pau[S]e [r]emove [a]dd [j/k] scroll ($j/${#t[@]})"$'\e[H'
+      #status $'\e[H'
 }
 
 t_print() {
@@ -64,7 +64,7 @@ main() {
 }
 
 transmission-daemon && printf '%s\n' "Launching daemon"
-
-while [[ -z $(pgrep transmission-da) ]]; do continue; done
+sleep 2
+#while ! pgrep transmission-da &>/dev/null; do read -rs -t 2 -p $'\r\e[K'"Launching daemon";done
 
 main

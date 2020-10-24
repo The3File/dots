@@ -12,7 +12,7 @@ execute(){
 
 confirm(){
    printf '\e[%sH\e[2J%s\e[?25h\n\e[2C' "$((p+1))"
-   read -rsn1 -p "${o[p]}? [y/N] "
+   read -rsn1 -p $'\e[7m'"${o[p]}? [y/N] "$'\e[m'
    case_confirm "$REPLY"
 }
 
@@ -27,25 +27,41 @@ case_confirm(){
 printl(){
    for i in {0..3}; do
       case $i in
-         $p) printf '\n\e[2C\e[7m%s\e[m' "${o[i]}" ;;
+         $p) printf '\n\e[2C\e[7m%s \e[m' "${o[i]}" ;;
          *) printf '\n\e[2C%s' "${o[i]}"
       esac
    done
 }
 
 case_key(){
+	up(){ ((p>0))&&((p--));}
+	down(){ ((p<${#o[@]}-1))&&((p++));}
    case $1 in
-   $'\101'|k) ((p>0))&&((p--)) ;;
-   $'\102'|j) ((p<${#o[@]}-1))&&((p++)) ;;
+   k) up ;;
+   j) down ;;
         ''|l) confirm ;;
-   $'\033'|q|h) exit 0
+   		q|h) exit 0 ;;
+	$'\x1b') # ESC
+		read -rsn1 k
+		[ "$k" == "" ] && return    # Esc-Key
+		[ "$k" == "[" ] && read -rsn1 k
+		[ "$k" == "O" ] && read -rsn1 k
+		case "$k" in
+			A) up
+				# Routine for handling arrow-up-key
+				;;
+			B) down
+				# Routine for handling arrow-down-key
+				;;
+		esac
    esac
+	read -rsn4 -t .1
 }
 
 main(){
    trap "printf '\e[m\e[2J\e[H\e[?25h'" EXIT
-	o=("poweroff" "reboot" "exit shell")
-   for((;;)){ reset; printl; read -rsn1 key; case_key "$key"; }
+	p=0;o=("poweroff" "reboot" "exit shell")
+   for((;;)){ reset; printl; read -rsn2 key; case_key "$key"; }
 }
 
 main
