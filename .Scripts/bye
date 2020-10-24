@@ -34,26 +34,11 @@ printl(){
 }
 
 case_key(){
-	up(){ ((p>0))&&((p--));}
-	down(){ ((p<${#o[@]}-1))&&((p++));}
    case $1 in
-   k) up ;;
-   j) down ;;
-        ''|l) confirm ;;
-   		q|h) exit 0 ;;
-	$'\x1b') # ESC
-		read -rsn1 k
-		[ "$k" == "" ] && return    # Esc-Key
-		[ "$k" == "[" ] && read -rsn1 k
-		[ "$k" == "O" ] && read -rsn1 k
-		case "$k" in
-			A) up
-				# Routine for handling arrow-up-key
-				;;
-			B) down
-				# Routine for handling arrow-down-key
-				;;
-		esac
+   	k) ((p>0))&&((p--)) ;;
+   	j) ((p<${#o[@]}-1))&&((p++)) ;;
+   	l) confirm ;;
+	 q|h) exit 0 ;;
    esac
 	read -rsn4 -t .1
 }
