@@ -40,13 +40,12 @@ case_key(){
    	l) confirm ;;
 	 q|h) exit 0 ;;
    esac
-	read -rsn4 -t .1
 }
 
 main(){
    trap "printf '\e[m\e[2J\e[H\e[?25h'" EXIT
 	p=0;o=("poweroff" "reboot" "exit shell")
-   for((;;)){ reset; printl; read -rsn2 key; case_key "$key"; }
+   for((;;)){ reset; printl; read -rsn1 key; case_key "$key"; }
 }
 
 main
