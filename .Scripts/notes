@@ -2,7 +2,7 @@
 
 fz(){ fzf --ansi --height 40% --reverse "$@";}
 
-editor(){ nvim +"set ft=markdown" +"Goyo" "$@";}
+editor(){ nvim +"set ft=markdown" "$@";}
 
 new(){
    cd "$NOTES"

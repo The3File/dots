@@ -26,13 +26,13 @@ query_desktop(){
 }
 
 query_swallower(){
-	swallowers="Sxiv Zathura"
-	[[ "$swallowers" =~ $(probe "$node_added") ]] || false
+	: ${SWALLOW_APPLICATIONS:-$apps}
+	[[ "$_" =~ $(probe "$node_added") ]] || false
 }
 
 query_swallowing(){
-	do_swallow="St"
-	[[ "$do_swallow" =~ $(probe "$node_swallow") ]] || false
+	: "${SWALLOW_TERMINAL:-$terminals}"
+	[[ "$_" =~ $(probe "$node_swallow") ]] || false
 }
 
 hide_node(){
@@ -72,7 +72,17 @@ define_events(){
 	desktop=$3
 }
 
+get_default(){
+	for app in "image/*" "application/pdf" "video/*"; do
+		: "$(xdg-mime query default $app)"
+		: ${_%.*}
+		apps+="${_^}"
+	done
+	terminals="St Urxvt Kitty"
+}
+
 main(){
+	get_default
 	while read -r -a evt; do
 		define_events "${evt[@]}"
 		case_event "${evt[0]}"
