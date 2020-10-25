@@ -10,7 +10,6 @@ start_cast(){
 get_prog(){
    query_progfile || return 1
    read_progfile
-   parse_prog
 }
 
 query_progfile(){
@@ -19,13 +18,9 @@ query_progfile(){
 }
 
 read_progfile(){
-   read -r prog < "$progfile"
-   printf '%s\n' "found prog file: $progfile ($prog)"
-}
-
-parse_prog(){
-   IFS=':' read -r -d '' h m s <<< "$prog"
+   IFS=':' read -r -d '' h m s < "$progfile"
    ((prog=(h*60*60)+(m*60)+s))
+	printf '%s (%02d:%02d:%02d)\n' "found prog file: $progfile" "$((prog/3600))" "$((prog/60%60))" "$((prog%60))"
    o+=("--seek" "$prog")
 }
 
@@ -39,7 +34,7 @@ write_prog(){
 
 case_prog_save(){
    case "$1" in 
-      y|Y) printf '%02d:%02d:%02d\n' "$((sec/3600))"\
+      y|Y) printf '%2d:%2d:%2d\n' "$((sec/3600))"\
          "$((sec/60%60))" "$((sec%60))" > "$progfile" ;;
      *) printf '%s\n' "Proggress not saved."
   esac
