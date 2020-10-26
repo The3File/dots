@@ -1,29 +1,29 @@
 #!/usr/bin/env bash
 
 main(){
-   if [[ "$biggest" = "$focused" ]]
-   then get_smaller
-   else move_biggest; fi
+	if [[ "$biggest" = "$focused" ]]
+	then get_smaller
+	else move_biggest; fi
 }
 
 read_leafs(){
-   IFS=$'\n' read -r -d '' -a leafs <\
-   <(bspc query -N -n .leaf.local.tiled)
+	IFS=$'\n' read -r -d '' -a leafs <\
+	<(bspc query -N -n .leaf.local.!hidden.tiled)
 }
 
 query_nodes(){
-   focused="$(bspc query -N -n focused.local)"
-   biggest="$(bspc query -N -n biggest.local)"
+	focused="$(bspc query -N -n focused.local.!hidden.window)"
+	biggest="$(bspc query -N -n biggest.local.!hidden.window)"
 }
 
 get_smaller(){
-   bspc node -s "${leafs[1]}"
-   bspc node -f biggest.local
+	bspc node -s "${leafs[1]}"
+	bspc node -f biggest.local.!hidden
 }
 
 move_biggest(){
-   bspc node -n biggest.local -s "${leafs[1]}"
-   bspc node -s biggest.local --follow
+	bspc node -n biggest.local.!hidden -s "${leafs[1]}"
+	bspc node -s biggest.local.!hidden --follow
 }
 
 read_leafs
