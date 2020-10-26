@@ -11,15 +11,16 @@ execute(){
 }
 
 confirm(){
-	printf '\e[%sH\e[2J%s\e[?25h\n\e[2C' "$((p+1))"
-	read -rsn1 -p $'\e[1m'"${o[p]}? [y/N] "$'\e[m'
+	printf '\e[%sH\e[2J%s\n\e[2C' "$((p+1))"
+	read -rsn1 -p $'\e[1m'"> ${o[p]} ?"$'\e[m'
 	case_confirm "$REPLY"
 }
 
 case_confirm(){
 	case $1 in
+		k) ((p=p>0?p-1:2)) ;;
+		j) ((p=p<${#o[@]}-1?p+1:0)) ;;
 		y|Y) execute "${o[p]}" ;;
-		$'\033'|n|N) break ;;
 		q) exit 0 ;;
 	esac
 }
@@ -27,7 +28,7 @@ case_confirm(){
 printl(){
 	for i in {0..3}; do
 		case $i in
-			$p) printf '\n\e[2C\e[1m%s \e[m' "${o[i]}" ;;
+			$p) printf '\n\e[2C\e[1m> %s\e[m' "${o[i]}" ;;
 			*) printf '\n\e[2C%s' "${o[i]}"
 		esac
 	done
@@ -35,10 +36,10 @@ printl(){
 
 case_key(){
 	case $1 in
-		k) ((p>0))&&((p--)) ;;
-		j) ((p<${#o[@]}-1))&&((p++)) ;;
+		k) ((p=p>0?p-1:2)) ;;
+		j) ((p=p<${#o[@]}-1?p+1:0)) ;;
 		l) confirm ;;
-		q) exit 0 ;;
+		$'\x1b'|q) exit 0 ;;
 	esac
 }
 
