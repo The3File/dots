@@ -12,7 +12,7 @@ execute(){
 
 confirm(){
 	printf '\e[%sH\e[2J%s\e[?25h\n\e[2C' "$((p+1))"
-	read -rsn1 -p $'\e[7m'"${o[p]}? [y/N] "$'\e[m'
+	read -rsn1 -p $'\e[1m'"${o[p]}? [y/N] "$'\e[m'
 	case_confirm "$REPLY"
 }
 
@@ -27,7 +27,7 @@ case_confirm(){
 printl(){
 	for i in {0..3}; do
 		case $i in
-			$p) printf '\n\e[2C\e[7m%s \e[m' "${o[i]}" ;;
+			$p) printf '\n\e[2C\e[1m%s \e[m' "${o[i]}" ;;
 			*) printf '\n\e[2C%s' "${o[i]}"
 		esac
 	done
