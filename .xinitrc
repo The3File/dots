@@ -21,7 +21,6 @@ exec networkd-dispatcher &
 exec /usr/lib/kdeconnectd &
 exec dunst &
 exec acpid_events &
-exec swallow &
 exec greenclip daemon &
 exec wal -Rtn &
 exec feh --bg-fill $HOME/.config/wall.png &
