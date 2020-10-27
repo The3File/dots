@@ -41,7 +41,7 @@ read_confirm(){
 
 case_confirm(){
 	case $1 in
-		y) execute "${o[p]}" ;;
+		y) execute "${o[p]}"; exit 0 ;;
 		q) exit 0 ;;
 		*) return ;;
 	esac
