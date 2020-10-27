@@ -7,7 +7,7 @@ execute(){
 	case $1 in
 		poweroff) poweroff ;;
 		reboot) reboot ;;
-		"exit shell") bspc quit || killall xinit ;;
+		"exit shell") killall xinit ;;
 	esac
 }
 
