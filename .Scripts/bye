@@ -10,18 +10,39 @@ execute(){
 	esac
 }
 
+animate_in(){
+	printf '\e[%sH\e[2C' "$((p+2))"
+	for i in "> $t" ">$t" "$t>" "$t " ;{ printf '\r\e[2C\e[m\e[1;33m%s\e[s' "$i"; read -t $at; }
+	for i in ">" " " y "|" n " ";{ tr+=$i; printf '\e[u%s' "$tr"; read -t $at; }
+}
+
+animate_out(){
+	printf '\e[?25l\e[%sD' "${#tr}"
+	for ((i=-4;i<=${#tr};i++)){ tr=${tr%?}; printf '\e[K%s\e[%sD' "$tr" "${#tr}"; read -t $at; }
+	for i in "$t >" "$t>" ">$t " "> $t" ;{ printf '\r\e[2C\e[1m%s\e[s\e[m' "$i"; read -t $at; }
+}
+
 confirm(){
-	printf '\e[%sH\e[2J%s\n\e[2C' "$((p+1))"
-	read -rsn1 -p $'\e[1m'"> ${o[p]} ?"$'\e[m'
-	case_confirm "$REPLY"
+	t="${o[p]}"
+	at="0.03"
+	st="2"
+	reset
+	printl
+	animate_in
+	read_confirm
+	animate_out
+}
+
+read_confirm(){
+	read -rsn1 -p $'\e[?25h'
+	case_confirm $REPLY
 }
 
 case_confirm(){
 	case $1 in
-		k) ((p=p>0?p-1:2)) ;;
-		j) ((p=p<${#o[@]}-1?p+1:0)) ;;
-		y|Y) execute "${o[p]}" ;;
+		y) execute "${o[p]}" ;;
 		q) exit 0 ;;
+		*) return ;;
 	esac
 }
 
@@ -29,24 +50,24 @@ printl(){
 	for i in {0..3}; do
 		case $i in
 			$p) printf '\n\e[2C\e[1m> %s\e[m' "${o[i]}" ;;
-			*) printf '\n\e[2C%s' "${o[i]}"
+			*) printf '\n\e[%sm\e[2C%s' "$st" "${o[i]}"
 		esac
 	done
 }
 
 case_key(){
 	case $1 in
-		k) ((p=p>0?p-1:2)) ;;
-		j) ((p=p<${#o[@]}-1?p+1:0)) ;;
+		k) ((p=p>0?p-1:0)) ;;
+		j) ((p=p<${#o[@]}-1?p+1:2)) ;;
 		l) confirm ;;
-		$'\x1b'|q) exit 0 ;;
+		$'\x1b'|q|h) exit 0 ;;
 	esac
 }
 
 main(){
 	trap "printf '\e[m\e[2J\e[H\e[?25h'" EXIT
 	p=0;o=("poweroff" "reboot" "exit shell")
-	for((;;)){ reset; printl; read -rsn1 key; case_key "$key"; }
+	for((;;)){ st="0";reset; printl; read -rsn1 key; case_key "$key"; }
 }
 
 main
