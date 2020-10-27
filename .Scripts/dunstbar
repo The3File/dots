@@ -8,12 +8,12 @@ kill_loop(){
 }
 
 bar(){
-   while read -r event; do
-      #w=$(bspc query -N -n .local.\!hidden.window)
-      #((w<=0)) && loop & loop="$!"
-      [[ "$event" =~ remove ]] || kill_loop
-      [[ "$event" =~ focus ]] && print_ws
-   done < "$BARFIFO"
+   #while read -r event; do
+      w=$(bspc query -N -n .local.\!hidden.window)
+   #   ((w<=0)) && loop & loop="$!"
+   #   [[ "$event" =~ remove ]] || kill_loop
+   #   [[ "$event" =~ focus ]] && print_ws
+   #done < "$BARFIFO"
 }
 
 barnot(){
@@ -22,6 +22,7 @@ barnot(){
       -d) get_date; out=("$dy, $d" "<b>($dt)</b>") ;;
       -b) out=( "$(light | awk -F"." '{print $1}')%") ;;
       -v) get_volume && out=(" ($volume)") || out=(" $volume ") ;;
+		-w) print_ws ;;
       -o) get_bat; get_net
 	  out=("" "$bat | $net | <b>$(date '+%R')</b>") || exit 1
    esac

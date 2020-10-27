@@ -7,20 +7,20 @@ execute(){
 	case $1 in
 		poweroff) poweroff ;;
 		reboot) reboot ;;
-		"exit shell") bspc quit || killall xinit ;;
+		"exit shell") killall xinit ;;
 	esac
 }
 
 animate_in(){
 	printf '\e[%sH\e[2C' "$((p+2))"
-	for i in "> $t" ">$t" "$t>" "$t " ;{ printf '\r\e[2C\e[m\e[1;33m%s\e[s' "$i"; read -t $at; }
+	for i in "> $t" ">$t" "$t>" "$t " ;{ printf '\r\eK\e[2C\e[m\e[1m%s\e[s' "$i"; read -t $at; }
 	for i in ">" " " y "|" n " ";{ tr+=$i; printf '\e[u%s' "$tr"; read -t $at; }
 }
 
 animate_out(){
 	printf '\e[?25l\e[%sD' "${#tr}"
 	for ((i=-4;i<=${#tr};i++)){ tr=${tr%?}; printf '\e[K%s\e[%sD' "$tr" "${#tr}"; read -t $at; }
-	for i in "$t >" "$t>" ">$t " "> $t" ;{ printf '\r\e[2C\e[1m%s\e[s\e[m' "$i"; read -t $at; }
+	for i in "$t >" "$t>" ">$t " "> $t" ;{ printf '\r\e[K\e[2C\e[1m%s\e[s\e[m' "$i"; read -t $at; }
 }
 
 confirm(){
@@ -41,7 +41,7 @@ read_confirm(){
 
 case_confirm(){
 	case $1 in
-		y) execute "${o[p]}" ;;
+		y) execute "${o[p]}"; exit 0 ;;
 		q) exit 0 ;;
 		*) return ;;
 	esac
@@ -60,7 +60,7 @@ case_key(){
 	case $1 in
 		k) ((p=p>0?p-1:0)) ;;
 		j) ((p=p<${#o[@]}-1?p+1:2)) ;;
-		l) confirm ;;
+		''|l) confirm ;;
 		$'\x1b'|q|h) exit 0 ;;
 	esac
 }
