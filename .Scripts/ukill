@@ -7,7 +7,7 @@ _kill(){
    for((;;)){ IFS=$' ' read -d '' -r -a p < \
       <(ps ax | sed -n "/vim/d;/ukill/d;/.*\<"$a"\>.*/p");
    ((p)) || break
-   kill -9 "${p[0]}" && echo "[$p] killed" || exit 1; }
+   kill -2 "${p[0]}" && echo "[$p] killed" || exit 1; }
 }
 
 main(){
