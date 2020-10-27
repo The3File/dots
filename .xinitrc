@@ -20,6 +20,9 @@ exec xbanish -i Mod1 -i Mod4 &
 exec networkd-dispatcher &
 exec /usr/lib/kdeconnectd &
 exec dunst &
+exec swallow &
+exec autogap &
+exec dunstbar &
 exec acpid_events &
 exec greenclip daemon &
 exec wal -Rtn &
