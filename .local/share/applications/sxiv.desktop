@@ -1,4 +1,4 @@
 [Desktop Entry]
 Type=Application
 Name=feh image viewer
-Exec=/usr/bin/sxiv %u
+Exec=/usr/bin/sxiv -b %u
