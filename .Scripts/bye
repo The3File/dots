@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# i need to go to bed
 
 reset(){ printf '\e[?25l\e[2J\e[H'; }
 
