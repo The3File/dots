@@ -22,6 +22,12 @@ sync(){
    [[ -z "$status" ]] && pull || push
 }
 
+show(){
+   [[ "$NOTES" ]] || return 1
+   cd "$NOTES"; fd -d 2 -c always .
+   exec $SHELL # creates a subshell in PWD
+}
+
 push(){
    git add .; git commit -m "$status"
    git push -u origin master
@@ -43,7 +49,7 @@ print_tags(){
 }
 
 print_opts(){
-   opts=("new" "sync" "edit")
+   opts=("new" "sync" "edit" "show")
    printf '%s\n' "${opts[@]}"
 }
 
@@ -54,7 +60,7 @@ get_opts(){
 
 main(){
    get_opts $1 || exit
-   case $opt in new) new ;; sync) sync ;; edit) edit; esac
+   eval $opt
 }
 
 main "$@"
