@@ -23,9 +23,9 @@ sync(){
 }
 
 show(){
-   [[ "$NOTES" ]] || return 1
-   cd "$NOTES"; fd -d 2 -c always .
-   exec $SHELL # creates a subshell in PWD
+   [[ "$NOTES" ]] && cd "$NOTES" || return 1
+   printf '%s\n' "entering subshell, ctrl+d to return"
+   tree -C; exec $SHELL
 }
 
 push(){

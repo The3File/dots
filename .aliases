@@ -21,7 +21,7 @@ alias x="extract"
 alias spe="speedtest"
 alias vim="nvim"
 alias nts="notes"
-alias sv="svim"
+alias s="svim"
 alias fuzzy_kill="ps aux | sort | fzf | awk '{print $2}' | xargs -r kill -9"
 # }}}
 ## QOL{{{
