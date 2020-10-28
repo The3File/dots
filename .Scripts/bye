@@ -24,14 +24,8 @@ animate_out(){
 }
 
 confirm(){
-	t="${o[p]}"
-	at="0.03"
-	st="2"
-	reset
-	printl
-	animate_in
-	read_confirm
-	animate_out
+	t="${o[p]}"; at="0.03"; st="2"
+	reset; printl; animate_in; read_confirm; animate_out
 }
 
 read_confirm(){
