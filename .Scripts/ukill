@@ -2,7 +2,7 @@
 
 confirm(){
 	read -p "sure you want to kill ${proc_name//$HOME\//\~/} ($pid)? [y|N] "
-	[[ "$REPLY" =~ y|Y ]] && echo $pid
+	[[ "$REPLY" =~ y|Y ]] || exit 0
 }
 
 main(){
@@ -15,7 +15,7 @@ main(){
 		proc_name=$6
 	done < <(ps ax)
 	[[ $opt != "noconfirm" ]] && confirm
-   #kill -$k "${p[0]}" && echo "[$p] killed" || exit 1
+   kill -9 "$pid" && echo "'$proc_name' killed" || exit 1
 }
 
 usage(){ printf '%s\n' "usage: ukill [-gnh] <script_name>"; exit 1; }

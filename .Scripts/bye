@@ -11,43 +11,40 @@ execute(){
 	esac
 }
 
-animate_in(){
-	printf '\e[%sH\e[2C' "$((p+2))"
-	for i in "> $t" ">$t" "$t>" "$t " ;{ printf '\r\eK\e[2C\e[m\e[1m%s\e[s' "$i"; read -t $at; }
-	for i in ">" " " y "|" n " ";{ tr+=$i; printf '\e[u%s' "$tr"; read -t $at; }
+a_in(){
+	printf '\e[%sH\e[2C' "$((p+2))"; tr=
+	for i in "${ai[@]}" ;{ printf '\e[K\r\e[2C\e[m\e[1m%s\e[s' "$i"; read -t $at; }
+	for i in " " y "|" n " ";{ tr+="$i"; printf '\e[u%s' "$tr"; read -t $at; }
 }
 
-animate_out(){
+a_out(){
 	printf '\e[?25l\e[%sD' "${#tr}"
-	for ((i=-4;i<=${#tr};i++)){ tr=${tr%?}; printf '\e[K%s\e[%sD' "$tr" "${#tr}"; read -t $at; }
-	for i in "$t >" "$t>" ">$t " "> $t" ;{ printf '\r\e[K\e[2C\e[1m%s\e[s\e[m' "$i"; read -t $at; }
+	for ((i=-4;i<${#tr};i++)){ tr=${tr%?}; printf '\e[K%s\e[%sD' "$tr" "${#tr}"; read -t $at; }
+	for i in "${ao[@]}"  ;{ printf '\r\e[K\e[2C\e[1m%s\e[s\e[m' "$i"; read -t $at; }
 }
 
-confirm(){
+parse_animation(){
 	t="${o[p]}"; at="0.03"; st="2"
-	reset; printl; animate_in; read_confirm; animate_out
+	ai=("> $t" ">$t" "$t>" "$t >")
+	ao=("$t>" "$t>" ">$t " "> $t")
 }
 
-read_confirm(){
-	read -rsn1 -p $'\e[?25h'
-	case_confirm $REPLY
-}
-
+confirm(){ parse_animation; reset; printl; a_in; read_confirm; a_out; }
+read_confirm(){ read -rsn1 -p $'\e[?25h'; case_confirm $REPLY; }
 case_confirm(){
 	case $1 in
 		y) execute "${o[p]}"; exit 0 ;;
 		q) exit 0 ;;
-		*) return ;;
+		$'\x1b'|q) return ;;
+		h) return ;;
 	esac
 }
 
 printl(){
-	for i in {0..3}; do
-		case $i in
-			$p) printf '\n\e[2C\e[1m> %s\e[m' "${o[i]}" ;;
-			*) printf '\n\e[%sm\e[2C%s' "$st" "${o[i]}"
-		esac
-	done
+	for i in {0..2}; do case $i in
+			$p) printf '\n\e[2C\e[1m> %s\e[m' "${o[p]}" ;;
+			*) printf '\n\e[%sm\e[2C  %s' "$st" "${o[i]}"
+	esac; done
 }
 
 case_key(){
@@ -55,7 +52,7 @@ case_key(){
 		k) ((p=p>0?p-1:0)) ;;
 		j) ((p=p<${#o[@]}-1?p+1:2)) ;;
 		''|l) confirm ;;
-		$'\x1b'|q|h) exit 0 ;;
+		$'\x1b'|q) exit 0 ;;
 	esac
 }
 
