@@ -1,20 +1,34 @@
 #!/usr/bin/env bash
 
-_restart(){ _kill $@; $@ &>/dev/null & disown; }
-
-_kill(){
-   a="$1"
-   for((;;)){ IFS=$' ' read -d '' -r -a p < \
-      <(ps ax | sed -n "/vim/d;/ukill/d;/.*\<"$a"\>.*/p");
-   ((p)) || break
-   kill -9 "${p[0]}" && echo "[$p] killed" || exit 1; }
+confirm(){
+	read -p "sure you want to kill ${proc_name//$HOME\//\~/} ($pid)? [y|N] "
+	[[ "$REPLY" =~ y|Y ]] && echo $pid
 }
 
 main(){
-   case "$@" in
-      -r) _restart "$@" ;;
-      *) for((;;)){ _kill "$@"; exit; }
-   esac
+   proc="$1"
+	while read -r ps; do
+		[[ "$ps" =~ $proc && ! "$ps" =~ ukill|vim ]] || continue
+		[[ $opt = "grep" ]] && { echo $ps; exit; }
+		set $ps
+		pid=$1
+		proc_name=$6
+	done < <(ps ax)
+	[[ $opt != "noconfirm" ]] && confirm
+   #kill -$k "${p[0]}" && echo "[$p] killed" || exit 1
 }
+
+usage(){ printf '%s\n' "usage: ukill [-gnh] <script_name>"; exit 1; }
+
+while getopts n:g:h a; do
+	case $a in
+		n) opt="noconfirm" ;;
+		g) opt="grep" ;;
+		h|help) usage
+	esac
+	shift
+done
+
+[[ $1 ]] || usage
 
 main "$@"
