@@ -48,7 +48,8 @@ reverse_fzf_history(){
 }
 
 fuzzy_cd() {
-   local dir="$(fd -H -t d . $HOME | fzf --preview='tree -L 1 {}'\
+   local dir="$(fd -H -t d . $HOME/.config $HOME/Projekter |\
+      fzf --preview='tree -L 1 {}'\
       --bind='space:toggle-preview' --preview-window=:hidden)"
    [[ ! -z "$dir" ]] && cd "$dir"
    unset dir
