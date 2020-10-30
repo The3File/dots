@@ -13,14 +13,14 @@ execute(){
 
 a_in(){
 	printf '\e[%sH\e[2C' "$((p+2))"; tr=
-	for i in "${ai[@]}" ;{ printf '\e[K\r\e[2C\e[m\e[1m%s\e[s' "$i"; read -t $at; }
+	for i in "${ai[@]}" ;{ printf '\e[K\r\e[2C\e[m\e[1;36m%s\e[s' "$i"; read -t $at; }
 	for i in " " y "|" n " ";{ tr+="$i"; printf '\e[u%s' "$tr"; read -t $at; }
 }
 
 a_out(){
 	printf '\e[?25l\e[%sD' "${#tr}"
 	for ((i=-4;i<${#tr};i++)){ tr=${tr%?}; printf '\e[K%s\e[%sD' "$tr" "${#tr}"; read -t $at; }
-	for i in "${ao[@]}"  ;{ printf '\r\e[K\e[2C\e[1m%s\e[s\e[m' "$i"; read -t $at; }
+	for i in "${ao[@]}"  ;{ printf '\r\e[K\e[2C\e[1;36m%s\e[s\e[m' "$i"; read -t $at; }
 }
 
 parse_animation(){
@@ -42,7 +42,7 @@ case_confirm(){
 
 printl(){
 	for i in {0..2}; do case $i in
-			$p) printf '\n\e[2C\e[1m> %s\e[m' "${o[p]}" ;;
+			$p) printf '\n\e[2C\e[1;36m> %s\e[m' "${o[p]}" ;;
 			*) printf '\n\e[%sm\e[2C  %s' "$st" "${o[i]}"
 	esac; done
 }
