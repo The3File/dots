@@ -171,3 +171,4 @@ let g:limelight_conceal_ctermfg = 'gray'
 let g:limelight_conceal_ctermfg = 240
 let g:limelight_priority = -1
 let g:limelight_default_coefficient = 1.7"}}}}}}
+let g:is_bash = 1
