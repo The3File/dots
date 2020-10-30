@@ -33,10 +33,10 @@ confirm(){ parse_animation; reset; printl; a_in; read_confirm; a_out; }
 read_confirm(){ read -rsn1 -p $'\e[?25h'; case_confirm $REPLY; }
 case_confirm(){
 	case $1 in
-		y) execute "${o[p]}"; exit 0 ;;
+		y) eval "${o[p]}"; exit 0 ;;
 		q) exit 0 ;;
-		$'\x1b'|q) return ;;
-		h) return ;;
+		h|$'\177') return ;;
+		*) read_confirm $1 ;;
 	esac
 }
 
@@ -48,17 +48,22 @@ printl(){
 }
 
 case_key(){
-	case $1 in
-		k) ((p=p>0?p-1:0)) ;;
-		j) ((p=p<${#o[@]}-1?p+1:2)) ;;
+    [[ $1 == $'\e' ]] && {
+        read -rsn 2
+        [[ ${1}${REPLY} == $'\e\e['* ]] && read -rsn 1 _
+        local e=${1}${REPLY}
+    }
+	case ${e:-$1} in
+		k|$'\e[A') ((p=p>0?p-1:0)) ;;
+		j|$'\e[B') ((p=p<${#o[@]}-1?p+1:2)) ;;
 		''|l) confirm ;;
-		$'\x1b'|q) exit 0 ;;
+		$'\e'|q) exit 0 ;;
 	esac
 }
 
 main(){
 	trap "printf '\e[m\e[2J\e[H\e[?25h'" EXIT
-	p=0;o=("poweroff" "reboot" "exit shell")
+	p=0;o=("poweroff" "reboot" "killall xinit")
 	for((;;)){ st="0";reset; printl; read -rsn1 key; case_key "$key"; }
 }
 
