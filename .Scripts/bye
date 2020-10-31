@@ -3,14 +3,6 @@
 
 reset(){ printf '\e[?25l\e[2J\e[H'; }
 
-execute(){
-	case $1 in
-		poweroff) poweroff ;;
-		reboot) reboot ;;
-		"exit shell") killall xinit ;;
-	esac
-}
-
 a_in(){
 	printf '\e[%sH\e[2C' "$((p+2))"; tr=
 	for i in "${ai[@]}" ;{ printf '\e[K\r\e[2C\e[m\e[1;36m%s\e[s' "$i"; read -t $at; }
@@ -33,7 +25,7 @@ confirm(){ parse_animation; reset; printl; a_in; read_confirm; a_out; }
 read_confirm(){ read -rsn1 -p $'\e[?25h'; case_confirm $REPLY; }
 case_confirm(){
 	case $1 in
-		y) eval "${o[p]}"; exit 0 ;;
+		''|y) eval "${o[p]}"; exit 0 ;;
 		q) exit 0 ;;
 		h|$'\177') return ;;
 		*) read_confirm $1 ;;
