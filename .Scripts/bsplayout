@@ -3,37 +3,11 @@
 XDG_CONF=${XDG_CONFIG_DIR:-"$HOME/.config"};
 CONFIG_DIR="$XDG_CONF/bsp-layout";
 
-export ROOT="/usr/lib/bsp-layout";
-source "$ROOT/utils/desktop.sh";
-source "$ROOT/utils/state.sh";
-
-LAYOUTS="$ROOT/layouts";
-
-HELP_TEXT="
-Usage: bsp-layout command [args]
-
-Commands:
-  set <layout> [desktop_selector] -- [options]      - Will apply the layout to the selected desktop
-  once <layout> [desktop_selector] -- [options]     - Will apply the layout on the current set of nodes
-  get <desktop_selector>                            - Will print the layout assigned to a given desktop
-  remove <desktop_selector>                         - Will disable the layout
-  layouts                                           - Will list all available layouts
-  version                                           - Displays the version number of the tool
-  help                                              - See this help menu
-
-Layout options:
-  tall,wide,rtall,rwide
-    --master-size 0.6         Set the master window size
-";
-
-# Layouts provided by bsp out of the box
-BSP_DEFAULT_LAYOUTS="tiled\nmonocle";
-
 # Default config
-export TALL_RATIO=0.6;
-export WIDE_RATIO=0.6;
+TALL_RATIO=0.6;
+WIDE_RATIO=0.6;
+DESKTOP_STATE="/tmp/bsp-layout.state/desktops";
 
-source "$CONFIG_DIR/layoutrc" 2> /dev/null || true;
 get_focused_desktop() { bspc query -D -d 'focused' --names; }
 get_desktop_name_from_id() { bspc query -D -d "$1" --names; }
 
@@ -59,7 +33,6 @@ rotate() {
 }
 
 auto_balance() { bspc node "$1" -B; }
-DESKTOP_STATE="/tmp/bsp-layout.state/desktops";
 
 # (Data ->) :: Key -> Value -> Data
 append_option() { sed "/^$1:/d"; echo "$1:$2"; }
