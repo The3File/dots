@@ -57,9 +57,10 @@ case_key(){
 }
 
 main(){
-	trap "printf '\e[m\e[2J\e[H\e[?25h'" EXIT
-	p=0;o=("poweroff" "reboot" "exit shell")
-	for((;;)){ st="0";reset; printl; read -rsn1 key; case_key "$key"; }
+	trap "printf '\e[m\e[2J\e[H\e[?25h\e[?1049l'" EXIT
+	st=0;p=0;o=("poweroff" "reboot" "exit shell")
+	printf '\e[?1049h'
+	for((;;)){ reset; printl; read -rsn1 key; case_key "$key"; }
 }
 
 main
