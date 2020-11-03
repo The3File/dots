@@ -19,19 +19,6 @@ jget() {
     echo "$var"
 }
 
-# amend the split type so we are arranged correctly
-rotate() {
-  node=$1;
-  want=$2;
-  have=$(jget splitType "$(bspc query -T -n "$node")");
-  have=${have:1:${#have}-2};
-  angle=$3;
-
-  if [[ ! "$have" = "$want" ]]; then
-    bspc node "$node" -R "$3";
-  fi
-}
-
 auto_balance() { bspc node "$1" -B; }
 
 # (Data ->) :: Key -> Value -> Data
@@ -60,6 +47,19 @@ source "$ROOT/utils/config.sh";
 master_size=$TALL_RATIO;
 
 node_filter="!hidden";
+
+# amend the split type so we are arranged correctly
+rotate() {
+  node=$1;
+  want=$2;
+  have=$(jget splitType "$(bspc query -T -n "$node")");
+  have=${have:1:${#have}-2};
+  angle=$3;
+
+  if [[ ! "$have" = "$want" ]]; then
+    bspc node "$node" -R "$3";
+  fi
+}
 
 execute_layout() {
   while [[ ! "$#" == 0 ]]; do
