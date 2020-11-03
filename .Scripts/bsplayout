@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
 
-XDG_CONF=${XDG_CONFIG_DIR:-"$HOME/.config"};
-CONFIG_DIR="$XDG_CONF/bsp-layout";
-
 # Default config
 TALL_RATIO=0.6;
 WIDE_RATIO=0.6;
@@ -34,15 +31,6 @@ rotate() {
 
 auto_balance() { bspc node "$1" -B; }
 
-# (Data ->) :: Key -> Value -> Data
-append_option() { sed "/^$1:/d"; echo "$1:$2"; }
-
-# (Data ->) :: Key -> Data[Key]
-valueof() { awk -F':' "/^$1:/ {print \$2}"; }
-
-# :: DesktopName -> Data
-get_desktop_options() { cat "$DESKTOP_STATE/$1" 2> /dev/null || true; }
-
 # :: DesktopName -> Key -> Value -> ()
 set_desktop_option() {
   new_options=$(get_desktop_options "$1" | append_option $2 $3);
@@ -50,41 +38,25 @@ set_desktop_option() {
   echo "$new_options" > "$DESKTOP_STATE/$1";
 }
 
-# :: List[DesktopName]
-list_desktops() { ls -1 "$DESKTOP_STATE"; }
-
-source "$ROOT/utils/common.sh";
-source "$ROOT/utils/layout.sh";
-source "$ROOT/utils/config.sh";
-
 master_size=$TALL_RATIO;
 
-node_filter="!hidden";
-
-execute_layout() {
-  while [[ ! "$#" == 0 ]]; do
-    case "$1" in
-      --master-size) master_size="$2"; shift; ;;
-      *) echo "$x" ;;
-    esac;
-    shift;
-  done;
+tall() {
 
   # ensure the count of the master child is 1, or make it so
-  local nodes=$(bspc query -N '@/1' -n .descendant_of.window.$node_filter);
-  local win_count=$(echo "$nodes" | wc -l);
+  nodes=($(bspc query -N '@/1' -n .descendant_of.window.!hidden))
+  win_count=$(echo "$nodes" | wc -l)
 
   if [ $win_count -ne 1 ]; then
-    local new_node=$(bspc query -N '@/1' -n last.descendant_of.window.$node_filter | head -n 1);
+    new_node=$(bspc query -N '@/1' -n last.descendant_of.window.!hidden | head -n 1);
 
     if [ -z "$new_node" ]; then
-      new_node=$(bspc query -N '@/2' -n last.descendant_of.window.$node_filter | head -n 1);
+      new_node=$(bspc query -N '@/2' -n last.descendant_of.window.!hidden | head -n 1);
     fi
 
-    local root=$(echo "$nodes" | head -n 1);
+    root=$(echo "$nodes" | head -n 1);
 
     # move everything into 2 that is not our new_node
-    for wid in $(bspc query -N '@/1' -n .descendant_of.window.$node_filter | grep -v $root); do
+    for wid in $(bspc query -N '@/1' -n .descendant_of.window.!hidden | grep -v $root); do
       bspc node "$wid" -n '@/2';
     done
 
@@ -94,8 +66,8 @@ execute_layout() {
   rotate '@/' vertical 90;
   rotate '@/2' horizontal 90;
 
-  local stack_node=$(bspc query -N '@/2' -n);
-  for parent in $(bspc query -N '@/2' -n .descendant_of.!window.$node_filter | grep -v $stack_node); do
+  stack_node=$(bspc query -N '@/2' -n);
+  for parent in $(bspc query -N '@/2' -n .descendant_of.!window.!hidden | grep -v $stack_node); do
     rotate $parent horizontal 90;
   done
 
@@ -103,36 +75,14 @@ execute_layout() {
 
   local mon_width=$(jget width "$(bspc query -T -m)");
 
-  local want=$(echo "$master_size * $mon_width" | bc | sed 's/\..*//');
+  ((want=master_size*mon_width))
   local have=$(jget width "$(bspc query -T -n '@/1')");
 
   bspc node '@/1' --resize right $((want - have)) 0;
 }
 
-# Kill old layout process
-kill_layout() {
-  old_pid="$(get_desktop_options "$1" | valueof pid)";
-  kill $old_pid 2> /dev/null || true;
-}
-
-remove_listener() {
-  desktop=$1;
-  [[ -z "$desktop" ]] && desktop=$(get_focused_desktop);
-
-  kill_layout "$desktop";
-
-  # Reset process id and layout
-  set_desktop_option $desktop 'layout' "";
-  set_desktop_option $desktop 'pid'    "";
-}
-
 run_layout() {
-  local layout_file="$LAYOUTS/$1.sh"; shift;
-
-  # GUARD: Check if layout exists
-  [[ ! -f $layout_file ]] && echo "Layout does not exist" && exit 1;
-
-  bash "$layout_file" $*;
+  tall
 }
 
 start_listener() {
@@ -142,7 +92,6 @@ start_listener() {
 
   args=$@;
 
-  # Set selected desktop to currently focused desktop if option is not specified
   [[ -z "$selected_desktop" ]] && selected_desktop=$(get_focused_desktop);
 
   # If it is a bsp default layout, set that
@@ -159,7 +108,8 @@ start_listener() {
 
   # Then listen to node changes and recalculate as required
   bspc subscribe node_{add,remove,transfer}  | while read line; do
-    event=$(echo "$line" | awk '{print $1}');
+    set "$line"
+    event=$1
     arg_index=$([[ "$event" == "node_transfer" ]] && echo "6" || echo "3");
     desktop_id=$(echo "$line" | awk "{print \$$arg_index}");
     desktop_name=$(get_desktop_name_from_id "$desktop_id");
