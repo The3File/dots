@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+
+move_nodes(){
+	filter=".descendant_of.window.!hidden.!floating"
+	IFS=$'\n' read -rd '' -a nodes < <(bspc query -N '@/1' -n $filter)
+	((${#nodes[@]}==1)) && return
+	move_first
+	move_second
+	bspc node '@/2' -B
+}
+
+move_first(){
+	bspc node "$new_node" -n '@/1'
+}
+
+move_second(){
+	for node in ${nodes[@]}; do
+		printf '%s\n' "${nodes[0]}"
+		[[ $node = ${nodes[0]} ]] && continue
+		bspc node "$node" -n '@/2'
+	done
+}
+
+resize(){
+	IFS=$',' read -rd '' -a T1 < <(bspc query -T -n '@/1')
+	for i in ${T1[@]};{ [[ $i =~ width ]] && { cur="${i##*:}"; break; }; }
+
+	((size=res*ratio/10+1))
+
+	echo "-z $((size-cur))"
+
+	bspc node '@/1' -z right $((size-cur)) 0;
+}
+
+case_event(){
+	case $1 in
+		node_add) move_nodes ;;
+		node_remove) resize ;;
+	esac
+}
+
+define_elements(){
+	desktop=$3
+	last_node=$4
+	new_node=$5
+}
+
+main(){
+	IFS=$',' read -rd '' -a T < <(bspc query -T -m)
+	for i in ${T[@]};{ [[ $i =~ width ]] && { res="${i##*:}"; break; }; }
+	bspc config automatic_scheme alternate
+	def_ratio=$(bspc config split_ratio)
+	echo $def_ratio
+	ratio=${def_ratio#*.}
+	echo $ratio
+	ratio=${_%%0*}
+	echo $ratio
+
+	while read -ra event; do
+		define_elements "${event[@]}"
+		#case_event "${event[0]}"
+		move_nodes
+		resize
+	done < <(bspc subscribe node_{add,remove})
+}
+#	$(bspc query -N '@/1' -n last.$filter)
+#	$(bspc query -N '@/2' -n last.$filter)
+
+
+main "$@"
