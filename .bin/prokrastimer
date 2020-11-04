@@ -10,9 +10,11 @@ clean() {
 }
 
 bar() {
+	tota="worked total: $((tot/60))"
 	printf -v elaps "%$(($1*width/s[c]))s"
-	printf -v total "%$((width-($1*width/s[c])))s"
-	printf '\e[J\e[999;0H%s\r' "[${elaps// /\#}${total// /-}]"
+	printf -v total "%$((width-($1*width/s[c])-${#tota}))s"
+	printf '\e[J\e[999;0H\e[7m%s\e[m%s\r'\
+		"$tota" "[${elaps// /\#}${total// /-}]"
 	}
 
 prompt() { clean force
@@ -34,7 +36,6 @@ next_state() {
 }
 
 completed() {
-	((total=(ct*work)+work-sec+30))
 	printf '\e[7;0H\e[J\e[1;33m%s%2dh%2dm\e[?25h\n'\
 		"combined time worked:" "$((total/60/60))" "$((total/60%60))"
 	echo $ct
@@ -44,6 +45,7 @@ timer() { clean force
 	for ((sec=s[c],st=SECONDS;sec>0;sec=(s[c]-(SECONDS-st)))){
 		printf '\e[?25l\e[10;0H\e[1;35m%s%02d:%02d'\
 			"${s[c]^} left: " "$((sec/60))" "$((sec%60))"
+		((tot=(ct*work)+work-sec+30))
 		bar $((SECONDS-st))
 		sleep 1
 	}
