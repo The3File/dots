@@ -25,9 +25,6 @@ resize(){
 	IFS=$',' read -rd '' -a T1 < <(bspc query -T -n '@/1')
 	for i in ${T1[@]};{ [[ $i =~ width ]] && { cur="${i##*:}"; break; }; }
 
-	((size=res*ratio/10+1))
-
-	echo "-z $((size-cur))"
 
 	bspc node '@/1' -z right $((size-cur)) 0;
 }
@@ -45,22 +42,27 @@ define_elements(){
 	new_node=$5
 }
 
-main(){
-	IFS=$',' read -rd '' -a T < <(bspc query -T -m)
-	for i in ${T[@]};{ [[ $i =~ width ]] && { res="${i##*:}"; break; }; }
-	bspc config automatic_scheme alternate
-	def_ratio=$(bspc config split_ratio)
-	echo $def_ratio
-	ratio=${def_ratio#*.}
-	echo $ratio
+get_resolution(){
+	while IFS=, read -r line; do
+		[[ "$line" =~ width ]] || continue
+		res="${i##*:}"; break
+	done < <(bspc query -T -m)
+}
+
+get_size(){
+	ratio=$(bspc config split_ratio)
+	ratio=${ratio#*.}
 	ratio=${_%%0*}
-	echo $ratio
+	((size=res*ratio/10+1))
+}
+
+main(){
+	bspc config automatic_scheme alternate
 
 	while read -ra event; do
 		define_elements "${event[@]}"
 		#case_event "${event[0]}"
-		move_nodes
-		resize
+		move_nodes; resize
 	done < <(bspc subscribe node_{add,remove})
 }
 #	$(bspc query -N '@/1' -n last.$filter)
