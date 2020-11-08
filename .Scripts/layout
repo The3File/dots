@@ -15,7 +15,6 @@ move_first(){
 
 move_second(){
 	for node in ${nodes[@]}; do
-		printf '%s\n' "${nodes[0]}"
 		[[ $node = ${nodes[0]} ]] && continue
 		bspc node "$node" -n '@/2'
 	done
@@ -24,7 +23,6 @@ move_second(){
 resize(){
 	IFS=$',' read -rd '' -a T1 < <(bspc query -T -n '@/1')
 	for i in ${T1[@]};{ [[ $i =~ width ]] && { cur="${i##*:}"; break; }; }
-
 
 	bspc node '@/1' -z right $((size-cur)) 0;
 }
