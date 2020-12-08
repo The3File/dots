@@ -13,6 +13,7 @@ a_out(){
 	printf '\e[?25l\e[%sD' "${#tr}"
 	for ((i=-4;i<${#tr};i++)){ tr=${tr%?}; printf '\e[K%s\e[%sD' "$tr" "${#tr}"; read -t $at; }
 	for i in "${ao[@]}"  ;{ printf '\r\e[K\e[2C\e[1;36m%s\e[s\e[m' "$i"; read -t $at; }
+	st=''
 }
 
 parse_animation(){
