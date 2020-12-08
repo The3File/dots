@@ -9,6 +9,7 @@ export BROWSER="qutebrowser"
 
 export CONFIG="$HOME/.config/bspwm/bspwmrc"
 export NOTES="$HOME/Dokumenter/Noter"
+export BUDGET_FILE="$HOME/Dokumenter/budget.tab"
 
 export PANELFIFO="/tmp/panel-fifo"
 export GAPFIFO="/tmp/gap-fifo"
