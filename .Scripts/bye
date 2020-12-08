@@ -22,7 +22,9 @@ parse_animation(){
 }
 
 confirm(){ parse_animation; reset; printl; a_in; read_confirm; a_out; }
+
 read_confirm(){ read -rsn1 -p $'\e[?25h'; case_confirm $REPLY; }
+
 case_confirm(){
 	case $1 in
 		''|y) eval "${o[p]}"; exit 0 ;;
