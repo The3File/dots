@@ -3,8 +3,8 @@
 on() {
    mkfifo "$PANELFIFO"
 
-   theme="base16-isotope"
    theme="gruvbox"
+   theme="base16-isotope"
 
    wal --theme $theme &>/dev/null
 
@@ -16,7 +16,7 @@ on() {
    #feh --bg-fill "$HOME/Billeder/wallpapers/arch/${bg[1]}" &
 
    pkill dunst && dunst &>/dev/null & disown
-   pkill picom; ukill dunstbar; ukill autogap
+   pkill picom; ukill -n dunstbar; ukill -n autogap
 
    for i in {1..10}; do
       bspc config -d $i left_padding 0
@@ -48,7 +48,7 @@ on() {
 }
 
 off() {
-   ukill runbar
+   ukill -n runbar
    pkill lemonbar
 
    bspc config top_padding 0

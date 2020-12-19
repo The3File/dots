@@ -29,34 +29,29 @@ ws() {
    W="$(sed -e 's/\(}\).?\(%\)/\1\2/' <<< "${s[*]}")"
 }
 
-out(){
-   while read -r line; do
-      case $line in
-	 net) net ;;
-	 'desktop'*) ws ;;
-	 *) 
-	    B=$(acpi | awk -F', ' 'gsub("Battery 0: ","") {print $1" "$2}')
-	    D="$(date '+%a %d %b %H:%M')"
-	    R="$(df -h --output="avail" | sed -n '4p')"
-	    H="$(df -h --output="avail" | sed -n '9p')"
-	    IFS=$'\n' read -rd '' -a ups < <(yay -Qu)
-	    U="${#ups[@]}"
-	    ;;
-      esac
-      printf '%s\n' " | $W |%{r}| updates: $U | free: /${R} /home${H} | $B | $N | $D | "
-   done
+rest(){
+	B=$(acpi | awk -F', ' 'gsub("Battery 0: ","") {print $1" "$2}')
+	D="$(date '+%a %d %b %H:%M')"
+	R="$(df -h --output="avail" | sed -n '4p')"
+	H="$(df -h --output="avail" | sed -n '9p')"
+	IFS=$'\n' read -rd '' -a ups < <(yay -Qu) &
+	U="${#ups[@]}"
+}
+
+parse(){
+	ws
+   printf '%s\n' " | $W |%{r}| updates: $U | free: /${R} /home${H} | $B | $N | $D | "
 }
 
 printb(){
-   cat "$PANELFIFO" | out |
-      lemonbar -p ${opt[@]}\
-      -g 1366x20\
-      -f "ypn envypn:size=10"\
-      -o 1\
-      -B "$background"\
-      -F "$foreground"\
-      -u 2 |
-      while read line; do eval "$line"; done &
+	while read -r _; do parse; done < <(bspc subscribe desktop_focus) | lemonbar -p ${opt[@]}\
+   -g 1366x20\
+   -f "ypn envypn:size=10"\
+   -o 1 -b\
+   -B "$background"\
+   -F "$foreground"\
+   -u 2 | while read -r line; do eval "$line"; done
+		echo done
 }
 
 main(){
@@ -64,13 +59,13 @@ main(){
    source /home/ringdal/.cache/wal/colors.sh
 
    ((updint=10))
-   opt=("$@")
 
    for((;;)){ echo net > "$PANELFIFO"; sleep 30; } &
    for((;;)){ echo > "$PANELFIFO"; sleep $updint; } &
 
-   ws; printb
-   wait
+	ws
+	rest
+	printb
 }
 
 main "$@"

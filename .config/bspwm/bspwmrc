@@ -62,7 +62,10 @@ apps() { #{{{
    _start(){ "$1" "${o[@]}" &>/dev/null & disown || return 1
    printf '\e[37m%s: %s\n' "$1" "started"; }
 
-   for app in autogap dunstbar dunst acpid_events
+	#apps=(autogap dunstbar dunst acpid_events)
+	apps=(runbar dunst acpid_events)
+
+   for app in "${apps[@]}"
    do app_is_running="$(ps ax | sed -n "/nvim/d;/sed/d;/\<$app\>/p")"
    if [[ "$app_is_running" ]]
    then _restart $app || printf '\e[31m%s: %s\n' "$app" "restart failed"
@@ -96,7 +99,7 @@ link_wal(){ #{{{
 #}}}
 
 make_fifo(){ #{{{
-for fifo in $GAPFIFO $BARFIFO; do
+for fifo in $GAPFIFO $BARFIFO $PANELFIFO; do
    [[ -e "$fifo" ]] && rm "$fifo"
    mkfifo "$fifo"
    bspc subscribe node_add node_remove desktop_focus > $fifo &
@@ -115,7 +118,7 @@ main(){ #{{{
       case "$1" in
          rules) rules ;;
          config) config ;;
-         qute) qute ;;
+         qute) link_wal ;;
          apps) apps ;;
       esac || exit 1
       exit 0
@@ -126,7 +129,7 @@ main(){ #{{{
       rules
 
    # external settings
-      autogap_settings
+      #autogap_settings
       link_wal
 
    # start/restart apps
@@ -141,6 +144,6 @@ main "$@" &&
 {
    printf '\e[m\n%s\n' "..all done";
    dunstify "bspwmrc reloaded" -t 2000 -r 90211 &
-   echo > $GAPFIFO
+   #echo > $GAPFIFO
 }
 # }}} vim: fdm=marker
