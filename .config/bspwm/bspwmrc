@@ -25,14 +25,14 @@ printf '\e[36m %s\n' "done."; }
 #}}}
 autogap_settings() { #{{{
    # gaps
-      export GAPS=0  # enable or disable automatic gaps
-      export G0=10    # minimum gap size
-      export GS=2    # gaps size integer
+      export GAPS=1  # enable or disable automatic gaps
+      export G0=5    # minimum gap size
+      export GS=7    # gaps size integer
       export GN=3    # number of windows
 
    # left and right padding
       export PADD=1  # enable or disable automatic padding
-      export PS=2    # padding size integer
+      export PS=5    # padding size integer
       export PN=2    # number of windows
 }
 
