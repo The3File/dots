@@ -26,25 +26,25 @@ ws() {
 	 s[$i]="${s[$i]}"
    }
    
-   W="$(sed -e 's/\(}\).?\(%\)/\1\2/' <<< "${s[*]}")"
+   export W="$(sed -e 's/\(}\).?\(%\)/\1\2/' <<< "${s[*]}")"
 }
 
 rest(){
-	B=$(acpi | awk -F', ' 'gsub("Battery 0: ","") {print $1" "$2}')
-	D="$(date '+%a %d %b %H:%M')"
-	R="$(df -h --output="avail" | sed -n '4p')"
-	H="$(df -h --output="avail" | sed -n '9p')"
-	IFS=$'\n' read -rd '' -a ups < <(yay -Qu) &
-	U="${#ups[@]}"
+	export B=$(acpi | awk -F', ' 'gsub("Battery 0: ","") {print $1" "$2}')
+	export D="$(date '+%a %d %b %H:%M')"
+	export R="$(df -h --output="avail" | sed -n '4p')"
+	export H="$(df -h --output="avail" | sed -n '9p')"
+	#IFS=$'\n' read -rd '' -a ups < <(yay -Qu) &
+	#export U="${#ups[@]}"
 }
 
 parse(){
-	ws
+	ws; net; rest
    printf '%s\n' " | $W |%{r}| updates: $U | free: /${R} /home${H} | $B | $N | $D | "
 }
 
 printb(){
-	while read -r _; do parse; done < <(bspc subscribe desktop_focus) | lemonbar -p ${opt[@]}\
+	while :; do parse; read -rt 10 _; done < <(bspc subscribe desktop_focus) | lemonbar -p ${opt[@]}\
    -g 1366x20\
    -f "ypn envypn:size=10"\
    -o 1 -b\
@@ -60,8 +60,8 @@ main(){
 
    ((updint=10))
 
-   for((;;)){ echo net > "$PANELFIFO"; sleep 30; } &
-   for((;;)){ echo > "$PANELFIFO"; sleep $updint; } &
+   for((;;)){ net; sleep 30; } &
+   for((;;)){ rest; sleep $updint; } &
 
 	ws
 	rest
