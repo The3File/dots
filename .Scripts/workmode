@@ -31,8 +31,8 @@ on() {
    bspc config normal_border_color "$color4"
    #bspc config initial_polarity first_child
    #bspc config automatic_scheme alternate
-   [[ $(pgrep -f runbar) ]] && pkill -f runbar
-   runbar -b & disown
+   #[[ $(pgrep -f runbar) ]] && pkill -f runbar
+   #runbar -b & disown
 
    bspc config split_ratio 0.6
 
@@ -42,14 +42,14 @@ on() {
    for side in top left right; do
       bspc config ${side}_padding $border
    done
-   bspc config bottom_padding $((border+20))
+   bspc config bottom_padding $((border))
 
    $CONFIG qute
 }
 
 off() {
-   ukill -n runbar
-   pkill lemonbar
+   #ukill -n runbar
+   #pkill lemonbar
 
    bspc config top_padding 0
    bspc config bottom_padding 0
