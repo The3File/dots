@@ -11,9 +11,9 @@ on() {
    source /home/ringdal/.cache/wal/colors.sh
 
    ln -sf "$HOME/.cache/wal/dunstrc" "$HOME/.config/dunst/dunstrc" &
-   xsetroot -solid "$background"
-   #bg=("black_arch.png" "black.jpg")
-   #feh --bg-fill "$HOME/Billeder/wallpapers/arch/${bg[1]}" &
+   #xsetroot -solid "$background"
+   bg=("black_arch.png" "black.jpg")
+   feh --bg-fill "$HOME/Billeder/wallpapers/arch/${bg[0]}" &
 
    pkill dunst && dunst &>/dev/null & disown
    pkill picom; ukill -n dunstbar; ukill -n autogap
