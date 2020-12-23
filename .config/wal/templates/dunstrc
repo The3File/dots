@@ -10,8 +10,8 @@
     separator_height = 2
     padding = 15
     horizontal_padding = 20
-    frame_width = 2
-    frame_color = "{color4}"
+    frame_width = 1
+    frame_color = "{color3}"
     separator_color = frame
     sort = yes
     idle_threshold = 120

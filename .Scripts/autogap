@@ -1,36 +1,14 @@
 #!/bin/sh
 
-logic(){
+main(){
    W=$(bspc query -N -n .local.\!hidden.tiled | wc -l); [ "$W" -le 1 ] && W=1
    $((P=((PN-W)*PS*10)*PADD))
    $((G=((GN+1-W)*GS)*GAPS))
    [ "$P" -le 0 ] && P=0
    [ "$G" -le "$((G0))" ] && G="$G0"
-}
-
-exec_(){
    for s in left right;do
       bspc config -d focused ${s}_padding "$P" &
-   done &
-   bspc config -d focused window_gap "$G"
+   done & bspc config -d focused window_gap "$G"
 }
 
-
-one_border(){
-   for side in bottom top left right; do
-      bspc config -d focused ${side}_padding $P
-   done
-}
-
-main(){
-   while read -r _; do
-      xprop="$(xprop -root _NET_CURRENT_DESKTOP)"
-      case "${xprop##*= }" in
-         #9) continue #P=0; G=0; one_border; exec_
-         #   ;;
-         *) logic; exec_
-      esac
-   done < "$GAPFIFO"
-}
-
-main
+while read -r _; do main done < "$GAPFIFO"
