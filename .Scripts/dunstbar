@@ -2,33 +2,19 @@
 
 loop(){ sleep 1.2; for ((;;)){ barnot -o;sleep 10;}; }
 
-kill_loop(){
-   #kill -9 "$loop"
-   dunstify -C 90211
-}
-
-bar(){
-   #while read -r event; do
-      w=$(bspc query -N -n .local.\!hidden.window)
-   #   ((w<=0)) && loop & loop="$!"
-   #   [[ "$event" =~ remove ]] || kill_loop
-   #   [[ "$event" =~ focus ]] && print_ws
-   #done < "$BARFIFO"
-}
-
-barnot(){
+case_opt(){
    case $1 in
       -c) get_stats; out=("$mem $cpu $temp") ;;
       -d) get_date; out=("$dy, $d" "<b>($dt)</b>") ;;
       -b) out=( "$(light | awk -F"." '{print $1}')%") ;;
       -v) get_volume && out=(" ($volume)") || out=(" $volume ") ;;
-		-w) print_ws ;;
-      -o) get_bat; get_net
-	  out=("" "$bat | $net | <b>$(date '+%R')</b>") || exit 1
+		-w) get_ws; out=("$ws") ;;
+      -o) get_bat; get_net; get_date; out=("" "$bat | $net | $hm") || exit 1
    esac
-
-   dunstify "${out[@]}" -t "$t" -r 90211
+	print_bar
 }
+
+print_bar(){ dunstify "${out[@]}" -t "$t" -r 90211; }
 
 get_stats(){
    mem="[mem] $(free -h | awk '/Mem:/ {print $3 "/" $2}')"
@@ -47,20 +33,22 @@ get_date(){
    d=$(date +%d" "%B)
    dy=$(date +%A)
    dt=$(date +%d/%m/%y)
+	hm=$(date +%R)
 }
 
 get_net(){
-   st="$(nmcli | awk '/wlp3s0/ {print $4}')"
+	st="$(iwgetid -r)"
    inf="$(networkctl status | awk '/Addr/ {print $2}')"
    sn="no connection"
    [[ "$inf" ]] && {
       sn=$(iwlist wlp3s0 scan | sed -n '5P' | awk -F'=' '{print $3}' | awk -F' ' '{print $1}')
-      ((sn>-20)) && i=""
-      ((sn<-20)) && i=""
-      ((sn<-45)) && i=""
-      ((sn<-60)) && i=""
+      ((sn>-20)) && i="****"
+      ((sn<-20)) && i="***"
+      ((sn<-45)) && i="**"
+      ((sn<-60)) && i="*"
    }
-   net=" <b>$st</b> <b>[$sn]</b>"
+   #net=" <b>$st</b> <b>[$sn]</b>"
+   net=" $st [$sn]"
 }
 
 get_bat(){
@@ -69,19 +57,22 @@ get_bat(){
    case $s in
       1) l="" ;;
       0)
-	 ((p>=80)) && l=""
-	 ((p<=80)) && l=""
-	 ((p<=65)) && l=""
-	 ((p<=40)) && l=""
-	 ((p<=20)) && l=""
-	 ;;
+			((p>=80)) && l=""
+			((p<=80)) && l=""
+			((p<=65)) && l=""
+			((p<=40)) && l=""
+			((p<=20)) && l=""
+			;;
       *) l=""
-   esac; bat="$l <b>$p%</b>"
+   esac
+	#bat="$l <b>$p%</b>"
+	bat="$l $p%"
 }
 
-print_ws(){
+get_ws(){
    ws=$(xprop -root _NET_CURRENT_DESKTOP | awk '{print $3+1}')
-   dunstify -C 90210; sleep .01; dunstify "$ws" -t 1250 -r 90211
+	#out=("" "<b>$ws </b>")
 }
 
-[[ "$1" ]] && { t=5000; barnot "$1"; exit; } || { t=11000; bar; }
+t=5000
+case_opt "$1"
