@@ -12,9 +12,8 @@ possix_script(){
 }
 
 main(){
-   read -rp $'\r\e[K'"name: " n || exit 0
-   a="$1"
-   case "$a" in
+	[[ "$2" ]] && n="$2" || read -rp $'\r\e[K'"name: " n || exit 0
+   case "$1" in
       bash) bash_script ;;
       sh) possix_script ;;
       *) exit 1
