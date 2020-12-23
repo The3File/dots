@@ -16,7 +16,6 @@ main(){
    case "$1" in
       bash) bash_script ;;
       sh) possix_script ;;
-      *) exit 1
    esac
 }
 
