@@ -119,10 +119,6 @@ super + {_,shift + }{h,j,k,l}
 super + {comma,period}
    bspc node -f @{parent,brother}
 
-# focus the next/previous desktop in the current monitor
-super + {,shift + Tab,Tab}
-   bspc desktop -f {prev,next}.occupied
-
 # focus the last node/desktop
 super + grave
    bspc node -f last
@@ -136,6 +132,10 @@ super + shift + {o,i}
 # focus or send to the given desktop
 super + {_,shift + }{1-9,0}
    bspc {desktop -f,node -d} '^{1-9,10}' ; dunstbar -w
+
+# focus the next/previous occupied desktop
+super + {,shift + Tab,Tab}
+   bspc desktop -f {prev,next}.occupied; dunstbar -w
 
 ###############
 # state/flags #

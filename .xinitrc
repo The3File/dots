@@ -15,14 +15,12 @@ exec xset s off &
 exec setxkbmap -layout dk -variant nodeadkeys -option caps:escape &
 
 # User apps
-exec picom --experimental-backends &
+#exec picom --experimental-backends &
 exec xbanish -i Mod1 -i Mod4 &
 exec networkd-dispatcher &
 exec /usr/lib/kdeconnectd &
 exec dunst &
 exec swallow &
-exec autogap &
-exec dunstbar &
 exec acpid_events &
 exec greenclip daemon &
 exec wal -Rtn &
