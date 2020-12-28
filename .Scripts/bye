@@ -17,7 +17,7 @@ a_out(){
 }
 
 parse_animation(){
-	t="${o[p]}"; at="0.02"; st="2"
+	t="${o[p]}"; at="0.04"; st="2"
 	ai=("> $t" ">$t" "$t>" "$t >")
 	ao=("$t>" "$t>" ">$t " "> $t")
 }
@@ -30,7 +30,7 @@ case_confirm(){
 	case $1 in
 		''|y) eval "${o[p]}"; exit 0 ;;
 		q) exit 0 ;;
-		h|$'\177') return ;;
+		h|$'\e'|n) return ;;
 		*) read_confirm $1 ;;
 	esac
 }
@@ -44,7 +44,7 @@ printl(){
 
 case_key(){
     [[ $1 == $'\e' ]] && {
-        read -rsn 2
+        read -rsn 2 -t .01
         [[ ${1}${REPLY} == $'\e\e['* ]] && read -rsn 1 _
         local e=${1}${REPLY}
     }
