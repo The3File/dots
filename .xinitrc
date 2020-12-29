@@ -23,6 +23,8 @@ exec dunst &
 exec swallow &
 exec acpid_events &
 exec greenclip daemon &
+exec expressvpn-agent
+exec expressvpn connect
 exec wal -Rtn &
 exec feh --bg-fill $HOME/.config/wall.png &
 
