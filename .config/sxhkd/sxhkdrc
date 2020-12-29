@@ -18,8 +18,11 @@ super + {_,shift +} {Return}
    st {_,-c float -g 88x25}
 
 # tui apps
-super + {v,u,s,shift+s}
-   st -e {mbsync -a; neomutt,rtv -s unixporn,svim,scli}
+super + {u,s,shift+s}
+   st -e {rtv -s unixporn,svim,scli}
+
+super + v
+	st -c float -g 60x15+30+20 -e mbsync -a; st -e neomutt
 
 # cli apps
 super + {_,shift +} e
