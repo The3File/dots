@@ -63,8 +63,7 @@ main() {
    for ((;;)); { get_torrents; read -rsN1 -t1 && prompt "$REPLY"; }
 }
 
-transmission-daemon && printf '%s\n' "Launching daemon"
-sleep 2
-#while ! pgrep transmission-da &>/dev/null; do read -rs -t 2 -p $'\r\e[K'"Launching daemon";done
+pgrep transmission-da &>/dev/null || transmission-daemon && printf '%s' "launching.."
+until pgrep transmission-da; do read -rt 1 -p "."; done
 
 main
