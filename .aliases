@@ -25,6 +25,7 @@ alias s="svim"
 alias fuzzy_kill="ps aux | sort | fzf | awk '{print $2}' | xargs -r kill -9"
 # }}}
 ## QOL{{{
+alias gogl="googler"
 alias here="st &>/dev/null &disown"
 alias gitl="git log --all --decorate --oneline --graph"
 alias es="expressvpn status"
