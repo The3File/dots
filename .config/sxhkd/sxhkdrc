@@ -22,7 +22,7 @@ super + {u,s,shift+s}
    st -e {rtv -s unixporn,svim,scli}
 
 super + v
-	st -c float -g 60x15+30+20 -e mbsync -a; st -e neomutt
+	st -c float -g 60x15+30+20 -e mbsync -Va; st -e neomutt
 	#st -e neomutt
 
 # cli apps
