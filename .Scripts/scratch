@@ -1,24 +1,44 @@
 #!/usr/bin/env bash
 
+math(){
+	cls="scratchmath"
+	geo="100x17-30-30"
+	exe="qalc"
+	placeholder
+}
+
 files(){
-   id=$(xdotool search --class files)
-   if [[ -z "$id" ]]
-   then st -c files -g 80x15+30-20 -e lf
-   else bspc node "$id" --flag hidden -f; fi
+	cls="files"
+	geo="80x15+30-20"
+	exe="lf"
+	placeholder
 }
 
 term(){
-   id=$(xdotool search --class scratchterm)
-   opts=( -c scratchterm -g 100x28+30+30 -e )
-   [[ -z "$id" ]] && { st ${opts[@]} tmux new -s 'scratch' ||
-      st ${opts[@]} tmux a -t '=scratch'; } ||
-      bspc node "$id" --flag hidden -f
+	cls="scratchterm"
+	geo="100x28+30+30"
+
+	term_placeholder
 }
 
-math(){
-   id=$(xdotool search --class scratchmath)
-   [[ -z "$id" ]] && st -c scratchmath -g 100x17-30-30 -e qalc ||
-   bspc node "$id" --flag hidden -f
+term_placeholder(){
+	get_id "$cls"
+
+	[[ -z "$id" ]] && {
+		st -c $cls -g $geo -e tmux new -s 'scratch' ||
+		st -c $cls -g $geo -e tmux a -t '=scratch'
+	} || toggle
 }
+
+placeholder(){
+	get_id "$cls"
+	[[ -z "$id" ]] && new || toggle
+}
+
+get_id(){ id=$(xdotool search --class $1); }
+
+toggle(){ bspc node "$id" --flag hidden -f; }
+
+new(){ st -c $cls -g $geo -e $exe; }
 
 $1
