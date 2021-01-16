@@ -3,7 +3,7 @@
 export XDG_CONFIG_HOME="$HOME/.config"
 
 export PATH=$HOME/.bin:/usr/local/bin:$HOME/.Scripts/:$PATH
-export VISUAL="nvim"
+export VISUAL="st -e nvim"
 export EDITOR="nvim"
 export BROWSER="qutebrowser"
 
