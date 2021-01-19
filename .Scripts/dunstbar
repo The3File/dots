@@ -39,7 +39,7 @@ get_date(){
 get_net(){
 	st="$(iwgetid -r)"
    inf="$(networkctl status | awk '/Addr/ {print $2}')"
-	vpn="$(expressvpn status | sed 's/\x1B\[[0-9;]\{1,\}[A-Za-z]//g;2Q')"
+	vpn="$(expressvpn status | sed -n 's/\x1B\[[0-9;]\{1,\}[A-Za-z]//g;/Connected to/p')"
    sn="no connection"
    [[ "$inf" ]] && {
       sn=$(iwlist wlp3s0 scan | sed -n '5P' | awk -F'=' '{print $3}' | awk -F' ' '{print $1}')
@@ -49,8 +49,8 @@ get_net(){
       ((sn<-60)) && i="*"
    }
    #net=" <b>$st</b> <b>[$sn]</b>"
-   net=" $st $sn"
-	[[ "$vpn" =~ Connected* ]] && net+=" |  ${vpn,,}"
+   net=" ${st} $sn"
+	[[ "$vpn" =~ "Connected to" ]] && net+=" |  ${vpn}"
 }
 
 get_bat(){
