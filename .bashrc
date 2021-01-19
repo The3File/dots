@@ -36,8 +36,9 @@ HISTIGNORE="&:[ ]*:exit:ls:bg:fg:history:history -r:clear:c:ll:lla:la:reverse_fz
 #{{{ shortcuts
 
 [[ -f ~/.aliases ]] 	&& source ~/.aliases
-
 for dir in ~/Projekter/*;{ [[ -d $dir ]] && declare "${dir##*/}"="$dir"; }
+
+dff(){ printf '\e[s'; for((;;)){ sed -n "1P;/$1/p" < <(df -h); read -rt 1; printf '\e[u\e[J'; }; }
 
 reverse_fzf_history(){
    local cmd="$(history | sort -nr | fzf --height 40% --reverse | cut -d ' ' -f 4-)"
