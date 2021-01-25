@@ -7,11 +7,6 @@ notify_plugged(){ [[ $1 = *ACPI* ]] && dunstbar -o; }
 
 power_menu(){ [[ $1 = "PBTN" ]] && st -c float -g 30x5+600-10 -e bye; }
 
-lockscreen(){
-	xinput enable 'AT Translated Set 2 keyboard' && printf '%s' "enable" > "$HOME/.keylock"
-	env XSECURELOCK_PASSWORD_PROMPT=time_hex xsecurelock -- systemctl suspend
-}
-
 lock_keys(){
    [[ $(<"$HOME/.keylock") = "enable" ]] && state="disable" || state="enable"
    xinput $state 'AT Translated Set 2 keyboard' && printf '%s' "$state" > "$HOME/.keylock"
@@ -23,7 +18,7 @@ handler(){
       button/power) power_menu $2 ;;
       button/screenlock) lock_keys ;;
       ac_adapter) notify_plugged $2 ;;
-      button/prog1) lockscreen ;;
+      button/prog1|button/suspend) lockscreen ;;
    esac
 }
 
