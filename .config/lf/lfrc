@@ -107,6 +107,7 @@ cmd new-script ${{
 
 map bf change_wal fav
 map bw change_wal sel
+map bg $feh --bg-fill $f
 
 cmd change_wal %{{
 	[[ -f "$fx" ]] || { printf "wal: $fx: not a picture"; exit; }
