@@ -39,7 +39,7 @@ super + {p,a}
 
 # program launcher
 super + d
-   rofi -show run
+   rofi -show drun
 
 # wifi menu
 super + shift + w
