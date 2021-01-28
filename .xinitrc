@@ -12,7 +12,7 @@ sysmodmap=/etc/X11/xinit/.Xmodmap
 exec xsetroot -cursor_name left_ptr &
 exec xset -dpms &
 exec xset s off &
-exec setxkbmap -layout dk -variant nodeadkeys -option caps:escape &
+exec setxkbmap -layout dk -variant nodeadkeys -option caps:swapescape &
 
 # User apps
 #exec picom --experimental-backends &
@@ -23,8 +23,7 @@ exec dunst &
 exec swallow &
 exec acpid_events &
 exec greenclip daemon &
-exec expressvpn-agent &
-exec expressvpn connect &
+exec expressvpn connect dk &
 exec wal -Rtn &
 exec feh --bg-fill $HOME/.config/wall.png &
 
