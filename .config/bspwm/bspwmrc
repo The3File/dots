@@ -123,7 +123,7 @@ done
 
 main(){ #{{{
 
-   xmodmap -e "keycode 135 = Super_R"
+	xmodmap -e "keysym Menu = Super_R"
    source "$HOME/.cache/wal/colors.sh"
 	case $1 in 1|0) reason="$1"; shift; esac
 
