@@ -12,7 +12,7 @@ sysmodmap=/etc/X11/xinit/.Xmodmap
 exec xsetroot -cursor_name left_ptr &
 exec xset -dpms &
 exec xset s off &
-exec setxkbmap -layout dk -variant nodeadkeys -option caps:swapescape &
+exec setxkbmap -layout dk -variant nodeadkeys -option caps:swapescape -option "shift:both_capslock" &
 
 # User apps
 #exec picom --experimental-backends &
