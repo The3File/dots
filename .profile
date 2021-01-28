@@ -2,7 +2,7 @@
 
 export XDG_CONFIG_HOME="$HOME/.config"
 
-export PATH=$HOME/.bin:/usr/local/bin:$HOME/.Scripts/:$PATH
+export PATH=$HOME/.bin:$HOME/.local/bin:/usr/local/bin:$HOME/.Scripts/:$PATH
 export VISUAL="st -e nvim"
 export EDITOR="nvim"
 export BROWSER="qutebrowser"
@@ -17,12 +17,13 @@ export BARFIFO="/tmp/bar-fifo"
 export WORKFIFO="/tmp/work-fifo"
 
 if [[ $(uname -o) = "Android" ]];then
-   export NOTES="/sdcard/Noter"
-   export MANPAGER="less"
-   alias xdg-open="termux-open"
+	export NOTES="/sdcard/Noter"
+	export MANPAGER="less"
+	alias xdg-open="termux-open"
 	alias notify-send="termux-notification -c"
-   [[ $TERM =~ "screen" ]] ||
-      exec tmux new -A -s termux
+	[[ $TERM =~ "screen" ]] || exec tmux new -A -s termux
+else
+	eval "$(thefuck --alias)"
 fi
 
 [[ -f ~/.bashrc ]] && source ~/.bashrc

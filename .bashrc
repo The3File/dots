@@ -3,7 +3,9 @@
 # set vi mode
 set -o vi
 
-#{{{ sane settings
+#####################
+### sane settings ###
+#####################
 
 [[ -f ~/.bash_prompt ]] && source ~/.bash_prompt
 
@@ -20,8 +22,9 @@ shopt -s dirspell 2> /dev/null
 shopt -s cdspell 2> /dev/null
 shopt -s expand_aliases
 
-#}}}
-#{{{ history
+###############
+### history ###
+###############
 
 shopt -s histappend
 
@@ -31,11 +34,11 @@ HISTCONTROL="erasedups:ignoreboth"
 HISTIGNORE="&:[ ]*:exit:ls:bg:fg:history:history -r:clear:c:ll:lla:la:reverse_fzf_history:fuzzy_cd:fuzzy_kill"
 #read -r tac "$HISTFILE" | awk '!x[$0]++' > /tmp/tmpfile  && f $(< "$hist")
 
+#################
+### shortcuts ###
+#################
 
-#}}}
-#{{{ shortcuts
-
-[[ -f ~/.aliases ]] 	&& source ~/.aliases
+[[ -f ~/.aliases ]] && source ~/.aliases
 for dir in ~/Projekter/*;{ [[ -d $dir ]] && declare "${dir##*/}"="$dir"; }
 
 dff(){ printf '\e[s'; for((;;)){ sed -n "1P;/$1/p" < <(df -h); read -rt 1; printf '\e[u\e[J'; }; }
@@ -60,6 +63,3 @@ pac() {
    sudo pacman -S $(pacman -Ssq | fzf -m --preview="pacman -Si {}"\
       --preview-window=:hidden --bind=space:toggle-preview)
 }
-
-#}}}
-# vim: fdm=marker
