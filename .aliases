@@ -22,7 +22,6 @@ alias spe="speedtest"
 alias vim="nvim"
 alias nts="notes"
 alias s="svim"
-alias fuzzy_kill="ps aux | sort | fzf | awk '{print $2}' | xargs -r kill -9"
 # }}}
 ## QOL{{{
 alias gogl="googler"

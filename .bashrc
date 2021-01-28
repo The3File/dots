@@ -52,6 +52,12 @@ reverse_fzf_history(){
    unset cmd
 }
 
+fuzzy_kill(){
+	local pid="$(ps aux | sort | fzf | awk '{print $2}')"
+	kill -9 $pid && echo "killed $pid"
+	unset pid
+}
+
 fuzzy_cd() {
    local dir="$(fd -H -t d . $HOME/.config $HOME/Projekter |\
       fzf --preview='tree -L 1 {}'\
