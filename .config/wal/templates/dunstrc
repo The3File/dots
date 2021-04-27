@@ -1,5 +1,5 @@
 [global]
-    monitor = 0
+    monitor = LVDS1
     follow = mouse
     geometry = "1300x50-20+10"
     indicate_hidden = yes
