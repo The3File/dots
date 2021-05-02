@@ -24,8 +24,10 @@ sync(){
 
 show(){
    [[ "$NOTES" ]] && cd "$NOTES" || return 1
-   printf '%s\n' "entering subshell, ctrl+d to return"
-   tree -C; exec $SHELL
+   #tree -C
+   printf '\e[1m%s\n\e[m%s\n' "entering subshell..."\
+			  "ctrl+d to return"
+	exec $SHELL
 }
 
 push(){
