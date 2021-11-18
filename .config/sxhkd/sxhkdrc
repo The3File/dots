@@ -55,7 +55,7 @@ super + i
 
 # browser
 super + {o,w}
-   qutebrowser
+	{qutebrowser, chromium}
 
 # restart bspwm
 super + shift + r
