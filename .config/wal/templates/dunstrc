@@ -1,15 +1,17 @@
 [global]
     monitor = LVDS1
     follow = mouse
-    geometry = "1300x50-20+10"
+    width = 40
+    height = 40
+    origin = top-right
+    offset = 20x50
     indicate_hidden = yes
     shrink = yes
     transparency = 0
     #transparency = 15
-    notification_height = 0
     separator_height = 2
-    padding = 15
-    horizontal_padding = 20
+    padding = 5
+    horizontal_padding = 2
     frame_width = 1
     frame_color = "{color3}"
     separator_color = frame
@@ -28,7 +30,7 @@
     hide_duplicate_count = false
     show_indicators = yes
     icon_position = off
-    max_icon_size = 32
+    max_icon_size = 20
     icon_path = /usr/share/icons/gnome/16x16/status/:/usr/share/icons/gnome/16x16/devices/
     sticky_history = yes
     history_length = 20
@@ -37,10 +39,6 @@
     always_run_script = true
     title = Dunst
     class = Dunst
-    close = ctrl+space
-    close_all = ctrl+shift+space
-    history = ctrl+grave
-    context = ctrl+shift+period
 
 [urgency_low]
     background = "{color0}"
