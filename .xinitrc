@@ -22,6 +22,7 @@ exec /usr/lib/kdeconnectd &
 exec dunst &
 exec swallow &
 exec acpid_events &
+exec runbar &
 exec greenclip daemon &
 exec expressvpn connect dk &
 exec wal -Rtn &

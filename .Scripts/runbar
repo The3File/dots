@@ -2,7 +2,7 @@
 
 net(){
    st="$(nmcli | awk '/wlp3s0/ {print $4}')"
-   inf="$(networkctl status | awk '/Addr/ {print $2}')"
+   inf="$(networkctl status | awk '/Addr/ {print $4}')"
    sn="no connection"
    [[ $inf = "wlp3s0" ]] && {
       st="%{F#0f0}$st%{F-}"
@@ -33,14 +33,14 @@ rest(){
 	export B=$(acpi | awk -F', ' 'gsub("Battery 0: ","") {print $1" "$2}')
 	export D="$(date '+%a %d %b %H:%M')"
 	export R="$(df -h --output="avail" | sed -n '4p')"
-	export H="$(df -h --output="avail" | sed -n '9p')"
+	export H="$(df -h --output="avail" | sed -n '8p')"
 	#IFS=$'\n' read -rd '' -a ups < <(yay -Qu) &
 	#export U="${#ups[@]}"
 }
 
 parse(){
 	ws; net; rest
-   printf '%s\n' " | $W |%{r}| updates: $U | free: /${R} /home${H} | $B | $N | $D | "
+   printf '%s\n' " $W %{r}| updates: $U | free: /${R} /home${H} | $B | $N | $D | "
 }
 
 printb(){
