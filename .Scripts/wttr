@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+opts() {
+   case $1 in
+      -l) trap "printf '\e[?25h'; stty echo" EXIT; stty -echo
+	 for ((;;)) { printf '\e[?25l\e[H\e[2J%s'; wthr | head -8; read -rst 60;} ;;
+      -f) printf '%s\n' "$wthr" | head -38 ;;
+      *) printf '%s\n' "\"$1\" is not an option"; exit 1
+   esac
+}
+
+wthr() { printf '\n%s' "$wthr" | sed -n 's/.*:/  /;2s/\,.*$//g;1,8p'; echo; }
+
+main() {
+   wthr=$(curl --silent wttr.in/svendborg)
+   [[ -z $1 ]] && wthr || opts $1
+}
+
+main "$@"

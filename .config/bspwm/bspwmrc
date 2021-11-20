@@ -11,6 +11,7 @@ config() { #{{{
 		for side in top bottom left right; do
 			bspc config ${side}_padding $border
 		done
+		bspc config bottom_padding 21
 	}
 
    bspc config focused_border_color    "${color3}"
