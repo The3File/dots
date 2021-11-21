@@ -19,7 +19,7 @@ exec setxkbmap -layout dk -variant nodeadkeys -option caps:swapescape -option "s
 exec xbanish -i Mod1 -i Mod4 &
 exec networkd-dispatcher &
 exec /usr/lib/kdeconnectd &
-exec dunst &
+#exec dunst &
 exec swallow &
 exec acpid_events &
 exec runbar &
