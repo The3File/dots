@@ -34,13 +34,13 @@ rest(){
 	export D="$(date '+%a %d %b %H:%M')"
 	export R="$(df -h --output="avail" | sed -n '4p')"
 	export H="$(df -h --output="avail" | sed -n '8p')"
-	IFS=$'\n' read -rd '' -a ups < <(yay -Qu) &
-	export U="${#ups[@]}"
+	#IFS=$'\n' read -rd '' -a ups < <(yay -Qu) &
+	#export U="${#ups[@]}"
 }
 
 parse(){
 	ws; net; rest
-   printf '%s\n' " $W %{r}| updates: $U | free: /${R} /home${H} | $B | $N | $D | "
+   printf '%s\n' " $W %{r} free: /${R} /home${H} | $B | $N | $D | "
 }
 
 printb(){
