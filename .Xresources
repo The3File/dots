@@ -64,6 +64,8 @@
 *bg: color0
 *fg: color4
 
-*herbe.background_color: .color0
-*herbe.border_color: #ffffff
-*herbe.font_color: color7
+!*herbe.background_color: color0
+!*herbe.border_color: color4
+!*herbe.font_color: color7
+*herbe.width: 300
+herbe.corner: 0

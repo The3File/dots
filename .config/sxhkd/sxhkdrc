@@ -203,7 +203,7 @@ XF86MonBrightness{Up,Down}
 
 # SOUND
 {_,super + } XF86Audio{Raise,Lower}Volume
-   pamixer {_,--allow-boost} {-i,-d}5 && dunstbar -v
+   pamixer {_,--allow-boost} {-i,-d}5 && pkill -SIGUSR1 herbe; herbe "volume: $(pamixer --get-volume)%"
 
 # mute sound
 XF86AudioMute

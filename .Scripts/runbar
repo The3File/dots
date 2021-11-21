@@ -22,7 +22,7 @@ ws() {
    c=$(xprop -root _NET_CURRENT_DESKTOP | awk '{print $3}')
    
    for ((i=0;i<${#s[*]};i++)){ 
-      [[ "$i" = "$c" ]] && s[$i]="%{F#0f0}[${s[$i]}]%{B-}%{F-}" ||
+      [[ "$i" = "$c" ]] && s[$i]="[${s[$i]}]%{B-}%{F-}" ||
 	 s[$i]="${s[$i]}"
    }
    
