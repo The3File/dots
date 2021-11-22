@@ -39,7 +39,8 @@ super + {p,a}
 
 # program launcher
 super + d
-   rofi -show drun
+		  dmenu_run -b -fn "ypn envypn:size=14" -p "apps:"
+#rofi -show drun
 
 # wifi menu
 super + shift + w
@@ -47,7 +48,7 @@ super + shift + w
 
 # rofi clipboard menu
 super + Insert
-   rofi -modi "clipboard:greenclip print" -show clipboard -run-command '{cmd}'
+		  clipmenu -fn "ypn envypn:size=14" -p "clipboard:"
 
 # emoji menu
 super + i
