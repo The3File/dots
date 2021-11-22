@@ -8,17 +8,17 @@ new-con(){
    ssid=$(nmcli -f SSID d w l | sed '/SSID/d;s/ *//g')
    dunstify -C 202
 
-   ans=$(echo "$ssid" | rofi -dmenu -i -p "[ new connection ]")
+   ans=$(echo "$ssid" | dmenu -i -b -fn "ypn envypn:size=14" -p "[ new connection ]")
    [[ $ans ]] || exit 0
       
-   passwd=$(rofi -dmenu -p "[ passwd ]")
+   passwd=$(dmenu -b -fn "ypn envypn:size=14" -p "[ passwd ]")
    [[ $passwd ]] || exit 0
 
       nmcli d w c "$ssid" password "$passwd"
 }
 
 del-con(){
-   ans=$(printf '%s\n' "$con" | rofi -dmenu -i -p "[ delete connection ]" |\
+   ans=$(printf '%s\n' "$con" | dmenu -b -fn "ypn envypn:size=14" -i -p "[ delete connection ]" |\
       sed 's/\ *$//g')
    nmcli c de "$ans"
 }
@@ -32,7 +32,7 @@ main() {
 
    [[ $active_con ]] && con=$(printf '%s\n' "${con/$active_con/$active}")
    out=$(printf '%s\n%s\n%s' "$con" "$new" "$del")
-   ans=$(printf '%s\n' "$out" | rofi -dmenu -i -p "nmcli:")
+   ans=$(printf '%s\n' "$out" | dmenu -i -b -fn "ypn envypn:size=14" -p "nmcli:")
 
    case $ans in
       "$active") con-down "${active_con}" ;;
