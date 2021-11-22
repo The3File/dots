@@ -23,7 +23,7 @@ exec setxkbmap -layout dk -variant nodeadkeys -option caps:swapescape -option "s
 exec swallow &
 exec acpid_events &
 exec runbar &
-exec greenclip daemon &
+exec clipmenud &
 #exec expressvpn connect dk &
 #exec wal -Rtn &
 exec feh --bg-fill $HOME/.config/wall.png &

@@ -4,7 +4,7 @@
 
 IFS=$'\n' read -d '' -r -a icn < "$HOME/.fontawesome"
 
-read -d '' -r -a answ < <(printf '%s\n' "${icn[@]}" | rofi -dmenu -i -p "symboler:")
+read -d '' -r -a answ < <(printf '%s\n' "${icn[@]}" | dmenu -b -fn "ypn envypn:size=14" -p "symboler:")
 
 printf '%s' "${answ[0]}" | xclip -selection c &&
    dunstify "copied: ${answ[0]}"
