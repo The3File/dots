@@ -5,7 +5,7 @@ application/x-raw-disk-image-xz-compressed=org.gnome.FileRoller.desktop;
 application/zip=org.gnome.FileRoller.desktop;
 x-scheme-handler/magnet=transmission-remote.desktop;
 x-scheme-handler/mailto=mutt.desktop;
-x-scheme-handler/tg=userapp-Telegram Desktop-GXKOZ0.desktop;
+x-scheme-handler/tg=userapp-Telegram Desktop-GXKOZ0.desktop;userapp-Telegram Desktop-C608C1.desktop;
 
 [Default Applications]
 image/*=sxiv.desktop
@@ -23,4 +23,4 @@ audio/x-wav=mpv.desktop
 text/html=qutebrowser.desktop
 application/pdf=zathura.desktop
 inode/directory=lf.desktop
-x-scheme-handler/tg=userapp-Telegram Desktop-GXKOZ0.desktop
+x-scheme-handler/tg=userapp-Telegram Desktop-C608C1.desktop
