@@ -39,7 +39,8 @@ super + {p,a}
 
 # program launcher
 super + d
-		  dmenu_run -b -fn "ypn envypn:size=14" -p "apps:"
+	dmenu_drun
+#dmenu_run -b -fn "ypn envypn:size=14" -p "apps:"
 #rofi -show drun
 
 # wifi menu
