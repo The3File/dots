@@ -5,7 +5,7 @@ cache="${XDG_DATA_HOME:-${HOME}/.local/share}/menjar.dat"
 
 declare -a dirs
 dirs=(/usr/share/applications /usr/local/share/applications)
-terms="x-terminal-emulator xterm konsole gnome-terminal xfce4-terminal alacritty urxvt"
+terms="x-terminal-emulator xterm konsole gnome-terminal xfce4-terminal alacritty urxvt st"
 
 keep=true
 debug=false
@@ -43,20 +43,6 @@ if $keep
 then
 	cat $cache
 else
-	for i in "$term" $terms
-	do
-		term=$( command -v $i )
-		if [[ -n "$term" ]]
-		then
-			break
-		fi
-	done
-
-	if [[ -z "$term" ]] && $debug
-	then
-		echo "No \$term found." 1>&2
-	fi
-
 	find -L "${dirs[@]}" -type f -name \*.desktop \
 		| xargs awk -f $LLIB/menjar1.awk -- term="$term" \
 		| sort \

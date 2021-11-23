@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+launch(){
+	IFS=$'\n' read -rd '' -a apps < "$HOME/test.txt"
+	read -r selection < <(printf '%s\n' "${apps[@]%,*}" | dmenu -i -b -p "$prompt" -fn "$font")
+	for i in "${!apps[@]}";{ [[ "${apps[$i]}" = "${selection}",* ]] && app="${apps[$i]#*,}"; }
+	exec $app
+}
+
+update(){
+	for file in /usr/share/applications/*; do
+		while read line; do
+			[[ $line =~ "Name=" && -z $name ]] && name="${line#*=}" && continue
+			[[ $line =~ "Exec=" && -z $exec ]] && exec="${line#*=}" && continue
+		done < $file
+		apps+=("$name,$exec")
+		unset name exec
+	done
+	printf '%s\n' "${apps[@]}" > "$HOME/test.txt"
+}
+
+prompt="apps:"
+font="ypn envypn:size=14"
+[[ $1 = u ]] && update || launch
