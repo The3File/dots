@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 launch(){
-	IFS=$'\n' read -rd '' -a apps < "$HOME/test.txt"
+	IFS=$'\n' read -rd '' -a apps < "$HOME/.desktop_files"
 	read -r selection < <(printf '%s\n' "${apps[@]%,*}" | dmenu -i -b -p "$prompt" -fn "$font")
 	for i in "${!apps[@]}";{ [[ "${apps[$i]}" = "${selection}",* ]] && app="${apps[$i]#*,}"; }
 	exec $app
@@ -16,7 +16,7 @@ update(){
 		apps+=("$name,$exec")
 		unset name exec
 	done
-	printf '%s\n' "${apps[@]}" > "$HOME/test.txt"
+	printf '%s\n' "${apps[@]}" > "$HOME/.desktop_files"
 }
 
 prompt="apps:"
