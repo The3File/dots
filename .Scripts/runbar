@@ -7,18 +7,6 @@ ws() {
    export W="$(sed -e 's/\(}\).?\(%\)/\1\2/' <<< "${s[*]}")"
 }
 
-bat(){
-	acpi=$(acpi | awk -F', ' 'gsub("Battery 0: ","") {print $1" "$2}')
-	: "${acpi##*\ }"; per="${_%%%}"
-	stat="${acpi%%\ *}"
-   ((per<=10)) && color="%{F#f00}"
-   ((per>=10)) && color="%{F#f30}"
-   ((per>=20)) && color="%{F#890}"
-   ((per>=45)) && color="%{F#4a0}"
-   ((per>=60)) && color="%{F#0c0}"
-	export B="${stat,,} ${color}${per}%%%{F-}"
-}
-
 net(){
 	[[ $1 = show ]] && st -c float -g 77x27-10-30 -e bash -c "ifconfig; read -rsn1" && return
 	st="$(iwgetid -r)"
@@ -31,7 +19,41 @@ net(){
       ((sn<=-60)) && color="%{F#0c0}"
 		net="${st,,}${color}${sn}%{F-}"
    }
-	N="$net"
+	N="%{A:net show:}$net%{A}"
+}
+
+bat(){
+	acpi=$(acpi | awk -F', ' 'gsub("Battery 0: ","") {print $1" "$2}')
+	: "${acpi##*\ }"; per="${_%%%}"
+	stat="${acpi%%\ *}"
+   ((per<=10)) && color="%{F#f00}"
+   ((per>=10)) && color="%{F#f30}"
+   ((per>=20)) && color="%{F#890}"
+   ((per>=45)) && color="%{F#4a0}"
+   ((per>=60)) && color="%{F#0c0}"
+	export B="${stat,,} ${color}${per}%%%{F-}"
+}
+
+light(){
+	IFS='.' read -r light _ < <(xbacklight -get)
+   ((light>=80)) && color="%{F#09c}"
+   ((light<=80)) && color="%{F#0c9}"
+   ((light<=60)) && color="%{F#0c3}"
+   ((light<=40)) && color="%{F#3c0}"
+   ((light<=20)) && color="%{F#990}"
+	export L="brightness ${color}${light}%%%{F-}"
+}
+
+volume(){
+	volume="$(pamixer --get-volume)"
+	mute="$(pamixer --get-mute)"
+	[[ $mute = true ]] && { v="(${volume}%)"; volume="0";} || v="${volume}%%"
+   ((volume<=25)) && color="%{F#04f}"
+   ((volume>=25)) && color="%{F#53f}"
+   ((volume>=50)) && color="%{F#72e}"
+   ((volume>=70)) && color="%{F#91d}"
+   ((volume>=90)) && color="%{F#c0c}"
+	export V="volume ${color}${v}%{F-}"
 }
 
 keylock(){
@@ -39,24 +61,6 @@ keylock(){
 	[[ $K = enable ]] && color="%{F#0c0}" || color="%{F#c00}"
 	export K="keyboard ${color}${K}d%{F-}"
 }
-
-light(){
-	read -r light < <(xbacklight -get)
-	export L="brightness %{F#0cf}${light%%.*}%%%{F-}"
-}
-
-volume(){
-	volume="$(pamixer --get-volume)"
-	mute="$(pamixer --get-mute)"
-	[[ $mute = true ]] && v="muted" || v="${volume}%"
-	export V="volume %{F#0cf}${v}%%{F-}"
-}
-
-date_(){ export D="$(date '+%a %d %b %H%M')"; }
-
-root(){ set $(df -h | grep "/$"); export R="/ $4 ($5)"; }
-
-home(){ set $(df -h | grep "/home$"); export H="/home $4 ($5)"; }
 
 main(){
 	while :; do echo > $PANELFIFO; sleep 10; done &
@@ -77,9 +81,12 @@ main(){
 	exec 3<&-
 }
 
-print_bar(){ lemonbar -p -g 1366x20 -b -B "#000" -F "#fff" -u 2 -f "ypn envypn:size=10"; }
+date_(){ export D="$(date '+%a %d %b %H%M')"; }
+root(){ set $(df -h | grep "/$"); export R="/ $4"; }
+home(){ set $(df -h | grep "/home$"); export H="~ $4"; }
 
-parse(){ printf '%s\n' " $W | $K %{c} %{r} $V | $L | %{A:net show:}$N%{A} | $B | $D "; }
+print_bar(){ lemonbar -p -g 1366x20 -b -B "#000" -F "#fff" -u 2 -f "ypn envypn:size=10"; }
+parse(){ printf '%s\n' " $W | $K %{r} $H | $R | $V | $L | $N | $B | $D "; }
 
 [[ -e "$PANELFIFO" ]] && rm "$PANELFIFO"
 mkfifo "$PANELFIFO"
