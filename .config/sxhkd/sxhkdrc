@@ -201,19 +201,19 @@ alt + ctrl + {h,j,k,l}
 
 # LIGHT | BRIGHTNESS
 XF86MonBrightness{Up,Down}
-   xbacklight -time 100 -{inc,dec} 5;((;:;)); dunstbar -b
+   xbacklight -time 100 -{inc,dec} 5;((;:;)); echo > $PANELFIFO
 
 # SOUND
 {_,super + } XF86Audio{Raise,Lower}Volume
-   pamixer {_,--allow-boost} {-i,-d}5 && pkill -SIGUSR1 herbe; herbe "volume: $(pamixer --get-volume)%"
+   pamixer {_,--allow-boost} {-i,-d}5 && echo > $PANELFIFO
 
 # mute sound
 XF86AudioMute
-   pamixer -t && dunstbar -v
+   pamixer -t && echo > $PANELFIFO
 
 # mute mic
 XF86AudioMicMute
-   amixer sset Capture toggle
+	pamixer --source alsa_input.pci-0000_00_1b.0.analog-stereo --get-mute && m=u || m=m; pamixer --source alsa_input.pci-0000_00_1b.0.analog-stereo -$m
 
 # dark light, night mode
 super + alt {_,shift +} n

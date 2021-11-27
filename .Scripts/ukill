@@ -13,12 +13,12 @@ main(){
 		set $ps
 		pid=$1
 		proc_name=$6
-		killps
+		kill_process
 	done < <(ps ax)
 }
 
-killps(){
-	[[ $opt != "noconfirm" ]] && confirm
+kill_process(){
+	[[ $opt = "noconfirm" ]] || confirm
    kill -9 "$pid" && echo "'$proc_name' killed" || exit 1
 }
 

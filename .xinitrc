@@ -15,17 +15,9 @@ exec xset s off &
 exec setxkbmap -layout dk -variant nodeadkeys -option caps:swapescape -option "shift:both_capslock" &
 
 # User apps
-#exec picom --experimental-backends &
-#exec xbanish -i Mod1 -i Mod4 &
-#exec networkd-dispatcher &
-#exec /usr/lib/kdeconnectd &
-#exec dunst &
+exec networkd-dispatcher &
 exec swallow &
-exec acpid_events &
-exec runbar &
 exec clipmenud &
-#exec expressvpn connect dk &
-#exec wal -Rtn &
 exec feh --bg-fill $HOME/.config/wall.png &
 
 # WM
