@@ -1,19 +1,23 @@
 #!/usr/bin/env bash
 
 confirm(){
-	read -p "sure you want to kill ${proc_name//$HOME\//\~/} ($pid)? [y|N] "
+	read -rp "sure you want to kill ${proc_name//$HOME\//\~/} ($pid)? [y|N] "
 	[[ "$REPLY" =~ y|Y ]] || exit 0
 }
 
 main(){
-   proc="$1"
+   script_name="$1"
 	while read -r ps; do
-		[[ "$ps" =~ $proc && ! "$ps" =~ ukill|vim ]] || continue
-		[[ $opt = "grep" ]] && { echo $ps; exit; }
+		[[ "$ps" =~ $script_name && ! "$ps" =~ ukill|vim ]] || continue
+		[[ $opt = "grep" ]] && { echo $ps; exit 0; }
 		set $ps
 		pid=$1
 		proc_name=$6
+		killps
 	done < <(ps ax)
+}
+
+killps(){
 	[[ $opt != "noconfirm" ]] && confirm
    kill -9 "$pid" && echo "'$proc_name' killed" || exit 1
 }
