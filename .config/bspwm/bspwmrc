@@ -124,8 +124,8 @@ done
 
 main(){ #{{{
 
-	xmodmap -e "keysym Menu = Super_R"
-   source "$HOME/.cache/wal/colors.sh"
+	#xmodmap -e "keysym Menu = Super_R"
+   #source "$HOME/.cache/wal/colors.sh"
 	case $1 in 1|0) reason="$1"; shift; esac
 
    [[ "$1" ]] && {
@@ -144,7 +144,7 @@ main(){ #{{{
 
    # external settings
       #autogap_settings
-      link_wal
+      #link_wal
 
    # start/restart apps
       make_fifo

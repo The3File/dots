@@ -1,3 +1,7 @@
 #!/usr/bin/env bash
 xinput enable 'AT Translated Set 2 keyboard' && printf '%s' "enable" > "$HOME/.keylock"
-env XSECURELOCK_PASSWORD_PROMPT=time_hex xsecurelock -- systemctl suspend
+if [[ $1 = nolock ]]; then
+	env XSECURELOCK_PASSWORD_PROMPT=time_hex xsecurelock
+else
+	env XSECURELOCK_PASSWORD_PROMPT=time_hex xsecurelock -- systemctl suspend
+fi
