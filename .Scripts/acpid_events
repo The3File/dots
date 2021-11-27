@@ -10,7 +10,7 @@ power_menu(){ [[ $1 = "PBTN" ]] && st -c float -g 30x5+600-10 -e bye; }
 lock_keys(){
    [[ $(<"$HOME/.keylock") = "enable" ]] && state="disable" || state="enable"
    xinput $state 'AT Translated Set 2 keyboard' && printf '%s' "$state" > "$HOME/.keylock"
-   dunstify -C 90211; dunstify -r 90210 -t 4000 "" "<b>${state}d </b>  "
+	echo > $PANELFIFO
 }
 
 handler(){
