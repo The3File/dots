@@ -137,7 +137,7 @@ super + shift + {o,i}
 
 # focus or send to the given desktop
 super + {_,shift + }{1-9,0}
-   bspc {desktop -f,node -d} '^{1-9,10}'
+   bspc {desktop -f,node -d} '^{1-9,10}'; echo ws > "$PANELFIFO"
 
 # focus the next/previous occupied desktop
 super + {,shift + Tab,Tab}
@@ -201,15 +201,15 @@ alt + ctrl + {h,j,k,l}
 
 # LIGHT | BRIGHTNESS
 XF86MonBrightness{Up,Down}
-   xbacklight -time 100 -{inc,dec} 5;((;:;)); echo > $PANELFIFO
+   xbacklight -time 100 -{inc,dec} 5;((;:;)); echo light > $PANELFIFO
 
 # SOUND
 {_,super + } XF86Audio{Raise,Lower}Volume
-   pamixer {_,--allow-boost} {-i,-d}5 && echo > $PANELFIFO
+   pamixer {_,--allow-boost} {-i,-d}5 && echo vol > $PANELFIFO
 
 # mute sound
 XF86AudioMute
-   pamixer -t && echo > $PANELFIFO
+   pamixer -t && echo vol > $PANELFIFO
 
 # mute mic
 XF86AudioMicMute

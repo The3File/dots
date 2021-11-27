@@ -112,10 +112,10 @@ link_wal(){ #{{{
 #}}}
 
 make_fifo(){ #{{{
-for fifo in $GAPFIFO $BARFIFO $PANELFIFO; do
+for fifo in $GAPFIFO $BARFIFO; do
    [[ -e "$fifo" ]] && rm "$fifo"
    mkfifo "$fifo"
-   bspc subscribe node_add node_remove desktop_focus > $fifo &
+   #bspc subscribe node_add node_remove desktop_focus > $fifo &
    printf '%s\n' "mkfifo: \"$fifo\""
 done
 }
@@ -147,7 +147,7 @@ main(){ #{{{
       #link_wal
 
    # start/restart apps
-      make_fifo
+      #make_fifo
       apps
 }
 

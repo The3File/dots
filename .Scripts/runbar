@@ -10,6 +10,7 @@ get_ip(){ wlp=0
 }
 
 net(){
+	[[ $1 = show ]] && st -c float -g 77x30-10-30 -e bash -c "ifconfig | less" && return
 	st="$(iwgetid -r)"
    net="%{F#f00}no connection%{F-}"
    [[ ! -z "$st" ]] && {
@@ -67,31 +68,46 @@ volume(){
 	export V="volume [${v}]"
 }
 
-printb(){
-	while :; do
-		parse; read -rt 10 _; done < "$PANELFIFO" |\
-			lemonbar -p -g 1366x20 -b -B "#000" -F "#fff" -u 2 -f "ypn envypn:size=10"
-			while read -r line; do eval "$line"; done
+date_(){
+	export D="$(date '+%a %d %b %H%M')"
 }
 
-update(){
-	bat; ws; volume; light; net; keylock
-	export D="$(date '+%a %d %b %H:%M')"
+root(){
 	set $(df -h | grep "/$")
 	export R="/ $4 ($5)"
+}
+
+home(){
 	set $(df -h | grep "/home$")
 	export H="/home $4 ($5)"
 }
 
-parse(){
-   update
-   printf '%s\n' " $W | $K %{c} %{r} | $V $L | $N | $B | $D "
+main(){
+	exec 5<>$PANELFIFO
+	ws; net; volume; light; bat; date_; root; home; keylock
+
+	while read -u 5 line <& 5; do
+		case $line in
+			ws) ws ;;
+			net) net ;;
+			vol) volume ;;
+			light) light ;;
+			key) keylock ;;
+			*) bat; date_; root; home ;;
+		esac
+		parse
+	done < "$PANELFIFO" | print_bar | while read; do eval $REPLY; done
+	exec 3<&-
 }
 
-trap 'bspc config bottom_padding 0; pkill lemonbar' EXIT
-#source /home/ringdal/.cache/wal/colors.sh
+print_bar(){ lemonbar -p -g 1366x20 -b -B "#000" -F "#fff" -u 2 -f "ypn envypn:size=10"; }
 
-((updint=10))
+parse(){ printf '%s\n' " $W | $K %{c} %{r} $V $L | %{A:net show:}$N%{A} | $B | $D "; }
 
-for((;;)){ net; sleep 30; } & loop="$!"
-update; printb
+[[ -e "$PANELFIFO" ]] && rm "$PANELFIFO"
+mkfifo "$PANELFIFO"
+
+while :; do echo > $PANELFIFO; sleep 10; done &
+
+trap 'bspc config bottom_padding 0; pkill lemonbar' EXIT HUP INT QUIT PIPE TERM
+main
