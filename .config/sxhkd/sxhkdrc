@@ -141,7 +141,7 @@ super + {_,shift + }{1-9,0}
 
 # focus the next/previous occupied desktop
 super + {,shift + Tab,Tab}
-   bspc desktop -f {prev,next}.occupied; dunstbar -w
+   bspc desktop -f {prev,next}.occupied; echo ws > "$PANELFIFO"
 
 ###############
 # state/flags #
