@@ -66,8 +66,8 @@ main(){
 	while :; do echo > $PANELFIFO; sleep 10; done &
 	ws; net; volume; light; bat; date_; root; home; keylock
 
-	exec 5<>$PANELFIFO
-	while read -u 5 line <& 5; do
+	exec 3<>$PANELFIFO
+	while read -u 3 line <& 3; do
 		case $line in
 			ws) ws ;;
 			net) net ;;
