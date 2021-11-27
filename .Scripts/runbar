@@ -1,16 +1,26 @@
 #!/usr/bin/env bash
 
-get_ip(){ wlp=0 
-	while read -r line; do
-		[[ $line =~ ^wlp3s0 ]] && wlp=1
-		[[ $wlp == 1 ]] || continue
-		[[ $line =~ .*inet.*  ]] || continue
-		set $line; ip=$2; break
-	done < <(ifconfig)
+ws() {
+   s=($(xprop -root _NET_DESKTOP_NAMES | awk '{$1=$2=""; print $0}' | sed -e 's/,//g' -e 's/\"//g' -e 's/^[[:space:]]*//'))
+   c=$(xprop -root _NET_CURRENT_DESKTOP | awk '{print $3}')
+   for ((i=0;i<${#s[*]};i++)){ [[ "$i" = "$c" ]] && s[$i]="%{F#0c0}[${s[$i]}]%{B-}%{F-}" || s[$i]="${s[$i]}"; }
+   export W="$(sed -e 's/\(}\).?\(%\)/\1\2/' <<< "${s[*]}")"
+}
+
+bat(){
+	acpi=$(acpi | awk -F', ' 'gsub("Battery 0: ","") {print $1" "$2}')
+	: "${acpi##*\ }"; per="${_%%%}"
+	stat="${acpi%%\ *}"
+   ((per<=10)) && color="%{F#f00}"
+   ((per>=10)) && color="%{F#f30}"
+   ((per>=20)) && color="%{F#890}"
+   ((per>=45)) && color="%{F#4a0}"
+   ((per>=60)) && color="%{F#0c0}"
+	export B="${stat,,} ${color}${per}%%%{F-}"
 }
 
 net(){
-	[[ $1 = show ]] && st -c float -g 77x30-10-30 -e bash -c "ifconfig | less" && return
+	[[ $1 = show ]] && st -c float -g 77x27-10-30 -e bash -c "ifconfig; read -rsn1" && return
 	st="$(iwgetid -r)"
    net="%{F#f00}no connection%{F-}"
    [[ ! -z "$st" ]] && {
@@ -18,74 +28,41 @@ net(){
       ((sn>=-20)) && color="%{F#f30}"
       ((sn<=-20)) && color="%{F#890}"
       ((sn<=-45)) && color="%{F#4a0}"
-      ((sn<=-60)) && color="%{F#0f0}"
-		get_ip
-		net="${st}${color}${sn}%{F-} ($ip)"
+      ((sn<=-60)) && color="%{F#0c0}"
+		net="${st,,}${color}${sn}%{F-}"
    }
 	N="$net"
 }
 
-ws() {
-   s=($(xprop -root _NET_DESKTOP_NAMES | awk '{$1=$2=""; print $0}' |\
-      sed -e 's/,//g' -e 's/\"//g' -e 's/^[[:space:]]*//'))
-   c=$(xprop -root _NET_CURRENT_DESKTOP | awk '{print $3}')
-
-   for ((i=0;i<${#s[*]};i++)){ 
-      [[ "$i" = "$c" ]] && s[$i]="%{F#0f0}[${s[$i]}]%{B-}%{F-}" || s[$i]="${s[$i]}"
-   }
-
-   export W="$(sed -e 's/\(}\).?\(%\)/\1\2/' <<< "${s[*]}")"
-}
-
-bat(){
-	acpi=$(acpi | awk -F', ' 'gsub("Battery 0: ","") {print $1" "$2}')
-	: "${acpi##*\ }"
-	per="${_%%%}"
-	stat="${acpi%%\ *}"
-   ((per<=10)) && color="%{F#f00}"
-   ((per>=10)) && color="%{F#f30}"
-   ((per>=20)) && color="%{F#890}"
-   ((per>=45)) && color="%{F#4a0}"
-   ((per>=60)) && color="%{F#0f0}"
-	export B="${stat,,} ${color}${per}%%%{F-}"
-}
-
 keylock(){
 	read -r K <"$HOME/.keylock"
-	[[ $K = enable ]] && color="%{F#0f0}" || color="%{F#f00}"
+	[[ $K = enable ]] && color="%{F#0c0}" || color="%{F#c00}"
 	export K="keyboard ${color}${K}d%{F-}"
 }
 
 light(){
-	IFS="." read -r light < <(xbacklight -get)
-	export L="brightness [${light%%.*}%]"
+	read -r light < <(xbacklight -get)
+	export L="brightness %{F#0cf}${light%%.*}%%%{F-}"
 }
 
 volume(){
 	volume="$(pamixer --get-volume)"
 	mute="$(pamixer --get-mute)"
 	[[ $mute = true ]] && v="muted" || v="${volume}%"
-	export V="volume [${v}]"
+	export V="volume %{F#0cf}${v}%%{F-}"
 }
 
-date_(){
-	export D="$(date '+%a %d %b %H%M')"
-}
+date_(){ export D="$(date '+%a %d %b %H%M')"; }
 
-root(){
-	set $(df -h | grep "/$")
-	export R="/ $4 ($5)"
-}
+root(){ set $(df -h | grep "/$"); export R="/ $4 ($5)"; }
 
-home(){
-	set $(df -h | grep "/home$")
-	export H="/home $4 ($5)"
-}
+home(){ set $(df -h | grep "/home$"); export H="/home $4 ($5)"; }
 
 main(){
-	exec 5<>$PANELFIFO
+	while :; do echo > $PANELFIFO; sleep 10; done &
 	ws; net; volume; light; bat; date_; root; home; keylock
 
+	exec 5<>$PANELFIFO
 	while read -u 5 line <& 5; do
 		case $line in
 			ws) ws ;;
@@ -102,12 +79,9 @@ main(){
 
 print_bar(){ lemonbar -p -g 1366x20 -b -B "#000" -F "#fff" -u 2 -f "ypn envypn:size=10"; }
 
-parse(){ printf '%s\n' " $W | $K %{c} %{r} $V $L | %{A:net show:}$N%{A} | $B | $D "; }
+parse(){ printf '%s\n' " $W | $K %{c} %{r} $V | $L | %{A:net show:}$N%{A} | $B | $D "; }
 
 [[ -e "$PANELFIFO" ]] && rm "$PANELFIFO"
 mkfifo "$PANELFIFO"
 
-while :; do echo > $PANELFIFO; sleep 10; done &
-
-trap 'bspc config bottom_padding 0; pkill lemonbar' EXIT HUP INT QUIT PIPE TERM
 main
