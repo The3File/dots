@@ -13,7 +13,6 @@ net(){
    net="%{F#f00}no connection%{F-}"
    [[ ! -z "$st" ]] && {
       sn=" $(iwlist wlp3s0 scan | sed -n '5P' | awk -F'=' '{print $3}' | awk -F' ' '{print $1}')"
-		get_color "$sn" "-20" "-20" "-40" "-55" "-60"
       ((sn>=-20)) && color="%{F#f30}"
       ((sn<=-20)) && color="%{F#890}"
       ((sn<=-40)) && color="%{F#4a0}"
@@ -32,12 +31,6 @@ bat(){
 	export B="${stat,,} ${color}${per}%%%{F-}"
 }
 
-light(){
-	IFS='.' read -r light _ < <(xbacklight -get)
-	get_color $light
-	export L="brightness ${color}${light}%%%{F-}"
-}
-
 volume(){
 	volume="$(pamixer --get-volume)"
 	mute="$(pamixer --get-mute)"
@@ -46,15 +39,40 @@ volume(){
 	export V="volume ${color}${v}%{F-}"
 }
 
+light(){
+	IFS='.' read -r light _ < <(xbacklight -get)
+	get_color $light
+	export L="brightness ${color}${light}%%%{F-}"
+}
+
 keylock(){
 	read -r K <"$HOME/.keylock"
 	[[ $K = enable ]] && color="%{F#0c0}" || color="%{F#c00}"
 	export K="keyboard ${color}${K}d%{F-}"
 }
 
+misc(){
+	export D="$(date '+%a %d %b %H%M')"
+	set $(df -h | grep "/$"); export R="/ $4"
+	set $(df -h | grep "/home$"); export H="~ $4"
+}
+
+get_color(){
+   (($1>=${2:-75})) && color="%{F#0c0}"
+   (($1<=${3:-75})) && color="%{F#4a0}"
+   (($1<=${4:-50})) && color="%{F#890}"
+   (($1<=${5:-25})) && color="%{F#f30}"
+   (($1<=${6:-10})) && color="%{F#f00}"
+}
+
+update_all(){ ws; net; volume; light; bat; date_; root; home; keylock; }
+
+print_bar(){ lemonbar -p -g 1366x20 -b -B "#000" -F "#fff" -u 2 -f "ypn envypn:size=10"; }
+
+parse(){ printf '%s\n' " $W | $K %{r} $H | $R | $V | $L | $N | $B | $D "; }
+
 main(){
 	while :; do echo > $PANELFIFO; sleep 10; done &
-	update_all
 
 	exec 3<>$PANELFIFO
 	while read -u 3 line <& 3; do
@@ -64,29 +82,15 @@ main(){
 			vol) volume ;;
 			light) light ;;
 			key) keylock ;;
-			*) bat; date_; root; home ;;
+			*) net; bat; misc ;;
 		esac
 		parse
 	done < "$PANELFIFO" | print_bar | while read; do eval $REPLY; done
 	exec 3<&-
 }
 
-get_color(){
-   (($1>=${2:-60})) && color="%{F#0c0}"
-   (($1<=${3:-60})) && color="%{F#4a0}"
-   (($1<=${4:-45})) && color="%{F#890}"
-   (($1<=${5:-20})) && color="%{F#f30}"
-   (($1<=${6:-10})) && color="%{F#f00}"
-}
-
-date_(){ export D="$(date '+%a %d %b %H%M')"; }
-root(){ set $(df -h | grep "/$"); export R="/ $4"; }
-home(){ set $(df -h | grep "/home$"); export H="~ $4"; }
-update_all(){ ws; net; volume; light; bat; date_; root; home; keylock; }
-print_bar(){ lemonbar -p -g 1366x20 -b -B "#000" -F "#fff" -u 2 -f "ypn envypn:size=10"; }
-parse(){ printf '%s\n' " $W | $K %{r} $H | $R | $V | $L | $N | $B | $D "; }
-
 [[ -e "$PANELFIFO" ]] && rm "$PANELFIFO"
 mkfifo "$PANELFIFO"
 
+update_all
 main
