@@ -1,24 +1,30 @@
 #!/usr/bin/env bash
 
 launch(){
-	IFS=$'\n' read -rd '' -a apps < "$HOME/.desktop_files"
+	IFS=$'\n' read -rd '' -a apps < "$config"
 	read -r selection < <(printf '%s\n' "${apps[@]%,*}" | dmenu -i -b -p "$prompt" -fn "$font")
-	for i in "${!apps[@]}";{ [[ "${apps[$i]}" = "${selection}",* ]] && app="${apps[$i]#*,}"; }
-	exec $app
+	for i in "${!apps[@]}"; do
+		[[ "${apps[$i]}" = "$selection",* ]] || continue
+		app="${apps[$i]#*,}"; entry="${apps[$i]}"; unset apps[$i]
+		printf '%s\n%s\n' "$entry" "${apps[@]}" > "$config"
+	done; exec $app
 }
 
 update(){
-	for file in /usr/share/applications/*; do
+	for file in /usr/share/applications/*.desktop $HOME/.local/share/applications/*.desktop; do
 		while read line; do
-			[[ $line =~ "Name=" && -z $name ]] && name="${line#*=}" && continue
-			[[ $line =~ "Exec=" && -z $exec ]] && exec="${line#*=}" && continue
-		done < $file
-		apps+=("$name,$exec")
-		unset name exec
+			[[ $line =~ "Name=" && -z $name ]] && { name="${line#*=}"; continue; }
+			[[ $line =~ "Exec=" && -z $exec ]] && { exec="${line#*=}"; continue; }
+		done < "$file"
+		apps+=("$name,$exec"); unset name exec
 	done
-	printf '%s\n' "${apps[@]}" > "$HOME/.desktop_files"
+	printf '%s\n' "${apps[@]}" > "$config"
 }
 
 prompt="apps:"
 font="ypn envypn:size=14"
-[[ $1 = u ]] && update || launch
+config="$HOME/.desktop_files"
+
+case $1 in '') launch ;; -u) update ;;
+	*) printf '%s\n' "use -u to update file" "run '$EDITOR $0' to configure"
+esac
