@@ -1,5 +1,5 @@
 " vim: fdm=marker
-" Plugins{{{
+" Plugins
 call plug#begin()
 Plug 'rrethy/vim-hexokinase', { 'do': 'make hexokinase' }
 Plug 'junegunn/goyo.vim'
@@ -11,9 +11,12 @@ Plug 'sheerun/vim-polyglot'
 Plug 'neomake/neomake'
 Plug 'kovetskiy/sxhkd-vim'
 Plug 'plasticboy/vim-markdown'
+Plug 'udalov/kotlin-vim'
+Plug 'itchyny/lightline.vim'
+Plug 'itchyny/vim-gitbranch'
 "Plug 'gabrielelana/vim-markdown'
-call plug#end()"}}}
-" Options{{{
+call plug#end()
+" Options
 "
 filetype plugin indent on
 syntax enable
@@ -36,10 +39,10 @@ set grepprg=grep\ -nH\ $*
 "colorscheme default
 colorscheme delek
 
-"autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown"}}}
-" Bindings{{{
+"autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown
+" Bindings
 
-" GLOBAL{{{
+" GLOBAL
 
 inoremap <C-Space> <ESC>/<++><Enter>"_c4l
 nnoremap <C-Space> <ESC>/<++><Enter>"_c4l
@@ -49,14 +52,14 @@ nnoremap ,p :previous<CR>
 nnoremap ;s" ciW""<esc>P
 vnoremap ;s" c""<esc>P
 
-"nnoremap ;s<++> ciW<++><esc>P}}}
-" BASH{{{
+"nnoremap ;s<++> ciW<++><esc>P
+" BASH
 
 autocmd FileType sh nnoremap ,c :!shellcheck %<CR>
 autocmd FileType sh nnoremap ,f i<CR>(){<CR>}<CR><ESC>2ki
 autocmd FileType sh inoremap ;e printf '' "<++>"<ESC>F'i
-"}}}
-" LATEX{{{
+
+" LATEX
 
 autocmd FileType tex nnoremap mp :w<ENTER>:! mdtopdf -t %<CR><CR>
 autocmd FileType tex nnoremap mo :! mdtopdf -o %<CR><CR>
@@ -80,12 +83,12 @@ autocmd FileType tex inoremap ;t \cdot
 autocmd FileType tex inoremap ;d \div
 autocmd FileType tex inoremap ;f \frac{}{<++>}<++><ESC>Fcf}i
 autocmd FileType tex inoremap ;s \sqrt{}<++><ESC>Ftf}i
-"}}}
-" GNUPLOT{{{
+
+" GNUPLOT
 
 autocmd FileType tex nnoremap ;g i\begin{figure}[h!]<Enter>\caption{<++>}<Enter>\label{fig:<++>}<ENTER>\begin{gnuplot}[terminal=epslatex]<CR>set key box top left<CR>set size 1.1,1.0<CR>set tics out<CR>set grid ytics mytics<CR>set grid xtics mytics<CR>set mytics 1<CR>set grid<CR><CR>set yr [<++>:<++>]<CR>set xr [<++>:<++>]<CR><CR>plot <++> w l title '<++>'<CR><CR>\end{gnuplot}<ENTER>\end{figure}<ESC>17k/<+*+><Enter>"_c4l
-"}}}
-" MARKDOWN{{{
+
+" MARKDOWN
 
 " surrounding
 autocmd FileType markdown nnoremap ;s* ciW**<esc>P
@@ -99,8 +102,8 @@ autocmd FileType markdown inoremap $$ $$<++><ESC>F$i
 autocmd FileType markdown nnoremap mo :w<CR>:! mdtopdf -o %<CR><CR>
 autocmd FileType markdown nnoremap mp :w<CR>:! mdtopdf %<CR><CR>
 autocmd FileType markdown nnoremap md :w<CR>:! mdtopdf -d %<CR><CR>
-"}}}
-" HTML{{{
+
+" HTML
 autocmd FileType html inoremap ;html <!DOCTYPE html><ENTER><html><ENTER><head><ENTER><title><++></title><ENTER></head><ENTER><body><ENTER><++><ENTER></body><ENTER></html><ESC>gg
 autocmd FileType html inoremap ;ln <link rel="stylesheet" type="text/css" href=""><ESC>hi
 autocmd FileType html inoremap ;id <div id=""><++></div><ESC>F"i
@@ -124,21 +127,21 @@ autocmd FileType html inoremap ;th <th></th><++><Esc>Fhcit
 autocmd FileType html inoremap ;tab <table><Enter></table><Esc>O
 autocmd FileType html inoremap ;dt <dt></dt><Enter><dd><++></dd><Enter><++><esc>2kcit
 autocmd FileType html inoremap ;dl <dl><Enter><Enter></dl><enter><enter><++><esc>3kcc
-"}}}}}}
-" Plugins{{{
+
+" Plugins
 let g:Hexokinase_highlighters = ['foregroundfull']
-"VimTex{{{
+"VimTex
    let g:tex_flavor = 'latex'
    let g:vimtex_view_method = 'mupdf'
    let g:vimtex_fold_enabled = 1
    let g:vimtex_fold_types = {
 	 \ 'comments' : {},
-	 \}"}}}
-"NeoVim Airline{{{
+	 \}
+"NeoVim Airline
    let g:airline_theme='fairyfloss'
    let g:airline_powerline_fonts = 1
-"}}}
-"Goyo{{{
+
+"Goyo
    nnoremap gf :!bspc node -t ~fullscreen<CR><CR>:G<ENTER>
    nnoremap g<ESC> :G<CR>:<ESC>:<BACKSPACE>
    
@@ -147,7 +150,7 @@ let g:Hexokinase_highlighters = ['foregroundfull']
    let g:goyo_margin_bottom = 0
 
 autocmd! User GoyoEnter nested call <SID>goyo_enter()
-" Goyo enter{{{
+" Goyo enter
 function! s:goyo_enter()
    "silent ![[ $TERM =~ "screen" ]] && tmux set status off
    "silent ![[ $TERM =~ "screen" ]] && tmux list-panes -F '\#F' | grep -q Z || tm
@@ -155,9 +158,9 @@ function! s:goyo_enter()
    set noshowcmd
    "set scrolloff=999
    "Limelight
-endfunction"}}}
+endfunction
 autocmd! User GoyoLeave nested call <SID>goyo_leave()"
-" Goyo leave{{{
+" Goyo leave
 function! s:goyo_leave()
    "silent !tmux set status on
    "silent !tmux list-panes -F '\#F' | grep -q Z && tm
@@ -166,10 +169,22 @@ function! s:goyo_leave()
    "set scrolloff=5
    "Limelight!
 endfunction"
-"}}} }}}
-"LimeLight{{{
+ 
+"LimeLight
 let g:limelight_conceal_ctermfg = 'gray'
 let g:limelight_conceal_ctermfg = 240
 let g:limelight_priority = -1
-let g:limelight_default_coefficient = 1.7"}}}}}}
+let g:limelight_default_coefficient = 1.7
 let g:is_bash = 1
+
+"Lightline
+let g:lightline = {
+      \ 'colorscheme': 'powerline',
+      \ 'active': {
+      \   'left': [ [ 'mode', 'paste' ],
+      \             [ 'gitbranch', 'readonly', 'filename', 'modified' ] ]
+      \ },
+      \ 'component_function': {
+      \   'gitbranch': 'gitbranch#name'
+      \ },
+      \ }
