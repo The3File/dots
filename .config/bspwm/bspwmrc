@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-config() { #{{{
+config() { 
    printf '\e[33m%s...' "applying configs"
    bspc monitor -d 1 2 3 4 5 6 7 8 9 10
 
@@ -35,8 +35,8 @@ config() { #{{{
 
 printf '\e[36m %s\n' "done."; }
 
-#}}}
-autogap_settings() { #{{{
+
+autogap_settings() { 
    # gaps
       export GAPS=1  # enable or disable automatic gaps
       export G0=5    # minimum gap size
@@ -49,9 +49,9 @@ autogap_settings() { #{{{
       export PN=2    # number of windows
 }
 
-#}}}
 
-rules() { #{{{
+
+rules() { 
    printf '\n\e[33m%s...' "setting rules"
    bspc rule -r "*"
 
@@ -61,14 +61,15 @@ rules() { #{{{
    bspc rule -a float sticky=off state=floating 
    bspc rule -a gass sticky=on state=floating focus=off border=on
    bspc rule -a files layer=above locked=on sticky=on state=floating hidden=on
-   bspc rule -a scratchterm layer=above locked=on sticky=on state=floating hidden=on
-   bspc rule -a scratchmath layer=above locked=on sticky=on state=floating hidden=on
+   bspc rule -a scratchterm layer=above locked=on sticky=on state=floating
+   bspc rule -a scratchmath layer=above locked=on sticky=on state=floating
+	bspc rule -a jetbrains-studio state=floating # Android Studio startup window
 
    printf '\e[36m %s\n\n' "done."
 }
 
-#}}}
-apps() { #{{{
+
+apps() { 
    _restart(){ ukill -n "$1" 1>/dev/null || return 1
    "$1" "${o[@]}" &>/dev/null & disown &&
    printf '\e[33m%s: %s\n' "$1" "restarted"; }
@@ -85,9 +86,9 @@ apps() { #{{{
    else _start $app || printf '\e[31m%s: %s\n' "$app" "failed"
    fi; done
 }
-#}}}
 
-link_wal(){ #{{{
+
+link_wal(){ 
    printf '\e[33m\n%s...' "linking files"
    ln -sf "$HOME/.cache/wal/dunstrc" "$HOME/.config/dunst/dunstrc" &
    ln -sf "$HOME/.cache/wal/zathurarc" "$HOME/.config/zathura/zathurarc" &
@@ -109,9 +110,9 @@ link_wal(){ #{{{
    qutebrowser :config-source &>/dev/null
    printf '\e[36m %s\n\n' "done"
 }
-#}}}
 
-make_fifo(){ #{{{
+
+make_fifo(){ 
 for fifo in $GAPFIFO $BARFIFO; do
    [[ -e "$fifo" ]] && rm "$fifo"
    mkfifo "$fifo"
@@ -120,9 +121,9 @@ for fifo in $GAPFIFO $BARFIFO; do
 done
 }
 
-#}}}
 
-main(){ #{{{
+
+main(){ 
 
 	xmodmap -e "keysym Menu = Super_R"
    #source "$HOME/.cache/wal/colors.sh"
@@ -151,13 +152,13 @@ main(){ #{{{
       apps
 }
 
-#}}}
 
-#{{{ INIT
+
+ INIT
 main "$@" &&
 {
    printf '\e[m\n%s\n' "..all done";
    dunstify "bspwmrc reloaded" -t 2000 -r 90211 &
    #echo > $GAPFIFO
 }
-# }}} vim: fdm=marker
+#  vim: fdm=marker
