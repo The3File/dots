@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+git_do(){
+	git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME "$@"
+}
+
 _init(){
 	cp $HOME/.dotfiles/README.md $HOME/README.md
 	git_do add $HOME/README.md
@@ -10,8 +14,9 @@ _cleanup(){
 	git_do update-index --assume-unchanged $HOME/README.md
 }
 
-git_do(){
-	git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME "$@"
+push(){
+	[[ $changes ]] && commit
+	git_do push
 }
 
 commit(){
@@ -19,13 +24,7 @@ commit(){
 	git_do commit -am "$message"
 }
 
-push(){
-	[[ $changes ]] && commit
-	git_do push
-}
-
 case_opts(){
-	[[ $1 ]] || exit
 	case $1 in
 		up) shift; message="$@"; push ;;
 		*) git_do "$@"
@@ -38,8 +37,7 @@ get_status(){
 }
 
 main(){
-	get_status $1
-	[[ $1 ]] || exit
+	get_status; [[ $1 ]] || exit
 	_init; case_opts "$@"; _cleanup
 }
 
