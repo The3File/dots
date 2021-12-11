@@ -36,3 +36,5 @@ print_status "$1"
 case_opts "$@"
 
 rm $HOME/README.md
+git_do update-index --assume-unchanged $HOME/README.md
+
