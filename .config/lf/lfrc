@@ -75,11 +75,11 @@ cmd open ${{
 
 cmd rename %[ -e $1 ] && printf "file exists" || mv $f $1
 
-cmd trash %{{
-   printf "delete? [y/n]: "
+cmd trash ${{
+	printf '\e[0H\e[J\e[0;33m%s\n\e[1;34m%s\e[m' "${fx[@]}" "delete? [y/n]: "
    read -rsn1
    [[ $REPLY == "y" ]] && {
-      trash "$fx"
+      trash ${fx[@]}
       printf "deleted"
    }
 }}
@@ -94,11 +94,11 @@ cmd trash-clear %{{
 }}
 
 cmd new-script ${{
-   printf "new bash script: "; read a
+   printf '\e[0;33m\e[H\e[J%s\n\e[1;34m%s\e[m' "new bash script" "name: "; read a
    [[ "$a" ]] && {
       [[ ! -f "$a" ]] && { 
-	 printf "#!/usr/bin/env bash\n\nmain(){\n<++>\n}\n\nmain \"\$@\"" > "$a"
-      	 chmod a+x "$a"
+	 		printf "#!/usr/bin/env bash\n\nmain(){\n\t<++>\n}\n\nmain \"\$@\"" > "$a"
+			chmod a+x "$a"
       }
    nvim "$a"
    }
