@@ -6,12 +6,12 @@ git_do(){
 
 commit(){
 	readme="$HOME/README.md"
-	cp $HOME/.dotfiles/README.md $readme
-	git_do add $HOME/README.md
+	cp $HOME/.dotfiles/README.md "$readme"
+	git_do add "$readme"
 	[[ "$message" ]] || message="$changes"
 	git_do commit -am "$message"
 	rm $readme
-	git update-index --assume-unchanged $readme
+	git update-index --assume-unchanged "$readme"
 }
 
 push(){
