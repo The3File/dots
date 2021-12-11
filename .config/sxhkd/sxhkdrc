@@ -10,8 +10,10 @@ alt + shift + Pause
 ##########################
 
 # bar replacement
-super + {c,shift + c,b}
-   dunstbar {-d,-c,-o}
+#super + {c,shift + c,b}
+	#dunstbar {-d,-c,-o}
+super + b
+	ukill -g runbar && ukill -k runbar || runbar &disown
 
 # terminal emulator
 super + {_,shift +} {Return}

@@ -1,38 +1,39 @@
 #!/usr/bin/env bash
 
-confirm(){
-	read -rp "sure you want to kill ${proc_name//$HOME\//\~/} ($pid)? [y|N] "
-	[[ "$REPLY" =~ y|Y ]] || exit 0
-}
-
-main(){
-   script_name="$1"
+read_ps(){
+	script_name="$1"
 	while read -r ps; do
 		[[ "$ps" =~ $script_name && ! "$ps" =~ ukill|vim ]] || continue
-		[[ $opt = "grep" ]] && { echo $ps; exit 0; }
 		set $ps
 		pid=$1
-		proc_name=$6
-		kill_process
+		pids+=("$1")
+		[[ $proc_name ]] || proc_name=$6
 	done < <(ps ax)
 }
 
-kill_process(){
-	[[ $opt = "noconfirm" ]] || confirm
-   kill -9 "$pid" && echo "'$proc_name' killed" || exit 1
+grep_ps(){
+	for pid in ${pids[@]}; do echo $proc_name $pid; done
+	[[ -z ${pids[@]} ]] && exit 1 || exit 0
+}
+
+kill_ps(){
+	for pid in ${pids[@]}; do
+		kill -15 "$pid" || kill -9 "$pid" && echo "'$proc_name' killed" || exit 1
+	done
 }
 
 usage(){ printf '%s\n' "usage: ukill [-gnh] <script_name>"; exit 1; }
 
-while getopts n:g:h a; do
+
+[[ $1 ]] || usage
+while getopts g:k:h a; do
 	case $a in
-		n) opt="noconfirm" ;;
-		g) opt="grep" ;;
-		h|help) usage
+		g) opt="grep_ps" ;;
+		k) opt="kill_ps" ;;
+		h) usage ;;
 	esac
 	shift
 done
 
-[[ $1 ]] || usage
-
-main "$@"
+read_ps "$@"
+eval $opt
