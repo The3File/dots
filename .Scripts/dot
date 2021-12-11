@@ -10,7 +10,7 @@ commit(){
 	[[ "$message" ]] || message="$changes"
 	git_do commit -am "$message"
 	rm $HOME/README.md
-	git update-index --assume-unchanged $HOME/README.md
+	#git update-index --assume-unchanged $HOME/README.md
 }
 
 push(){
