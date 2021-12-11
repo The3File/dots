@@ -37,5 +37,10 @@ get_status(){
 	[[ ! -z $changes ]] && printf '%s\n' "$changes"
 }
 
-get_status $1
-_init; case_opts "$@"; _cleanup
+main(){
+	get_status $1
+	[[ $1 ]] || exit
+	_init; case_opts "$@"; _cleanup
+}
+
+main "$@"
