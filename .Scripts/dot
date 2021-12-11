@@ -2,7 +2,8 @@
 
 _init(){
 	cp $HOME/.dotfiles/README.md $HOME/README.md
-	print_status "$1"
+	git_do add $HOME/README.md
+	print_status
 }
 
 _exit(){
@@ -15,7 +16,6 @@ git_do(){
 }
 
 commit(){
-	git_do add $HOME/README.md
 	[[ "$message" ]] || message="$changes"
 	git_do commit -am "$message"
 }
@@ -25,7 +25,8 @@ push(){
 	git_do push
 }
 
-case_opts(){ 
+case_opts(){
+	[[ $1 ]] || exit
 	case $1 in
 		up) shift; message="$@"; push ;;
 		*) git_do "$@"
@@ -34,9 +35,8 @@ case_opts(){
 
 print_status(){
 	changes=$(git_do status --porcelain)
-	[[ -z "$1" && ! -z $changes ]] && printf '%s\n' "$changes"
+	[[ ! -z $changes ]] && printf '%s\n' "$changes"
 }
 
-
-[[ $1 ]] || { print_status; exit; }
+[[ $1 ]] || print_status
 _init; case_opts "$@"; _exit
