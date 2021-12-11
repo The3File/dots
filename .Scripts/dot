@@ -32,10 +32,10 @@ case_opts(){
 	esac
 }
 
-print_status(){
+get_status(){
 	changes=$(git_do status --porcelain)
 	[[ ! -z $changes ]] && printf '%s\n' "$changes"
 }
 
-print_status
+get_status $1
 _init; case_opts "$@"; _cleanup
