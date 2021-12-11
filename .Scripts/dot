@@ -1,5 +1,15 @@
 #!/usr/bin/env bash
 
+_init(){
+	cp $HOME/.dotfiles/README.md $HOME/README.md
+	print_status "$1"
+}
+
+_exit(){
+	rm $HOME/README.md
+	git_do update-index --assume-unchanged $HOME/README.md
+}
+
 git_do(){
 	git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME "$@"
 }
@@ -23,18 +33,10 @@ case_opts(){
 }
 
 print_status(){
-   changes=$(git_do status --porcelain)
-   [[ -z "$1" && ! -z $changes ]] && printf '%s\n' "$changes"
+	changes=$(git_do status --porcelain)
+	[[ -z "$1" && ! -z $changes ]] && printf '%s\n' "$changes"
 }
-
-cp $HOME/.dotfiles/README.md $HOME/README.md
-
-print_status "$1"
 
 
 [[ $1 ]] || exit
-case_opts "$@"
-
-rm $HOME/README.md
-git_do update-index --assume-unchanged $HOME/README.md
-
+_init; case_opts "$@"; _exit
