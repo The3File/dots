@@ -5,7 +5,6 @@ git_do(){
 }
 
 commit(){
-	git update-index --assume-unchanged $HOME/README.md
 	cp $HOME/.dotfiles/README.md $HOME/README.md
 	git_do add $HOME/README.md
 	[[ "$message" ]] || message="$changes"
