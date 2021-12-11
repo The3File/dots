@@ -5,11 +5,9 @@ git_do(){
 }
 
 commit(){
-	cp $HOME/.dotfiles/README.md $HOME/README.md
 	git_do add $HOME/README.md
 	[[ "$message" ]] || message="$changes"
 	git_do commit -am "$message"
-	rm $HOME/README.md
 }
 
 push(){
@@ -29,8 +27,12 @@ print_status(){
    [[ -z "$1" && ! -z $changes ]] && printf '%s\n' "$changes"
 }
 
+cp $HOME/.dotfiles/README.md $HOME/README.md
+
 print_status "$1"
 
 
 [[ $1 ]] || exit
 case_opts "$@"
+
+rm $HOME/README.md
