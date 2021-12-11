@@ -3,10 +3,9 @@
 _init(){
 	cp $HOME/.dotfiles/README.md $HOME/README.md
 	git_do add $HOME/README.md
-	print_status
 }
 
-_exit(){
+_cleanup(){
 	rm $HOME/README.md
 	git_do update-index --assume-unchanged $HOME/README.md
 }
@@ -38,5 +37,5 @@ print_status(){
 	[[ ! -z $changes ]] && printf '%s\n' "$changes"
 }
 
-[[ $1 ]] || print_status
-_init; case_opts "$@"; _exit
+print_status
+_init; case_opts "$@"; _cleanup
