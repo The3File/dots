@@ -5,11 +5,13 @@ git_do(){
 }
 
 commit(){
-	cp $HOME/.dotfiles/README.md $HOME/README.md
+	readme="$HOME/README.md"
+	cp $HOME/.dotfiles/README.md $readme
 	git_do add $HOME/README.md
 	[[ "$message" ]] || message="$changes"
 	git_do commit -am "$message"
-	rm $HOME/README.md
+	rm $readme
+	git update-index --assume-unchanged $readme
 }
 
 push(){
