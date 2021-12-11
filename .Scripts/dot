@@ -38,5 +38,5 @@ print_status(){
 }
 
 
-[[ $1 ]] || exit
+[[ $1 ]] || { print_status; exit; }
 _init; case_opts "$@"; _exit
