@@ -25,12 +25,11 @@ kill_ps(){
 usage(){ printf '%s\n' "usage: ukill [-gnh] <script_name>"; exit 1; }
 
 
-[[ $1 ]] || usage
-while getopts g:k:h a; do
+while getopts g:k a; do
+	[[ $a ]] || usage
 	case $a in
 		g) opt="grep_ps" ;;
 		k) opt="kill_ps" ;;
-		h) usage ;;
 	esac
 	shift
 done
