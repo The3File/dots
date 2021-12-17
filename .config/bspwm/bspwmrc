@@ -78,7 +78,6 @@ rules() {
 
 	bspc config external_rules_command "$(which external_rules)"
 
-	#bspc rule -a Sxiv hidden=on
 	bspc rule -a Zathura state=tiled
 	bspc rule -a float sticky=off state=floating 
 	bspc rule -a gass sticky=on state=floating focus=off border=on
