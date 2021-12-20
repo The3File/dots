@@ -3,7 +3,8 @@
 export XDG_CONFIG_HOME="$HOME/.config"
 
 export PATH="$HOME/.bin:$HOME/.local/bin:$HOME/.Scripts/:/usr/local/bin:$PATH"
-export VISUAL="st -e nvim"
+export TERMINAL="st -e"
+export VISUAL="$TERMINAL nvim"
 export EDITOR="nvim"
 export BROWSER="qutebrowser"
 
@@ -16,6 +17,8 @@ export GAPFIFO="/tmp/gap-fifo"
 export BARFIFO="/tmp/bar-fifo"
 export WORKFIFO="/tmp/work-fifo"
 
+## < TERMUX
+
 termux_specific(){
 	export NOTES="/sdcard/Noter"
 	export MANPAGER="less"
@@ -25,6 +28,8 @@ termux_specific(){
 }
 
 [[ $(uname -o) = "Android" ]] && termux_specific
+
+## >
 
 [[ -f ~/.bashrc ]] && source ~/.bashrc
 [[ ! $DISPLAY && $XDG_VTNR -eq 1 ]] && exec startx &>/dev/null

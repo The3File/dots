@@ -24,3 +24,4 @@ text/html=chromium.desktop
 application/pdf=zathura.desktop
 inode/directory=lf.desktop
 x-scheme-handler/tg=userapp-Telegram Desktop-9GYFE1.desktop
+x-scheme-handler/msteams=teams.desktop

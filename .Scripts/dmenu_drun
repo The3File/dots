@@ -3,6 +3,7 @@
 launch(){
 	IFS=$'\n' read -rd '' -a apps < "$config"
 	read -r selection < <(printf '%s\n' "${apps[@]%,*}" | dmenu -i -b -p "$prompt" -fn "$font")
+	[[ $selection = "update_drun" ]] && update
 	for i in "${!apps[@]}"; do
 		[[ "${apps[$i]}" = "$selection",* ]] || continue
 		app="${apps[$i]#*,}"; entry="${apps[$i]}"; unset apps[$i]
@@ -10,7 +11,7 @@ launch(){
 	done; exec $app
 }
 
-update(){
+update(){ unset apps
 	for file in /usr/share/applications/*.desktop $HOME/.local/share/applications/*.desktop; do
 		while read line; do
 			[[ $line =~ "Name=" && -z $name ]] && { name="${line#*=}"; continue; }
@@ -18,7 +19,8 @@ update(){
 		done < "$file"
 		apps+=("$name,$exec"); unset name exec
 	done
-	printf '%s\n' "${apps[@]}" > "$config"
+	printf '%s\n' "${apps[@]}" "update_drun" > "$config"
+	exit 0
 }
 
 prompt="apps:"
