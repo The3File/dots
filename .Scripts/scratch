@@ -21,8 +21,6 @@ term_placeholder(){
 
 	$TERMINAL --class $cls,$cls -e tmux new -s 'scratch' ||
 	$TERMINAL --class $cls,$cls -e tmux a -t '=scratch'
-	#st --class $cls -g $geo -e tmux new -s 'scratch' ||
-	#st --class $cls -g $geo -e tmux a -t '=scratch'
 }
 
 placeholder(){
