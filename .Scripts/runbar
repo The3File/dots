@@ -67,7 +67,7 @@ get_color(){
 
 update_all(){ ws; net; volume; light; bat; date_; root; home; keylock; }
 
-print_bar(){ lemonbar -p -g 1366x20 -b -B "$color0" -F "$color7" -u 2 -f "ypn envypn:size=10"; }
+print_bar(){ lemonbar -p -g 1366x20 -${lp} -B "$color0" -F "$color7" -u 2 -f "ypn envypn:size=10"; }
 
 parse(){ printf '%s\n' " $W | $K %{r} $H | $R | $V | $L | $N | $B | $D "; }
 
@@ -89,12 +89,15 @@ main(){
 	exec 3<&-
 }
 
-trap 'killall lemonbar; bspc config bottom_padding 0' EXIT TERM KILL
+trap 'killall lemonbar; bspc config bottom_padding 0; bspc config top_padding 0' EXIT TERM KILL
 
 [[ -e "$PANELFIFO" ]] && rm "$PANELFIFO"
 mkfifo "$PANELFIFO"
 
-bspc config bottom_padding          21
+# lemonbar_position
+lp="t"
+bspc config top_padding          21
+#bspc config bottom_padding          21
 source "$HOME/.cache/wal/colors.sh"
 
 update_all
