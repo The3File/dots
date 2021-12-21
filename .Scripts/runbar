@@ -95,9 +95,9 @@ trap 'killall lemonbar; bspc config bottom_padding 0; bspc config top_padding 0'
 mkfifo "$PANELFIFO"
 
 # lemonbar_position
-lp="t"
-bspc config top_padding          21
-#bspc config bottom_padding          21
+lp="b"
+#bspc config top_padding          21
+bspc config bottom_padding          21
 source "$HOME/.cache/wal/colors.sh"
 
 update_all

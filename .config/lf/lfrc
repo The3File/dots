@@ -3,8 +3,10 @@ set shellopts '-eu'
 set ifs "\n"
 set scrolloff 10
 set previewer ~/.bin/preview
-set preview!
-set ratios '1:1:9999'
+#set preview!
+set preview
+#set ratios '1:1:9999'
+set ratios '1:2:3'
 set relativenumber
 #set drawbox on
 #### BINDINGS ####
