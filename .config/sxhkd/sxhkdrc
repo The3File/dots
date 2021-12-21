@@ -17,19 +17,19 @@ super + b
 
 # terminal emulator
 super + {_,shift +} {Return}
-   st {_,-c float -g 88x25}
+   $TERMINAL {_,-c float -g 88x25}
 
 # tui apps
 super + {u,s,shift+s}
-   st -e {rtv -s unixporn,svim,scli}
+   $TERMINAL -e {rtv -s unixporn,svim,scli}
 
 super + v
-	st -c float -g 60x15+30+20 -e mbsync -Va; st -e neomutt
-	#st -e neomutt
+	$TERMINAL -c float -g 60x15+30+20 -e mbsync -Va; $TERMINAL -e neomutt
+	#$TERMINAL -e neomutt
 
 # cli apps
 super + {_,shift +} e
-   {st -e lf, scratch files}
+   {$TERMINAL -e lf, scratch files}
 
 # draw terminal
 alt + button1
@@ -93,7 +93,7 @@ super + Escape
    pkill -USR1 -x sxhkd
 
 super + alt + shift + q
- st -c float -g 30x5+30-30 -e bye
+ $TERMINAL -c float -g 30x5+30-30 -e bye
 
 #################
 # bspwm hotkeys #
