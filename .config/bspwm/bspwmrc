@@ -83,6 +83,7 @@ rules() {
 
 	bspc rule -a Zathura state=tiled
 	bspc rule -a float sticky=off state=floating 
+	bspc rule -a fullscreen sticky=off state=fullscreen
 	bspc rule -a gass sticky=on state=floating focus=off border=on
 	bspc rule -a files layer=above locked=on sticky=on state=floating hidden=on
 	bspc rule -a scratchterm layer=above locked=on sticky=on state=floating
