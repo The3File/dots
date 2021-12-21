@@ -36,8 +36,8 @@ set grepprg=grep\ -nH\ $*
 
 "colorscheme wal
 "colorscheme zellner
-"colorscheme default
-colorscheme delek
+colorscheme default
+"colorscheme delek
 
 "autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown
 " Bindings

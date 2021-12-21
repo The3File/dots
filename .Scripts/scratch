@@ -7,13 +7,6 @@ math(){
 	placeholder
 }
 
-files(){
-	cls="files"
-	geo="80x15+30-20"
-	exe="lf"
-	placeholder
-}
-
 term(){
 	cls="scratchterm"
 	geo="100x28+30+30"
@@ -24,10 +17,12 @@ term(){
 term_placeholder(){
 	get_id "$cls"
 
-	[[ -z "$id" ]] && {
-		st -c $cls -g $geo -e tmux new -s 'scratch' ||
-		st -c $cls -g $geo -e tmux a -t '=scratch'
-	} || toggle
+	[[ -z "$id" ]] || toggle
+
+	$TERMINAL --class $cls,$cls -e tmux new -s 'scratch' ||
+	$TERMINAL --class $cls,$cls -e tmux a -t '=scratch'
+	#st --class $cls -g $geo -e tmux new -s 'scratch' ||
+	#st --class $cls -g $geo -e tmux a -t '=scratch'
 }
 
 placeholder(){
@@ -37,8 +32,8 @@ placeholder(){
 
 get_id(){ id=$(xdotool search --class $1); }
 
-toggle(){ bspc node "$id" --flag hidden -f; }
+toggle(){ bspc node "$id" --flag hidden -f; exit; }
 
-new(){ st -c $cls -g $geo -e $exe; }
+new(){ $TERMINAL --class $cls,$cls -e $exe; }
 
-$1
+eval $1
