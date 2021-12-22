@@ -3,6 +3,7 @@
 
 main(){ 
 
+	# "#00ff00"
 	BORDER_COLOR="$color3"
 	BACKGROUND_COLOR="$color0"
 

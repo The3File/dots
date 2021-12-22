@@ -1,6 +1,7 @@
 " vim: fdm=marker
 " Plugins
 call plug#begin()
+Plug 'ap/vim-css-color'
 Plug 'rrethy/vim-hexokinase', { 'do': 'make hexokinase' }
 Plug 'junegunn/goyo.vim'
 Plug 'junegunn/limelight.vim'
