@@ -22,5 +22,5 @@ exec feh --bg-fill $HOME/.config/wall.png &
 
 # WM
 exec sxhkd -m 1 &
-#lockscreen nolock &
+lockscreen nolock &
 bspwm
