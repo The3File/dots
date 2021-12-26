@@ -19,7 +19,6 @@ backup() {
 		}
 	done
 	config checkout
-	config config --local status.showUntrackedFiles no
 }
 
 printf '%s\n%s\n%s' ".dotfiles" "install.bash" "README.md" >"$HOME/.gitignore"
@@ -35,3 +34,4 @@ u | url)
 esac
 
 config checkout &>/dev/null || backup
+config config --local status.showUntrackedFiles no
