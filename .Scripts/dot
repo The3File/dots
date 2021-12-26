@@ -4,12 +4,13 @@ git_do(){
 	git --git-dir=$HOME/.dotfiles/ --work-tree=$HOME "$@"
 }
 
-_init(){
+put_readme(){
+	git_do update-index --no-assume-unchanged $HOME/README.md
 	cp $HOME/.dotfiles/README.md $HOME/README.md
 	git_do add $HOME/README.md
 }
 
-_cleanup(){
+get_readme(){
 	mv $HOME/README.md $HOME/.dotfiles/
 	git_do update-index --assume-unchanged $HOME/README.md
 }
@@ -17,6 +18,7 @@ _cleanup(){
 push(){
 	[[ $changes ]] && commit
 	git_do push
+	exit 0
 }
 
 commit(){
@@ -27,7 +29,7 @@ commit(){
 case_opts(){
 	case $1 in
 		up) shift; message="$@"; push ;;
-		*) git_do "$@"
+		push) put_readme
 	esac
 }
 
@@ -39,8 +41,10 @@ get_status(){
 main(){
 	get_status
 	[[ $1 ]] || exit
-	[[ $1 = pull ]] || _init
-	case_opts "$@"; _cleanup
+
+	case_opts "$@"
+	git_do "$@"
+	get_readme
 }
 
 main "$@"
