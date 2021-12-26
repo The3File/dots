@@ -10,7 +10,7 @@ _init(){
 }
 
 _cleanup(){
-	rm $HOME/README.md
+	mv $HOME/README.md $HOME/.dotfiles/
 	git_do update-index --assume-unchanged $HOME/README.md
 }
 
@@ -37,8 +37,10 @@ get_status(){
 }
 
 main(){
-	get_status; [[ $1 ]] || exit
-	_init; case_opts "$@"; _cleanup
+	get_status
+	[[ $1 ]] || exit
+	[[ $1 = pull ]] || _init
+	case_opts "$@"; _cleanup
 }
 
 main "$@"
