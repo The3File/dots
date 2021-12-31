@@ -98,6 +98,7 @@ mkfifo "$PANELFIFO"
 lp="b"
 #bspc config top_padding          21
 #bspc config bottom_padding          21
+bspc rule -a lemonbar layer=below
 source "$HOME/.cache/wal/colors.sh"
 
 update_all
