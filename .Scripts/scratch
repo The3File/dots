@@ -1,37 +1,20 @@
 #!/usr/bin/env bash
 
+get_id(){ id="$(xdotool search --class $cls)"; }
+toggle(){ bspc node "$id" --flag hidden -f; exit; }
+
 math(){
-	cls="scratchmath"
-	geo="100x17-30-30"
-	exe="qalc"
-	placeholder
+	cls="scratchmath"; get_id
+	[[ -z "$id" ]] && { $TERMINAL --class $cls,$cls -e qalc; } || toggle
 }
 
 term(){
-	cls="scratchterm"
-	geo="100x28+30+30"
-
-	term_placeholder
-}
-
-term_placeholder(){
-	get_id "$cls"
-
+	cls="scratchterm"; get_id
 	[[ -z "$id" ]] || toggle
 
-	$TERMINAL --class $cls,$cls -e tmux new -s 'scratch' ||
-	$TERMINAL --class $cls,$cls -e tmux a -t '=scratch'
+	tmux has-session -t scratch &&
+		{ $TERMINAL --class $cls,$cls -e tmux a -t '=scratch'; } ||
+		{ $TERMINAL --class $cls,$cls -e tmux new -s 'scratch'; }
 }
-
-placeholder(){
-	get_id "$cls"
-	[[ -z "$id" ]] && new || toggle
-}
-
-get_id(){ id=$(xdotool search --class $1); }
-
-toggle(){ bspc node "$id" --flag hidden -f; exit; }
-
-new(){ $TERMINAL --class $cls,$cls -e $exe; }
 
 eval $1
