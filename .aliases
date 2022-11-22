@@ -46,6 +46,7 @@ alias lla="ls -la"
 #alias ll="ls -l"
 #alias lla="ll -H"
 alias tree="tree -C"
+alias myip="curl ifconfig.co"
 # }}}
 ## TSM{{{
 alias hej="echo hej $USER!"

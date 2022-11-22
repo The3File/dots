@@ -2,7 +2,7 @@
 
 export XDG_CONFIG_HOME="$HOME/.config"
 
-export PATH="$HOME/.bin:$HOME/.local/bin:$HOME/.Scripts/:/usr/local/bin:$PATH"
+export PATH="$HOME/.Scripts/:$HOME/.bin:$HOME/.local/bin:$HOME/.Scripts/:/usr/local/bin:$PATH"
 export TERMINAL="alacritty"
 export VISUAL="$TERMINAL nvim"
 export EDITOR="nvim"

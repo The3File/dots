@@ -41,9 +41,9 @@ super + {p,a}
 
 # program launcher
 super + d
-	dmenu_drun
-#dmenu_run -b -fn "ypn envypn:size=14" -p "apps:"
-#rofi -show drun
+	dmenu_run -b -fn "ypn envypn:size=14" -p "apps:"
+	#dmenu_drun
+	#rofi -show drun
 
 # wifi menu
 super + shift + w
@@ -91,6 +91,9 @@ super + shift + a ; e
 # reload sxhkd
 super + Escape
 	pkill -USR1 -x sxhkd
+
+# kill xorg
+super + shift + escape
 
 super + alt + shift + q
 	$TERMINAL --class fullscreen,fullscreen -e bye
@@ -207,7 +210,7 @@ alt + ctrl + {h,j,k,l}
 
 # LIGHT | BRIGHTNESS
 XF86MonBrightness{Up,Down}
-   xbacklight -time 100 -{inc,dec} 5;((;:;)); echo light > $PANELFIFO
+   sudo xbacklight -time 100 -{inc,dec} 5;((;:;)); echo light > $PANELFIFO
 
 # SOUND
 {_,super + } XF86Audio{Raise,Lower}Volume
