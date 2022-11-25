@@ -96,7 +96,7 @@ super + Escape
 super + shift + escape
 
 super + alt + shift + q
-	$TERMINAL --class fullscreen,fullscreen -e bye
+	$TERMINAL -o "window.dimensions: {columns: 25, lines: 5}" --class float -e bye
 #$TERMINAL --class float,float -e bye
 
 #################
