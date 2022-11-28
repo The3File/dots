@@ -1,0 +1,21 @@
+#!/data/data/com.termux/files/usr/bin/env bash
+
+as="$HOME/storage/shared/Audiobooks"
+ab=(null)
+
+i=0
+IFS=$'\n'
+for a in ${as}/*; do
+	((i++))
+	ab+=($a)
+	: ${a##*/}
+	printf '%s\n' "$i: ${_%%.*}"
+done
+
+read -rsn1 -p "which audiobook?"$'\n' s
+
+[[ ${ab[$s]} = null ]] && exit
+
+printf '%s\n' "playing ${ab[$s]}"
+mpv "${ab[$s]}"
+exit
