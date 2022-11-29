@@ -23,6 +23,7 @@ export WORKFIFO="/tmp/work-fifo"
 termux_specific(){
 	read -r USER < $HOME/.username
 	export $USER
+	export HOSTNAME=termux
 	export NOTES="/sdcard/Noter"
 	export MANPAGER="less"
 	alias xdg-open="termux-open"
