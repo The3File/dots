@@ -1,6 +1,7 @@
 #!/bin/sh
 
 export XDG_CONFIG_HOME="$HOME/.config"
+export USER=$(whoami)
 
 export PATH="$HOME/.Scripts/:$HOME/.bin:$HOME/.local/bin:$HOME/.Scripts/:/usr/local/bin:$PATH"
 export TERMINAL="alacritty"
@@ -20,6 +21,8 @@ export WORKFIFO="/tmp/work-fifo"
 ## < TERMUX
 
 termux_specific(){
+	read -r USER < $HOME/.username
+	export $USER
 	export NOTES="/sdcard/Noter"
 	export MANPAGER="less"
 	alias xdg-open="termux-open"
