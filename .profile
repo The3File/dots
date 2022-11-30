@@ -24,7 +24,7 @@ termux_specific(){
 	read -r USER < $HOME/.username
 	export $USER
 	export HOSTNAME=termux
-	export SDCARD="/storage/emulated/0"
+	export SDCARD="/sdcard"
 	export NOTES="/sdcard/Noter"
 	export MANPAGER="less"
 	alias xdg-open="termux-open"
