@@ -59,3 +59,6 @@ alias ap="adb push"
 alias arr="adb reboot recovery"
 alias sshfon="ssh $(ip r | awk '{getline $1; print $3}') -p 8022 -i '$HOME/.ssh/id_rsa'"
 # }}}
+
+# Termux
+alias cdsd="cd $SDCARD"
