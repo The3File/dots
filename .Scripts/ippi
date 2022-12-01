@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-hn=pi
+hn=rpi
 printf '%s\n' "scanning.."
 
 ip=$(nmap -sP $(IFS=$'\n' read -rsd '' -a ip < <(ip r); echo ${ip[2]%%\ *}) | grep "$hn")
