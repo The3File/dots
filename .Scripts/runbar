@@ -51,7 +51,7 @@ light(){
 }
 
 keylock(){
-	read -r K <"$HOME/.keylock"
+	read -r K < "$HOME/.keylock"
 	[[ $K = enable ]] && color="%{F#0c0}" || color="%{F#c00}"
 	export K="keyboard ${color}${K}d%{F-}"
 }

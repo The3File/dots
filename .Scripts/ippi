@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+hn=pi
+printf '%s\n' "scanning.."
+
+ip=$(nmap -sP $(IFS=$'\n' read -rsd '' -a ip < <(ip r); echo ${ip[2]%%\ *}) | grep "$hn")
+: "${ip%%)*}"; ip="${_##*(}"
+
+[[ $ip ]] || { printf '\e[1A%s\n' "found no devices.."; exit 1; }
+
+printf '\e[1A\e[J%s\n' "found device with hostname '$hn' [$ip]"
+
+read -rn1 -p "connect immediately? [Y|n]"$'\n'"> "
+
+case $REPLY in
+	n|N)
+		printf '%s' "$ip" | xclip
+		printf '\n%s\n' "copyed '$ip' to clipboard"
+		;;
+	*)
+		ssh ${USER}@${ip}
+esac

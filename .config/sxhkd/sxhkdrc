@@ -9,6 +9,9 @@ alt + shift + Pause
 # wm independent hotkeys #
 ##########################
 
+super + alt + shift + l
+	lock_keys
+
 # bar replacement
 #super + {c,shift + c,b}
 	#dunstbar {-d,-c,-o}
