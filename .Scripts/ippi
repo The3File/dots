@@ -1,14 +1,16 @@
 #!/usr/bin/env bash
 
-hn=rpi
-printf '%s\n' "scanning.."
+read -r mac < "$HOME/.pi_mac"
 
-ip=$(nmap -sP $(IFS=$'\n' read -rsd '' -a ip < <(ip r); echo ${ip[2]%%\ *}) | grep "$hn")
-: "${ip%%)*}"; ip="${_##*(}"
+while read line; do
+	[[ "$line" = *"$mac"* ]] || continue
+	set $line
+	: "${2%)}"; ip="${_#(}"
+done < <(arp -a)
 
-[[ $ip ]] || { printf '\e[1A%s\n' "found no devices.."; exit 1; }
+[[ $ip ]] || { printf '%s\n' "no.."; exit 1; }
 
-printf '\e[1A\e[J%s\n' "found device with hostname '$hn' [$ip]"
+printf '\e[1;35m%s\n\e[m' "[$ip]"
 
 read -rn1 -p "connect immediately? [Y|n]"$'\n'"> "
 
