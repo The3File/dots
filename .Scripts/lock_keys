@@ -4,4 +4,4 @@
 xinput $state "AT Translated Set 2 keyboard"
 printf '%s\n' "keyboard ${state}d"
 printf '%s' "$state" > "$HOME/.keylock"
-printf '%s\n' "key" > $PANELFIFO
+printf '%s\n' "key" > "$PANELFIFO"
