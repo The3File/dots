@@ -63,3 +63,4 @@ alias sshfon="ssh $(ip r | awk '{getline $1; print $3}') -p 8022 -i '$HOME/.ssh/
 # Termux
 alias cdsd="cd $SDCARD"
 alias localip='read -ra ip < <(ip a s wlan0 | grep '\''inet '\''); echo 192.168.230.216'
+alias :q="exit"
