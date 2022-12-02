@@ -66,7 +66,7 @@ handle_mime() {
         text/* | */xml)
             # Syntax highlight
             #vimpager "${FILE_PATH}"
-            bat -f "${FILE_PATH}"
+            batcat "${FILE_PATH}"
             exit 2;;
 
         # Image
