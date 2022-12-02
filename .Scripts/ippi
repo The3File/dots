@@ -4,21 +4,17 @@ read -r mac < "$HOME/.pi_mac"
 
 while read line; do
 	[[ "$line" = *"$mac"* ]] || continue
-	set $line
-	: "${2%)}"; ip="${_#(}"
-done < <(arp -a)
+	set $line; ip="$1"; break
+done < <(ip neigh show)
 
 [[ $ip ]] || { printf '%s\n' "no.."; exit 1; }
-
 printf '\e[1;35m%s\n\e[m' "[$ip]"
 
 read -rn1 -p "connect immediately? [Y|n]"$'\n'"> "
-
 case $REPLY in
 	n|N)
-		printf '%s' "$ip" | xclip
+		printf '%s' "$ip" | xclip &&
 		printf '\n%s\n' "copyed '$ip' to clipboard"
 		;;
-	*)
-		ssh ${USER}@${ip}
+	*) ssh ${USER}@${ip}
 esac
