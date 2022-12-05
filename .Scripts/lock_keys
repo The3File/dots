@@ -3,6 +3,7 @@
 [[ $(< "$HOME/.keylock") = "enable" ]] && state="disable" || state="enable"
 xinput $state "AT Translated Set 2 keyboard"
 xinput $state "TPPS/2 IBM TrackPoint"
-printf '%s\n' "keyboard ${state}d"
+printf '%s\n' "Keyboard ${state^}d"
 printf '%s' "$state" > "$HOME/.keylock"
-printf '%s\n' "key" > "$PANELFIFO"
+
+echo "key" > "$PANELFIFO"
