@@ -1,0 +1,65 @@
+#!/bin/bash
+
+until ping -c 1 g.co &>/dev/null; do sleep 10; done
+
+send_mail(){
+	sbj="$host IP Changed"
+
+	echo sending mail
+	echo -e "Subject: $sbj\n$n_ip" | msmtp $email
+}
+
+save_ip(){
+	printf "$n_ip" > $wan_file
+	cat <<-EOF >> "$HOME/.ip.log"
+		======= $(date '+%Y-%m-%d %H:%M') =======
+		Mail sendt to: $email
+		Subject: $sbj
+		Text: $n_ip
+
+	EOF
+}
+
+get_local_ip(){
+	printf '%s\n' "using local address"
+	set $(ip a s wlan0 | grep 'inet ')
+	n_ip=${2%/*}
+}
+
+get_public_ip(){
+	read -r n_ip < <(curl -s ifconfig.co)
+}
+
+define_vars(){
+	get_opts "$@"
+	[[ $local = 1 ]] && get_local_ip || get_public_ip
+	host="${h:-$(hostname)}"
+
+	wan_file="$HOME/.ip"
+	read -r o_ip < "$wan_file"
+}
+
+get_opts(){
+	while getopts "lm:h:" o; do
+		case $o in
+			l) ((local=1)) ;;
+			m) [[ $OPTARG = *@*.* ]] && email="${OPTARG}" ;;
+			h) h="${OPTARG}" ;;
+			*) usage; exit 1
+		esac
+	done
+
+	: ${email:?missing argument \'-m\' or email invalid}
+}
+
+usage(){
+	cat <<-EOF
+		Usage: ${0##*\/} -m email@example.co [-hl]
+		-l (optional): use local ip
+		-h (requres argument, optional): specify hostname (uses output of 'hostname' if not set)
+	EOF
+}
+
+define_vars "$@"
+[[ "$n_ip" && "$n_ip" != "$o_ip" ]] || exit 1
+send_mail && save_ip
