@@ -3,7 +3,7 @@
 export XDG_CONFIG_HOME="$HOME/.config"
 export USER=$(whoami)
 
-export PATH="$HOME/.Scripts/:$HOME/.bin:$HOME/.local/bin:$HOME/.Scripts/:/usr/local/bin:$PATH"
+export PATH="$HOME/.Scripts/:$HOME/.bin:$HOME/.local/bin:$HOME/.Scripts/:/usr/local/bin:$HOME/.cargo/bin:$PATH"
 export TERMINAL="alacritty"
 export VISUAL="$TERMINAL -e nvim"
 export EDITOR="nvim"
