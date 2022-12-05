@@ -17,7 +17,8 @@ net(){
 	read -ra st < <(iw wlan0 link | grep SSID)
    [[ ! -z "$st" ]] && {
 		read -ra ip < <(ip a s wlan0 | grep 'inet ')
-		read -ra sn < <(iw wlan0 link | grep signal)
+		read -ra sn < <(iw wlan0 link | grep 'signal')
+		sn="${sn##*:}"
       ((sn>=-20)) && color="%{F#f30}"
       ((sn<=-20)) && color="%{F#890}"
       ((sn<=-40)) && color="%{F#4a0}"
@@ -70,27 +71,29 @@ get_color(){
    (($1<=${6:-10})) && color="%{F#f00}"
 }
 
-update_all(){ ws; net; volume; light; bat; date_; root; home; keylock; }
+update_all(){ ws; net; volume; light; bat; misc; keylock; }
 
-print_bar(){ lemonbar -p -g 1366x20 -${lp} -B "$color0" -F "$color7" -u 2 -f "ypn envypn:size=10"; }
+print_bar(){ lemonbar -p -n lemonbar -g 1366x20 -${lp} -B "$color0" -F "$color7" -u 2 -f "ypn envypn:size=10"; }
 
 parse(){ printf '%s\n' " $W | $K %{r} $H | $R | $V | $L | $N | $B | $D "; }
 
 main(){
 	while :; do echo > $PANELFIFO; sleep 10; done &
 
-	exec 3<>$PANELFIFO
-	while read -u 3 line <& 3; do
-		case $line in
-			ws) ws ;;
-			net) net ;;
-			vol) volume ;;
-			light) light ;;
-			key) keylock ;;
-			*) net; bat; misc ;;
-		esac
-		parse
-	done < "$PANELFIFO" | print_bar | while read; do eval $REPLY; done
+		exec 3<>$PANELFIFO
+		while read -u 3 line <& 3; do
+			case $line in
+				ws) ws ;;
+				net) net ;;
+				vol) volume ;;
+				light) light ;;
+				key) keylock ;;
+				*) net; bat; misc ;;
+			esac
+			parse
+		done < "$PANELFIFO" | print_bar | while read; do eval $REPLY
+
+	done &
 	exec 3<&-
 }
 
@@ -108,3 +111,6 @@ source "$HOME/.cache/wal/colors.sh"
 
 update_all
 main
+
+xdo above -t "$(xdo id -N Bspwm -n root)" "$(xdo id -m -a lemonbar)"
+wait

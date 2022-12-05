@@ -97,7 +97,7 @@ rules() {
 
 
 apps() { 
-	_restart(){ ukill -n "$1" 1>/dev/null || return 1
+	_restart(){ ukill -k "$1" 1>/dev/null || return 1
 	"$1" "${o[@]}" &>/dev/null & disown &&
 	printf '\e[33m%s: %s\n' "$1" "restarted"; }
 	_start(){ "$1" "${o[@]}" &>/dev/null & disown || return 1
