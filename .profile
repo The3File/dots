@@ -23,6 +23,7 @@ export WORKFIFO="/tmp/work-fifo"
 termux_specific(){
 	read -r USER < $HOME/.username
 	export $USER
+	export VISUAL="nvim"
 	export HOSTNAME=termux
 	export SDCARD="/sdcard"
 	export NOTES="/sdcard/Noter"
