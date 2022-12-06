@@ -1,6 +1,5 @@
 #!/bin/bash
-
-until ping -c 1 g.co &>/dev/null; do sleep 10; done
+trap 'printf "\e[m"' EXIT
 
 send_mail(){
 	sbj="$host IP Changed"
@@ -52,14 +51,20 @@ get_opts(){
 	: ${email:?missing argument \'-m\' or email invalid}
 }
 
-usage(){
+usage(){ printf '\e[35m'
 	cat <<-EOF
-		Usage: ${0##*\/} -m email@example.co [-hl]
+	Usage: ${0##*\/} [-mhl]
+		-m (required): email@example.co
 		-l (optional): use local ip
 		-h (requres argument, optional): specify hostname (uses output of 'hostname' if not set)
 	EOF
 }
 
+until ping -c 1 g.co &>/dev/null; do sleep 10; done
+
 define_vars "$@"
+
 [[ "$n_ip" && "$n_ip" != "$o_ip" ]] || exit 1
+
 send_mail && save_ip
+

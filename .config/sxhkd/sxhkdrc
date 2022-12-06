@@ -44,9 +44,11 @@ super + {p,a}
 
 # program launcher
 super + d
-	dmenu_run -b -fn "ypn envypn:size=14" -p "apps:"
+	dmenu_run -b -nb black -nf white -sf black -sb green -fn "ypn envypn:size=13" -p "apps:"
 	#dmenu_drun
 	#rofi -show drun
+super + shift + b
+	dmenu-bluetooth -b -nb black -nf white -sf black -sb green -fn "ypn envypn:size=13" # -p "apps:"
 
 # wifi menu
 super + shift + w
