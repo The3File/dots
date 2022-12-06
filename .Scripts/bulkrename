@@ -1,19 +1,52 @@
 #!/usr/bin/env bash
 
-tmp="$(mktemp)"
+mk_tmp(){
+	echo creating tmp file
+	tmp="$(mktemp)"
+}
 
-for name in $@; do
-	[[ -a $name ]] && continue
-	printf '%s\n' "Does not exist: '$name'"
-	exit 1
-done
+get_files(){ echo testing names
+	for name in "$@"; do
+		[[ -a $name ]] && { old_names+=("${name}"); continue; }
+		printf '%s\n' "Does not exist: '$name'"
+		exit 1
+	done
+	path="${old_names[0]%\/*}"
+}
 
-printf '%s\n' "$@" > $tmp
+write_tmp(){
+	echo writing names to file
+	printf '%s\n' "${old_names[@]##*\/}" > $tmp
+}
 
+read_new_names(){
+	echo reading new names
+	IFS=$'\n' read -d '' -ra new_names < "$tmp"
+}
+
+check_new_names(){
+	echo checking new filenames
+	(( ${#old_names[@]}==${#new_names[@]} )) || exit
+}
+
+move_files(){
+	echo moving files
+	for((i=0;i<${#old_names[@]};i++));{
+		mv "${old_names[i]}" "${path}/${new_names[i]}" &&
+			echo renamed "${old_names[i]##*\/}" to "${new_names[i]}"
+	}
+}
+
+rm_tmp(){
+	echo removing tmp file
+	rm $tmp
+}
+
+mk_tmp
+get_files "$@"
+write_tmp
 nvim "$tmp"
-
-while read -r line; do
-	echo $line
-done < "$tmp"
-
-rm $tmp
+read_new_names
+check_new_names
+move_files
+rm_tmp
