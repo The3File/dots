@@ -66,13 +66,13 @@ handle_mime() {
         text/* | */xml)
             # Syntax highlight
             #vimpager "${FILE_PATH}"
-            batcat "${FILE_PATH}"
+            bat --color=always "${FILE_PATH}"
             exit 2;;
 
         # Image
         image/*)
             # Preview as text conversion
-            # img2txt --gamma=0.6 -- "${FILE_PATH}" && exit 1
+            img2txt --gamma=0.6 -- "${FILE_PATH}" && exit 1
             exiftool "${FILE_PATH}" 
             exit 1;;
 
