@@ -1,4 +1,6 @@
 #!/bin/bash
+# update ip via mail
+
 trap 'printf "\e[m"' EXIT
 
 exit_ip_match(){ printf '%s\n' "Current ip matches the one in $wan_file, exiting."; exit 1; }
