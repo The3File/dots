@@ -9,23 +9,23 @@ ws() {
 
 net(){
 	[[ $1 = show ]] && alacritty\
-			-o "window.position: {x: 800, y: 410}" -o "window.dimensions: {columns: 70, lines: 21}"\
-			--class float -e bash -c "iw wlan0 link; ip a s wlan0; read -rsn1" && return
+		-o "window.position: {x: 800, y: 410}" -o "window.dimensions: {columns: 70, lines: 21}"\
+		--class float -e bash -c "iw wlan0 link; ip a s wlan0; read -rsn1" && return
 
    net="%{F#f00}no connection%{F-}"
 
 	read -ra st < <(iw wlan0 link | grep SSID)
-   [[ ! -z "$st" ]] && {
+	[[ ! -z "$st" ]] && {
 		read -ra ip < <(ip a s wlan0 | grep 'inet ')
 		read -ra sn < <(iw wlan0 link | grep 'signal')
 		sn="${sn##*:}"
-      ((sn>=-20)) && color="%{F#f30}"
-      ((sn<=-20)) && color="%{F#890}"
-      ((sn<=-40)) && color="%{F#4a0}"
-      ((sn<=-55)) && color="%{F#0c0}"
-      ((sn<=-60)) && color="%{F#0c0}"
+		((sn>=-20)) && color="%{F#f30}"
+		((sn<=-20)) && color="%{F#890}"
+		((sn<=-40)) && color="%{F#4a0}"
+		((sn<=-55)) && color="%{F#0c0}"
+		((sn<=-60)) && color="%{F#0c0}"
 		net="${st[1],,} ${color}${sn[1]} ${sn[2]}%{F-} [${ip[1]}]"
-   }
+	}
 	export N="%{A:net show:}$net%{A}"
 }
 
