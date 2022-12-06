@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
 ws() {
-   s=($(xprop -root _NET_DESKTOP_NAMES | awk '{$1=$2=""; print $0}' | sed -e 's/,//g' -e 's/\"//g' -e 's/^[[:space:]]*//'))
-   c=$(xprop -root _NET_CURRENT_DESKTOP | awk '{print $3}')
-   for ((i=0;i<${#s[*]};i++)){ [[ "$i" = "$c" ]] && s[$i]="%{F#0c0}[${s[$i]}]%{B-}%{F-}" || s[$i]="${s[$i]}"; }
-   export W="$(sed -e 's/\(}\).?\(%\)/\1\2/' <<< "${s[*]}")"
+	s=($(xprop -root _NET_DESKTOP_NAMES | awk '{$1=$2=""; print $0}' | sed -e 's/,//g' -e 's/\"//g' -e 's/^[[:space:]]*//'))
+	c=$(xprop -root _NET_CURRENT_DESKTOP | awk '{print $3}')
+	for ((i=0;i<${#s[*]};i++)){ [[ "$i" = "$c" ]] && s[$i]="%{F#0c0}[${s[$i]}]%{B-}%{F-}" || s[$i]="${s[$i]}"; }
+	export W="$(sed -e 's/\(}\).?\(%\)/\1\2/' <<< "${s[*]}")"
 }
 
 net(){
