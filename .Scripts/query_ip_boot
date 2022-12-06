@@ -6,7 +6,7 @@ send_mail(){
 	sbj="$host IP Changed"
 
 	echo sending mail
-	echo -e "Subject: $sbj\n$n_ip" | msmtp $email
+	echo -e "From: IP Change\nSubject: $sbj\n$n_ip" | msmtp $email
 }
 
 save_ip(){
