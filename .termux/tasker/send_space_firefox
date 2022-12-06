@@ -1,0 +1,3 @@
+#!/data/data/com.termux/files/usr/bin/env bash
+
+ssh -o ConnectTimeout=5 -o BatchMode=yes -o StrictHostKeyChecking=no x220 "export DISPLAY=\":0\"; xvkbd -window Firefox -text \" \"" && echo Sendt space to Firefox
