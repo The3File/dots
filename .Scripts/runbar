@@ -12,7 +12,7 @@ net(){
 		-o "window.position: {x: 800, y: 410}" -o "window.dimensions: {columns: 70, lines: 21}"\
 		--class float -e bash -c "iw wlan0 link; ip a s wlan0; read -rsn1" && return
 
-   net="%{F#f00}no connection%{F-}"
+	net="%{F#f00}no connection%{F-}"
 
 	read -ra st < <(iw wlan0 link | grep SSID)
 	[[ ! -z "$st" ]] && {
