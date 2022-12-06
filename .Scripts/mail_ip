@@ -1,0 +1,69 @@
+#!/bin/bash
+trap 'printf "\e[m"' EXIT
+
+exit_ip_match(){ printf '%s\n' "Current ip matches the one in $wan_file, exiting."; exit 1; }
+
+usage(){ printf '\e[35m'
+	cat <<-EOF
+	Usage: ${0##*\/} [-mhl]
+		-m (required): email@example.co
+		-l (optional): use local ip
+		-h (requres argument, optional): specify hostname (uses output of 'hostname' if not set)
+	EOF
+}
+
+get_opts(){
+	while getopts "lm:h:" o; do case $o in
+			l) get_local_ip ;;
+			m) [[ $OPTARG = *@*.* ]] && email="${OPTARG}" ;;
+			h) h="${OPTARG}" ;;
+			*) usage; exit 1
+		esac
+	done
+
+	: ${email:?missing argument \'-m\' or email invalid}
+}
+
+get_ip(){
+	n_ip="${l_ip:=$(curl -s ifconfig.co)}"
+	read -r o_ip < "$wan_file"
+	[[ "$n_ip" && "$n_ip" != "$o_ip" ]] || exit_ip_match
+}
+
+get_local_ip(){
+	set $(ip a s wlan0 | grep 'inet ')
+	l_ip=${2%/*}
+}
+
+send_mail(){
+	sbj="$host IP Changed"
+	frm="${0##*\/}"
+
+	echo -e "From: $frm\nSubject: $sbj\n$n_ip" | msmtp $email || return 1
+}
+
+save_ip(){
+	printf "$n_ip" > $wan_file
+	cat <<-EOF >> "$HOME/.ip.log"
+		======= $(date '+%Y-%m-%d %H:%M') =======
+		From: $(hostname):${0##*\/}
+		Mail sendt to: $email
+		Subject: $sbj
+		Text: $n_ip
+
+	EOF
+}
+
+main(){
+	host="${h:-$(hostname)}"
+	wan_file="$HOME/.ip"
+
+	get_ip
+	send_mail && save_ip
+	printf '%s\n' "Sendt mail with ip '$n_ip' to $email"
+}
+
+until ping -c 1 g.co &>/dev/null; do sleep 10; done
+
+get_opts "$@"
+main "$@"
