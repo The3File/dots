@@ -1,0 +1,290 @@
+#!/usr/bin/env bash
+# hfetch
+# 
+# https://github.com/gentoo-btw/hfetch
+#
+# MIT License
+#
+# Copyright (c) 2022 gentoo-btw
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+        "-> MacOS is not supported yet."
+        exit 1
+fi
+
+# sets version
+HFETCH_VERSION="v1.1.2"
+# sets config file/dir and bin path.
+HFETCH_CONFIG_DIR="$HOME/.config/hfetch/"
+HFETCH_CONFIG="$HOME/.config/hfetch/config.conf"
+HFETCH_BIN="$HOME/.Scripts/hfetch"
+
+# see if hfetch is installed or not.
+if [ ! -f "$HFETCH_BIN" ]; then
+   echo "-> hfetch executable not found. please install hfetch first. exiting..."
+   exit 1
+fi
+
+# create a config.conf file if there isn't one.
+if [ -f "$HFETCH_CONFIG" ]; then
+   source $HOME/.config/hfetch/config.conf
+fi
+
+# creates config. (aka hfetch -m option. this is executed when you install hfetch.)
+mkconfig() {
+   mkdir $HFETCH_CONFIG_DIR
+   cat <<EOF > $HOME/.config/hfetch/config.conf
+# MIT License
+
+# Copyright (c) 2022 gentoo-btw
+
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+# colors
+BLACK='\e[0;30m'
+RED='\e[0;31m'
+GREEN='\e[0;32m'
+YELLOW='\e[0;33m'
+PURPLE='\e[0;35m'
+CYAN='\e[0;36m'
+WHITE='\e[0;37m'
+
+# Arrow color. set to blue by default
+ARROW_COLOR='\033[0;34m->\033[0m' 
+
+# Colorblocks
+# Available options:
+# (1)   (Font Awesome)
+# (2) ██
+COLORBLOCKS="1"
+
+# Fortune
+# Available options:
+# (1) Enable
+# (2) Disable
+FORTUNE_VALUE="1"
+
+# Hostname and user
+# Available options:
+# (1) echo (echo -e "$USER@HOSTNAME")
+HAU_VALUE="1"
+
+# OS
+# Available options:
+# (1) cat (cat /etc/os-release | grep -v PRETTY | grep NAME | tr -d 'NAME=')
+# (2) lsb-release (lsb-release -si)
+# (3) uname (uname -s)
+OS_VALUE="1"
+
+# Uptime
+# Available options:
+# (1) uptime (uptime -p)
+# (2) cat (cat /proc/uptime)
+UPTIME_VALUE="1"
+
+# Locale
+# Available options:
+# (1) echo (echo $LANG)
+LOCALE_VALUE="1"
+
+# Kernel Version
+# Available options:
+# (1) uname (uname -r)
+KERNELVER_VALUE="1"
+
+# Disk Usage
+# Available options:
+# # (1) df (df -kh . | tail -n1 | awk '{print $3}') and (df -kh . | tail -n1 | awk '{print $4}')
+DISK_VALUE="1"
+
+# RAM Usage
+# Avaibable options:
+# (1) free (free -m | awk 'NR==2{printf "\033[0;34m->\033[0;0m" " Memory: %s/%sMB \n", $3,$2,$3*100/$2}')
+RAM_VALUE="1"
+
+# Shell
+# Available options:
+# (1) echo (echo "$SHELL")
+SHELL_VALUE="1"
+
+# Terminal
+# Available options:
+# (1) echo (echo "$TERM")
+TERM_VALUE="1"
+EOF
+echo -e "\e[1;32m->\e[0m Created config file and config dir. Config file is located at ~/.config/hfetch/config.conf"
+}
+
+help() {
+        echo
+        echo "hfetch [-h|v|m]"
+        echo
+        echo "options:"
+        echo "-h -- prints help and some options"
+        echo "-v -- prints version"
+	echo "-m -- creates config file and config directory"
+        echo
+}
+
+version() {
+        echo
+        echo "hfetch version $HFETCH_VERSION"
+	echo "https://github.com/gentoo-btw/hfetch"
+	echo " "
+	echo -e "${WHITE} ${RED} ${YELLOW} ${GREEN} ${BLUE} ${CYAN} ${PURPLE} ${BLACK} ${RESET}"
+        echo
+}
+
+while getopts "hvm" option; do
+   case $option in
+      h)
+         help
+         exit;;
+      v)
+         version
+         exit;;
+      m)
+         mkconfig
+	 exit;;
+   esac
+done
+
+if [ ! -f $HFETCH_CONFIG ]; then
+   echo -e "\e[1;31m->\e[0m No config file found. Did you run "hfetch -m"?"
+   exit 1
+fi
+
+# fortune
+if [ "$FORTUNE_VALUE" = "1" ]; then
+   echo
+   echo "     ____________"
+   echo "     $(fortune -s -n 13)  "
+   echo "     ____________"
+   cat << "EOF"     
+	    ||
+         ||
+         ___
+        (.. \
+        (<> |
+       //  \ \
+      ( |  | /|
+     _/\ __)/_)
+     \/-____\/
+
+EOF
+fi
+
+if [ "$FORTUNE_VALUE" = "2" ]; then
+   cat << "EOF"     
+         ___
+        (.. \
+        (<> |
+       //  \ \
+      ( |  | /|
+     _/\ __)/_)
+     \/-____\/
+
+EOF
+fi    
+
+# hostname and user
+if [ "$HAU_VALUE" = "1" ]; then
+    echo -e "${ARROW_COLOR} $USER@$HOSTNAME"
+fi
+
+# OS
+if [ "$OS_VALUE" = "1" ]; then
+    echo -e "${ARROW_COLOR} OS: $(cat /etc/os-release | grep -v PRETTY | grep NAME | tr -d 'NAME=')"
+fi
+
+if [ "$OS_VALUE" = "2" ]; then
+    echo -e "${ARROW_COLOR} OS: $(lsb-release -si)"
+fi
+
+if [ "$OS_VALUE" = "3" ]; then
+    echo -e "${ARROW_COLOR} OS: $(uname -s)"
+fi
+
+# locale
+if [ "$LOCALE_VALUE" = "1" ]; then
+    echo -e "${ARROW_COLOR} Locale: $(echo $LANG)"
+fi
+
+# uptime
+if [ "$UPTIME_VALUE" = "1" ]; then
+    echo -e "${ARROW_COLOR} Uptime: $(uptime -p)"
+fi
+
+if [ "$UPTIME_VALUE" = "2" ]; then
+    echo -e "${ARROW_COLOR} Uptime: $(cat /proc/uptime)"
+fi
+
+# kernel version
+if [ "$KERNELVER_VALUE" = "1" ]; then
+    echo -e "${ARROW_COLOR} Kernel Version: $(uname -r)"
+fi
+
+# disk
+if [ "$DISK_VALUE" = "1" ]; then
+    echo -e "${ARROW_COLOR} Disk: $(df -kh . | tail -n1 | awk '{print $3}') / $(df -kh . | tail -n1 | awk '{print $4}')"
+fi
+
+# ram
+if [ "$RAM_VALUE" = "1" ]; then
+    echo -e "$(free -m | awk 'NR==2{printf "\033[0;34m->\033[0;0m" " Memory: %s/%sMB \n", $3,$2,$3*100/$2}' )"
+fi
+# shell/term
+if [ "$SHELL_VALUE" = "1" ]; then
+    echo -e "${ARROW_COLOR} Shell: $(echo $SHELL)"
+fi
+
+if [ "$TERM_VALUE" = "1" ]; then
+   echo -e "${ARROW_COLOR} Terminal: $TERM"
+fi
+
+# colorblocks
+if [ "$COLORBLOCKS" = "1" ]; then
+   echo " "
+   echo -e "   ${WHITE} ${RED} ${YELLOW} ${GREEN} ${BLUE} ${CYAN} ${PURPLE} ${BLACK} ${WHITE}"
+   echo " "
+fi
+
+if [ "$COLORBLOCKS" = "2" ]; then
+   echo " "
+   echo -e "   ${WHITE}██${RED}██${YELLOW}██${GREEN}██${BLUE}██${CYAN}██${PURPLE}██${BLACK}██${WHITE}"
+   echo " "
+fi
