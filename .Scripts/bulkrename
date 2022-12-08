@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 
 mk_tmp(){
-	echo creating tmp file
+	# echo creating tmp file
 	tmp="$(mktemp)"
 }
 
-get_files(){ echo testing names
+get_files(){
+	# echo testing names
 	for name in "$@"; do
 		[[ -a $name ]] && { old_names+=("${name}"); continue; }
 		printf '%s\n' "Does not exist: '$name'"
@@ -15,30 +16,31 @@ get_files(){ echo testing names
 }
 
 write_tmp(){
-	echo writing names to file
+	# echo writing names to file
 	printf '%s\n' "${old_names[@]##*\/}" > $tmp
 }
 
 read_new_names(){
-	echo reading new names
+	# echo reading new names
 	IFS=$'\n' read -d '' -ra new_names < "$tmp"
 }
 
 check_new_names(){
-	echo checking new filenames
-	(( ${#old_names[@]}==${#new_names[@]} )) || exit
+	# echo checking new filenames
+	(( ${#old_names[@]}==${#new_names[@]} )) || { printf '\n%s\n' "dont delete lines"; exit 1; }
 }
 
 move_files(){
-	echo moving files
-	for((i=0;i<${#old_names[@]};i++));{
+	# echo moving files
+	for((i=0;i<${#new_names[@]};i++));{
+		[[ "${old_names[i]}" = "${path}/${new_names[i]}" ]] && continue
 		mv "${old_names[i]}" "${path}/${new_names[i]}" &&
-			echo renamed "${old_names[i]##*\/}" to "${new_names[i]}"
+			echo mv "${old_names[i]##*\/}" "${new_names[i]}"
 	}
 }
 
 rm_tmp(){
-	echo removing tmp file
+	# echo removing tmp file
 	rm $tmp
 }
 
