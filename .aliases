@@ -25,7 +25,7 @@ alias s="svim"
 # }}}
 ## QOL{{{
 alias gogl="googler"
-alias here="st &>/dev/null &disown"
+alias here="alacritty &>/dev/null &disown"
 alias gitl="git log --all --decorate --oneline --graph"
 alias es="expressvpn status"
 alias ec="expressvpn connect"
