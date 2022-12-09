@@ -7,9 +7,9 @@ set mark-symlinked-directories on
 
 Control-r:"reverse_fzf_history"
 Control-f:"fuzzy_cd"
-Control-h:"here"
-Control-g:"gotop"
-Control-k:"fuzzy_kill"
+#Control-"\e[M":"here"
+#Control-g:"gotop"
+#Control-k:"fuzzy_kill"
 
 #"\e[Z": menu-complete
 
