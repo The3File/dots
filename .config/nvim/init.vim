@@ -42,6 +42,8 @@ colorscheme default
 "colorscheme delek
 
 "autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown
+autocmd BufNewFile,BufRead *.bulkrename set filetype=bulkrename
+autocmd BufNewFile,BufRead *.bulkrename source ~/.config/nvim/after/syntax/br.vim
 " Bindings
 
 " GLOBAL
