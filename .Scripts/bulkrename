@@ -1,54 +1,68 @@
 #!/usr/bin/env bash
+files=(./*)
+[[ "$@" ]] && files=($@)
 
-mk_tmp(){
-	# echo creating tmp file
-	tmp="$(mktemp)"
+main() {
+	get_files
+	edit_files
+
+	move_files dryrun
+	prompt_sure
+	move_files
 }
 
-get_files(){
-	# echo testing names
-	for name in "$@"; do
-		[[ -a $name ]] && { old_names+=("${name}"); continue; }
-		printf '%s\n' "Does not exist: '$name'"
-		exit 1
+get_files() {
+	path="${files[0]%\/*}"
+	for name in "${files[@]##*\/}"; do
+		[[ -a $name ]] || error "$name"
+		add_prefix
 	done
-	path="${old_names[0]%\/*}"
+	write_tmp
 }
 
-write_tmp(){
-	# echo writing names to file
-	printf '%s\n' "${old_names[@]##*\/}" > $tmp
+edit_files(){
+	nvim "$tmp" || exit
+	read_nns
+	check_nns
 }
 
-read_new_names(){
-	# echo reading new names
-	IFS=$'\n' read -d '' -ra new_names < "$tmp"
-}
-
-check_new_names(){
-	# echo checking new filenames
-	(( ${#old_names[@]}==${#new_names[@]} )) || { printf '\n%s\n' "dont delete lines"; exit 1; }
-}
-
-move_files(){
-	# echo moving files
-	for((i=0;i<${#new_names[@]};i++));{
-		[[ "${old_names[i]}" = "${path}/${new_names[i]}" ]] && continue
-		mv "${old_names[i]}" "${path}/${new_names[i]}" &&
-			echo mv "${old_names[i]##*\/}" "${new_names[i]}"
+move_files() {
+	for((i=0;i<${#nns[@]};i++));{
+		o="${ons[i]#*\ }"
+		n="${nns[i]#*\ }"
+		[[ "$o" = "$n" ]] && continue
+		[[ $1 = dryrun ]] && { q+=("$o -> $n"); continue; }
+		mv "$o" "${path}/$n" && echo "mv ${o##*\/} $n"
 	}
+	[[ ${q[@]} ]] || exit 0
+	printf '%s\n' "${q[a]}"
 }
 
-rm_tmp(){
-	# echo removing tmp file
-	rm $tmp
+write_tmp() {
+	trap 'rm $tmp' EXIT
+	tmp="$(mktemp XXX.bulkrename)"
+	printf '%s\n' "${ons[@]}" > $tmp
 }
 
-mk_tmp
-get_files "$@"
-write_tmp
-nvim "$tmp"
-read_new_names
-check_new_names
-move_files
-rm_tmp
+add_prefix() {
+	[[ -d $name ]] && ons+=("d $name") && return
+	[[ -x $name ]] && ons+=("x $name") && return
+	[[ -f $name ]] && ons+=("f $name") && return
+}
+
+read_nns() {
+	IFS=$'\n' read -d '' -ra nns < "$tmp"
+}
+
+check_nns() {
+	(( ${#ons[@]}==${#nns[@]} )) || error "dont delete lines"
+}
+
+prompt_sure() {
+	read -rp "Commit? [y/N]: "
+	[[ $REPLY =~ y|Y ]] || exit 0
+}
+
+error() { printf '%s\n' "error: $1"; exit 1; }
+
+main
