@@ -35,7 +35,7 @@ move_files() {
 		mv "$o" "${path}/$n" && echo "mv ${o##*\/} $n"
 	}
 	[[ ${q[@]} ]] || exit 0
-	printf '%s\n' "${q[a]}"
+	printf '%s\n' "${q[@]}" | less -F
 }
 
 write_tmp() {
