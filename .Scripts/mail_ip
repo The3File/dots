@@ -29,7 +29,7 @@ get_opts(){
 get_ip(){
 	n_ip="${l_ip:=$(curl -s ifconfig.co)}"
 	read -r o_ip < "$wan_file"
-	[[ "$n_ip" && "$n_ip" != "$o_ip" ]] || exit_ip_match
+	[[ "$n_ip" && "$n_ip" != "$o_ip" ]] || return 1
 }
 
 get_local_ip(){
@@ -41,7 +41,11 @@ send_mail(){
 	sbj="$host IP Changed"
 	frm="${0##*\/}"
 
-	echo -e "From: $frm\nSubject: $sbj\n$n_ip" | msmtp $email || return 1
+	cat <<-EOF | msmtp $email || return 1
+		From: $frm
+		Subject: $sbj
+		$n_ip
+	EOF
 }
 
 save_ip(){
@@ -60,7 +64,7 @@ main(){
 	host="${h:-$(hostname)}"
 	wan_file="$HOME/.ip"
 
-	get_ip
+	get_ip || exit_ip_match
 	send_mail && save_ip
 	printf '%s\n' "Sendt mail with ip '$n_ip' to $email"
 }
