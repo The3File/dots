@@ -6,8 +6,26 @@ editor(){ nvim +"set ft=markdown" "$@";}
 
 new(){
    cd "$NOTES"
-   #print_tags | editor +startinsert +"file new_note.md"
-   editor +startinsert +"file new_note.md"
+	mk_tmp
+	editor +startinsert $tmp
+	get_name
+}
+
+mk_tmp(){
+	tmp="$(mktemp)"
+   print_tags > $tmp
+}
+
+get_name(){
+	while IFS= read -rsn1 -p $'\r\e[K'"name: ${input:-new_note}.md"$'\e[3D' char; do
+		case "$char" in
+			$'\177') input="${input%?}" ;;
+			$'\015'|'') printf '\n'; break ;;
+			" ") input+="_" ;;
+			*) input+="$char" ;;
+		esac
+	done
+	mv "$tmp" "${input:-new_note}.md" -v -i
 }
 
 edit(){
@@ -24,9 +42,8 @@ sync(){
 
 show(){
    [[ "$NOTES" ]] && cd "$NOTES" || return 1
-   #tree -C
-   printf '\e[1m%s\n\e[m%s\n' "entering subshell..."\
-			  "ctrl+d to return"
+   tree -C
+   printf '\e[1m%s\n\e[m%s\n' "entering subshell..." "ctrl+d to return"
 	exec $SHELL
 }
 
@@ -46,8 +63,7 @@ print_notes(){
 }
 
 print_tags(){
-   printf '\n\n%s\n%s' "[//]: # ($(date -Iseconds))"\
-      "[//]: # (tags: [<++>])"
+   printf '\n\n%s\n%s' "[//]: # ($(date -Iseconds))" "[//]: # (tags: [<++>])"
 }
 
 print_opts(){
