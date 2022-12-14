@@ -8,6 +8,7 @@ set -o vi
 #####################
 
 [[ -f ~/.bash_prompt ]] && source ~/.bash_prompt
+#[[ -f ~/.profile ]] && source ~/.profile
 
 export MANPAGER="sh -c 'col -bx | bat -l man --paging=always -p'"
 PROMPT_DIRTRIM=2
