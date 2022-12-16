@@ -22,10 +22,15 @@ get_name(){
 			$'\177') input="${input%?}" ;;
 			$'\015'|'') printf '\n'; break ;;
 			" ") input+="_" ;;
+			'	') match_items ;;
 			*) input+="$char" ;;
 		esac
 	done
 	mv "$tmp" "${input:-new_note}.md" -v -i
+}
+
+match_items(){
+	test
 }
 
 edit(){
