@@ -14,7 +14,7 @@ getext(){
 
 confirm(){
    read -r -p "Unpack \"$1\" [Y/n]: "
-   [[ "$REPLY" = "n" ]] && false
+   [[ "$REPLY" != "n" ]] || return 1
 }
 
 _zip(){
