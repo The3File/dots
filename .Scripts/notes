@@ -5,51 +5,48 @@ fz(){ fzf --ansi --height 40% --reverse "$@";}
 editor(){ nvim +"set ft=markdown" "$@";}
 
 new(){
-   cd "$NOTES"
-	mk_tmp
+	prep_tmp
 	editor +startinsert $tmp
-	get_name
+	read -rep "new name: " new_name
+	mv_tmp
 }
 
-mk_tmp(){
+edit(){
+	get_note edit
+   [[ -f "$note" ]] && editor "$note"
+}
+
+delete(){
+	get_note delete
+	read -rp "delete "$note"? [y/N] " r
+	[[ $r =~ y|Y ]] && rm "$note"
+}
+
+move(){
+	get_note move
+	read -rep "new name: " new_name
+	mv "$note" "${new_name}.md" -v -i
+}
+
+show(){
+   printf '\e[1m%s\n\e[m%s\n' "entering subshell..."\
+		"ctrl+d to return"
+	exec $SHELL
+}
+
+prep_tmp(){
 	tmp="$(mktemp)"
    print_tags > $tmp
 }
 
-get_name(){
-	while IFS= read -rsn1 -p $'\r\e[K'"name: ${input:-new_note}.md"$'\e[3D' char; do
-		case "$char" in
-			$'\177') input="${input%?}" ;;
-			$'\015'|'') printf '\n'; break ;;
-			" ") input+="_" ;;
-			'	') match_items ;;
-			*) input+="$char" ;;
-		esac
-	done
-	mv "$tmp" "${input:-new_note}.md" -v -i
-}
-
-match_items(){
-	test
-}
-
-edit(){
-   note="$NOTES/$(print_notes | fz)"
-   [[ -f "$note" ]] && editor "$note"
-   exit 0
+mv_tmp(){
+	fallback="note_$(date '+%d-%m_%H%M')"
+	mv "$tmp" "${new_name:-$fallback}.md" -v -i
 }
 
 sync(){
-   cd "$NOTES"
    status=$(git status --porcelain)
    [[ -z "$status" ]] && pull || push
-}
-
-show(){
-   [[ "$NOTES" ]] && cd "$NOTES" || return 1
-   tree -C
-   printf '\e[1m%s\n\e[m%s\n' "entering subshell..." "ctrl+d to return"
-	exec $SHELL
 }
 
 push(){
@@ -62,28 +59,36 @@ pull(){
    git pull
 }
 
+get_note(){
+   note="$(print_notes | fz --prompt="$1 > " -q "$q")"
+	[[ -z "$note" ]] && exit 0
+}
+
 print_notes(){
    IFS=$'\n' read -rd '' -a notes < <(fd -c always .md $NOTES)
    printf '%s\n' "${notes[@]#*${NOTES##*/}/}"
 }
 
 print_tags(){
-   printf '\n\n%s\n%s' "[//]: # ($(date -Iseconds))" "[//]: # (tags: [<++>])"
+   printf '\n\n%s\n%s' "[//]: # ($(date -Iseconds))"\
+		"[//]: # (tags: [<++>])"
 }
 
 print_opts(){
-   opts=("new" "sync" "edit" "show")
+   opts=("new" "sync" "edit" "delete" "move" "show")
    printf '%s\n' "${opts[@]}"
 }
 
 get_opts(){
    opt=$(print_opts | fz -0 -1 -q "$1")
+	q="$2"
    [[ $opt ]] || false
 }
 
 main(){
-   get_opts $1 || exit
-   eval $opt
+   [[ "$NOTES" ]] && cd "$NOTES" || return 1
+   get_opts "$@" || exit
+   eval "$opt"
 }
 
 main "$@"
