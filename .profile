@@ -22,6 +22,7 @@ export WORKFIFO="/tmp/work-fifo"
 ## < TERMUX
 
 termux_specific(){
+	ANDROID=1
 	read -r USER < $HOME/.username
 	export $USER
 	export VISUAL="nvim"
