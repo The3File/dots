@@ -6,32 +6,15 @@ editor(){ nvim +"set ft=markdown" "$@";}
 
 new(){
 	prep_tmp
-	editor +startinsert $tmp
-	read -rep "new name: " new_name
+	until get_new_name; do
+		editor +startinsert $tmp
+	done
 	mv_tmp
 }
 
-edit(){
-	get_note edit
-	[[ -f "$note" ]] && editor "$note"
-}
-
-delete(){
-	get_note delete
-	read -rp "delete "$note"? [y/N] " r
-	[[ $r =~ y|Y ]] && rm "$note"
-}
-
-move(){
-	get_note move
-	read -rep "new name: " new_name
-	mv "$note" "${new_name}.md" -v -i
-}
-
-show(){
-	printf '\e[1m%s\n\e[m%s\n' "entering subshell..."\
-		"ctrl+d to return"
-	exec $SHELL
+get_new_name(){
+	read -rep $'\e[A\r\e[K'"new name: " new_name
+	[[ $new_name ]] || return 1
 }
 
 prep_tmp(){
@@ -42,6 +25,29 @@ prep_tmp(){
 mv_tmp(){
 	fallback="note_$(date '+%d-%m_%H%M')"
 	mv "$tmp" "${new_name:-$fallback}.md" -v -i
+}
+
+edit(){
+	select_note edit
+	editor "$note"
+}
+
+delete(){
+	select_note delete
+	read -rp "delete "$note"? [y/N] " r
+	[[ $r =~ y|Y ]] && rm "$note"
+}
+
+move(){
+	select_note move
+	read -rep "new name: " new_name
+	mv "$note" "${new_name}.md" -v -i
+}
+
+show(){
+	printf '\e[1m%s\n\e[m%s\n' "entering subshell..."\
+		"ctrl+d to return"
+	exec $SHELL
 }
 
 sync(){
@@ -59,19 +65,16 @@ pull(){
 	git pull
 }
 
-get_note(){
-	note="$(print_notes | fz --prompt="$1 > " -q "$q")"
-	[[ -z "$note" ]] && exit 0
-}
-
-print_notes(){
-	IFS=$'\n' read -rd '' -a notes < <(fd -c always .md $NOTES)
-	printf '%s\n' "${notes[@]#*${NOTES##*/}/}"
-}
-
 print_tags(){
 	printf '\n\n%s\n%s' "[//]: # ($(date -Iseconds))"\
 		"[//]: # (tags: [<++>])"
+}
+
+print_notes(){
+	IFS=$'\n' read -rd '' -a notes < <(
+		fd -c always .md $NOTES
+	)
+	printf '%s\n' "${notes[@]#*${NOTES##*/}/}"
 }
 
 print_opts(){
@@ -79,15 +82,20 @@ print_opts(){
 	printf '%s\n' "${opts[@]}"
 }
 
+select_note(){
+	note="$(print_notes | fz --prompt="$1 > " -q "$q")"
+	[[ -z "$note" ]] && exit 0
+}
+
 get_opts(){
-	opt=$(print_opts | fz -0 -1 -q "$1")
 	q="$2"
-	[[ $opt ]] || false
+	opt=$(print_opts | fz -0 -1 -q "$1")
+	[[ $opt ]] || exit
 }
 
 main(){
-	[[ "$NOTES" ]] && cd "$NOTES" || return 1
-	get_opts "$@" || exit
+	[[ "$NOTES" ]] && cd "$NOTES" || exit
+	get_opts "$@"
 	eval "$opt"
 }
 
