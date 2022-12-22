@@ -6,10 +6,18 @@ editor(){ nvim +"set ft=markdown" "$@";}
 
 new(){
 	prep_tmp
-	until get_new_name; do
+	i=0
+	until get_new_name || ((i>1)); do
 		editor +startinsert $tmp
+		((i++))
 	done
-	mv_tmp
+
+	check_file_changed && mv_tmp
+}
+
+check_file_changed(){
+	current_modify="$(stat -c "%Y" $tmp)"
+	((first_modify<current_modify)) || return 1
 }
 
 get_new_name(){
@@ -20,6 +28,7 @@ get_new_name(){
 prep_tmp(){
 	tmp="$(mktemp)"
 	print_tags > $tmp
+	first_modify="$(stat -c %Y $tmp)"
 }
 
 mv_tmp(){
