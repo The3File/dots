@@ -1,10 +1,11 @@
+# vim: ft=bash
 # get current branch in git repo
 parse_git_branch(){
    BRANCH=`git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/'`
 
    [[ "${BRANCH}" ]] && {
       echo "[${BRANCH}$(parse_git_dirty)] "
-      } || echo ""
+   } || echo ""
 }
 
 dots(){

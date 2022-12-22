@@ -34,14 +34,24 @@ alias bsp="~/.config/bspwm/bspwmrc"
 alias xr="xrdb ~/.Xresources"
 alias pf="pfetch"
 alias nf="clear -x && echo -e \ && neofetch"
-alias ls="ls --color=auto --group-directories-first"
-alias la="ls -a"
-alias ll="ls -l"
-alias lla="ls -la"
+
+## ls
+#alias ls="ls --color=auto --group-directories-first"
+#alias la="ls -a"
+
+## lsd
+alias ls="lsd --date '+%d/%m/%y %X'"
+alias la="ls -A"
+
+## fd
 #alias ls="fd -d 1 . -c always"
 #alias la="ls -H"
-#alias ll="ls -l"
-#alias lla="ll -H"
+
+## all
+alias ll="ls -l"
+alias lla="la -l"
+
+
 alias tree="tree -C"
 [[ $ANDROID = 1 ]] || alias localip="read -ra ip < <(ip a s wlan0 | grep \'inet \'); echo $ip"
 alias publicip="curl ifconfig.co"
