@@ -13,7 +13,7 @@ new(){
 
 edit(){
 	get_note edit
-   [[ -f "$note" ]] && editor "$note"
+	[[ -f "$note" ]] && editor "$note"
 }
 
 delete(){
@@ -29,14 +29,14 @@ move(){
 }
 
 show(){
-   printf '\e[1m%s\n\e[m%s\n' "entering subshell..."\
+	printf '\e[1m%s\n\e[m%s\n' "entering subshell..."\
 		"ctrl+d to return"
 	exec $SHELL
 }
 
 prep_tmp(){
 	tmp="$(mktemp)"
-   print_tags > $tmp
+	print_tags > $tmp
 }
 
 mv_tmp(){
@@ -45,50 +45,50 @@ mv_tmp(){
 }
 
 sync(){
-   status=$(git status --porcelain)
-   [[ -z "$status" ]] && pull || push
+	status=$(git status --porcelain)
+	[[ -z "$status" ]] && pull || push
 }
 
 push(){
-   git add .; git commit -m "$status"
-   git push -u origin master
+	git add .; git commit -m "$status"
+	git push -u origin master
 }
 
 pull(){
-   printf '%s\n' "No changes, checking remote.."
-   git pull
+	printf '%s\n' "No changes, checking remote.."
+	git pull
 }
 
 get_note(){
-   note="$(print_notes | fz --prompt="$1 > " -q "$q")"
+	note="$(print_notes | fz --prompt="$1 > " -q "$q")"
 	[[ -z "$note" ]] && exit 0
 }
 
 print_notes(){
-   IFS=$'\n' read -rd '' -a notes < <(fd -c always .md $NOTES)
-   printf '%s\n' "${notes[@]#*${NOTES##*/}/}"
+	IFS=$'\n' read -rd '' -a notes < <(fd -c always .md $NOTES)
+	printf '%s\n' "${notes[@]#*${NOTES##*/}/}"
 }
 
 print_tags(){
-   printf '\n\n%s\n%s' "[//]: # ($(date -Iseconds))"\
+	printf '\n\n%s\n%s' "[//]: # ($(date -Iseconds))"\
 		"[//]: # (tags: [<++>])"
 }
 
 print_opts(){
-   opts=("new" "sync" "edit" "delete" "move" "show")
-   printf '%s\n' "${opts[@]}"
+	opts=("new" "sync" "edit" "delete" "move" "show")
+	printf '%s\n' "${opts[@]}"
 }
 
 get_opts(){
-   opt=$(print_opts | fz -0 -1 -q "$1")
+	opt=$(print_opts | fz -0 -1 -q "$1")
 	q="$2"
-   [[ $opt ]] || false
+	[[ $opt ]] || false
 }
 
 main(){
-   [[ "$NOTES" ]] && cd "$NOTES" || return 1
-   get_opts "$@" || exit
-   eval "$opt"
+	[[ "$NOTES" ]] && cd "$NOTES" || return 1
+	get_opts "$@" || exit
+	eval "$opt"
 }
 
 main "$@"
