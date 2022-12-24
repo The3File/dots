@@ -57,8 +57,8 @@ check_file_changed(){
 }
 
 mv_tmp(){
-	fallback="note_$(date '+%d-%m_%H%M')"
-	mv_ "$tmp" "${new_name:-$fallback}.md"
+	default="note_$(date '+%d-%m_%H%M')"
+	mv_ "$tmp" "${new_name:-$default}.md"
 }
 
 sync(){

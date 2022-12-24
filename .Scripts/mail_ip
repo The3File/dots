@@ -5,15 +5,6 @@ trap 'printf "\e[m"' EXIT
 
 exit_ip_match(){ printf '%s\n' "Current ip matches the one in $wan_file, exiting."; exit 1; }
 
-usage(){ printf '\e[35m'
-	cat <<-EOF
-	Usage: ${0##*\/} [-mhl]
-		-m (required): email@example.co
-		-l (optional): use local ip
-		-h (requres argument, optional): specify hostname (uses output of 'hostname' if not set)
-	EOF
-}
-
 get_opts(){
 	while getopts "lm:h:" o; do case $o in
 			l) get_local_ip ;;
@@ -68,6 +59,22 @@ main(){
 	send_mail && save_ip
 	printf '%s\n' "Sendt mail with ip '$n_ip' to $email"
 }
+
+usage(){ printf '\e[35m'
+	cat <<-EOF
+	Usage: ${0##*\/} [-mhl]
+		-m (required): email@example.co
+		-l (optional): use local ip
+		-h (requres argument, optional): specify hostname (uses output of 'hostname' if not set)
+	EOF
+}
+
+check_command(){
+    command -v "$1" >/dev/null 2>&1 || exit_error "Command '$1' not found"
+}
+
+check_command curl
+check_command msmtp
 
 until ping -c 1 g.co &>/dev/null; do sleep 10; done
 
