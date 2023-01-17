@@ -6,6 +6,8 @@ application/zip=org.gnome.FileRoller.desktop;
 x-scheme-handler/magnet=transmission-remote.desktop;
 x-scheme-handler/mailto=mutt.desktop;
 x-scheme-handler/tg=userapp-Telegram Desktop-GXKOZ0.desktop;userapp-Telegram Desktop-C608C1.desktop;userapp-Telegram Desktop-9GYFE1.desktop;
+x-scheme-handler/sms=org.gnome.Shell.Extensions.GSConnect.desktop;
+x-scheme-handler/tel=org.gnome.Shell.Extensions.GSConnect.desktop;
 
 [Default Applications]
 image/*=sxiv.desktop
