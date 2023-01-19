@@ -8,6 +8,11 @@ x-scheme-handler/mailto=mutt.desktop;
 x-scheme-handler/tg=userapp-Telegram Desktop-GXKOZ0.desktop;userapp-Telegram Desktop-C608C1.desktop;userapp-Telegram Desktop-9GYFE1.desktop;
 x-scheme-handler/sms=org.gnome.Shell.Extensions.GSConnect.desktop;
 x-scheme-handler/tel=org.gnome.Shell.Extensions.GSConnect.desktop;
+video/mp4=vlc.desktop;
+x-scheme-handler/http=org.gnome.Epiphany.desktop;
+x-scheme-handler/https=org.gnome.Epiphany.desktop;
+text/html=org.gnome.Epiphany.desktop;
+application/xhtml+xml=org.gnome.Epiphany.desktop;
 
 [Default Applications]
 image/*=sxiv.desktop
@@ -22,8 +27,12 @@ audio/*=mpv.desktop
 audio/mp3=mpv.desktop
 audio/mpeg=mpv.desktop
 audio/x-wav=mpv.desktop
-text/html=chromium.desktop
+text/html=org.gnome.Epiphany.desktop
 application/pdf=zathura.desktop
 inode/directory=lf.desktop
 x-scheme-handler/tg=userapp-Telegram Desktop-9GYFE1.desktop
 x-scheme-handler/msteams=teams.desktop
+video/mp4=vlc.desktop
+x-scheme-handler/http=org.gnome.Epiphany.desktop
+x-scheme-handler/https=org.gnome.Epiphany.desktop
+application/xhtml+xml=org.gnome.Epiphany.desktop
