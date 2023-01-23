@@ -17,6 +17,7 @@ window:
   #
   # Specified in number of columns/lines, not pixels.
   # If both are `0`, this setting is ignored.
+  opacity: 0.9
   dimensions:
     columns: 100
     lines: 30
@@ -89,21 +90,23 @@ scrolling:
 # Font configuration
 font:
   # Normal (roman) font face
-  #size: 9
   normal:
-    family: Ypn Envypn
+    family: Terminus
     style: Regular
-    size: 9.0
+  bold:
+    family: Terminus
+    style: Bold
+  size: 12
 
-  # Offset is the extra space around each character. `offset.y` can be thought of
-  # as modifying the line spacing, and `offset.x` as modifying the letter spacing.
+      # Offset is the extra space around each character. `offset.y` can be thought of
+      # as modifying the line spacing, and `offset.x` as modifying the letter spacing.
   offset:
     x: 0
-    y: 0
-
-  # Glyph offset determines the locations of the glyphs within their cells with
-  # the default being at the bottom. Increasing `x` moves the glyph to the right,
-  # increasing `y` moves the glyph upwards.
+    y: 1
+    
+      ## Glyph offset determines the locations of the glyphs within their cells with
+      ## the default being at the bottom. Increasing `x` moves the glyph to the right,
+      ## increasing `y` moves the glyph upwards.
   glyph_offset:
     x: 0
     y: 0
