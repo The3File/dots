@@ -21,7 +21,7 @@ parse_animation(){
 	ao=("$t>" "$t>" ">$t " "> $t")
 }
 
-confirm(){ bep 10; parse_animation; reset; printl; a_in; read_confirm; a_out; }
+confirm(){ parse_animation; reset; printl; a_in; read_confirm; a_out; }
 
 read_confirm(){ read -rsn1 -p $'\e[?25h'; case_confirm $REPLY; }
 
@@ -52,16 +52,13 @@ case_key(){
 		''|l) confirm ;;
 		$'\e'|q) exit 0 ;;
 	esac
-	bep 5
 }
 
 main(){
 	trap "printf '\e[m\e[2J\e[H\e[?25h\e[?1049l'" EXIT
-	p=0; o=("sudo poweroff" "sudo reboot" "lockscreen")
+	p=0; o=("poweroff" "reboot" "lockscreen")
 	printf '\e[?1049h'
 	for((;;)){ reset; printl; read -rsn1 key; case_key "$key"; }
 }
 
-bep(){ sudo env -i beep -l $1; }
-bep 20
 main
