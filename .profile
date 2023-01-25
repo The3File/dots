@@ -7,6 +7,7 @@ export PATH="$HOME/.Scripts/:$HOME/.bin:$HOME/.local/bin:$HOME/.Scripts/:/usr/lo
 export TERMINAL="alacritty"
 export VISUAL="$TERMINAL -e nvim"
 export EDITOR="nvim"
+export SYSTEMD_EDITOR="nvim"
 export BROWSER="qutebrowser"
 
 export CONFIG="$HOME/.config/bspwm/bspwmrc"
