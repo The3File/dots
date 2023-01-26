@@ -6,7 +6,7 @@ reset(){ printf '\e[?25l\e[2J\e[H'; }
 a_in(){
 	printf '\e[%sH\e[2C' "$((p+2))"; tr=
 	for i in "${ai[@]}";{ printf '\e[K\r\e[2C\e[m\e[1;36m%s\e[s' "$i"; read -t $at; }
-	for i in " " y "|" n " ";{ tr+="$i"; printf '\e[u%s' "$tr"; read -t $at; }
+	for i in " " "[" Y "/" n "]" " ";{ tr+="$i"; printf '\e[u%s' "$tr"; read -t $at; }
 }
 
 a_out(){
@@ -16,7 +16,7 @@ a_out(){
 }
 
 parse_animation(){
-	t="${o[p]}"; at="0.04"; st="2"
+	t="${o[p]}"; at="0.02"; st="2"
 	ai=("> $t" ">$t" "$t>" "$t >")
 	ao=("$t>" "$t>" ">$t " "> $t")
 }
