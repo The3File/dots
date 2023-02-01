@@ -5,6 +5,7 @@ b="/sys/devices/platform/thinkpad_acpi/leds/tpacpi::power/brightness"
 case "$@" in
 	on) s=1 ;;
 	off) s=0 ;;
+	*) exit 1
 esac
 
 echo "$s" | sudo tee "$b"
