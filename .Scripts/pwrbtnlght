@@ -16,5 +16,5 @@ case "$@" in
 	*) toggle
 esac
 
-echo "$msg the power button light"
-echo "$s" | sudo tee "$b"
+printf '\e[1;32m%s\n\e[2;39m' "$msg the power button light"
+echo "$s" | sudo tee "$b" && read -t .2 -p "success"
