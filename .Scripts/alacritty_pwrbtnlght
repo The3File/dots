@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
-x="${1:-1580}"
-y="${2:-1800}"
-alacritty -o "window.position: {x: $x, y: $y}" -o "window.dimensions: {columns: 65, lines: 3}" --class toggle_light --title "Toggle Light" -e pwrbtnlght
+x="${1:-700}"
+y="${2:-1000}"
+alacritty -o "window.position: {x: $x, y: $y}" -o "window.dimensions: {columns: 55, lines: 3}" --class toggle_light --title "Toggle Light" -e pwrbtnlght
