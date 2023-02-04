@@ -17,7 +17,7 @@ window:
   #
   # Specified in number of columns/lines, not pixels.
   # If both are `0`, this setting is ignored.
-  opacity: 0.9
+  opacity: 0.95
   dimensions:
     columns: 100
     lines: 30
@@ -355,54 +355,31 @@ key_bindings:
   # Print all received window events.
   #print_events: false
 
-# Custom colorscheme fitting Sweetified theme
+# Colors (Darcula)
 colors:
+  # Default colors
   primary:
-    background: '0x0a1124'
-    foreground: '0xeec49a'
-  cursor:
-    text:       '0x0a1124'
-    cursor:     '0xeec49a'
+    background: '0x111111'
+    foreground: '0xf8f8f2'
+
+  # Normal colors
   normal:
-    black:      '0x0a1124'
-    red:        '0x5F4149'
-    green:      '0xEB3247'
-    yellow:     '0xBC4349'
-    blue:       '0xF35645'
-    magenta:    '0xF6A73B'
-    cyan:       '0xFAD32F'
-    white:      '0xeec49a'
+    black:   '0x000000'
+    red:     '0xff5555'
+    green:   '0x50fa7b'
+    yellow:  '0xf1fa8c'
+    blue:    '0xcaa9fa'
+    magenta: '0xff79c6'
+    cyan:    '0x8be9fd'
+    white:   '0xbfbfbf'
+
+  # Bright colors
   bright:
-    black:      '0xa6896b'
-    red:        '0x5F4149'
-    green:      '0xEB3247'
-    yellow:     '0xBC4349'
-    blue:       '0xF35645'
-    magenta:    '0xF6A73B'
-    cyan:       '0xFAD32F'
-    white:      '0xeec49a'
-    # colors:
-  primary:
-    background: '0x0C0201'
-    foreground: '0xebb2b7'
-  cursor:
-    text:       '0x0C0201'
-    cursor:     '0xebb2b7'
-  normal:
-    black:      '0x0C0201'
-    red:        '0x0E0A4B'
-    green:      '0xBD5758'
-    yellow:     '0xB48D62'
-    blue:       '0xC39D60'
-    magenta:    '0xF7877E'
-    cyan:       '0xDE6C82'
-    white:      '0xebb2b7'
-  bright:
-    black:      '0xa47c80'
-    red:        '0x0E0A4B'
-    green:      '0xBD5758'
-    yellow:     '0xB48D62'
-    blue:       '0xC39D60'
-    magenta:    '0xF7877E'
-    cyan:       '0xDE6C82'
-    white:      '0xebb2b7'
+    black:   '0x282a35'
+    red:     '0xff6e67'
+    green:   '0x5af78e'
+    yellow:  '0xf4f99d'
+    blue:    '0xcaa9fa'
+    magenta: '0xff92d0'
+    cyan:    '0x9aedfe'
+    white:   '0xe6e6e6'
