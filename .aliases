@@ -40,12 +40,12 @@ alias nf="clear -x && echo -e \ && neofetch"
 #alias la="ls -a"
 
 ## lsd
-alias ls="lsd --date '+%d/%m/%y %X'"
-alias la="ls -A"
+#alias ls="lsd --date '+%d/%m/%y %X'"
+#alias la="ls -A"
 
 ## fd
-#alias ls="fd -d 1 . -c always"
-#alias la="ls -H"
+alias ls="fd -d 1 . -c always"
+alias la="ls -H"
 
 ## all
 alias ll="ls -l"
