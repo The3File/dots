@@ -3,7 +3,10 @@
 main(){
    get_size
    query_min_size || return
-   st -c "float" -g ${W}x${H}+${X}+${Y}
+   alacritty --class float --title float\
+		-o "window.position: {x: $X, y: $Y}"\
+		-o "window.dimensions: {columns: $W, lines: $H}"
+	#st -c "float" -g ${W}x${H}+${X}+${Y}
 }
 
 prompt_draw(){
@@ -12,7 +15,7 @@ prompt_draw(){
 
 get_size(){
    read -r X Y W H < <(prompt_draw)
-   (( W/=1366/192, W-=3, H/=768/49, H-- ))
+   (( W/=1920/189, W-=3, H/=1080/55, H-- ))
 }
 
 query_min_size(){
