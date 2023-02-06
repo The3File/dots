@@ -2,4 +2,4 @@
 
 x="${1:-700}"
 y="${2:-980}"
-alacritty -o "window.position: {x: $x, y: $y}" -o "window.dimensions: {columns: 55, lines: 3}" --class toggle_light --title "Toggle Light" -e pwrbtnlght
+alacritty -o "window.position: {x: $x, y: $y}" -o "window.dimensions: {columns: 55, lines: 3}" --class toggle_light --title "Toggle Light" -e pwrbtnlght off
