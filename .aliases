@@ -52,7 +52,7 @@ alias ll="ls -l"
 alias lla="la -l"
 
 
-alias tree="tree -C"
+alias tree="lsd --tree"
 [[ $ANDROID = 1 ]] || alias localip="read -ra ip < <(ip a s wlan0 | grep \'inet \'); echo $ip"
 alias publicip="curl ifconfig.co"
 alias :q="exit"
