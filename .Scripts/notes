@@ -1,13 +1,16 @@
 #!/usr/bin/env bash
 
+## Commands with args
+
 fz(){ fzf --ansi --height 40% --reverse "$@";}
 
 editor(){ nvim +"set ft=markdown" "$@";}
 
-mv_(){
-	[[ $2 =~ / ]] && mkdir -p ${2%/*}
-	mv -vi "$1" "$2"
+query_move(){
+	[[ $2 =~ / ]] && mkdir -p ${2%/*}; mv -vi "$1" "$2"
 }
+
+## Input from user
 
 edit(){
 	select_note edit
@@ -23,7 +26,7 @@ delete(){
 move(){
 	select_note move
 	read -rep "new name: " new_name
-	mv_ "$note" "${new_name}.md"
+	query_move "$note" "${new_name}.md"
 }
 
 show(){
@@ -58,7 +61,7 @@ check_file_changed(){
 
 mv_tmp(){
 	default="note_$(date '+%d-%m_%H%M')"
-	mv_ "$tmp" "${new_name:-$default}.md"
+	query_move "$tmp" "${new_name:-$default}.md"
 }
 
 sync(){
