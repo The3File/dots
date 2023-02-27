@@ -16,7 +16,9 @@ Plug 'plasticboy/vim-markdown'
 Plug 'udalov/kotlin-vim'
 Plug 'itchyny/lightline.vim'
 Plug 'itchyny/vim-gitbranch'
+Plug 'chrisbra/Colorizer'
 "Plug 'gabrielelana/vim-markdown'
+"Plug '<++>'
 call plug#end()
 " Options
 "
