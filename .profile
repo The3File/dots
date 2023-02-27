@@ -3,14 +3,15 @@
 export XDG_CONFIG_HOME="$HOME/.config"
 export USER=$(whoami)
 
-export PATH="$HOME/.Scripts/:$HOME/.bin:$HOME/.local/bin:$HOME/.Scripts/:/usr/local/bin:$HOME/.cargo/bin:$PATH"
+export PATH="$HOME/.Scripts/:$HOME/.bin:$HOME/.local/bin:$HOME/.Scripts/:/usr/local/bin:$PATH"
 export TERMINAL="alacritty"
 export VISUAL="$TERMINAL -e nvim"
 export EDITOR="nvim"
+export SYSTEMD_EDITOR="nvim"
 export BROWSER="qutebrowser"
 
 export CONFIG="$HOME/.config/bspwm/bspwmrc"
-export NOTES="$HOME/documents/Noter"
+export NOTES="$HOME/Documents/Noter"
 export SKOLE="$HOME/documents/Skole"
 export BUDGET_FILE="$HOME/Dokumenter/budget.tab"
 

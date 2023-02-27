@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 
+<<<<<<< HEAD
 ## Commands with args
 
 fz(){ fzf --ansi --height 40% --reverse "$@";}
+=======
+fz(){ fzf -m --ansi --height 40% --reverse "$@";}
+>>>>>>> 0d8f43f8303956e63eb7e2f2bde66288c94b31d1
 
 editor(){ nvim +"set ft=markdown" "$@";}
 
@@ -25,8 +29,13 @@ delete(){
 
 move(){
 	select_note move
+<<<<<<< HEAD
 	read -rep "new name: " new_name
 	query_move "$note" "${new_name}.md"
+=======
+	get_new_name
+	mv_ "$note" "${new_name}.md"
+>>>>>>> 0d8f43f8303956e63eb7e2f2bde66288c94b31d1
 }
 
 show(){
@@ -37,15 +46,17 @@ show(){
 
 new(){
 	prep_tmp
-	i=1; until get_new_name || [[ $i -ge 2 ]]; do
-		editor +startinsert $tmp && ((i++))
-	done
+	get_new_name
+	editor +startinsert $tmp
+	get_new_name
 	check_file_changed && mv_tmp || rm $tmp
 }
 
 get_new_name(){
-	read -rep "new name: " new_name
-	[[ $new_name ]] || return 1
+	tree -C
+	[[ $new_name ]] && return 1
+	read -rep "new name: "
+	new_name="${REPLY%.md}"
 }
 
 prep_tmp(){

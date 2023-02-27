@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
-x="${1:-10}"
-y="${2:-649}"
-alacritty -o "window.position: {x: $x, y: $y}" -o "window.dimensions: {columns: 25, lines: 5}" --class float -e bye
+x="${1:-80}"
+y="${2:-900}"
+alacritty -o "window.position: {x: $x, y: $y}" -o "window.dimensions: {columns: 25, lines: 5}" --class bye --title bye -e bye

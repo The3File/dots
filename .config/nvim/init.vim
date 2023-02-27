@@ -139,7 +139,7 @@ let g:Hexokinase_highlighters = ['foregroundfull']
 "VimTex
    let g:tex_flavor = 'latex'
    let g:vimtex_view_method = 'mupdf'
-   let g:vimtex_fold_enabled = 1
+   let g:vimtex_fold_enabled = 0
    let g:vimtex_fold_types = {
 	 \ 'comments' : {},
 	 \}

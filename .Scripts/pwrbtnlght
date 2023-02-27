@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+b="/sys/devices/platform/thinkpad_acpi/leds/tpacpi::power/brightness"
+
+toggle(){
+	read -r state < $b
+	case $state in
+		0) s=1; msg="Turn on" ;;
+		1) s=0; msg="Turn off"
+	esac
+}
+
+case "$@" in
+	on) s=1; msg="Turn on" ;;
+	off) s=0; msg="Turn off" ;;
+	*) toggle
+esac
+
+printf '\e[1;32m%s\n\e[2;39m' "$msg the power button light"
+echo "$s" | sudo tee "$b" && read -t .2 -p "success"
