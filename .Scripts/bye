@@ -6,7 +6,7 @@ reset(){ printf '\e[?25l\e[2J\e[H'; }
 a_in(){
 	printf '\e[%sH\e[2C' "$((p+2))"; tr=
 	for i in "${ai[@]}";{ printf '\e[K\r\e[2C\e[m\e[1;36m%s\e[s' "$i"; read -t $at; }
-	for i in " " y "|" n " ";{ tr+="$i"; printf '\e[u%s' "$tr"; read -t $at; }
+	for i in " " "[" Y "/" n "]" " ";{ tr+="$i"; printf '\e[u%s' "$tr"; read -t $at; }
 }
 
 a_out(){
@@ -16,12 +16,12 @@ a_out(){
 }
 
 parse_animation(){
-	t="${o[p]}"; at="0.04"; st="2"
+	t="${o[p]}"; at="0.02"; st="2"
 	ai=("> $t" ">$t" "$t>" "$t >")
 	ao=("$t>" "$t>" ">$t " "> $t")
 }
 
-confirm(){ bep 10; parse_animation; reset; printl; a_in; read_confirm; a_out; }
+confirm(){ parse_animation; reset; printl; a_in; read_confirm; a_out; }
 
 read_confirm(){ read -rsn1 -p $'\e[?25h'; case_confirm $REPLY; }
 
@@ -52,16 +52,13 @@ case_key(){
 		''|l) confirm ;;
 		$'\e'|q) exit 0 ;;
 	esac
-	bep 5
 }
 
 main(){
 	trap "printf '\e[m\e[2J\e[H\e[?25h\e[?1049l'" EXIT
-	p=0; o=("sudo poweroff" "sudo reboot" "lockscreen")
+	p=0; o=("poweroff" "reboot" "lockscreen")
 	printf '\e[?1049h'
 	for((;;)){ reset; printl; read -rsn1 key; case_key "$key"; }
 }
 
-bep(){ sudo env -i beep -l $1; }
-bep 20
 main

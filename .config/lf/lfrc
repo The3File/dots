@@ -52,7 +52,7 @@ map gS cd ~/.Scripts
 map gb cd ~/.bin
 map g/ cd /
 map ga cd ~/.apps
-map gh cd ~/Hentet
+map gh cd ~/Downloads
 map gH cd ~/
 map gb cd ~/.bin
 map gB cd ~/Dokumenter/bible
@@ -60,10 +60,10 @@ map gs cd ~/Dokumenter/Skole
 map gS cd ~/.Scripts
 map gp cd ~/Projekter
 map gd cd ~/.dotfiles
-map gD cd ~/Dokumenter
+map gD cd ~/Documents
 map gc cd ~/.config
 map gl cd ~/.local
-map gw cd ~/Billeder/wallpapers
+map gw cd ~/Pictures/wallpapers
 map gt cd $trash
 map gy cd ~/Movies/youtube
 
