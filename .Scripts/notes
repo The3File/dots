@@ -1,12 +1,8 @@
 #!/usr/bin/env bash
 
-<<<<<<< HEAD
 ## Commands with args
 
-fz(){ fzf --ansi --height 40% --reverse "$@";}
-=======
 fz(){ fzf -m --ansi --height 40% --reverse "$@";}
->>>>>>> 0d8f43f8303956e63eb7e2f2bde66288c94b31d1
 
 editor(){ nvim +"set ft=markdown" "$@";}
 
@@ -29,13 +25,8 @@ delete(){
 
 move(){
 	select_note move
-<<<<<<< HEAD
-	read -rep "new name: " new_name
-	query_move "$note" "${new_name}.md"
-=======
 	get_new_name
-	mv_ "$note" "${new_name}.md"
->>>>>>> 0d8f43f8303956e63eb7e2f2bde66288c94b31d1
+	query_move "$note" "${new_name}.md"
 }
 
 show(){
