@@ -11,7 +11,7 @@ export SYSTEMD_EDITOR="nvim"
 export BROWSER="qutebrowser"
 
 export CONFIG="$HOME/.config/bspwm/bspwmrc"
-export NOTES="$HOME/Documents/Noter"
+export NOTES="$HOME/Documents/Arbejde"
 export SKOLE="$HOME/documents/Skole"
 export BUDGET_FILE="$HOME/Dokumenter/budget.tab"
 

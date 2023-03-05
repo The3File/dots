@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-dl(){ youtube-dl -f 'best[height <=? 720]/mp4' -o\
+dl(){ youtube-dl -f 'best[height <=? 1080]/mp4' -o\
       "$HOME/Movies/youtube/%(title)s.%(ext)s" "$url"; }
 qute(){ qutebrowser ":message-info \"Opening youtube-dl in scratchterm: $url\"" &>/dev/null
    dl && qutebrowser ":message-info \"Download done: $url\"" ||\
