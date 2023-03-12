@@ -54,6 +54,9 @@ case_key(){
 	esac
 }
 
+# Hacky fix
+lockscreen(){ systemctl suspend -i; }
+
 main(){
 	trap "printf '\e[m\e[2J\e[H\e[?25h\e[?1049l'" EXIT
 	p=0; o=("poweroff" "reboot" "lockscreen")
