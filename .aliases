@@ -32,7 +32,7 @@ alias ec="expressvpn connect"
 alias ed="expressvpn disconnect"
 alias bsp="~/.config/bspwm/bspwmrc"
 alias xr="xrdb ~/.Xresources"
-alias pf="pfetch"
+alias pf="echo;pfetch;echo"
 alias nf="clear -x && echo -e \ && neofetch"
 
 ## ls
