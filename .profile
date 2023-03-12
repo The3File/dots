@@ -5,7 +5,7 @@ export USER=$(whoami)
 
 export PATH="$HOME/.Scripts/:$HOME/.bin:$HOME/.local/bin:$HOME/.Scripts/:/usr/local/bin:$PATH"
 export TERMINAL="alacritty"
-export VISUAL="$TERMINAL -e nvim"
+export VISUAL="nvim"
 export EDITOR="nvim"
 export SYSTEMD_EDITOR="nvim"
 export BROWSER="qutebrowser"
