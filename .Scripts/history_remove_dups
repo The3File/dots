@@ -1,3 +1,8 @@
 #!/usr/bin/env bash
-#
-cp ~/.bash_history ~/.back_history; cat ~/.back_history | nl | sort -k 2 | uniq -f 1 | sort -n|cut -f 2 > ~/.bash_history
+
+bac="$HOME/.back_history"
+his="$HOME/.bash_history"
+
+cp $his $bac
+
+cat "$bac" | nl | sort -k 2 | uniq -f 1 | sort -n | cut -f 2 > "$his"
