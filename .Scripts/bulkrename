@@ -26,5 +26,6 @@ IFS=$'\n' read -d '' -ra nns < "$tmp"
 for((i=0;i<${#nns[@]};i++));{
 	o="${ons[i]#*\ }"; n="${nns[i]#*\ }"
 	[[ "$o" = "$n" ]] && continue
+	[[ -d ${n%\/*} ]] || mkdir -p ${n%\/*}
 	mv -v "$o" "$n"
 }
