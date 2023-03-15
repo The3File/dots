@@ -1,68 +1,30 @@
 #!/usr/bin/env bash
 files=(./*)
 [[ "$@" ]] && files=($@)
+path="${files[0]%\/*}"
 
-main() {
-	get_files
-	edit_files
-
-	move_files dryrun
-	prompt_sure
-	move_files
-}
-
-get_files() {
-	path="${files[0]%\/*}"
-	for name in "${files[@]##*\/}"; do
-		[[ -a $name ]] || error "$name"
-		add_prefix
-	done
-	write_tmp
-}
-
-edit_files(){
-	nvim "$tmp" || exit
-	read_nns
-	check_nns
-}
-
-move_files() {
-	for((i=0;i<${#nns[@]};i++));{
-		o="${ons[i]#*\ }"
-		n="${nns[i]#*\ }"
-		[[ "$o" = "$n" ]] && continue
-		[[ $1 = dryrun ]] && { q+=("$o -> $n"); continue; }
-		mv "$o" "${path}/$n" && echo "mv ${o##*\/} $n"
-	}
-	[[ ${q[@]} ]] || exit 0
-	printf '%s\n' "${q[@]}" | less -F
-}
-
-write_tmp() {
-	trap 'rm $tmp' EXIT
-	tmp="$(mktemp XXX.bulkrename)"
-	printf '%s\n' "${ons[@]}" > $tmp
-}
-
-add_prefix() {
-	[[ -d $name ]] && ons+=("d $name") && return
-	[[ -x $name ]] && ons+=("x $name") && return
-	[[ -f $name ]] && ons+=("f $name") && return
-}
-
-read_nns() {
-	IFS=$'\n' read -d '' -ra nns < "$tmp"
-}
-
-check_nns() {
-	(( ${#ons[@]}==${#nns[@]} )) || error "dont delete lines"
-}
-
-prompt_sure() {
-	read -rp "Commit? [y/N]: "
-	[[ $REPLY =~ y|Y ]] || exit 0
-}
+trap 'rm $tmp' EXIT
+tmp="$(mktemp XXX.bulkrename)"
 
 error() { printf '%s\n' "error: $1"; exit 1; }
 
-main
+#for name in "${files[@]##*\/}"; do
+for name in "${files[@]}"; do
+	[[ -a $name ]] || error "not a file $name"
+	[[ -d $name ]] && ons+=("d $name") && continue
+	[[ -x $name ]] && ons+=("x $name") && continue
+	[[ -f $name ]] && ons+=("f $name") && continue
+done
+
+printf '%s\n' "${ons[@]}" > $tmp
+
+nvim "$tmp"
+
+IFS=$'\n' read -d '' -ra nns < "$tmp"
+((${#ons[@]}==${#nns[@]})) || error "dont delete lines"
+
+for((i=0;i<${#nns[@]};i++));{
+	o="${ons[i]#*\ }"; n="${nns[i]#*\ }"
+	[[ "$o" = "$n" ]] && continue
+	mv -v "$o" "$n"
+}
