@@ -3,14 +3,13 @@
 main(){
    get_size
    query_min_size || return
-   alacritty --class float --title float\
+   alacritty --class float,float --title float\
 		-o "window.position: {x: $X, y: $Y}"\
 		-o "window.dimensions: {columns: $W, lines: $H}"
-	#st -c "float" -g ${W}x${H}+${X}+${Y}
 }
 
 prompt_draw(){
-   slop -f "%x %y %w %h" -b 2 -t 0 -q
+   slop -f "%x %y %w %h" -b 2 -t 0 -q -l -c 0.3,0.4,0.6,0.6
 }
 
 get_size(){
