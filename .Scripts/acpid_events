@@ -11,9 +11,9 @@ power_menu(){ [[ $1 = "PBTN" ]] && alacritty_bye 640; }
 handler(){
 	case "$1" in
 		button/power) power_menu $2 ;;
-		button/screenlock) $HOME/.Scripts/lock_keys ;;
+		button/screenlock) /home/ringdal/.Scripts/lock_keys ;;
 		ibm/hotkey)
-			[[ $4 = 00001311 ]] && $HOME/.Scripts/lock_keys
+			[[ $4 = 00001311 ]] && /home/ringdal/.Scripts/lock_keys
 			;;
 		ac_adapter) notify_plugged $2 ;;
 		button/prog1|button/suspend) lockscreen ;;
