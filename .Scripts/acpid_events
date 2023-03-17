@@ -6,11 +6,13 @@ trap 'xinput enable "AT Translated Set 2 keyboard"' EXIT
 
 notify_plugged(){ [[ $1 = *ACPI* ]] && echo > $PANELFIFO; }
 
-power_menu(){ [[ $1 = "PBTN" ]] && alacritty_bye 640; }
+power_menu(){ [[ $1 = "PBTN" ]] && alacritty_bye; }
 
 handler(){
 	case "$1" in
-		button/power) power_menu $2 ;;
+		button/power)
+			#power_menu $2
+			;;
 		button/screenlock) /home/ringdal/.Scripts/lock_keys ;;
 		ibm/hotkey)
 			[[ $4 = 00001311 ]] && /home/ringdal/.Scripts/lock_keys
@@ -21,5 +23,5 @@ handler(){
 }
 
 while read -u "${COPROC[0]}" -a event; do
-	handler "${event[@]}"
+	handler "${event[@]}" &
 done
