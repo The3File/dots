@@ -1,5 +1,8 @@
 $include /etc/inputrc
 
+# do not bell on tab-completion
+set bell-style none
+
 set completion-ignore-case on
 set completion-map-case on
 set show-all-if-ambiguous off
@@ -18,6 +21,10 @@ Control-f:"fuzzy_cd"
 "\e[B": history-search-forward
 "\e[C": forward-char
 "\e[D": backward-char
+
+# cycle through matches
+"\t": menu-complete
+"\e[Z": menu-complete-backward
 
 ##  VI MODE
 set editing-mode vi
