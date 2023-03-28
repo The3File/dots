@@ -1,14 +1,17 @@
+set cleaner ~/.config/lf/cleaner
 set shell bash
 set shellopts '-eu'
 set ifs "\n"
 set scrolloff 10
-set previewer ~/.bin/preview
+#set previewer ~/.bin/preview
+set previewer ~/.config/lf/preview
 #set preview!
 set preview
+set cleaner ~/.config/lf/cleaner
 #set ratios '1:1:9999'
 set ratios '1:2:3'
 set relativenumber
-#set drawbox on
+set drawbox on
 #### BINDINGS ####
 
 map . set hidden!
@@ -30,9 +33,11 @@ map r $bulkrename $fx
 
 map S $$SHELL
 
+# trash management
 map D trash
 map tc trash-clear
-map tr $trash-restore
+map t ;
+map tr !trash-restore
 
 map B new-script
 
@@ -41,6 +46,7 @@ map x $$f
 map X !$f
 
 # dedicated keys for file opener actions
+map i $bat --color always --style plain --paging always $f
 map o &xdg-open $f
 map O $xdg-open --ask $f
 
@@ -55,8 +61,8 @@ map ga cd ~/.apps
 map gh cd ~/Downloads
 map gH cd ~/
 map gb cd ~/.bin
-map gB cd ~/Dokumenter/bible
-map gs cd ~/Dokumenter/Skole
+map gB cd ~/Documents/bible
+map gs cd ~/Documents/Arbejde/HF
 map gS cd ~/.Scripts
 map gp cd ~/Projekter
 map gd cd ~/.dotfiles
