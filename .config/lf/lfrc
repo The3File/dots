@@ -29,7 +29,7 @@ map se :set sortby ext; set info
 map c unselect
 map <space> :toggle; down
 #map r push :rename<space>
-map r $bulkrename $fx
+map r $bulkrename "$fx"
 
 map S $$SHELL
 
