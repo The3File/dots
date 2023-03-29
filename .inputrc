@@ -14,7 +14,7 @@ Control-f:"fuzzy_cd"
 #Control-g:"gotop"
 #Control-k:"fuzzy_kill"
 
-#"\e[Z": menu-complete
+"\e[Z": menu-complete
 
 # SEARCH HISTORY WITH UP/DOWN
 "\e[A": history-search-backward
@@ -23,8 +23,8 @@ Control-f:"fuzzy_cd"
 "\e[D": backward-char
 
 # cycle through matches
-"\t": menu-complete
-"\e[Z": menu-complete-backward
+#"\t": menu-complete
+#"\e[Z": menu-complete-backward
 
 ##  VI MODE
 set editing-mode vi
