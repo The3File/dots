@@ -3,15 +3,15 @@ set shell bash
 set shellopts '-eu'
 set ifs "\n"
 set scrolloff 10
-#set previewer ~/.bin/preview
-set previewer ~/.config/lf/preview
+set previewer ~/.bin/preview
+#set previewer ~/.config/lf/preview
+#set cleaner ~/.config/lf/cleaner
 #set preview!
 set preview
-set cleaner ~/.config/lf/cleaner
 #set ratios '1:1:9999'
 set ratios '1:2:3'
 set relativenumber
-set drawbox on
+#set drawbox on
 #### BINDINGS ####
 
 map . set hidden!
@@ -46,7 +46,13 @@ map x $$f
 map X !$f
 
 # dedicated keys for file opener actions
-map i $bat --color always --style plain --paging always $f
+cmd preview_full_screen ${{
+	clear
+	IFS=' ' read -r h w < <(stty size)
+	preview "$f" '' '' "$w"
+	read -rsn1
+}}
+map i preview_full_screen
 map o &xdg-open $f
 map O $xdg-open --ask $f
 
