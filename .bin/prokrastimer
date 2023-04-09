@@ -58,7 +58,7 @@ main() {
 
 	prompt; traps
 	for ((i=2;;i++)){ timer; ((i<ss)) && next_state; }
-	}
+}
 
 traps(){
 	trap "completed; stty echo" EXIT
