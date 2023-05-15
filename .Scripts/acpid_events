@@ -14,6 +14,7 @@ handler(){
 			#power_menu $2
 			;;
 		button/screenlock) /home/ringdal/.Scripts/lock_keys ;;
+		## Key = 
 		ibm/hotkey)
 			[[ $4 = 00001311 ]] && /home/ringdal/.Scripts/lock_keys
 			;;
