@@ -14,7 +14,7 @@ alias trc="nvim ~/.config/tmux/tmux.conf"
 alias drc="nvim ~/.config/wal/templates/dunstrc"
 
 ## APL
-alias sshd="sudo /bin/sshd"
+alias ssshd="sudo /bin/sshd"
 alias kdeconnectd="/usr/lib/kdeconnectd"
 alias ccp="rsync --progress"
 alias x="extract"
