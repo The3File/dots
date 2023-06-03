@@ -1,8 +1,11 @@
+set cleaner ~/.config/lf/cleaner
 set shell bash
 set shellopts '-eu'
 set ifs "\n"
 set scrolloff 10
 set previewer ~/.bin/preview
+#set previewer ~/.config/lf/preview
+#set cleaner ~/.config/lf/cleaner
 #set preview!
 set preview
 #set ratios '1:1:9999'
@@ -26,13 +29,15 @@ map se :set sortby ext; set info
 map c unselect
 map <space> :toggle; down
 #map r push :rename<space>
-map r $bulkrename $fx
+map r $bulkrename "$fx"
 
 map S $$SHELL
 
+# trash management
 map D trash
 map tc trash-clear
-map tr $trash-restore
+map t ;
+map tr !trash-restore
 
 map B new-script
 
@@ -41,6 +46,13 @@ map x $$f
 map X !$f
 
 # dedicated keys for file opener actions
+cmd preview_full_screen ${{
+	clear
+	IFS=' ' read -r h w < <(stty size)
+	preview "$f" '' '' "$w"
+	read -rsn1
+}}
+map i preview_full_screen
 map o &xdg-open $f
 map O $xdg-open --ask $f
 
@@ -55,8 +67,8 @@ map ga cd ~/.apps
 map gh cd ~/Downloads
 map gH cd ~/
 map gb cd ~/.bin
-map gB cd ~/Dokumenter/bible
-map gs cd ~/Dokumenter/Skole
+map gB cd ~/Documents/bible
+map gs cd ~/Documents/Arbejde/HF
 map gS cd ~/.Scripts
 map gp cd ~/Projekter
 map gd cd ~/.dotfiles

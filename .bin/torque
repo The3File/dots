@@ -63,7 +63,12 @@ main() {
    for ((;;)); { get_torrents; read -rsN1 -t1 && prompt "$REPLY"; }
 }
 
-pgrep transmission-da &>/dev/null || transmission-daemon && printf '%s' "launching.."
-until pgrep transmission-da; do read -rt 1 -p "."; done
+pgrep transmission-da &>/dev/null || {
+	transmission-daemon && printf '%s' "launching.."
+
+	until pgrep transmission-da; do
+		read -rt 1 -p "."
+	done
+}
 
 main

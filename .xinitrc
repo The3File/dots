@@ -17,7 +17,7 @@ exec setxkbmap -layout dk -variant nodeadkeys -option caps:swapescape -option "s
 # User apps
 exec networkd-dispatcher &
 exec swallow &
-	exec unclutter -idle 3 &
+exec unclutter -idle 3 &
 exec clipmenud &
 exec feh --bg-fill $HOME/.config/wall.png &
 

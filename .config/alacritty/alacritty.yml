@@ -17,7 +17,7 @@ window:
   #
   # Specified in number of columns/lines, not pixels.
   # If both are `0`, this setting is ignored.
-  opacity: 0.95
+  opacity: 0.94
   dimensions:
     columns: 100
     lines: 30
@@ -116,7 +116,7 @@ font:
 colors:
 
   primary:
-    background: '#1d1f21'
+    background: '#151515'
     foreground: '#c5c8c6'
 
   cursor:
@@ -356,30 +356,30 @@ key_bindings:
   #print_events: false
 
 # Colors (Darcula)
-colors:
-  # Default colors
-  primary:
-    background: '0x111111'
-    foreground: '0xf8f8f2'
-
-  # Normal colors
-  normal:
-    black:   '0x000000'
-    red:     '0xff5555'
-    green:   '0x50fa7b'
-    yellow:  '0xf1fa8c'
-    blue:    '0xcaa9fa'
-    magenta: '0xff79c6'
-    cyan:    '0x8be9fd'
-    white:   '0xbfbfbf'
-
-  # Bright colors
-  bright:
-    black:   '0x282a35'
-    red:     '0xff6e67'
-    green:   '0x5af78e'
-    yellow:  '0xf4f99d'
-    blue:    '0xcaa9fa'
-    magenta: '0xff92d0'
-    cyan:    '0x9aedfe'
-    white:   '0xe6e6e6'
+#colors:
+#  # Default colors
+#  primary:
+#    background: '#111111'
+#    foreground: '#f8f8f2'
+#
+#  # Normal colors
+#  normal:
+#    black:   '#000000'
+#    red:     '#ff5555'
+#    green:   '#50fa7b'
+#    yellow:  '#f1fa8c'
+#    blue:    '#caa9fa'
+#    magenta: '#ff79c6'
+#    cyan:    '#8be9fd'
+#    white:   '#bfbfbf'
+#
+#  # Bright colors
+#  bright:
+#    black:   '#282a35'
+#    red:     '#ff6e67'
+#    green:   '#5af78e'
+#    yellow:  '#f4f99d'
+#    blue:    '#caa9fa'
+#    magenta: '#ff92d0'
+#    cyan:    '#9aedfe'
+#    white:   '#e6e6e6'
