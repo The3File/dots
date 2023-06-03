@@ -6,7 +6,7 @@ image() {
 		exit 1
 	else
 		#kitty +kitten icat --transfer-mode file --stdin no --place "$2x$3@$4x$5" "$1" < /dev/null > /dev/tty
-		chafa -w 9 --zoom "$1" -s "${4}x"
+		chafa "$1" -s "${4}x"
 	fi
 }
 

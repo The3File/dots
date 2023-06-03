@@ -1,5 +1,6 @@
 # ~/.bashrc
 
+[[ -a $HOME/.gpt_key ]] && source $HOME/.gpt_key
 # set vi mode
 set -o vi
 

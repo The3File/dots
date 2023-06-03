@@ -8,7 +8,7 @@ main(){
 	BACKGROUND_COLOR="$color0"
 
 	BORDER_WIDTH="1"
-	WINDOW_GAP="0"
+	WINDOW_GAP="10"
 
 	xmodmap -e "keysym Menu = Super_R"
 	source "$HOME/.cache/wal/colors.sh"
@@ -33,6 +33,7 @@ main(){
 	link_wal
 
 	# start/restart apps
+	xinit_rc
 	apps
 }
 
@@ -49,10 +50,10 @@ config() {
 
 	bspc config gapless_monocle			true
 	bspc config borderless_monocle		true
-	bspc config single_monocle				true
+	bspc config single_monocle				false
 
 	bspc config center_pseudo_tiled     true
-	bspc config split_ratio             0.60
+	bspc config split_ratio             0.55
 
 	bspc config automatic_scheme			spiral
 	bspc config initial_polarity			first_child
@@ -104,7 +105,7 @@ apps() {
 	printf '\e[37m%s: %s\n' "$1" "started"; }
 
 	apps=(runbar acpid_events)
-
+	
 	for app in "${apps[@]}"
 	do app_is_running="$(ps ax | sed -n "/nvim/d;/sed/d;/\<$app\>/p")"
 	if [[ "$app_is_running" ]]
@@ -137,6 +138,21 @@ link_wal(){
 	#printf '\e[36m %s\n\n' "done"
 }
 
+xinit_rc(){
+	# X settings
+	exec xsetroot -cursor_name left_ptr &
+	exec xset -dpms &
+	exec xset s off &
+	exec setxkbmap -layout dk -variant nodeadkeys -option caps:swapescape -option "shift:both_capslock" &
+
+	# User apps
+	exec networkd-dispatcher &
+	exec swallow &
+	exec unclutter -idle 3 &
+	exec clipmenud &
+	exec feh --bg-fill $HOME/.config/wall.png &
+	exec sxhkd -m 1 &
+}
 
 # INIT
 main "$@" &&
