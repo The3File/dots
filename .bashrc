@@ -8,6 +8,10 @@ set -o vi
 ### sane settings ###
 #####################
 
+# Use bash-completion
+[[ $PS1 && -f /usr/share/bash-completion/bash_completion ]] && \
+    . /usr/share/bash-completion/bash_completion
+
 [[ -f ~/.bash_prompt ]] && source ~/.bash_prompt
 #[[ -f ~/.profile ]] && source ~/.profile
 
