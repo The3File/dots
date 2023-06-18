@@ -30,6 +30,13 @@ else
 fi
 
 printf '%s\n' "Keyboard ${state^}d"
+pressed_key=$(notify-send "$_")
+
+case $pressed_key in
+	"hey_hello") ;;
+	"key_world") ;;
+esac
+
 printf '%s' "$state" > "$HOME/.keylock"
 
 echo "key" > "$PANELFIFO"
