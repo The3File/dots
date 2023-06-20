@@ -9,8 +9,8 @@ ws() {
 
 net(){
 	[[ $1 = show ]] && alacritty\
-		-o "window.position: {x: 800, y: 410}" -o "window.dimensions: {columns: 70, lines: 21}"\
-		--class float -e bash -c "iw wlan0 link; ip a s wlan0; read -rsn1" && return
+		-o "window.position: {x: 1100, y: 500}" -o "window.dimensions: {columns: 70, lines: 24}"\
+		--class float -e bash -c "iw wlp3s0 link; ip a s wlp3s0; read -rsn1" && return
 
 	net="%{F#f00}no connection%{F-}"
 
