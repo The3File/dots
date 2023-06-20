@@ -14,10 +14,10 @@ net(){
 
 	net="%{F#f00}no connection%{F-}"
 
-	read -ra st < <(iw wlan0 link | grep SSID)
+	read -ra st < <(iw wlp3s0 link | grep SSID)
 	[[ ! -z "$st" ]] && {
-		read -ra ip < <(ip a s wlan0 | grep 'inet ')
-		read -ra sn < <(iw wlan0 link | grep 'signal')
+		read -ra ip < <(ip a s wlp3s0 | grep 'inet ')
+		read -ra sn < <(iw wlp3s0 link | grep 'signal')
 		sn="${sn##*:}"
 		get_color "$sn" "-20" "-40" "-55" "-60"
 		net="${st[1],,} ${color}${sn[1]} ${sn[2]}%{F-} [${ip[1]}]"
@@ -43,7 +43,8 @@ volume(){
 }
 
 light(){
-	IFS='.' read -r light _ < <(xbacklight -get)
+	read -r light_file < "/sys/class/backlight/amdgpu_bl0/brightness"
+	light="$((light_file*100/255))"
 	get_color $light
 	export L="brightness ${color}${light}%%%{F-}"
 }
@@ -61,11 +62,11 @@ misc(){
 }
 
 get_color(){
-   (($1>= ${2:-75})) && color="%{F#0c0}"
-   (($1<= ${2:-75})) && color="%{F#4a0}"
-   (($1<= ${3:-50})) && color="%{F#890}"
-   (($1<= ${4:-25})) && color="%{F#f30}"
-   (($1<= ${5:-10})) && color="%{F#f00}"
+   [[ $1 -ge ${2:-75} ]] && color="%{F#0c0}"
+   [[ $1 -le ${2:-75} ]] && color="%{F#4a0}"
+   [[ $1 -le ${3:-50} ]] && color="%{F#890}"
+   [[ $1 -le ${4:-25} ]] && color="%{F#f30}"
+   [[ $1 -le ${5:-10} ]] && color="%{F#f00}"
 }
 
 update_all(){ ws; net; volume; light; bat; misc; keylock; }

@@ -64,7 +64,7 @@ super + i
 
 # browser
 super + {o,w}
-	{qutebrowser, chromium}
+	{qutebrowser, firefox}
 
 # restart bspwm
 super + shift + r
@@ -214,7 +214,7 @@ alt + ctrl + {h,j,k,l}
 
 # LIGHT | BRIGHTNESS
 XF86MonBrightness{Up,Down}
-   sudo xbacklight -time 100 -{inc,dec} 5;((;:;)); echo light > $PANELFIFO
+   sudo light -{A,U} 5;((;:;)); echo light > $PANELFIFO
 
 # SOUND
 {_,super + } XF86Audio{Raise,Lower}Volume

@@ -22,7 +22,7 @@ exec clipmenud &
 #exec feh --bg-fill $HOME/.config/wall.png &
 
 # WM
-#exec sxhkd -m 1 &
-#lockscreen nolock &
-#bspwm
-dwm
+exec sxhkd -m 1 &
+lockscreen nolock &
+bspwm
+#dwm
