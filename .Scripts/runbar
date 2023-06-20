@@ -71,7 +71,7 @@ get_color(){
 
 update_all(){ ws; net; volume; light; bat; misc; keylock; }
 
-print_bar(){ lemonbar -p -n lemonbar -g 1920x30 -${lp} -B "$color0" -F "$color7" -u 2 -f "Terminus:style=Regular:size=12"; }
+print_bar(){ lemonbar -p -n lemonbar -g 1920x30 -${lp} -B "$color0" -F "$color7" -u 2 -f "-xos4-terminus-medium-*-*-*-14-*-*-*-*-*-*-*"; }
 
 parse(){ printf '%s\n' " $W | $K %{r} $H | $R | $V | $L | $N | $B | $D "; }
 

@@ -116,7 +116,7 @@ font:
 colors:
 
   primary:
-    background: '#151515'
+    background: '#000000'
     foreground: '#c5c8c6'
 
   cursor:
