@@ -33,7 +33,7 @@ main(){
 	link_wal
 
 	# start/restart apps
-	xinit_rc
+	#xinit_rc
 	apps
 }
 
