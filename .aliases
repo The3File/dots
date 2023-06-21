@@ -33,7 +33,7 @@ alias ed="expressvpn disconnect"
 alias bsp="~/.config/bspwm/bspwmrc"
 alias xr="xrdb ~/.Xresources"
 alias pf="echo;pfetch;echo"
-alias nf="printf '\e[1A\e[K\n'; neofetch | head -41; read -rsp $'\e[?25l'; printf '\e[?25h'"
+alias nf="printf '\e[1A\e[K\n'; neofetch | head -41; read -rsn1 -p $'\e[?25l'; printf '\e[?25h'"
 
 ## ls
 #alias ls="ls --color=auto --group-directories-first"
