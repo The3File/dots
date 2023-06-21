@@ -7,7 +7,7 @@ main(){
 	BORDER_COLOR="$color3"
 	BACKGROUND_COLOR="$color0"
 
-	BORDER_WIDTH="1"
+	BORDER_WIDTH="2"
 	WINDOW_GAP="10"
 
 	xmodmap -e "keysym Menu = Super_R"
@@ -46,6 +46,7 @@ config() {
 	bspc config normal_border_color		"$BACKGROUND_COLOR"
 
 	bspc config border_width            "$BORDER_WIDTH"
+	bspc config border_radius           10
 	bspc config window_gap					"$WINDOW_GAP"
 
 	bspc config gapless_monocle			true
