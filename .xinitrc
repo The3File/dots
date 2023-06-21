@@ -20,9 +20,10 @@ exec swallow &
 exec unclutter -idle 3 &
 exec clipmenud &
 exec feh --bg-fill $HOME/.config/wall.png &
+exec picom -b &
 
 # WM
 exec sxhkd -m 1 &
-#lockscreen nolock &
+lockscreen nolock &
 bspwm
 #dwm

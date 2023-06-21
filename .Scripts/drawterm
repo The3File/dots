@@ -14,7 +14,7 @@ prompt_draw(){
 
 get_size(){
    read -r X Y W H < <(prompt_draw)
-   (( W/=1920/188, W-=3, H/=1080/49, H-- ))
+   (( W/=1920/188, W-=3, H/=1080/50, H-- ))
 }
 
 query_min_size(){

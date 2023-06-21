@@ -112,12 +112,12 @@ font:
     x: 0
     y: 0
 
+  #primary:
+  #  background: '#000000'
+  #  foreground: '#c5c8c6'
 # Colors (Tomorrow Night)
 colors:
 
-  primary:
-    background: '#000000'
-    foreground: '#c5c8c6'
 
   cursor:
     text: '#000000'
