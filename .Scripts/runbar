@@ -71,7 +71,7 @@ get_color(){
 
 update_all(){ ws; net; volume; light; bat; misc; keylock; }
 
-print_bar(){ lemonbar -p -n lemonbar -g 1920x30 -${lp} -B "$color0" -F "$color7" -u 2 -f "-xos4-terminus-medium-*-*-*-14-*-*-*-*-*-*-*"; }
+print_bar(){ lemonbar -p -n lemonbar -g 1920x26 -${lp} -B "$bg" -F "$fg" -u 2 -f "-xos4-terminus-medium-*-*-*-14-*-*-*-*-*-*-*"; }
 
 parse(){ printf '%s\n' " $W | $K %{r} $H | $R | $V | $L | $N | $B | $D "; }
 
@@ -102,10 +102,11 @@ mkfifo "$PANELFIFO"
 
 # lemonbar_position
 lp="b"
-#bspc config top_padding          21
-#bspc config bottom_padding          21
 bspc rule -a lemonbar layer=below
 source "$HOME/.cache/wal/colors.sh"
+#bg="$color0"
+bg="#000000"
+fg="$color7"
 
 update_all
 main
