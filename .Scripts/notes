@@ -1,16 +1,13 @@
 #!/usr/bin/env bash
 
-## Commands with args
-
 fz(){ fzf -m --ansi --height 40% --reverse "$@";}
 
 editor(){ nvim +"set ft=markdown" "$@";}
 
 query_move(){
-	[[ $2 =~ / ]] && mkdir -p ${2%/*}; mv -vi "$1" "$2"
+	[[ $2 =~ / ]] && mkdir -p ${2%/*}
+	mv -vi "$1" "$2"
 }
-
-## Input from user
 
 edit(){
 	select_note edit

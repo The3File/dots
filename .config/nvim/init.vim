@@ -17,6 +17,10 @@ Plug 'udalov/kotlin-vim'
 Plug 'itchyny/lightline.vim'
 Plug 'itchyny/vim-gitbranch'
 Plug 'chrisbra/Colorizer'
+Plug 'tanvirtin/monokai.nvim'
+Plug 'ellisonleao/gruvbox.nvim'
+Plug 'xiyaowong/transparent.nvim'
+"Plug 'jamespwilliams/bat.vim'
 "Plug 'gabrielelana/vim-markdown'
 "Plug '<++>'
 call plug#end()
@@ -40,7 +44,8 @@ set grepprg=grep\ -nH\ $*
 
 "colorscheme wal
 "colorscheme zellner
-colorscheme default
+"colorscheme default
+colorscheme gruvbox
 "colorscheme delek
 
 "autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown

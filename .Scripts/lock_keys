@@ -18,7 +18,8 @@ wayland(){
 xorg(){
 	printf '%s\n' "Running Xorg"
 	xinput $state "AT Translated Set 2 keyboard"
-	xinput $state "TPPS/2 IBM TrackPoint"
+	xinput $state "TPPS/2 Elan TrackPoint"
+	xinput $state "SYNA0001:00 06CB:CE67 Touchpad"
 }
 
 [[ $(< "$HOME/.keylock") = "enable" ]] && state="disable" || state="enable"
