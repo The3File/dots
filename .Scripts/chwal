@@ -1,21 +1,25 @@
 #!/usr/bin/env bash
 
+usage(){ printf '%s\n' "chwal [-rl] [-f '/path/to/image'" "-r: reload current" "-l: light theme" "-f: add image to rotation"; }
+
 sel(){
    current=$(awk -F/ 'NF>1{print $NF}' $HOME/.cache/wal/wal)
    files=$(ls $HOME/Billeder/favoritter | sed '/.backend/d')
    dir="$HOME/Billeder/favoritter"
 
-   if [[ $1 = "-r" ]]; then
+   if [[ $r = "1" ]]; then
       next="$dir/$current"
    else
-   [[ $(printf "$files\n" | tail -1) = ${current} || -z $(echo $files | grep $current) ]] &&
+   [[ $(printf "$files\n" | tail -1) = ${current} ]] ||
+	[[ -z $(echo $files | grep $current) ]] &&
       next="$dir/$(printf '%s' "$files" | head -1)" ||
       next="$dir/$(printf '%s' "$files" | awk "/$current/{getline; print}")"
    fi
 
    backend="$(cat "${next%.*}.backend")"
+	echo $backend
 
-   wal -tqi $next --backend $backend
+   wal -tqi $next ${l} --backend $backend && echo $next
    cp $next "$HOME/.config/wall.png"
 
    $CONFIG &>/dev/null
@@ -32,7 +36,7 @@ fav(){
 		"t: colorthief"\
 		"choose > "
 
-   read -rs; [[ ! $REPLY ]] && exit
+   read -r; [[ ! $REPLY ]] && exit
    case $REPLY in
 		w) backend="wal" ;;
 		c) backend="colorz" ;;
@@ -42,16 +46,30 @@ fav(){
    esac
 
    [[ $backend ]] && {
-		printf '%s' "$backend" > "$HOME/Billeder/favoritter/${1%.*}.backend"
+		name="${1##*/}"
+		echo $name
+		printf '%s' "$backend" > "$HOME/Billeder/favoritter/${name%.*}.backend"
    	cp "$1" "$HOME/Billeder/favoritter/${1##*/}"
 	}
+	exit 0
 }
 
 main(){
+	while getopts "rlf:" o; do case $o in
+         f) [[ $OPTARG ]] && fav $OPTARG ;;
+			l) l="-l" ;;
+			r) r="1" ;;
+			*) usage; exit 1
+		esac
+	done
    case $1 in
-         -f) shift; [[ $1 ]] && fav $1 ;;
          *) sel "$@" ;;
    esac
+}
+
+get_opts(){
+
+	: ${email:?missing argument \'-m\' or email invalid}
 }
 
 main "$@"

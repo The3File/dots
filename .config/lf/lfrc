@@ -129,8 +129,8 @@ cmd new-script ${{
 }}
 
 
-map bf change_wal fav
-map bw change_wal sel
+map bf !chwal -f $fx
+map bw change_wal
 map bg $feh --bg-fill $f
 
 cmd change_wal %{{
@@ -144,13 +144,8 @@ cmd change_wal %{{
 		h) backend="haishoku" ;;
 		*) exit
 	esac
-	case $1 in
-		fav) printf '%s' "$backend" >\
-			"$HOME/Billeder/favoritter/${1%.*}.backend"
-   		cp "$fx" "$HOME/Billeder/favoritter/${1##*/}"
-		;;
-		set) wal --backend $backend -i "$fx"
-			. ~/.config/bspwm/bspwmrc config
+	wal --backend $backend -i "$fx"
+	. ~/.config/bspwm/bspwmrc config
 	esac
 }}
 

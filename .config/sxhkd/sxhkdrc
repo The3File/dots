@@ -226,7 +226,7 @@ XF86AudioMute
 
 # mute mic
 XF86AudioMicMute
-	pamixer --source alsa_input.pci-0000_00_1b.0.analog-stereo --get-mute && m=u || m=m; pamixer --source alsa_input.pci-0000_00_1b.0.analog-stereo -$m
+	pamixer --source alsa_input.pci-0000_05_00.6.HiFi__hw_acp__source --get-mute && m=u || m=m; pamixer --source alsa_input.pci-0000_05_00.6.HiFi__hw_acp__source -$m
 
 # dark light, night mode
 super + alt {_,shift +} n
