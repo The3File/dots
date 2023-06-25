@@ -104,8 +104,8 @@ mkfifo "$PANELFIFO"
 lp="b"
 bspc rule -a lemonbar layer=below
 source "$HOME/.cache/wal/colors.sh"
-#bg="$color0"
-bg="#000000"
+bg="$color0"
+#bg="#000000"
 fg="$color7"
 
 update_all
