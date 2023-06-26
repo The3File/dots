@@ -4,14 +4,14 @@
 main(){ 
 
 	# "#00ff00"
-	BORDER_COLOR="$color3"
-	BACKGROUND_COLOR="$color0"
 
 	BORDER_WIDTH="2"
 	WINDOW_GAP="10"
 
 	xmodmap -e "keysym Menu = Super_R"
 	source "$HOME/.cache/wal/colors.sh"
+	BORDER_COLOR="$color4"
+	BACKGROUND_COLOR="$color0"
 	case $1 in 1|0) reason="$1"; shift; esac
 
 	[[ "$1" ]] && {
