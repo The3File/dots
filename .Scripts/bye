@@ -55,7 +55,7 @@ case_key(){
 }
 
 # Hacky fix
-lockscreen(){ systemctl suspend -i; }
+#lockscreen(){ systemctl suspend -i; }
 
 main(){
 	trap "printf '\e[m\e[2J\e[H\e[?25h\e[?1049l'" EXIT
