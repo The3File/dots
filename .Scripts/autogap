@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 main(){
 
@@ -14,6 +14,6 @@ main(){
 
 [[ -e "$GAPFIFO" ]] && rm "$GAPFIFO"
 mkfifo "$GAPFIFO"
-bspc subscribe node_add node_remove desktop_focus > $fifo &
+bspc subscribe node_add node_remove desktop_focus > $GAPFIFO &
 
-while read -r _; do main done < "$GAPFIFO"
+while read -r _; do main; done < "$GAPFIFO"
