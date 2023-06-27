@@ -9,7 +9,8 @@ main(){
 	WINDOW_GAP="10"
 
 	wal -Rtn
-	xmodmap -e "keysym Menu = Super_R"
+	#xmodmap -e "keysym Menu = Super_R"
+	exec setxkbmap -layout dk -variant nodeadkeys -option caps:swapescape -option "shift:both_capslock" &
 	source "$HOME/.cache/wal/colors.sh"
 	BORDER_COLOR="$color4"
 	BACKGROUND_COLOR="$color0"
