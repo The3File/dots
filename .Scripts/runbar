@@ -112,12 +112,8 @@ main(){
 	[[ -e "$PANELFIFO" ]] && rm "$PANELFIFO"
 	mkfifo "$PANELFIFO"
 
-	get_config
-	update_all
-	start_while_loop
-
-	wait
+	get_config && update_all && start_while_loop
+	xdo above -t "$(xdo id -N Bspwm -n root)" "$(xdo id -m -a lemonbar)" & wait
 }
 
 main
-#xdo above -t "$(xdo id -N Bspwm -n root)" "$(xdo id -m -a lemonbar)"
