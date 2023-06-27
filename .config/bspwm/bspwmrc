@@ -8,6 +8,7 @@ main(){
 	BORDER_WIDTH="2"
 	WINDOW_GAP="10"
 
+	wal -Rtn
 	xmodmap -e "keysym Menu = Super_R"
 	source "$HOME/.cache/wal/colors.sh"
 	BORDER_COLOR="$color4"
@@ -105,7 +106,7 @@ apps() {
 	_start(){ "$1" "${o[@]}" &>/dev/null & disown || return 1
 	printf '\e[37m%s: %s\n' "$1" "started"; }
 
-	apps=(runbar acpid_events)
+	apps=(runbar acpid_events dunst)
 	
 	for app in "${apps[@]}"
 	do app_is_running="$(ps ax | sed -n "/nvim/d;/sed/d;/\<$app\>/p")"
