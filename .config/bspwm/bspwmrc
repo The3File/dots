@@ -68,13 +68,13 @@ config() {
 autogap_settings() { 
 	# gaps
 	export GAPS=1  # enable or disable automatic gaps
-	export G0=5    # minimum gap size
+	export G0=7    # minimum gap size
 	export GS=7    # gaps size integer
 	export GN=3    # number of windows
 
 	# left and right padding
 	export PADD=1  # enable or disable automatic padding
-	export PS=5    # padding size integer
+	export PS=8    # padding size integer
 	export PN=2    # number of windows
 }
 
