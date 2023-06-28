@@ -13,7 +13,7 @@ get_config(){
 }
 
 parse_all_out(){
-	printf '%s\n' " $W | $K %{r} $H | $R | $V | $L | $N | $B | $D "
+	printf '%s\n' "$W | $K %{r} $H | $R | $V | $L | $N | $B | $D "
 }
 
 print_bar(){
@@ -26,43 +26,19 @@ print_bar(){
 		-f "-xos4-terminus-medium-*-*-*-14-*-*-*-*-*-*-*"
 }
 
-start_while_loop(){
-	start_timed_update
-	start_read_fifo
-}
-
-start_timed_update(){
-	while :; do
-		echo > $PANELFIFO
-		sleep 10
-	done &
-}
-
-start_read_fifo(){
-	while read -u 3 line <& 3; do
-		case $line in
-			ws) ws ;;
-			net) net ;;
-			vol) volume ;;
-			light) light ;;
-			key) keylock ;;
-			*) net; bat; misc ;;
-		esac
-		parse_all_out
-	done < "$PANELFIFO" | print_bar | while read; do eval $REPLY; done &
-	exec 3<&-
-}
-
 ws() {
 	set $(xprop -root _NET_CURRENT_DESKTOP)
 	current_space="$3"
-	spaces=()
+	spaces=(1 2 3 4 5 6 7 8 9 10)
 
 	for ((i=1;i<=10;i++));{
-		case $i in
-			$((current_space+1))) spaces+=("%{F#0c0}$i*%{B-}%{F-}") ;;
-			*) spaces+=($i)
-		esac
+			if ((i==current_space+1)); then
+				spaces[$((i-1))]="%{F#0f0}[$i]%{B-}%{F-}"
+			elif ((i==current_space+2))||((i==10)); then
+				spaces[$((i-1))]="$i"
+			elif ((i>10)); then
+				spaces[$((i-1))i]=" $i"
+			fi
 	}
 
 	export W="${spaces[@]}"
@@ -150,6 +126,33 @@ get_color(){
    [[ $1 -le ${3:-50} ]] && color="%{F#b90}"
    [[ $1 -le ${4:-35} ]] && color="%{F#c60}"
    [[ $1 -le ${5:-15} ]] && color="%{F#f00}"
+}
+
+start_while_loop(){
+	start_timed_update
+	start_read_fifo
+}
+
+start_timed_update(){
+	while :; do
+		echo > $PANELFIFO
+		sleep 10
+	done &
+}
+
+start_read_fifo(){
+	while read -u 3 line <& 3; do
+		case $line in
+			ws) ws ;;
+			net) net ;;
+			vol) volume ;;
+			light) light ;;
+			key) keylock ;;
+			*) net; bat; misc ;;
+		esac
+		parse_all_out
+	done < "$PANELFIFO" | print_bar | while read; do eval $REPLY; done &
+	exec 3<&-
 }
 
 update_all(){ ws; net; light; bat; misc; keylock; volume; }
