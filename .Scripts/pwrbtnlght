@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
 
-b="/sys/devices/platform/thinkpad_acpi/leds/tpacpi::power/brightness"
+dev_pwr="/sys/devices/platform/thinkpad_acpi/leds/tpacpi::power/brightness"
+dev_mcm="/sys/devices/platform/thinkpad_acpi/leds/platform::micmute/brightness"
+
+check_device(){
+	read -rp "chooose device from"$'\n'"1. $dev_pwr"$'\n'"2. $dev_mcm"$'\n'"> "
+	case "$REPLY" in
+		1) b="$dev_pwr" ;;
+		2) b="$dev_mcm" ;;
+	esac
+	toggle
+}
 
 toggle(){
 	read -r state < $b
@@ -13,7 +23,7 @@ toggle(){
 case "$@" in
 	on) s=1; msg="Turn on" ;;
 	off) s=0; msg="Turn off" ;;
-	*) toggle
+	*) check_device
 esac
 
 printf '\e[1;32m%s\n\e[2;39m' "$msg the power button light"
