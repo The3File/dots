@@ -20,6 +20,8 @@ export GAPFIFO="/tmp/gap-fifo"
 export BARFIFO="/tmp/bar-fifo"
 export WORKFIFO="/tmp/work-fifo"
 
+export LOCALHOST="$(ip a | grep 'inet 192' | awk '{print $2}')"
+
 ## < TERMUX
 
 termux_specific(){
