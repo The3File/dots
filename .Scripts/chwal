@@ -19,7 +19,7 @@ sel(){
    backend="$(cat "${next%.*}.backend")"
 	echo $backend
 
-   wal -tqi $next ${l} --backend $backend && echo $next
+   wal -tqi $next ${l} --backend $backend -a 0 && echo $next
    cp $next "$HOME/.config/wall.png"
 
    $CONFIG &>/dev/null
