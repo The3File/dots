@@ -35,9 +35,6 @@ sg      g       # SETGID
 ex             # EXEC
 fi             # FILE
 
-Downloads	
-Documents	
-
 
 # file extensions (vim-devicons)
 *.styl          
