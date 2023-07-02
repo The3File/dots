@@ -8,11 +8,10 @@ main(){
 	BORDER_WIDTH="2"
 	WINDOW_GAP="10"
 
-	wal -Rtn
 	#xmodmap -e "keysym Menu = Super_R"
 	#exec setxkbmap -layout dk -variant nodeadkeys -option caps:swapescape -option "shift:both_capslock" &
 	source "$HOME/.cache/wal/colors.sh"
-	BORDER_COLOR="$color4"
+	BORDER_COLOR="${color4}"
 	BACKGROUND_COLOR="$color0"
 	case $1 in 1|0) reason="$1"; shift; esac
 
@@ -107,7 +106,7 @@ apps() {
 	_start(){ "$1" "${o[@]}" &>/dev/null & disown || return 1
 	printf '\e[37m%s: %s\n' "$1" "started"; }
 
-	apps=(runbar acpid_events dunst)
+	apps=(runbar acpid_events dunst autogap)
 	
 	for app in "${apps[@]}"
 	do app_is_running="$(ps ax | sed -n "/nvim/d;/sed/d;/\<$app\>/p")"
