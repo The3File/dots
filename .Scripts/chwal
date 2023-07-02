@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 
+dir="$HOME/Pictures/favoritter"
+
 usage(){ printf '%s\n' "chwal [-rl] [-f '/path/to/image'" "-r: reload current" "-l: light theme" "-f: add image to rotation"; }
 
 sel(){
    current=$(awk -F/ 'NF>1{print $NF}' $HOME/.cache/wal/wal)
-   files=$(ls $HOME/Billeder/favoritter | sed '/.backend/d')
-   dir="$HOME/Billeder/favoritter"
+   files=$(ls $dir | sed '/.backend/d')
 
    if [[ $r = "1" ]]; then
       next="$dir/$current"
@@ -48,8 +49,8 @@ fav(){
    [[ $backend ]] && {
 		name="${1##*/}"
 		echo $name
-		printf '%s' "$backend" > "$HOME/Billeder/favoritter/${name%.*}.backend"
-   	cp "$1" "$HOME/Billeder/favoritter/${1##*/}"
+		printf '%s' "$backend" > "$dir/${name%.*}.backend"
+   	cp "$1" "$dir/${1##*/}"
 	}
 	exit 0
 }
