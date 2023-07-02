@@ -2,28 +2,29 @@
 
 dir="$HOME/Pictures/favoritter"
 
-usage(){ printf '%s\n' "chwal [-rl] [-f '/path/to/image'" "-r: reload current" "-l: light theme" "-f: add image to rotation"; }
+usage(){ printf '%s\n' "chwal [-rl] [-f '/path/to/image']" "-r: reload current" "-l: light theme" "-f: add image to rotation"; }
 
 sel(){
    current=$(awk -F/ 'NF>1{print $NF}' $HOME/.cache/wal/wal)
    files=$(ls $dir | sed '/.backend/d')
 
-   if [[ $r = "1" ]]; then
-      next="$dir/$current"
-   else
-   [[ $(printf "$files\n" | tail -1) = ${current} ]] ||
-	[[ -z $(echo $files | grep $current) ]] &&
-      next="$dir/$(printf '%s' "$files" | head -1)" ||
-      next="$dir/$(printf '%s' "$files" | awk "/$current/{getline; print}")"
-   fi
+   get_next_fav || next="$dir/$current"
 
    backend="$(cat "${next%.*}.backend")"
-	echo $backend
 
-   wal -tqi $next ${l} --backend $backend -a 0 && echo $next
+   wal -tqi $next ${l} --backend $backend -a 0
+
    cp $next "$HOME/.config/wall.png"
 
    $CONFIG &>/dev/null
+}
+
+get_next_fav(){
+	[[ $r = "1" ]] && return 1
+
+   [[ $(printf "$files\n" | tail -1) = ${current} || -z $(echo $files | grep $current) ]] &&
+      next="$dir/$(printf '%s' "$files" | head -1)" ||
+      next="$dir/$(printf '%s' "$files" | awk "/$current/{getline; print}")"
 }
 
 fav(){
@@ -63,14 +64,7 @@ main(){
 			*) usage; exit 1
 		esac
 	done
-   case $1 in
-         *) sel "$@" ;;
-   esac
-}
-
-get_opts(){
-
-	: ${email:?missing argument \'-m\' or email invalid}
+   sel "$@"
 }
 
 main "$@"
