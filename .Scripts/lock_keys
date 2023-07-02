@@ -17,5 +17,5 @@ notify_change(){
 }
 
 get_current_state
-toggle_keys
+lock_keys_now
 notify_change

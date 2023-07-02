@@ -68,15 +68,11 @@ super + {o,w}
 
 # restart bspwm
 super + shift + r
-   ukill bspwmrc; "$CONFIG"
+   chwal -r
 
 # change toggle wal colorschemes
 super + alt + shift + w
    chwal
-
-# reload wal colorschemes
-super + alt + shift + r
-   chwal -r
 
 # rotate root node
 super + shift + a : {j,k}
@@ -99,6 +95,7 @@ super + Escape
 
 # kill xorg
 super + shift + escape
+	killall xinit
 
 super + alt + shift + q
 	alacritty_bye

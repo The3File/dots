@@ -1,5 +1,16 @@
 #!/bin/bash
 
+trap 'exit_protocol' EXIT
+
+exit_protocol(){
+	for desktop in {1..10}; do
+		for side in left right; do
+			bspc config -d $desktop ${side}_padding 0
+		done
+		bspc config -d $desktop window_gap 10
+	done
+}
+
 main(){
 
 	W=$(bspc query -N -n .local.\!hidden.tiled | wc -l); [ "$W" -le 1 ] && W=1

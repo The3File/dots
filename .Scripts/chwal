@@ -21,16 +21,23 @@ next_fav(){
 get_next_fav(){
 	[[ $r = "1" ]] && return 1
 
-	for file in ${dir}/*; { [[ $file = *.backend ]] || files+=("${file##*/}"); }
-	num_files="$((${#files[@]}-1))"
+	get_files
 
 	for ((i=0;i<=${#files[@]};i++));{
-		[[ ${files[$i]} = $current ]] || continue
-
-		if [[ ${files[$i]} = ${files[$num_files]} ]]
-		then next="$dir/${files[0]}"
-		else next="$dir/${files[$((i+1))]}"; fi
+		[[ "${files[$i]}" = "$current" ]] || continue
+		sel_next_or_first
 	}
+}
+
+get_files(){
+	for file in ${dir}/*; { [[ $file = *.backend ]] || files+=("${file##*/}"); }
+	num_files="$((${#files[@]}-1))"
+}
+
+sel_next_or_first(){
+	if [[ ${files[$i]} = ${files[$num_files]} ]]
+	then next="$dir/${files[0]}"
+	else next="$dir/${files[$((i+1))]}"; fi
 }
 
 change_wal(){
