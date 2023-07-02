@@ -12,7 +12,7 @@ sysmodmap=/etc/X11/xinit/.Xmodmap
 exec xsetroot -solid "#333333" -cursor_name left_ptr &
 exec xset -dpms &
 exec xset s off &
-exec setxkbmap -layout dk -variant nodeadkeys -option caps:swapescape -option "shift:both_capslock" &
+#exec setxkbmap -layout dk -variant nodeadkeys -option caps:swapescape -option "shift:both_capslock" &
 
 # User apps
 exec networkd-dispatcher &
