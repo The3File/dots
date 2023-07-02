@@ -81,7 +81,7 @@ main(){
 			*) usage; exit 1
 		esac
 	done
-   next_fav "$@"
+   next_fav
 }
 
 main "$@"
