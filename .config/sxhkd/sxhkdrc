@@ -232,5 +232,5 @@ super + alt {_,shift +} n
 
 # normal light, day mode
 super + alt {_,shift +} m
-   {xbacklight -time 400 -set 100 && dunstbar -b,\
+   {xbacklight -time 400 -set 100\
    killall redshift && redshift -x -m vidmode}
