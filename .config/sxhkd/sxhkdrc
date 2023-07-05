@@ -44,7 +44,7 @@ super + {p,a}
 
 # program launcher
 super + d
-	dmenu_run -b -nb black -nf white -sf black -sb green -p "apps:"
+	dmenu_drun
 	#dmenu_drun
 	#rofi -show drun
 super + shift + b
