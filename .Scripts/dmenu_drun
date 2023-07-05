@@ -18,10 +18,11 @@ launch(){
 	done
 
 	echo "Launching ${app%\ *}"
-	"${app%\ *}"
+	exec ${app%\ *}
 }
 
-update(){ unset apps
+update(){
+	unset apps
 	files=("/usr/share/applications/*.desktop" "$HOME/.local/share/applications/*.desktop")
 	for file in ${files[@]}; do
 		while read line; do
