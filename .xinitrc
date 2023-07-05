@@ -25,6 +25,6 @@ exec picom -b &
 
 # WM
 exec sxhkd -m 1 &
-#lockscreen nolock &
+lockscreen nolock &
 bspwm
 #dwm
