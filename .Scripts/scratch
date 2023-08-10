@@ -4,8 +4,10 @@ get_id(){ id="$(xdotool search --class $cls)"; }
 toggle(){ bspc node "$id" --flag hidden -f; exit; }
 
 math(){
+	#cas="qalc"
+	cas="sage"
 	cls="scratchmath"; get_id
-	[[ -z "$id" ]] && { $TERMINAL -o "window.position: {x: 1000, y: 700}" -o "window.dimensions: {columns: 86, lines: 14}" --class $cls,$cls -e qalc; } || toggle
+	[[ -z "$id" ]] && { $TERMINAL -o "window.position: {x: 1000, y: 700}" -o "window.dimensions: {columns: 86, lines: 14}" --class $cls,$cls -e $cas; } || toggle
 }
 
 term(){

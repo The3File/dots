@@ -1,5 +1,5 @@
 [Added Associations]
-application/pdf=zathura.desktop;org.gnome.Evince.desktop;
+application/pdf=zathura.desktop
 application/x-compressed-tar=obconf.desktop;
 application/x-raw-disk-image-xz-compressed=org.gnome.FileRoller.desktop;
 application/zip=org.gnome.FileRoller.desktop;
@@ -65,7 +65,7 @@ text/plain=nvim.desktop
 text/x-shellscript=nvim.desktop
 audio/*=mpv.desktop
 text/html=firefox.desktop
-application/pdf=org.gnome.Evince.desktop
+application/pdf=.local/share/applications/zathura.desktop
 inode/directory=lf.desktop
 x-scheme-handler/tg=userapp-Telegram Desktop-9GYFE1.desktop
 x-scheme-handler/msteams=teams.desktop
