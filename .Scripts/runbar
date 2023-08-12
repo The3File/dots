@@ -110,11 +110,13 @@ keylock(){
 misc(){
 	export D="$(date '+%a %d %b %H%M')"
 
-	set $(df -h | grep "/$")
-	export R="/ $4"
-
 	set $(df -h | grep "/home$")
-	export H="~ $4"
+	get_color $((100-${5%\%}))
+	export H="~ ${4} ${color}($5)%{F-}"
+
+	set $(df -h | grep "/$")
+	get_color $((100-${5%\%}))
+	export R="/ ${4} ${color}($5)%{F-}"
 }
 
 start_while_loop(){
@@ -145,11 +147,13 @@ start_read_fifo(){
 }
 
 get_color(){
-   [[ $1 -gt ${2:-75} ]] && color="%{F#0c0}"
-   [[ $1 -le ${2:-75} ]] && color="%{F#5b0}"
-   [[ $1 -le ${3:-50} ]] && color="%{F#b90}"
-   [[ $1 -le ${4:-35} ]] && color="%{F#c60}"
-   [[ $1 -le ${5:-15} ]] && color="%{F#f00}"
+   [[ $1 -gt ${2:-85} ]] && color="%{F#0c0}"
+   [[ $1 -le ${2:-85} ]] && color="%{F#5b0}"
+   [[ $1 -le ${2:-70} ]] && color="%{F#9b0}"
+   [[ $1 -le ${3:-55} ]] && color="%{F#ba0}"
+   [[ $1 -le ${4:-40} ]] && color="%{F#c80}"
+   [[ $1 -le ${4:-25} ]] && color="%{F#d50}"
+   [[ $1 -le ${5:-10} ]] && color="%{F#f00}"
 }
 
 update_all(){ ws; net; light; bat; misc; keylock; volume; }
