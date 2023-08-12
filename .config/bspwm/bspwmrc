@@ -32,6 +32,7 @@ main(){
 	# external settings
 	autogap_settings
 	link_wal
+	for dev in 1 2;{ pwrbtnlght off $dev; }
 
 	# start/restart apps
 	#xinit_rc

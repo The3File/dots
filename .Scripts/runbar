@@ -93,10 +93,10 @@ volume(){
 }
 
 light(){
-	read -r light_file < "/sys/class/backlight/amdgpu_bl0/brightness"
+	read -r light_file < "/sys/class/backlight/amdgpu_bl1/brightness"
 	light="$((light_file*100/255))"
 	get_color $light
-	export L="brightness ${color}${light}%%%{F-}"
+	export L="backlight ${color}${light}%%%{F-}"
 }
 
 keylock(){
