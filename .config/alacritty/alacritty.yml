@@ -354,6 +354,10 @@ key_bindings:
 
   # Print all received window events.
   #print_events: false
+colors:
+  # Default colors
+  primary:
+    background: '#000000'
 
 # Colors (Darcula)
 #colors:
