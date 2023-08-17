@@ -37,6 +37,9 @@ on() {
 off() {
 	bspc config top_padding 0
 	bspc config bottom_padding 0
+	for side in bottom top left right; do
+		bspc config ${side}_padding 0
+	done
 
 	picom -b
 	chwal -r

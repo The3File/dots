@@ -41,6 +41,7 @@ autocmd BufNewFile,BufRead * set noexpandtab
 set tabstop=3
 set shiftwidth=3
 set grepprg=grep\ -nH\ $*
+set nofoldenable
 
 "colorscheme wal
 "colorscheme zellner

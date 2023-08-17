@@ -50,7 +50,7 @@ config() {
 
 	bspc config border_width            "$BORDER_WIDTH"
 	bspc config border_radius           10
-	bspc config window_gap					"$WINDOW_GAP"
+	#bspc config window_gap					"$WINDOW_GAP"
 
 	bspc config gapless_monocle			true
 	bspc config borderless_monocle		true
@@ -163,6 +163,6 @@ main "$@" &&
 	{
 		printf '\e[m\n%s\n' "..all done";
 		dunstify "bspwmrc reloaded" -t 2000 -r 90211 &
-		[[ -e "$GAPFIFO" ]] && echo > $GAPFIFO
+		[[ -e "$GAPFIFO" ]] && { sleep .1; echo > $GAPFIFO; }
 	}
 #  vim: fdm=marker
