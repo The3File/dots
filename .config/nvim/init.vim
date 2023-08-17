@@ -45,8 +45,8 @@ set nofoldenable
 
 "colorscheme wal
 "colorscheme zellner
-"colorscheme default
-colorscheme gruvbox
+colorscheme default
+"colorscheme gruvbox
 "colorscheme delek
 
 "autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown

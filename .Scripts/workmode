@@ -2,6 +2,7 @@
 
 on() {
 	source /home/ringdal/.cache/wal/colors.sh
+	wal --theme base16-isotope
 
 	xsetroot -solid "#000000"
 
@@ -44,7 +45,7 @@ off() {
 	picom -b
 	chwal -r
 
-	"$CONFIG" &>/dev/null
+	#"$CONFIG" &>/dev/null
 	sleep .1
 	echo > "$GAPFIFO" &
 }
