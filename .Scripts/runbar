@@ -165,7 +165,7 @@ mk_fifo(){
 }
 
 main(){
-	trap 'killall lemonbar; bspc config bottom_padding 0; bspc config top_padding 0' EXIT TERM KILL
+	trap 'killall lemonbar; bspc config bottom_padding 26; bspc config top_padding 0' EXIT TERM KILL
 	
 	mk_fifo
 	get_config
