@@ -16,7 +16,7 @@ super + alt + shift + l
 #super + {c,shift + c,b}
 	#dunstbar {-d,-c,-o}
 super + b
-	ukill -g runbar && ukill -k runbar || runbar &disown
+	ukill -g runbar && ( ukill -k runbar; sleep .1; bspc config bottom_padding 1; ) || runbar &disown
 
 # terminal emulator
 super + {_,shift +} {Return}
