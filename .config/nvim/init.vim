@@ -7,7 +7,8 @@ Plug 'rrethy/vim-hexokinase', { 'do': 'make hexokinase' }
 Plug 'junegunn/goyo.vim'
 Plug 'junegunn/limelight.vim'
 Plug 'lervag/vimtex'
-Plug 'dylanaraps/wal.vim'
+"Plug 'dylanaraps/wal.vim'
+Plug 'AlphaTechnolog/pywal.nvim', { 'as': 'pywal' }
 Plug 'gioele/vim-autoswap'
 Plug 'sheerun/vim-polyglot'
 Plug 'neomake/neomake'
@@ -43,9 +44,9 @@ set shiftwidth=3
 set grepprg=grep\ -nH\ $*
 set nofoldenable
 
-"colorscheme wal
+colorscheme pywal
 "colorscheme zellner
-colorscheme default
+"colorscheme default
 "colorscheme gruvbox
 "colorscheme delek
 
