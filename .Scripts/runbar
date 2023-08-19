@@ -13,7 +13,8 @@ get_config(){
 }
 
 parse_all_out(){
-	printf '%s\n' " $W | $K %{r} $H | $R | $V | $L | $N | $B | $D "
+	sep="%{F$color5}||%{F-}"
+	printf '%s\n' " $W $sep $K %{r} $V $L $sep $H $R $sep $N $sep $B $sep $D "
 }
 
 print_bar(){
@@ -33,7 +34,7 @@ ws() {
 
 	for ((i=1;i<=10;i++));{
 		case $i in
-			$((current_space+1))) spaces+=("%{F#0f0}[ $i ]%{F-}%{B-}") ;;
+			$((current_space+1))) spaces+=("%{F$color4}[ $i ]%{F-}%{B-}") ;;
 			*) spaces+=($i)
 		esac
 	}
@@ -77,12 +78,12 @@ net_show(){
 
 bat(){
 	set $(acpi)
-	stat="${3%%,}"
+	state="${3%%,}"
 
-	per="${4%%%,}"
-	get_color $per
+	pct="${4%%%,}"
+	get_color $pct
 
-	export B="${stat,,} ${color}${per}%%%{F-}"
+	export B="${state,,} ${color}${pct}%%%{F-}"
 }
 
 volume(){
@@ -91,22 +92,22 @@ volume(){
 	[[ $mute = true ]] && { v="(${volume}%)"; volume="0";} || v="${volume}%%"
 	get_color $volume
 	[[ volume -gt 100 ]] && color="%{F#F00}"
-	export V="volume ${color}${v}%{F-}"
+	export V="spkr ${color}${v}%{F-}"
 }
 
 light(){
 	read -r light_file < "/sys/class/backlight/amdgpu_bl1/brightness"
 	light="$((light_file*100/255))"
 	get_color $light
-	export L="backlight ${color}${light}%%%{F-}"
+	export L="scrn ${color}${light}%%%{F-}"
 }
 
 keylock(){
 	read -r K < "$HOME/.keylock"
 
-	[[ $K = enable ]] && color="%{F#0c0}" || color="%{F#c00}"
+	[[ $K = enable ]] && color="%{F$color2}" || color="%{F$color1}"
 
-	export K="keyboard ${color}${K}d%{F-}"
+	export K="kbd ${color}${K}d%{F-}"
 }
 
 misc(){
@@ -114,11 +115,11 @@ misc(){
 
 	set $(df -h | grep "/home$")
 	get_color $((100-${5%\%}))
-	export H="~ ${4} ${color}($5)%{F-}"
+	export H="home ${color}${4}%{F-}"
 
 	set $(df -h | grep "/$")
 	get_color $((100-${5%\%}))
-	export R="/ ${4} ${color}($5)%{F-}"
+	export R="root ${color}${4}%{F-}"
 }
 
 start_while_loop(){
