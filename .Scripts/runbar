@@ -76,10 +76,12 @@ net_show(){
 }
 
 bat(){
-	acpi=$(acpi | awk -F', ' 'gsub("Battery 0: ","") {print $1" "$2}')
-	: "${acpi##*\ }"; per="${_%%%}"
-	stat="${acpi%%\ *}"
+	set $(acpi)
+	stat="${3%%,}"
+
+	per="${4%%%,}"
 	get_color $per
+
 	export B="${stat,,} ${color}${per}%%%{F-}"
 }
 
