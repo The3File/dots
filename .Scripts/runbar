@@ -160,7 +160,7 @@ get_color(){
    [[ $1 -le ${5:-10} ]] && color="%{F#f00}"
 }
 
-update_all(){ ws; net; light; bat; misc; keylock; volume; }
+update_all(){ ws; net; light; bat; misc; keylock; volume; ((:;:)); volume; }
 
 mk_fifo(){
 	[[ -e "$PANELFIFO" ]] && rm "$PANELFIFO"
