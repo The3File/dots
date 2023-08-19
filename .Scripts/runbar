@@ -8,7 +8,8 @@ get_config(){
 
 	# colors
 	source "$HOME/.cache/wal/colors.sh"
-	bg="$color0"
+	#bg="$color0"
+	bg="#000000"
 	fg="$color7"
 }
 
