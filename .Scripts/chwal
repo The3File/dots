@@ -1,57 +1,94 @@
 #!/usr/bin/env bash
 
-sel(){
-   current=$(awk -F/ 'NF>1{print $NF}' $HOME/.cache/wal/wal)
-   files=$(ls $HOME/Billeder/favoritter | sed '/.backend/d')
-   dir="$HOME/Billeder/favoritter"
+dir="$HOME/Pictures/favoritter"
+: "$(< .cache/wal/wal)"
+current="${_##*/}"
 
-   if [[ $1 = "-r" ]]; then
-      next="$dir/$current"
-   else
-   [[ $(printf "$files\n" | tail -1) = ${current} || -z $(echo $files | grep $current) ]] &&
-      next="$dir/$(printf '%s' "$files" | head -1)" ||
-      next="$dir/$(printf '%s' "$files" | awk "/$current/{getline; print}")"
-   fi
+usage(){ printf '%s\n' "$1."\
+	"chwal [-rl] [-f '/path/to/image']"\
+	"-r: reload current" "-l: light theme"\
+	"-f: add image to rotation"
+	exit 1
+}
 
+next_fav(){
+   get_next_fav || next="$dir/$current"
    backend="$(cat "${next%.*}.backend")"
+	printf '%s\n' "LAST: $current" "NEXT: ${next##*/}" '' "FAVOTITES:" "${files[@]}"
+	change_wal
+}
 
-   wal -tqi $next --backend $backend
+get_next_fav(){
+	[[ $r = "1" ]] && return 1
+
+	get_files
+
+	for ((i=0;i<=${#files[@]};i++));{
+		[[ "${files[$i]}" = "$current" ]] || continue
+		sel_next_or_first
+	}
+}
+
+get_files(){
+	for file in ${dir}/*; { [[ $file = *.backend ]] || files+=("${file##*/}"); }
+	num_files="$((${#files[@]}-1))"
+}
+
+sel_next_or_first(){
+	if [[ ${files[$i]} = ${files[$num_files]} ]]
+	then next="$dir/${files[0]}"
+	else next="$dir/${files[$((i+1))]}"; fi
+}
+
+change_wal(){
+   wal -tqi $next ${l} --backend $backend -a 0
    cp $next "$HOME/.config/wall.png"
-
    $CONFIG &>/dev/null
 }
 
-fav(){
-   trap 'printf "\n"' EXIT
+add_new_fav(){
+	[[ -f "$1" ]] || usage "Not a valid path"
+	name="${1##*/}"
+	[[ -f $dir/$name ]] && { printf '%s\n' "already in favorites"; exit; }
 
-   printf '\e[H\e[2J\e[1;34m%s\n\e[0;34m%s\n%s\n%s\n%s\n\e[1;32m%s\e[0m'\
-      "backends:"\
-		"w: wal"\
-		"c: colorz"\
-		"h: haishoku"\
-		"t: colorthief"\
-		"choose > "
+	prompt_user_backend
+	case_backend
 
-   read -rs; [[ ! $REPLY ]] && exit
-   case $REPLY in
+	save_new_fav "$1"
+	next="$dir/$name"
+	change_wal
+}
+
+prompt_user_backend(){
+   read -rp $'\e[1;34m'"backends:"$'\n\e[0;34m'"w: wal"$'\n'\
+"c: colorz"$'\n'"h: haishoku"$'\n'"t: colorthief"\
+$'\n\e[1;32m'"choose > "$'\e[0m' b
+}
+
+case_backend(){
+   case $b in
 		w) backend="wal" ;;
 		c) backend="colorz" ;;
       h) backend="haishoku" ;;
 		t) backend="colorthief" ;;
 		*) exit 1
    esac
+}
 
-   [[ $backend ]] && {
-		printf '%s' "$backend" > "$HOME/Billeder/favoritter/${1%.*}.backend"
-   	cp "$1" "$HOME/Billeder/favoritter/${1##*/}"
-	}
+save_new_fav(){
+	printf '%s' "$backend" > "$dir/${name%.*}.backend"
+   cp "$1" "$dir/$name"
 }
 
 main(){
-   case $1 in
-         -f) shift; [[ $1 ]] && fav $1 ;;
-         *) sel "$@" ;;
-   esac
+	while getopts "rlf:" o; do case $o in
+         f) [[ $OPTARG ]] && add_new_fav $OPTARG; exit 0 ;;
+			l) l="-l" ;;
+			r) r="1" ;;
+			*) usage; exit 1
+		esac
+	done
+   next_fav
 }
 
 main "$@"

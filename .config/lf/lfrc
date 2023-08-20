@@ -8,11 +8,16 @@ set previewer ~/.bin/preview
 #set cleaner ~/.config/lf/cleaner
 #set preview!
 set preview
-#set ratios '1:1:9999'
-set ratios '1:2:3'
+#set ratios '1:5555:9999'
+set ratios '1:2:5'
 set relativenumber
-#set drawbox on
+set drawbox on
+set icons true
+
+
+
 #### BINDINGS ####
+
 
 map . set hidden!
 map zr set reverse!
@@ -34,7 +39,7 @@ map r $bulkrename "$fx"
 map S $$SHELL
 
 # trash management
-map D trash
+map D trash $fx
 map tc trash-clear
 map t ;
 map tr !trash-restore
@@ -124,8 +129,8 @@ cmd new-script ${{
 }}
 
 
-map bf change_wal fav
-map bw change_wal sel
+map bf !chwal -f $fx
+map bw change_wal
 map bg $feh --bg-fill $f
 
 cmd change_wal %{{
@@ -139,13 +144,8 @@ cmd change_wal %{{
 		h) backend="haishoku" ;;
 		*) exit
 	esac
-	case $1 in
-		fav) printf '%s' "$backend" >\
-			"$HOME/Billeder/favoritter/${1%.*}.backend"
-   		cp "$fx" "$HOME/Billeder/favoritter/${1##*/}"
-		;;
-		set) wal --backend $backend -i "$fx"
-			. ~/.config/bspwm/bspwmrc config
+	wal --backend $backend -i "$fx"
+	. ~/.config/bspwm/bspwmrc config
 	esac
 }}
 

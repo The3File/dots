@@ -17,7 +17,7 @@ window:
   #
   # Specified in number of columns/lines, not pixels.
   # If both are `0`, this setting is ignored.
-  opacity: 0.94
+  opacity: 0.75
   dimensions:
     columns: 100
     lines: 30
@@ -97,7 +97,7 @@ font:
   bold:
     family: Terminus
     style: Bold
-  size: 12
+  size: 8
 
       # Offset is the extra space around each character. `offset.y` can be thought of
       # as modifying the line spacing, and `offset.x` as modifying the letter spacing.
@@ -112,44 +112,44 @@ font:
     x: 0
     y: 0
 
+  #primary:
+  #  background: '#000000'
+  #  foreground: '#c5c8c6'
 # Colors (Tomorrow Night)
-colors:
-
-  primary:
-    background: '#151515'
-    foreground: '#c5c8c6'
-
-  cursor:
-    text: '#000000'
-    cursor: '#ffffff'
-
-  vi_mode_cursor:
-    text: '#000000'
-    cursor: '#ffffff'
-
-  selection:
-    text: '#eaeaea'
-    background: '#404040'
-
-  normal:
-    black:   '#1d1f21'
-    red:     '#cc6666'
-    green:   '#b5bd68'
-    yellow:  '#f0c674'
-    blue:    '#81a2be'
-    magenta: '#b294bb'
-    cyan:    '#8abeb7'
-    white:   '#c5c8c6'
-
-  bright:
-    black:   '#666666'
-    red:     '#d54e53'
-    green:   '#b9ca4a'
-    yellow:  '#e7c547'
-    blue:    '#7aa6da'
-    magenta: '#c397d8'
-    cyan:    '#70c0b1'
-    white:   '#eaeaea'
+#colors:
+#
+#
+#  cursor:
+#    text: '#000000'
+#    cursor: '#ffffff'
+#
+#  vi_mode_cursor:
+#    text: '#000000'
+#    cursor: '#ffffff'
+#
+#  selection:
+#    text: '#eaeaea'
+#    background: '#404040'
+#
+#  normal:
+#    black:   '#1d1f21'
+#    red:     '#cc6666'
+#    green:   '#b5bd68'
+#    yellow:  '#f0c674'
+#    blue:    '#81a2be'
+#    magenta: '#b294bb'
+#    cyan:    '#8abeb7'
+#    white:   '#c5c8c6'
+#
+#  bright:
+#    black:   '#666666'
+#    red:     '#d54e53'
+#    green:   '#b9ca4a'
+#    yellow:  '#e7c547'
+#    blue:    '#7aa6da'
+#    magenta: '#c397d8'
+#    cyan:    '#70c0b1'
+#    white:   '#eaeaea'
 
 # Background opacity
 window.opacity: 0.6
@@ -354,6 +354,10 @@ key_bindings:
 
   # Print all received window events.
   #print_events: false
+colors:
+  # Default colors
+  primary:
+    background: '#000000'
 
 # Colors (Darcula)
 #colors:
@@ -383,3 +387,6 @@ key_bindings:
 #    magenta: '#ff92d0'
 #    cyan:    '#9aedfe'
 #    white:   '#e6e6e6'
+#
+import:
+  - ~/.cache/wal/colors-alacritty.yml

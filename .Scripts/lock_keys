@@ -1,35 +1,21 @@
 #!/usr/bin/env bash
 
-wayland(){
-	printf '%s\n' "Running Wayland"
-	gsettings set org.gnome.desktop.peripherals.touchpad send-events ${state}d
-	if [[ $state = enable ]]; then
-		killall evtest
-		killall unclutter
-	else
-		unclutter --start-hidden &
-		# Trackpoint
-		evtest --grab /dev/input/event5 &>/dev/null &
-		# Keyboard
-		evtest --grab /dev/input/event4 &>/dev/null &
-	fi
+get_current_state(){
+	[[ $(< "$HOME/.keylock") = "enable" ]] && state="disable" || state="enable"
+	IFS='' devices=("AT Translated Set 2 keyboard" "TPPS/2 Elan TrackPoint" "SYNA0001:00 06CB:CE67 Touchpad")
 }
 
-xorg(){
-	printf '%s\n' "Running Xorg"
-	xinput $state "AT Translated Set 2 keyboard"
-	xinput $state "TPPS/2 IBM TrackPoint"
+lock_keys_now(){
+	for device in ${devices[@]}; do
+		xinput $state $device || break 1
+	done
 }
 
-[[ $(< "$HOME/.keylock") = "enable" ]] && state="disable" || state="enable"
+notify_change(){
+	printf '%s' "$state" > "$HOME/.keylock"
+	echo "key" > "$PANELFIFO"
+}
 
-if [[ $XDG_SESSION_TYPE = wayland ]]; then
-	wayland 
-else
-	xorg
-fi
-
-printf '%s\n' "Keyboard ${state^}d"
-printf '%s' "$state" > "$HOME/.keylock"
-
-echo "key" > "$PANELFIFO"
+get_current_state
+lock_keys_now
+notify_change

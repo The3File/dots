@@ -1,52 +1,18 @@
 #!/usr/bin/env bash
 # the3file
 
-main(){ 
-
-	# "#00ff00"
-	BORDER_COLOR="$color3"
-	BACKGROUND_COLOR="$color0"
-
-	BORDER_WIDTH="1"
-	WINDOW_GAP="10"
-
-	xmodmap -e "keysym Menu = Super_R"
-	source "$HOME/.cache/wal/colors.sh"
-	case $1 in 1|0) reason="$1"; shift; esac
-
-	[[ "$1" ]] && {
-		case "$1" in
-			rules) rules ;;
-			config) config ;;
-			qute) link_wal ;;
-			apps) apps ;;
-		esac || exit 1
-		exit 0
-	}
-
-	# bspwm settings
-	config
-	rules
-
-	# external settings
-	autogap_settings
-	link_wal
-
-	# start/restart apps
-	xinit_rc
-	apps
-}
-
 config() { 
 	printf '\e[33m%s...' "applying configs"
 	bspc monitor -d 1 2 3 4 5 6 7 8 9 10
 
 	bspc config focused_border_color    "$BORDER_COLOR"
 	bspc config presel_feedback_color   "$BORDER_COLOR"
-	bspc config normal_border_color		"$BACKGROUND_COLOR"
+	bspc config normal_border_color		"$color8"
+	#bspc config normal_border_color		"$BACKGROUND_COLOR"
 
 	bspc config border_width            "$BORDER_WIDTH"
-	bspc config window_gap					"$WINDOW_GAP"
+	bspc config border_radius           10
+	#bspc config window_gap					"$WINDOW_GAP"
 
 	bspc config gapless_monocle			true
 	bspc config borderless_monocle		true
@@ -72,7 +38,7 @@ autogap_settings() {
 	# left and right padding
 	export PADD=1  # enable or disable automatic padding
 	export PS=5    # padding size integer
-	export PN=2    # number of windows
+	export PN=3    # number of windows before 0
 }
 
 
@@ -104,7 +70,7 @@ apps() {
 	_start(){ "$1" "${o[@]}" &>/dev/null & disown || return 1
 	printf '\e[37m%s: %s\n' "$1" "started"; }
 
-	apps=(runbar acpid_events)
+	apps=(runbar acpid_events dunst autogap)
 	
 	for app in "${apps[@]}"
 	do app_is_running="$(ps ax | sed -n "/nvim/d;/sed/d;/\<$app\>/p")"
@@ -120,38 +86,43 @@ link_wal(){
 	ln -sf "$HOME/.cache/wal/dunstrc" "$HOME/.config/dunst/dunstrc" &
 	ln -sf "$HOME/.cache/wal/zathurarc" "$HOME/.config/zathura/zathurarc" &
 	printf '\e[36m %s\n' "done"
-
-	#printf '\e[33m%s...' "creating style"
-	#qute="$HOME/.config/qutebrowser"
-	#sassc "$qute/style.scss" > "$qute/style.css"
-	#printf '\e[36m %s\n' "done"
-
-	#printf '\e[33m%s...' "applying colors"
-	#sed 's/{color4}/'$color4'/p;s/{color2}/'$color2'/g;s/{color0}/'$color0'/g'\
-	#   $HOME/.config/wal/qute >\
-	#   $HOME/.config/qutebrowser/config.py
-	#printf '\e[36m %s\n' "done"
-
-	#[[ -z $(pgrep -x qutebrowser) ]] && return
-	#printf '\e[33m%s...' "reloading qutebrowser"
-	#qutebrowser :config-source &>/dev/null
-	#printf '\e[36m %s\n\n' "done"
 }
 
-xinit_rc(){
-	# X settings
-	exec xsetroot -cursor_name left_ptr &
-	exec xset -dpms &
-	exec xset s off &
-	exec setxkbmap -layout dk -variant nodeadkeys -option caps:swapescape -option "shift:both_capslock" &
+main(){ 
 
-	# User apps
-	exec networkd-dispatcher &
-	exec swallow &
-	exec unclutter -idle 3 &
-	exec clipmenud &
-	exec feh --bg-fill $HOME/.config/wall.png &
-	exec sxhkd -m 1 &
+	# "#00ff00"
+
+	BORDER_WIDTH="1"
+	WINDOW_GAP="10"
+
+	#xmodmap -e "keysym Menu = Super_R"
+	#exec setxkbmap -layout dk -variant nodeadkeys -option caps:swapescape -option "shift:both_capslock" &
+	source "$HOME/.cache/wal/colors.sh"
+	BORDER_COLOR="${color4}"
+	BACKGROUND_COLOR="$color0"
+	case $1 in 1|0) reason="$1"; shift; esac
+
+	[[ "$1" ]] && {
+		case "$1" in
+			rules) rules ;;
+			config) config ;;
+			qute) link_wal ;;
+			apps) apps ;;
+		esac || exit 1
+		exit 0
+	}
+
+	# bspwm settings
+	config
+	rules
+
+	# external settings
+	autogap_settings
+	link_wal
+	for dev in 1 2;{ pwrbtnlght off $dev; }
+
+	# start/restart apps
+	apps
 }
 
 # INIT
@@ -159,6 +130,6 @@ main "$@" &&
 	{
 		printf '\e[m\n%s\n' "..all done";
 		dunstify "bspwmrc reloaded" -t 2000 -r 90211 &
-		[[ -e "$GAPFIFO" ]] && echo > $GAPFIFO
+		[[ -e "$GAPFIFO" ]] && { sleep .1; echo > $GAPFIFO; }
 	}
 #  vim: fdm=marker

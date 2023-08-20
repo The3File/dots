@@ -1,20 +1,35 @@
 #!/usr/bin/env bash
 
-b="/sys/devices/platform/thinkpad_acpi/leds/tpacpi::power/brightness"
+dev_pwr="/sys/devices/platform/thinkpad_acpi/leds/tpacpi::power/brightness"
+dev_mcm="/sys/devices/platform/thinkpad_acpi/leds/platform::micmute/brightness"
+
+check_device(){
+	read -rp "chooose device from"$'\n'"1. $dev_pwr"$'\n'"2. $dev_mcm"$'\n'"> "
+	case "$REPLY" in
+		1) b="$dev_pwr" ;;
+		2) b="$dev_mcm" ;;
+	esac
+}
 
 toggle(){
 	read -r state < $b
 	case $state in
-		0) s=1; msg="Turn on" ;;
-		1) s=0; msg="Turn off"
+		0) s=1; msg="Turned on" ;;
+		1) s=0; msg="Turned off"
 	esac
 }
 
-case "$@" in
-	on) s=1; msg="Turn on" ;;
-	off) s=0; msg="Turn off" ;;
+case "$1" in
+	on) s=1; msg="Turned on" ;;
+	off) s=0; msg="Turned off" ;;
 	*) toggle
 esac
 
-printf '\e[1;32m%s\n\e[2;39m' "$msg the power button light"
-echo "$s" | sudo tee "$b" && read -t .2 -p "success"
+case "$2" in
+	1) b="$dev_pwr"; dev="power button" ;;
+	2) b="$dev_mcm"; dev="mic mute" ;;
+	*) check_device
+esac
+
+printf '\e[1;32m%s\e[2;39m' "$msg the $dev light"
+echo "$s" | sudo tee "$b" &>/dev/null && read -t .2 -p " - success"$'\n'

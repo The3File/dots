@@ -7,7 +7,8 @@ Plug 'rrethy/vim-hexokinase', { 'do': 'make hexokinase' }
 Plug 'junegunn/goyo.vim'
 Plug 'junegunn/limelight.vim'
 Plug 'lervag/vimtex'
-Plug 'dylanaraps/wal.vim'
+"Plug 'dylanaraps/wal.vim'
+Plug 'AlphaTechnolog/pywal.nvim', { 'as': 'pywal' }
 Plug 'gioele/vim-autoswap'
 Plug 'sheerun/vim-polyglot'
 Plug 'neomake/neomake'
@@ -17,6 +18,10 @@ Plug 'udalov/kotlin-vim'
 Plug 'itchyny/lightline.vim'
 Plug 'itchyny/vim-gitbranch'
 Plug 'chrisbra/Colorizer'
+Plug 'tanvirtin/monokai.nvim'
+Plug 'ellisonleao/gruvbox.nvim'
+Plug 'xiyaowong/transparent.nvim'
+"Plug 'jamespwilliams/bat.vim'
 "Plug 'gabrielelana/vim-markdown'
 "Plug '<++>'
 call plug#end()
@@ -37,10 +42,12 @@ autocmd BufNewFile,BufRead * set noexpandtab
 set tabstop=3
 set shiftwidth=3
 set grepprg=grep\ -nH\ $*
+set nofoldenable
 
-"colorscheme wal
+colorscheme pywal
 "colorscheme zellner
-colorscheme default
+"colorscheme default
+"colorscheme gruvbox
 "colorscheme delek
 
 "autocmd BufNewFile,BufRead *.{md,mdwn,mkd,mkdn,mark*} set filetype=markdown
