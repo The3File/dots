@@ -32,6 +32,7 @@ alias ec="expressvpn connect"
 alias ed="expressvpn disconnect"
 alias bsp="~/.config/bspwm/bspwmrc"
 alias xr="xrdb ~/.Xresources"
+[[ $(uname -o) = "Android" ]] || alias localip="read -ra ip < <(ip a s wlan0 | grep \'inet \'); echo $ip"
 alias pf="echo;pfetch;echo"
 alias nf="printf '\e[1A\e[K\n'; neofetch | head -41; read -rsp $'\e[?25l'; printf '\e[?25h'"
 
@@ -53,7 +54,6 @@ alias lla="la -l"
 
 
 alias tree="lsd --tree"
-[[ $ANDROID = 1 ]] || alias localip="read -ra ip < <(ip a s wlan0 | grep \'inet \'); echo $ip"
 alias publicip="curl ifconfig.co"
 alias :q="exit"
 alias br="bulkrename"
@@ -67,7 +67,7 @@ alias fr="fastboot reboot"
 alias ff="fastboot flash"
 alias ap="adb push"
 alias arr="adb reboot recovery"
-[[ $ANDROID = 1 ]] || alias sshfon="ssh $(ip r | awk '{getline $1; print $3}') -p 8022 -i '$HOME/.ssh/id_rsa'"
+[[ $(uname -o) = "Android" ]] || alias sshfon="ssh $(ip r | awk '{getline $1; print $3}') -p 8022 -i '$HOME/.ssh/id_rsa'"
 
 # Termux
 alias cdsd="cd $SDCARD"
