@@ -1,5 +1,15 @@
 #!/bin/sh
 
+
+#### GPU ####
+# driver:
+export VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/radeon_icd.x86_64.json
+# anisotropic filtering
+export R600_TEX_ANISO=8
+export RADV_ANISO=8
+export AMD_ANISO=8
+#############
+
 export XDG_CONFIG_HOME="$HOME/.config"
 export USER=$(whoami)
 
@@ -19,6 +29,8 @@ export PANELFIFO="/tmp/panel-fifo"
 export GAPFIFO="/tmp/gap-fifo"
 export BARFIFO="/tmp/bar-fifo"
 export WORKFIFO="/tmp/work-fifo"
+
+export LOCALHOST="$(ip a | grep 'inet 192' | awk '{print $2}')"
 
 ## < TERMUX
 

@@ -1,4 +1,16 @@
-#!/bin/sh
+#!/bin/bash
+
+#trap 'exit_protocol' EXIT
+
+exit_protocol(){
+	for desktop in {1..10}; do
+		for side in left right; do
+			bspc config -d $desktop ${side}_padding 0
+			bspc config -d $desktop ${side}_monocle_padding 0 &
+		done
+		bspc config -d $desktop window_gap 10
+	done
+}
 
 main(){
 
@@ -9,11 +21,12 @@ main(){
 	[ "$G" -le "$((G0))" ] && G="$G0"
 	for s in left right;do
 		bspc config -d focused ${s}_padding "$P" &
+		bspc config -d focused ${s}_monocle_padding 0 &
 	done & bspc config -d focused window_gap "$G"
 }
 
 [[ -e "$GAPFIFO" ]] && rm "$GAPFIFO"
 mkfifo "$GAPFIFO"
-bspc subscribe node_add node_remove desktop_focus > $fifo &
+bspc subscribe node_add node_remove desktop_focus > $GAPFIFO &
 
-while read -r _; do main done < "$GAPFIFO"
+while read -r _; do main; done < "$GAPFIFO"

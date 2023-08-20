@@ -16,7 +16,7 @@ super + alt + shift + l
 #super + {c,shift + c,b}
 	#dunstbar {-d,-c,-o}
 super + b
-	ukill -g runbar && ukill -k runbar || runbar &disown
+	ukill -g runbar && ( ukill -k runbar; sleep .1; bspc config bottom_padding 1; ) || runbar &disown
 
 # terminal emulator
 super + {_,shift +} {Return}
@@ -44,7 +44,7 @@ super + {p,a}
 
 # program launcher
 super + d
-	dmenu_run -b -nb black -nf white -sf black -sb green -fn "ypn envypn:size=13" -p "apps:"
+	dmenu_drun
 	#dmenu_drun
 	#rofi -show drun
 super + shift + b
@@ -64,19 +64,15 @@ super + i
 
 # browser
 super + {o,w}
-	{qutebrowser, chromium}
+	{qutebrowser, firefox}
 
 # restart bspwm
 super + shift + r
-   ukill bspwmrc; "$CONFIG"
+   chwal -r
 
 # change toggle wal colorschemes
 super + alt + shift + w
    chwal
-
-# reload wal colorschemes
-super + alt + shift + r
-   chwal -r
 
 # rotate root node
 super + shift + a : {j,k}
@@ -99,6 +95,7 @@ super + Escape
 
 # kill xorg
 super + shift + escape
+	killall xinit
 
 super + alt + shift + q
 	alacritty_bye
@@ -214,7 +211,7 @@ alt + ctrl + {h,j,k,l}
 
 # LIGHT | BRIGHTNESS
 XF86MonBrightness{Up,Down}
-   sudo xbacklight -time 100 -{inc,dec} 5;((;:;)); echo light > $PANELFIFO
+   sudo light -{A,U} 5;((;:;)); echo light > $PANELFIFO
 
 # SOUND
 {_,super + } XF86Audio{Raise,Lower}Volume
@@ -226,7 +223,7 @@ XF86AudioMute
 
 # mute mic
 XF86AudioMicMute
-	pamixer --source alsa_input.pci-0000_00_1b.0.analog-stereo --get-mute && m=u || m=m; pamixer --source alsa_input.pci-0000_00_1b.0.analog-stereo -$m
+	pamixer --source alsa_input.pci-0000_05_00.6.HiFi__hw_acp__source --get-mute && m=u || m=m; pamixer --source alsa_input.pci-0000_05_00.6.HiFi__hw_acp__source -$m
 
 # dark light, night mode
 super + alt {_,shift +} n
@@ -235,5 +232,5 @@ super + alt {_,shift +} n
 
 # normal light, day mode
 super + alt {_,shift +} m
-   {xbacklight -time 400 -set 100 && dunstbar -b,\
+   {xbacklight -time 400 -set 100\
    killall redshift && redshift -x -m vidmode}

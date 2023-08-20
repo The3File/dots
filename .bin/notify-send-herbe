@@ -76,6 +76,6 @@ parse() {
   exit 1
 }
 
-parse "$@"
-eval set -- "$REST"
-herbe "$@" &
+#parse "$@"
+#eval set -- "$REST"
+#herbe "$@" &

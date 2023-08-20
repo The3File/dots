@@ -17,7 +17,7 @@ print_files(){
 
 fz(){
    fzf --ansi -0 -1 -q "$query" --preview\
-   "bat -l bash --theme='OneHalfDark'\
+   "bat -l bash --theme='gruvbox-dark'\
    --style=numbers,changes --color always $HOME/{}"
 }
 
