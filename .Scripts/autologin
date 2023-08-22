@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+if [ -f /run/user/1000/tty1started ]; then
+	/usr/bin/agetty --noclear tty1 $TERM 
+else
+	touch /run/user/1000/tty1started
+	/sbin/agetty -o '-p -f -- \\u' --noclear --autologin ringdal %I $TERM
+fi

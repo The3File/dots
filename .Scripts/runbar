@@ -55,7 +55,7 @@ net(){
 
 parse_net_out(){
 	get_color "$signal" "-20" "-40" "-55" "-60"
-	net="${ssid[1],,} ${color}${signal[1]} ${signal[2]}%{F-} [${ip[1]}]"
+	net="${ssid[1],,}: ${color}${signal[1]} ${signal[2]}%{F-} [${ip[1]}]"
 }
 
 get_net_ip(){
@@ -79,19 +79,19 @@ net_show(){
 
 bat(){
 	set $(acpi)
-	state="${3%%,}"
+	state="${3%%,*}"
 
-	pct="${4%%%,}"
+	pct="${4%%%,*}"
 	get_color $pct
 
-	export B="${state,,} ${color}${pct}%%%{F-}"
+	export B="${state,,}: ${color}${pct}%%%{F-}"
 }
 
 get_audio_sink(){
 	while read -r line; do
 		[[ $line =~ "Default Sink:" ]] || continue
-		[[ $line =~ "bluez" ]] && echo "blth" || echo "spkr"
-		#set $line; echo "${3%%.*}"
+		#[[ $line =~ "bluez" ]] && echo "blth" || echo "spkr"
+		set $line; echo "${3%%.*}"
 		break
 	done < <(pactl info)
 }
@@ -107,14 +107,14 @@ volume(){
 	get_color $volume
 	[[ volume -gt 100 ]] && color="%{F#F00}"
 
-	export V="$sink ${color}${v}%{F-}"
+	export V="$sink: ${color}${v}%{F-}"
 }
 
 light(){
 	read -r light_file < "/sys/class/backlight/amdgpu_bl1/brightness"
 	light="$((light_file*100/255))"
 	get_color $light
-	export L="scrn ${color}${light}%%%{F-}"
+	export L="scrn: ${color}${light}%%%{F-}"
 }
 
 keylock(){
@@ -122,7 +122,7 @@ keylock(){
 
 	[[ $K = enable ]] && color="%{F$color2}" || color="%{F$color1}"
 
-	export K="kbd ${color}${K}d%{F-}"
+	export K="kbd: ${color}${K}d%{F-}"
 }
 
 misc(){
@@ -130,11 +130,11 @@ misc(){
 
 	set $(df -h | grep "/home$")
 	get_color $((100-${5%\%}))
-	export H="home ${color}${4}%{F-}"
+	export H="home: ${color}${4}%{F-}"
 
 	set $(df -h | grep "/$")
 	get_color $((100-${5%\%}))
-	export R="root ${color}${4}%{F-}"
+	export R="root: ${color}${4}%{F-}"
 }
 
 start_while_loop(){

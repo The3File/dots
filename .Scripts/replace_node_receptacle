@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+bspc node 'focused.!fullscreen.!floating.window' -p east -i && bspc node 'focused.!fullscreen.!floating' -k
