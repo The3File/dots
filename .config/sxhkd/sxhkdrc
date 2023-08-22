@@ -87,9 +87,13 @@ super + shift + a ; e
 
 ## RECEPTACLES
 
-# create, or replace node with, receptacle
-super + n ; {r, shift + r}
+# create receptacle
+super + n ; r
 	bspc node -i {_,-c}
+
+# replace node with receptacle
+super +n ; shift + r
+	replace_node_receptacle
 
 # remove first local receptacle
 super + n ; q
@@ -169,8 +173,12 @@ super + {t,shift + t,shift + space,f}
    bspc node -t ~{tiled,pseudo_tiled,floating,fullscreen}
 
 # set the node flags
-super + ctrl + {m,q,s,p}
-   bspc node -g {marked,locked,sticky,private}
+super + ctrl + {q,s,p}
+   bspc node -g {locked,sticky,private}
+
+# marked
+super + m
+	bspc node -g marked
 
 ###############
 # move/resize #
