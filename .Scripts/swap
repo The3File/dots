@@ -1,9 +1,21 @@
 #!/usr/bin/env bash
 
 main(){
-	if [[ "$biggest" = "$focused" ]]
-	then get_smaller
-	else move_biggest; fi
+	marked="$(bspc query -N -n 'newest.marked')"
+	focused="$(bspc query -N -n 'focused')"
+	if [[ ! -z $marked ]]; then
+		focused_to_marked
+	else
+		if [[ "$biggest" = "$focused" ]]
+		then get_smaller
+		else move_biggest; fi
+	fi
+}
+
+focused_to_marked(){
+	bspc node -s "$marked" -b "$focused" --follow
+	bspc node "$marked" -g marked
+	dunstify "moved $marked to $focused"
 }
 
 read_leafs(){
