@@ -89,7 +89,7 @@ super + shift + a ; e
 
 # create receptacle
 super + n ; r
-	bspc node -i {_,-c}
+	bspc node -i
 
 # replace node with receptacle
 super +n ; shift + r

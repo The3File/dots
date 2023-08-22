@@ -5,4 +5,4 @@ nodes=$(bspc query -N -n any.local.hidden)
 for i in "${nodes[@]}"; do
    bspc node "${i}" --flag hidden=off
 done
-echo > $GAPFIFO
+echo > $GAPFIFO &
