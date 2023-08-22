@@ -95,11 +95,6 @@ super + n ; {r, shift + r}
 super + n ; q
 	bspc node 'any.leaf.!window.local' -k
 
-# yank marked or focused to receptacle or preselect
-super + n ; y
-	yank_node
-
-
 #super + x
    #env XSECURELOCK_PASSWORD_PROMPT=time_hex xsecurelock -- systemctl suspend
    #xsecurelock & ((;:;)); systemctl suspend
@@ -127,17 +122,17 @@ super + {_,shift + }q
 super + End
    bspc desktop -l next
 
-# send the newest marked node to the newest preselected node
+##############
+# focus/swap #
+##############
+
+# yank marked or focused to receptacle or preselect
 super + y
-   bspc node newest.marked.local -n newest.!automatic.local
+	yank_node
 
 # swap biggest and last node
 super + space
    swap
-
-##############
-# focus/swap #
-##############
 
 # focus the node in the given direction
 super + {_,shift + }{h,j,k,l}
