@@ -36,7 +36,6 @@ shopt -s histappend
 
 export HISTSIZE=500000
 export HISTFILESIZE=100000
-#HISTCONTROL="erasedups:ignoreboth"
 export HISTCONTROL=ignoreboth:erasedups
 export HISTIGNORE="&:[ ]*:exit:ls:bg:fg:history:history -r:clear:c:ll:lla:la:reverse_fzf_history:fuzzy_cd:fuzzy_kill"
 #read -r tac "$HISTFILE" | awk '!x[$0]++' > /tmp/tmpfile  && f $(< "$hist")
