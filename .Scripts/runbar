@@ -87,13 +87,27 @@ bat(){
 	export B="${state,,} ${color}${pct}%%%{F-}"
 }
 
+get_audio_sink(){
+	while read -r line; do
+		[[ $line =~ "Default Sink:" ]] || continue
+		[[ $line =~ "bluez" ]] && echo "blth" || echo "spkr"
+		#set $line; echo "${3%%.*}"
+		break
+	done < <(pactl info)
+}
+
 volume(){
 	volume="$(pamixer --get-volume)"
 	mute="$(pamixer --get-mute)"
+
+	sink=$(get_audio_sink)
+
 	[[ $mute = true ]] && { v="(${volume}%)"; volume="0";} || v="${volume}%%"
+
 	get_color $volume
 	[[ volume -gt 100 ]] && color="%{F#F00}"
-	export V="spkr ${color}${v}%{F-}"
+
+	export V="$sink ${color}${v}%{F-}"
 }
 
 light(){
