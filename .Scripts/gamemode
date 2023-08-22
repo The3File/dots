@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+exit_message(){ echo $1; exit; }
+
+[[ $DISPLAY ]] && exit_message "\$DISPLAY is set. Aborting"
+
+killall xinit
+gamemoded -r &
+gamescope -e -- steam -gamepadui
