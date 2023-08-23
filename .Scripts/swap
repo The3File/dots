@@ -18,16 +18,6 @@ focused_to_marked(){
 	dunstify "moved $marked to $focused"
 }
 
-read_leafs(){
-	IFS=$'\n' read -r -d '' -a leafs <\
-	<(bspc query -N -n .leaf.local.!hidden.tiled)
-}
-
-query_nodes(){
-	focused="$(bspc query -N -n focused.local.!hidden.window)"
-	biggest="$(bspc query -N -n biggest.local.!hidden.window)"
-}
-
 get_smaller(){
 	bspc node -s "${leafs[1]}"
 	bspc node -f biggest.local.!hidden
@@ -36,6 +26,17 @@ get_smaller(){
 move_biggest(){
 	bspc node -n biggest.local.!hidden -s "${leafs[1]}"
 	bspc node -s biggest.local.!hidden --follow
+}
+
+
+query_nodes(){
+	focused="$(bspc query -N -n focused.local.!hidden.window)"
+	biggest="$(bspc query -N -n biggest.local.!hidden.window)"
+}
+
+read_leafs(){
+	IFS=$'\n' read -r -d '' -a leafs <\
+	<(bspc query -N -n .leaf.local.!hidden.tiled)
 }
 
 read_leafs

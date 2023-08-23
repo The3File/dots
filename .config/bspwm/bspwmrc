@@ -37,8 +37,8 @@ autogap_settings() {
 
 	# left and right padding
 	export PADD=1  # enable or disable automatic padding
-	export PS=5    # padding size integer
-	export PN=3    # number of windows before 0
+	export PS=7    # padding size integer
+	export PN=2    # number of windows before 0
 }
 
 

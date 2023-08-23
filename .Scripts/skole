@@ -16,7 +16,7 @@ edit(){
 
 delete(){
 	select_note delete
-	read -rp "delete "$note"? [y/N] " r
+	read -rp "delete $note? [y/N] " r
 	[[ $r =~ y|Y ]] && rm "$note"
 }
 
@@ -33,28 +33,36 @@ show(){
 }
 
 new(){
+	get_new_name || exit 1
 	prep_tmp
-	get_new_name
-	editor $tmp
-	get_new_name
-	check_file_changed && mv_tmp || rm $tmp
+	editor $new_name
+	check_file_changed || { rm "$new_name"; printf '%s\n' "deleted unchanged"; }
 }
 
 get_new_name(){
 	tree -C
-	[[ $new_name ]] && return 1
-	read -rep "new name: "
-	new_name="${REPLY%.tex}"
+	read -rep "new name: " || return 1
+	[[ -a $REPLY ]] && { echo exists; exit 1; }
+	[[ ${REPLY} =~ .*/.* ]] && { dir=${REPLY%/*}; cd $working_dir/$dir; }
+	new_name="${REPLY##*/}"
+	new_name="${new_name%.tex}.tex"
+	read -p "$(echo "create ${new_name}" in $(pwd))"
+}
+
+print_template(){
+	while read -r line; do
+		[[ $line =~ "<-->" ]] &&
+			printf '%s\n' "${line//<-->/${new_name%.tex}}" || echo "$line"
+	done < "$working_dir/template.tex"
 }
 
 prep_tmp(){
-	tmp="$(mktemp)"
-	cp "$working_dir/template.tex" $tmp
-	first_modify="$(stat -c %Y $tmp)"
+	print_template >> "$new_name"
+	first_modify="$(stat -c %Y $new_name)"
 }
 
 check_file_changed(){
-	current_modify="$(stat -c "%Y" $tmp)"
+	current_modify="$(stat -c "%Y" $new_name)"
 	((first_modify<current_modify)) || return 1
 }
 
@@ -85,7 +93,7 @@ print_tags(){
 
 print_notes(){
 	IFS=$'\n' read -rd '' -a notes < <(
-		fd -c always ".tex" $working_dir
+		fd -c always "\.tex" $working_dir
 	)
 	printf '%s\n' "${notes[@]#*${working_dir##*/}/}"
 }
@@ -102,7 +110,7 @@ select_note(){
 
 get_opts(){
 	q="$2"
-	opt=$(print_opts | fz --prompt="math > " -0 -1 -q "$1")
+	opt=$(print_opts | fz --prompt="$class > " -0 -1 -q "$1")
 	[[ $opt ]] || exit
 }
 
