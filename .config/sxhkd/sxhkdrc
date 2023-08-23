@@ -9,9 +9,6 @@ alt + shift + Pause
 # wm independent hotkeys #
 ##########################
 
-super + alt + shift + l
-	lock_keys
-
 # bar replacement
 #super + {c,shift + c,b}
 	#dunstbar {-d,-c,-o}
@@ -138,7 +135,7 @@ super + y
 super + space
    swap
 
-# focus the node in the given direction
+# focus or swap the node in the given direction
 super + {_,shift + }{h,j,k,l}
    bspc node -{f,s} {west,south,north,east}
 
