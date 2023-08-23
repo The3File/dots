@@ -1,0 +1,120 @@
+#!/usr/bin/env bash
+
+fz(){ fzf -m --ansi --height 40% --reverse "$@";}
+
+editor(){ nvim +"set ft=tex" "$@";}
+
+query_move(){
+	[[ $2 =~ / ]] && mkdir -p ${2%/*}
+	mv -vi "$1" "$2"
+}
+
+edit(){
+	select_note edit
+	editor "$note"
+}
+
+delete(){
+	select_note delete
+	read -rp "delete "$note"? [y/N] " r
+	[[ $r =~ y|Y ]] && rm "$note"
+}
+
+move(){
+	select_note move
+	get_new_name
+	query_move "$note" "${new_name}.tex"
+}
+
+show(){
+	printf '\e[1m%s\n\e[m%s\n'\
+		"entering subshell..." "ctrl+d to return"
+	exec $SHELL
+}
+
+new(){
+	prep_tmp
+	get_new_name
+	editor $tmp
+	get_new_name
+	check_file_changed && mv_tmp || rm $tmp
+}
+
+get_new_name(){
+	tree -C
+	[[ $new_name ]] && return 1
+	read -rep "new name: "
+	new_name="${REPLY%.tex}"
+}
+
+prep_tmp(){
+	tmp="$(mktemp)"
+	cp "$working_dir/template.tex" $tmp
+	first_modify="$(stat -c %Y $tmp)"
+}
+
+check_file_changed(){
+	current_modify="$(stat -c "%Y" $tmp)"
+	((first_modify<current_modify)) || return 1
+}
+
+mv_tmp(){
+	default="note_$(date '+%d-%m_%H%M')"
+	query_move "$tmp" "${new_name:-$default}.tex"
+}
+
+sync(){
+	status=$(git status --porcelain)
+	[[ -z "$status" ]] && pull || push
+}
+
+push(){
+	git add .; git commit -m "$status"
+	git push -u origin master
+}
+
+pull(){
+	printf '%s\n' "No changes, checking remote.."
+	git pull
+}
+
+print_tags(){
+	printf '\n\n%s\n%s' "[//]: # ($(date -Iseconds))"\
+		"[//]: # (tags: [<++>])"
+}
+
+print_notes(){
+	IFS=$'\n' read -rd '' -a notes < <(
+		fd -c always ".tex" $working_dir
+	)
+	printf '%s\n' "${notes[@]#*${working_dir##*/}/}"
+}
+
+print_opts(){
+	opts=("new" "sync" "edit" "delete" "move" "show")
+	printf '%s\n' "${opts[@]}"
+}
+
+select_note(){
+	note="$(print_notes | fz --prompt="$1 > " -q "$q")"
+	[[ -z "$note" ]] && exit 0
+}
+
+get_opts(){
+	q="$2"
+	opt=$(print_opts | fz --prompt="math > " -0 -1 -q "$1")
+	[[ $opt ]] || exit
+}
+
+main(){
+	class="$(printf '%s\n' "math" "history" | fz --prompt="$1 > " -1 -q "$1")"
+	case $class in
+		math) working_dir="$SKOLE/matematik"; shift 1 ;;
+		history) working_dir="$SKOLE/historie"; shift 1 ;;
+	esac
+	[[ "$working_dir" ]] && cd "$working_dir" || exit
+	get_opts "$@"
+	eval "$opt"
+}
+
+main "$@"
