@@ -70,7 +70,7 @@ apps() {
 	_start(){ "$1" "${o[@]}" &>/dev/null & disown || return 1
 	printf '\e[37m%s: %s\n' "$1" "started"; }
 
-	apps=(runbar acpid_events dunst autogap)
+	apps=(runbar acpid_events dunst autogap swallow)
 	
 	for app in "${apps[@]}"
 	do app_is_running="$(ps ax | sed -n "/nvim/d;/sed/d;/\<$app\>/p")"
