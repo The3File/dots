@@ -47,7 +47,7 @@ off() {
 	bspc config single_monocle false
 
 	picom -b
-	chwal -r
+	chwal -r &>/dev/null
 
 	#"$CONFIG" &>/dev/null
 	sleep .1
