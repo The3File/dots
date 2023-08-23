@@ -1,13 +1,10 @@
 #!/usr/bin/env bash
 
 on() {
-	wal --theme base16-isotope
+	wal -a 0 --theme base16-isotope
 	source /home/ringdal/.cache/wal/colors.sh
 
 	xsetroot -solid "#000000"
-
-	pkill picom
-	ukill -k autogap
 
 	for i in {1..10}; do
 		bspc config -d $i left_padding 0
@@ -24,13 +21,17 @@ on() {
 	bspc config split_ratio 0.6
 	bspc config single_monocle true
 
-	border=1
+	border=2
 	bspc config window_gap -$border
 	bspc config border_radius $border
 	bspc config border_width $border
 	for side in top left right; do
 		bspc config ${side}_padding $border
 	done
+
+	pkill picom
+	ukill -k autogap &>/dev/null
+	ukill -k runbar &>/dev/null && runbar &>/dev/null & disown
 	#bspc config bottom_padding $border
 
 	#$CONFIG qute
