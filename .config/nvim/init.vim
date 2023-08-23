@@ -76,7 +76,7 @@ autocmd FileType sh inoremap ;e printf '' "<++>"<ESC>F'i
 
 autocmd FileType tex nnoremap mp :w<ENTER>:! mdtopdf -t %<CR><CR>
 autocmd FileType tex nnoremap mo :! mdtopdf -o %<CR><CR>
-autocmd FileType tex nnoremap ;S i\section{}<CR><++><ESC>kf}i
+autocmd FileType tex nnoremap ;S i\section{}<CR>
 autocmd FileType tex nnoremap ;s i\subsection{}<ENTER><ENTER><++><ESC>2kf}i
 autocmd FileType tex inoremap ;i <ESC>o\item<Space>
 autocmd FileType tex nnoremap ;i <ESC>\item<Space>
