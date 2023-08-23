@@ -40,6 +40,7 @@ query_swallowing(){
 hide_node(){
 	bspc node "$last_node" --flag hidden=on
 	swallowed+=("$new_node $last_node")
+	echo > $GAPFIFO &
 }
 
 spit() {
@@ -71,6 +72,7 @@ show_node(){
 	bspc node "$node_spit" --flag hidden=off
 	bspc node "$node_spit" -f
 	unset 'swallowed[spit]'
+	echo > $GAPFIFO &
 }
 
 get_defaults(){
