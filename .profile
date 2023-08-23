@@ -22,7 +22,7 @@ export BROWSER="qutebrowser"
 
 export CONFIG="$HOME/.config/bspwm/bspwmrc"
 export NOTES="$HOME/Documents/Arbejde"
-export SKOLE="$HOME/documents/Skole"
+export SKOLE="$HOME/Documents/Arbejde/HF"
 export BUDGET_FILE="$HOME/Dokumenter/budget.tab"
 
 export PANELFIFO="/tmp/panel-fifo"
