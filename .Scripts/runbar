@@ -8,8 +8,7 @@ get_config(){
 
 	# colors
 	source "$HOME/.cache/wal/colors.sh"
-	#bg="$color0"
-	bg="#000000"
+	bg="#000000" # bg="$color0"
 	fg="$color7"
 }
 
@@ -78,20 +77,21 @@ net_show(){
 }
 
 bat(){
-	set $(acpi)
-	state="${3%%,*}"
+	BAT0="/sys/class/power_supply/BAT0"
 
-	pct="${4%%%,*}"
-	get_color $pct
+	read -r status < ${BAT0}/status
+	read -r capacity < ${BAT0}/capacity
 
-	export B="${state,,}: ${color}${pct}%%%{F-}"
+	get_color $capacity
+
+	export B="${status,,}: ${color}${capacity}%%%{F-}"
 }
 
 get_audio_sink(){
 	while read -r line; do
 		[[ $line =~ "Default Sink:" ]] || continue
-		#[[ $line =~ "bluez" ]] && echo "blth" || echo "spkr"
-		set $line; echo "${3%%.*}"
+		[[ $line =~ "bluez" ]] && echo "blth" || echo "spkr"
+		#set $line; echo "${3%%.*}"
 		break
 	done < <(pactl info)
 }
@@ -126,7 +126,8 @@ keylock(){
 }
 
 misc(){
-	export D="$(date '+%a %d %b %H%M')"
+	: "$(date '+%a %d %b %H%M')"
+	export D="${_,,}"
 
 	set $(df -h | grep "/home$")
 	get_color $((100-${5%\%}))
