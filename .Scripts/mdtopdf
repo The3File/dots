@@ -19,7 +19,7 @@ tex(){
       pdflatex -shell-escape "$1" 1>/dev/null
    fi
 
-   clean=( gnuploterrors log aux )
+   clean=( gnuploterrors log )
 
    for ext in "${clean[@]}"; do
       [[ -f "${1%.*}.$ext" ]] && rm "${1%.*}.$ext"
