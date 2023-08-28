@@ -127,6 +127,10 @@ super + End
 # focus/swap #
 ##############
 
+# spit hidden nodes
+super + shift + s
+	spit
+
 # yank marked or focused to receptacle or preselect
 super + y
 	yank_node
