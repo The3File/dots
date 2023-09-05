@@ -21,6 +21,7 @@ alias x="extract"
 alias spe="speedtest-cli"
 alias vim="nvim"
 alias nts="notes"
+alias skl="skole"
 alias s="svim"
 
 ## QOL
