@@ -15,7 +15,7 @@ main(){
 focused_to_marked(){
 	bspc node -s "$marked" -b "$focused" --follow
 	bspc node "$marked" -g marked
-	dunstify "moved $marked to $focused"
+	dunstify "swapped $marked with $focused"
 }
 
 get_smaller(){
