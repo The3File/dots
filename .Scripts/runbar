@@ -127,7 +127,7 @@ keylock(){
 
 misc(){
 	: "$(date '+%a %d %b %H%M')"
-	export D="${_,,}"
+	export D="%{A:date_show:}${_,,}%{A}"
 
 	set $(df -h | grep "/home$")
 	get_color $((100-${5%\%}))
@@ -136,6 +136,12 @@ misc(){
 	set $(df -h | grep "/$")
 	get_color $((100-${5%\%}))
 	export R="root: ${color}${4}%{F-}"
+}
+
+date_show(){
+	alacritty\
+		-o "window.position: {x: 1620, y: 820}" -o "window.dimensions: {columns: 24, lines: 9}"\
+		--class float -e bash -c "cal -mw; read -rsn1"
 }
 
 start_while_loop(){
