@@ -197,7 +197,8 @@ main(){
 	update_all
 	start_while_loop
 
-	xdo above -t "$(xdo id -N Bspwm -n root)" "$(xdo id -m -a lemonbar)" & wait
+	#xdo above -t "$(xdo id -N Bspwm -n root)" "$(xdo id -m -a lemonbar)" &
+	wait
 }
 
 main
