@@ -11,7 +11,8 @@ query_move(){
 
 edit(){
 	select_note edit
-	editor "$note"
+	cd "${note%/*}"
+	editor "${note##*/}"
 }
 
 delete(){

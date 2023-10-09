@@ -75,6 +75,7 @@ autocmd FileType sh inoremap ;e printf '' "<++>"<ESC>F'i
 " LATEX
 
 autocmd FileType tex nnoremap mp :w<ENTER>:! mdtopdf -t %<CR><CR>
+autocmd FileType tex nnoremap md :w<ENTER>:! mdtopdf -d %<CR><CR>
 autocmd FileType tex nnoremap mo :! mdtopdf -o %<CR><CR>
 autocmd FileType tex nnoremap ;S i\section{}<CR>
 autocmd FileType tex nnoremap ;s i\subsection{}<ENTER><ENTER><++><ESC>2kf}i
@@ -89,6 +90,7 @@ autocmd FileType tex inoremap ;r \ref{}<++><ESC>T{i
 autocmd FileType tex inoremap ;m \[\]<ESC>hi
 autocmd FileType tex inoremap $$ $$<++><ESC>F$i
 autocmd FileType tex inoremap __ _{}<++><ESC>F}i
+autocmd FileType tex inoremap ;lr \Leftrightarrow
 autocmd FileType tex inoremap ;e \begin{equation}<ESC>o\end{equation}<ESC>O\label{eq:<++>}<ESC>o
 autocmd FileType tex inoremap ;E \begin{align}<ESC>o\end{align}<ESC>O\label{eq:<++>}<ESC>o
 autocmd FileType tex inoremap ;a \begin{align*}<ESC>o\end{align*}<ESC>O
