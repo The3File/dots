@@ -84,6 +84,7 @@ autocmd FileType tex nnoremap ;i <ESC>\item<Space>
 autocmd FileType tex nnoremap ;b i\begin{}<Enter>\end{}<ESC>kf}i
 autocmd FileType tex nnoremap ;e i\begin{enumerate}<Enter>\item <++><ENTER>\end{enumerate}<ESC>2k0f=a
 autocmd FileType tex nnoremap ;a i\begin{enumerate}[label=\textbf{\alph*)}]<Enter>\end{enumerate}<ESC>O\item 
+autocmd FileType tex nnoremap ;i i\begin{itemize}<Enter>\end{itemize}<ESC>O\item 
 autocmd FileType tex nnoremap ;t i\begin{table}[h]<Enter>\centering<Enter>\setlength{\tabcolsep}{1.0em}<CR>\renewcommand{\arraystretch}{1.5}<CR>\begin{tabular}{}<Enter>\end{tabular}<Enter>\end{table}<ESC>
 autocmd FileType tex inoremap ;r \ref{}<++><ESC>T{i
 
