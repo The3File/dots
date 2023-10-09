@@ -74,18 +74,18 @@ autocmd FileType sh inoremap ;e printf '' "<++>"<ESC>F'i
 
 " LATEX
 
-autocmd FileType tex nnoremap mp :w<ENTER>:! mdtopdf -t %<CR><CR>
-autocmd FileType tex nnoremap md :w<ENTER>:! mdtopdf -d %<CR><CR>
+autocmd FileType tex nnoremap mp :w<CR>:! mdtopdf -t %<CR>
+"autocmd FileType tex nnoremap mp :w<CR>:! pdflatex -shell-escape %<CR>
+autocmd FileType tex nnoremap md :w<CR>:! mdtopdf -d %<CR><CR>
 autocmd FileType tex nnoremap mo :! mdtopdf -o %<CR><CR>
-autocmd FileType tex nnoremap ;S i\section{}<CR>
-autocmd FileType tex nnoremap ;s i\subsection{}<ENTER><ENTER><++><ESC>2kf}i
+autocmd FileType tex nnoremap ;S i\section{}<CR><CR><++><ESC>2kf}i
+autocmd FileType tex nnoremap ;s i\subsection{}<CR><CR><++><ESC>2kf}i
 autocmd FileType tex inoremap ;i <ESC>o\item<Space>
-autocmd FileType tex nnoremap ;i <ESC>\item<Space>
-autocmd FileType tex nnoremap ;b i\begin{}<Enter>\end{}<ESC>kf}i
-autocmd FileType tex nnoremap ;e i\begin{enumerate}<Enter>\item <++><ENTER>\end{enumerate}<ESC>2k0f=a
-autocmd FileType tex nnoremap ;a i\begin{enumerate}[label=\textbf{\alph*)}]<Enter>\end{enumerate}<ESC>O\item 
-autocmd FileType tex nnoremap ;i i\begin{itemize}<Enter>\end{itemize}<ESC>O\item 
-autocmd FileType tex nnoremap ;t i\begin{table}[h]<Enter>\centering<Enter>\setlength{\tabcolsep}{1.0em}<CR>\renewcommand{\arraystretch}{1.5}<CR>\begin{tabular}{}<Enter>\end{tabular}<Enter>\end{table}<ESC>
+autocmd FileType tex nnoremap ;b i\begin{}<CR>\end{}<ESC>kf}i
+autocmd FileType tex nnoremap ;e i\begin{enumerate}<CR>\item <++><CR>\end{enumerate}<ESC>2k0f=a
+autocmd FileType tex nnoremap ;a i\begin{enumerate}[label=\textbf{\alph*)}]<CR>\end{enumerate}<ESC>O\item 
+autocmd FileType tex nnoremap ;i o\begin{itemize}<CR>\end{itemize}<ESC>O\item 
+autocmd FileType tex nnoremap ;t i\begin{table}[h]<CR>\centering<CR>\setlength{\tabcolsep}{1.0em}<CR>\renewcommand{\arraystretch}{1.5}<CR>\begin{tabular}{}<CR>\end{tabular}<CR>\end{table}<ESC>
 autocmd FileType tex inoremap ;r \ref{}<++><ESC>T{i
 
 autocmd FileType tex inoremap ;m \[\]<ESC>hi
