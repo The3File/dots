@@ -8,10 +8,10 @@ set previewer ~/.bin/preview
 #set cleaner ~/.config/lf/cleaner
 #set preview!
 set preview
-#set ratios '1:5555:9999'
-set ratios '1:2:5'
+set ratios '1:5555:9999'
+#set ratios '1:2:5'
 set relativenumber
-set drawbox true
+set drawbox false
 set icons true
 
 
