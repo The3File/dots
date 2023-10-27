@@ -7,6 +7,7 @@ get_config(){
 	lp="b"
 
 	# colors
+	padding="28"
 	source "$HOME/.cache/wal/colors.sh"
 	bg="#000000" # bg="$color0"
 	fg="$color7"
@@ -196,6 +197,7 @@ main(){
 	get_config
 	update_all
 	start_while_loop
+	bspc config bottom_padding $padding
 
 	#xdo above -t "$(xdo id -N Bspwm -n root)" "$(xdo id -m -a lemonbar)" &
 	wait
