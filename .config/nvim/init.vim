@@ -74,7 +74,7 @@ autocmd FileType sh inoremap ;e printf '' "<++>"<ESC>F'i
 
 " LATEX
 
-autocmd FileType tex nnoremap mp :w<CR>:! mdtopdf -t %<CR>
+autocmd FileType tex nnoremap mp :w<CR>:! mdtopdf -t %<CR><CR>
 "autocmd FileType tex nnoremap mp :w<CR>:! pdflatex -shell-escape %<CR>
 autocmd FileType tex nnoremap md :w<CR>:! mdtopdf -d %<CR><CR>
 autocmd FileType tex nnoremap mo :! mdtopdf -o %<CR><CR>
