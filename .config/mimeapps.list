@@ -16,3 +16,7 @@ x-scheme-handler/http=firefox.desktop
 x-scheme-handler/https=firefox.desktop
 x-scheme-handler/magnet=transmission-remote.desktop;
 application/xhtml+xml=firefox.desktop
+video/quicktime=userapp-mpv-MRU3D2.desktop
+
+[Added Associations]
+video/quicktime=userapp-mpv-MRU3D2.desktop;
