@@ -14,9 +14,9 @@ tomd(){
 
 tex(){
    if [[ $(sed 1q $1) = "%math" ]]; then
-      pdflatex -shell-escape "$1" 1>/dev/null
+      pdflatex --shell-escape "$1" 1>/dev/null
    else
-      pdflatex -shell-escape "$1" 1>/dev/null
+      pdflatex --shell-escape "$1" 1>/dev/null
    fi
 
    clean=( gnuploterrors log )
