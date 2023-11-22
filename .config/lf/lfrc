@@ -33,7 +33,7 @@ map sc :set sortby ctime; set info ctime
 map se :set sortby ext; set info
 map c :clear; unselect
 map <space> :toggle; down
-map r $bulkrename "$fx"
+map r $bulkrename $fx
 
 map S $$SHELL
 

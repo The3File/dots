@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
-files=(./*)
-[[ "$@" ]] && files=($@)
+IFS=$'\n'
+[[ "$@" ]] && for file in "$@"; do
+	files+=("$file")
+done || files=(./*)
 
 trap 'rm $tmp' EXIT
 tmp="$(mktemp XXX.bulkrename)"
@@ -8,10 +10,10 @@ tmp="$(mktemp XXX.bulkrename)"
 error() { printf '%s\n' "error: $1"; exit 1; }
 
 for name in "${files[@]}"; do
-	[[ -a $name ]] || error "not a file $name"
-	[[ -d $name ]] && ons+=("d $name") && continue
-	[[ -x $name ]] && ons+=("x $name") && continue
-	[[ -f $name ]] && ons+=("f $name") && continue
+	[[ -a "$name" ]] || error "parsing $name"
+	[[ -d "$name" ]] && ons+=("d $name") && continue
+	[[ -x "$name" ]] && ons+=("x $name") && continue
+	[[ -f "$name" ]] && ons+=("f $name") && continue
 done
 
 printf '%s\n' "${ons[@]}" > $tmp
