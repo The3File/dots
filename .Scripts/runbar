@@ -199,7 +199,8 @@ main(){
 	start_while_loop
 	bspc config bottom_padding $padding
 
-	#xdo above -t "$(xdo id -N Bspwm -n root)" "$(xdo id -m -a lemonbar)" &
+	sleep 3
+	xdo above -t "$(xdo id -N Bspwm -n root)" "$(xdo id -m -a lemonbar)" &
 	wait
 }
 
