@@ -78,7 +78,7 @@ window:
   #
   # Override the variant of the GTK theme. Commonly supported values are `dark` and `light`.
   # Set this to `None` to use the default theme variant.
-  window.decorations_theme_variant: dark
+  #window.decorations_theme_variant: dark
 
 scrolling:
   # Maximum number of lines in the scrollback buffer.
@@ -152,13 +152,13 @@ font:
 #    white:   '#eaeaea'
 
 # Background opacity
-window.opacity: 0.6
+#window.opacity: 0.6
 
 selection:
   semantic_escape_chars: ",│`|:\"' ()[]{}<>\t"
 
 # Clipboard selection
-save_to_clipboard: true
+#save_to_clipboard: true
 
 cursor:
   # Cursor style
@@ -181,13 +181,13 @@ live_config_reload: true
 mouse:
   hide_when_typing: true
 
-  hints:
-    launcher:
-      program: xdg-open
+#hints:
+#launcher:
+#program: xdg-open
 
 # Mouse bindings
-mouse_bindings:
-  - { mouse: Middle, action: PasteSelection }
+#mouse.bindings:
+#- { mouse: Middle, action: PasteSelection }
 
 # Key bindings
 #
@@ -323,15 +323,14 @@ mouse_bindings:
 #
 # If the same trigger is assigned to multiple actions, all of them are executed
 # at once.
-key_bindings:
-    # (Windows, Linux, and BSD only)
-  - { key: V,        mods: Control|Shift, action: Paste            }
-  - { key: C,        mods: Control|Shift, action: Copy             }
-  - { key: Insert,   mods: Shift,         action: PasteSelection   }
-  - { key: Key0,     mods: Control,       action: ResetFontSize    }
-  - { key: Equals,   mods: Control,       action: IncreaseFontSize }
-  - { key: Plus,     mods: Control,       action: IncreaseFontSize }
-  - { key: Minus,    mods: Control,       action: DecreaseFontSize }
+#keyboard.bindings:
+#- { key: V,        mods: Control|Shift, action: Paste            }
+#- { key: C,        mods: Control|Shift, action: Copy             }
+#- { key: Insert,   mods: Shift,         action: PasteSelection   }
+#- { key: Key0,     mods: Control,       action: ResetFontSize    }
+#- { key: Equals,   mods: Control,       action: IncreaseFontSize }
+#- { key: Plus,     mods: Control,       action: IncreaseFontSize }
+#- { key: Minus,    mods: Control,       action: DecreaseFontSize }
 
 
 #debug:

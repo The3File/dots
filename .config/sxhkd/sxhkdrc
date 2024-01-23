@@ -225,8 +225,11 @@ alt + ctrl + {h,j,k,l}
    xdotool mousemove_relative {-- -10 0,0 10,-- 0 -10,10 0}
 
 # screenshot
-{_,alt + } {_,shift +}Print
-   scrot {_,-s} {_,-d 3} '%m-%h-%H%M%S.png' -e 'mv $f ~/Billeder/screenshots/'
+{_,alt + }Print
+   scrot {_,-s} '%m-%h-%H-%M-%S.png' -e 'mv $f ~/Pictures/screenshots/'
+
+shift + {_,alt + }Print
+   scrot {_,-s} '%m-%h-%H-%M-%S.png' -e 'mv $f ~/tmp/; bspc rule -a sxiv state=floating rectangle="1000x1000+0+0" center=true && sxiv -N sxiv $f'
 
 # LIGHT | BRIGHTNESS
 XF86MonBrightness{Up,Down}
