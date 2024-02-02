@@ -228,8 +228,8 @@ alt + ctrl + {h,j,k,l}
 {_,alt + }Print
    scrot {_,-s} '%m-%h-%H-%M-%S.png' -e 'mv $f ~/Pictures/screenshots/'
 
-shift + {_,alt + }Print
-   scrot {_,-s} '%m-%h-%H-%M-%S.png' -e 'mv $f ~/tmp/; bspc rule -a sxiv state=floating rectangle="1000x1000+0+0" center=true && sxiv -N sxiv $f'
+shift + Print
+	scrot -s -f -q 100 --silent - | convert - -units PixelsPerInch -resample 300 -sharpen 12x6.0 - | tesseract -l dan stdin stdout | xclip -i
 
 # LIGHT | BRIGHTNESS
 XF86MonBrightness{Up,Down}
