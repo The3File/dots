@@ -226,10 +226,10 @@ alt + ctrl + {h,j,k,l}
 
 # screenshot
 {_,alt + }Print
-   scrot {_,-s} '%m-%h-%H-%M-%S.png' -e 'mv $f ~/Pictures/screenshots/'
+   scrot -z {_,-s} '%m-%h-%H-%M-%S.png' -e 'mv $f ~/Pictures/screenshots/'
 
 shift + Print
-	scrot -s -f -q 100 --silent - | convert - -units PixelsPerInch -resample 300 -sharpen 12x6.0 - | tesseract -l dan stdin stdout | xclip -i
+	scrot -z -s -f -q 100 --silent - | convert - -units PixelsPerInch -resample 300 -sharpen 12x6.0 - | tesseract -l dan stdin stdout | xclip -i
 
 # LIGHT | BRIGHTNESS
 XF86MonBrightness{Up,Down}
