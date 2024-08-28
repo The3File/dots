@@ -94,7 +94,7 @@ autocmd FileType tex inoremap __ _{}<++><ESC>F}i
 autocmd FileType tex inoremap ;lr \Leftrightarrow
 autocmd FileType tex inoremap ;e \begin{equation}<ESC>o\end{equation}<ESC>O\label{eq:<++>}<ESC>o
 autocmd FileType tex inoremap ;E \begin{align}<ESC>o\end{align}<ESC>O\label{eq:<++>}<ESC>o
-autocmd FileType tex inoremap ;a \begin{alignat*}<ESC>o\end{alignat*}<ESC>O
+autocmd FileType tex inoremap ;a \begin{align*}<ESC>o\end{align*}<ESC>O
 autocmd FileType tex inoremap ;t \cdot
 autocmd FileType tex inoremap ;d \div
 autocmd FileType tex inoremap ;f \frac{}{<++>}<++><ESC>Fcf}i
