@@ -127,11 +127,12 @@ get_opts(){
 }
 
 main(){
-	class="$(printf '%s\n' "math" "history" "dansk" | fz --prompt="$1 > " -1 -q "$1")"
+	class="$(printf '%s\n' "math" "history" "dansk" "engelsk" | fz --prompt="$1 > " -1 -q "$1")"
 	case $class in
 		math) working_dir="$SKOLE/matematik/B"; shift 1 ;;
 		history) working_dir="$SKOLE/historie"; shift 1 ;;
 		dansk) working_dir="$SKOLE/dansk"; shift 1 ;;
+		engelsk) working_dir="$SKOLE/engelsk"; shift 1 ;;
 	esac
 	[[ "$working_dir" ]] && cd "$working_dir" || exit
 	get_opts "$@"
