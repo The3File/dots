@@ -2,12 +2,14 @@
 
 dev_pwr="/sys/devices/platform/thinkpad_acpi/leds/tpacpi::power/brightness"
 dev_mcm="/sys/devices/platform/thinkpad_acpi/leds/platform::micmute/brightness"
+dev_mute="/sys/devices/platform/thinkpad_acpi/leds/platform::mute/brightness"
 
 check_device(){
-	read -rp "chooose device from"$'\n'"1. $dev_pwr"$'\n'"2. $dev_mcm"$'\n'"> "
+	read -rp "chooose device from"$'\n'"1. $dev_pwr"$'\n'"2. $dev_mcm"$'\n'"3. $dev_mute"$'\n'"> "
 	case "$REPLY" in
 		1) b="$dev_pwr" ;;
 		2) b="$dev_mcm" ;;
+		3) b="$dev_mute" ;;
 	esac
 }
 
