@@ -21,6 +21,7 @@ exec unclutter -idle 3 &
 exec clipmenud &
 exec feh --bg-fill $HOME/.config/wall.png &
 exec picom -b &
+exec /usr/bin/kdeconnectd &
 
 # WM
 exec sxhkd -m 1 &
