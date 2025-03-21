@@ -32,10 +32,10 @@ main(){
       -o) [[ -r "${2%.*}.pdf" ]] && xdg-open "${2%.*}.pdf" & disown ;;
       -t) tex "$2" ;;
       --to-md) tomd "$2" || echo "failed (can't convert $err to md)" ;;
-      *) [[ -e $1 ]] && pandoc\
+      *) [[ -e $1 ]] && pandoc -f markdown\
+			-V geometry:margin=1in\
 			-s --pdf-engine xelatex "$1"\
 			-V 'sansfont:DejaVuSans'\
-			-V geometry:margin=1in\
 			-o "${1%.*}.pdf" || echo failed ;;
    esac
 }
