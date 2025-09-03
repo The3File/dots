@@ -44,9 +44,9 @@ set shiftwidth=3
 set grepprg=grep\ -nH\ $*
 set nofoldenable
 
-colorscheme pywal
+"colorscheme pywal
 "colorscheme zellner
-"colorscheme default
+colorscheme default
 "colorscheme gruvbox
 "colorscheme delek
 
