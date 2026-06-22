@@ -32,7 +32,7 @@ config() {
 	## RATIOS AND WM SCHEMES ##
 	bspc config split_ratio             0.55				# float
 	bspc config automatic_scheme			spiral 			# longest_side | alternate | spiral
-	bspc config initial_polarity			second_child 	# second_child | first_child
+	bspc config initial_polarity			first_child 	# second_child | first_child
 
 
 	## MISC. ##
