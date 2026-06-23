@@ -46,11 +46,11 @@ autogap_settings() {
 	export GAPS=1  # enable or disable automatic gaps
 	export G0=5    # minimum gap size
 	export GS=7    # gaps size integer
-	export GN=3    # number of windows
+	export GN=3    # number of windows before 0
 
 	# left and right padding
 	export PADD=1  # enable or disable automatic padding
-	export PS=15    # padding size integer
+	export PS=6    # padding size integer
 	export PN=2    # number of windows before 0
 }
 
@@ -67,10 +67,16 @@ rules() {
 	bspc rule -a fullscreen sticky=off state=fullscreen layer=above
 	bspc rule -a gass sticky=on state=floating focus=off border=on
 	bspc rule -a files layer=above locked=on sticky=on state=floating hidden=on
+	bspc rule -a jetbrains-studio manage=on # Android Studio startup window
+
 	bspc rule -a scratchterm layer=above locked=on sticky=on state=floating
 	bspc rule -a scratchmath rectangle="1000x400+900+620" layer=above locked=on sticky=on state=floating
-	bspc rule -a jetbrains-studio manage=on # Android Studio startup window
+
+	## Bar stuff
 	bspc rule -a Bar layer=below
+	bspc rule -a bye rectangle="270x150+50+860" layer=above locked=on sticky=on state=floating
+	bspc rule -a cal rectangle="270x220+1620+810" layer=above locked=on sticky=on state=floating
+	bspc rule -a net rectangle="800x200+1020+830" layer=above locked=on sticky=on state=floating
 
 }
 
@@ -82,8 +88,8 @@ apps() {
 	_start(){ "$1" "${o[@]}" &>/dev/null & disown || return 1
 	printf '\e[37m%s: %s\n' "$1" "started"; }
 
-	apps=(runbar acpid_events dunst swallow)
-	# autogap 
+	apps=(autogap acpid_events dunst swallow)
+	# runbar 
 	
 	for app in "${apps[@]}"; do
 		app_is_running="$(ps ax | sed -n "/nvim/d;/sed/d;/\<$app\>/p")"
@@ -124,6 +130,6 @@ main "$@" &&
 	{
 		printf '\e[m\n%s\n' "..all done";
 		dunstify "bspwmrc reloaded" -t 2000 -r 90211 &
-		[[ -e "$GAPFIFO" ]] && { sleep .1; echo > $GAPFIFO; }
+		[[ -e "$GAPFIFO" ]] && { sleep 1; echo "hello" > $GAPFIFO; } &
 	}
 #  vim: fdm=marker

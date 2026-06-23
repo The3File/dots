@@ -2,7 +2,7 @@
     monitor = LVDS1
     follow = mouse
     width = (0,400)
-    height = (0,2)
+    height = (100)
     origin = top-right
     offset = 20x20
     indicate_hidden = yes

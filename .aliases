@@ -25,6 +25,7 @@ alias skl="skole"
 alias s="svim"
 
 ## QOL
+alias dfh="df -h | awk 'NR==1 || /nvme/'"
 alias gogl="googler"
 alias here="alacritty &>/dev/null &disown"
 alias gitl="git log --all --decorate --oneline --graph"

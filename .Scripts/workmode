@@ -19,10 +19,10 @@ on() {
 	#bspc config automatic_scheme alternate
 
 	bspc config split_ratio 0.6
-	bspc config single_monocle true
+	bspc config single_monocle false
 
 	border=1
-	bspc config window_gap -$border
+	bspc config window_gap "-$border"
 	bspc config border_radius $border
 	bspc config border_width $border
 	for side in top left right; do
