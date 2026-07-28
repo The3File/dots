@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+read -r level < "/sys/class/power_supply/BAT0/capacity"
+read -r status < "/sys/class/power_supply/BAT0/status"
+
+[[ "$status" = "Discharging" ]] || exit
+[[ "$level" -le 15 ]] || exit
+
+[[ "$level" -le 5 ]] || { notify-send -u critical "BATTERY UNDER 15%"; exit; }
+
+notify-send -u critical "BATTERY UNDER 5%"
+beep -r 3
