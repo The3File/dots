@@ -36,6 +36,7 @@ general.live_config_reload = true
 #key = "Minus"
 #mods = "Control"
 
+# palette from wal import; keep solid black background
 [colors.primary]
 background = "#000000"
 
@@ -83,7 +84,8 @@ semantic_escape_chars = ",│`|:\"' ()[]{}<>\t"
 [window]
 decorations = "none"
 dynamic_padding = true
-opacity = 0.75
+opacity = 0.85
+#opacity = 1
 title = "alacritty"
 #"window.decorations_theme_variant" = "dark"
 

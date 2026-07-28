@@ -43,7 +43,50 @@ sel_next_or_first(){
 change_wal(){
    wal -tqi $next ${l} --backend $backend -a 0
    cp $next "$HOME/.config/wall.png"
-   $CONFIG &>/dev/null
+
+   if [[ -n "$WAYLAND_DISPLAY" || "$XDG_SESSION_TYPE" == "wayland" ]]; then
+      apply_hyprland
+   else
+      $CONFIG &>/dev/null
+   fi
+}
+
+apply_hyprland(){
+   # wallpaper
+   if pgrep -x hyprpaper >/dev/null; then
+      hyprctl hyprpaper wallpaper ",$next" &>/dev/null \
+         || hyprctl hyprpaper wallpaper "[,$next]" &>/dev/null
+   fi
+   # rewrite hyprpaper.conf so it survives restart
+   cat > "$HOME/.config/hypr/hyprpaper.conf" <<EOF
+splash = false
+
+wallpaper {
+    monitor =
+    path = $next
+    fit_mode = cover
+}
+EOF
+   # borders from wal
+   # shellcheck disable=SC1090
+   source "$HOME/.cache/wal/colors.sh"
+   cat > "$HOME/.config/hypr/colors.conf" <<EOF
+# Seeded from ~/.cache/wal/colors.sh (color0 inactive, color4 active)
+# Re-run / update after chwal if you change the palette.
+
+\$background = rgb(${background#\#})
+\$foreground = rgb(${foreground#\#})
+\$color0 = rgb(${color0#\#})
+\$color4 = rgb(${color4#\#})
+\$color7 = rgb(${color7#\#})
+\$color8 = rgb(${color8#\#})
+
+\$active_border = \$color4
+\$inactive_border = \$color0
+EOF
+   hyprctl reload &>/dev/null
+   # waybar picks up ~/.cache/wal/colors-waybar.css
+   pkill -USR2 waybar 2>/dev/null || true
 }
 
 add_new_fav(){

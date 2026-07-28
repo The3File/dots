@@ -355,8 +355,8 @@ mouse:
   #print_events: false
 colors:
   # Default colors
-  primary:
-    background: '#000000'
+  #primary:
+  #  background: '#000000'
 
 # Colors (Darcula)
 #colors:
