@@ -1,9 +1,49 @@
 #!/usr/bin/env bash
 
+is_wayland() { [[ -n "$WAYLAND_DISPLAY" || "$XDG_SESSION_TYPE" == "wayland" ]]; }
+
+# --- Hyprland / Wayland -------------------------------------------------------
+
+hypr_addr() {
+	hyprctl clients -j | jq -r --arg c "$cls" '
+		.[] | select(.class == $c) | .address' | head -1
+}
+
+hypr_toggle() {
+	local addr
+	addr="$(hypr_addr)"
+	if [[ -z "$addr" ]]; then
+		# windowrule sends it to special:<class> and shows it
+		"$@" &
+	else
+		hyprctl dispatch togglespecialworkspace "$cls"
+	fi
+}
+
+hypr_math() {
+	cas="qalc"
+	#cas="sage"
+	cls="scratchmath"
+	hypr_toggle $TERMINAL --class $cls,$cls -e $cas
+}
+
+hypr_term() {
+	cls="scratchterm"
+	if tmux has-session -t scratch 2>/dev/null; then
+		hypr_toggle $TERMINAL --class $cls,$cls -e tmux a -t '=scratch'
+	else
+		hypr_toggle $TERMINAL --class $cls,$cls -e tmux new -s 'scratch'
+	fi
+}
+
+# --- bspwm / X11 (original) ---------------------------------------------------
+
 get_id(){ id="$(xdotool search --class $cls)"; }
 toggle(){ bspc node "$id" --flag hidden -f; exit; }
 
 math(){
+	is_wayland && { hypr_math; return; }
+
 	cas="qalc"
 	#cas="sage"
 	cls="scratchmath"; get_id
@@ -14,6 +54,8 @@ math(){
 }
 
 term(){
+	is_wayland && { hypr_term; return; }
+
 	cls="scratchterm"; get_id
 	[[ -z "$id" ]] || toggle
 
