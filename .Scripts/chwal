@@ -67,22 +67,23 @@ wallpaper {
     fit_mode = cover
 }
 EOF
-   # borders from wal
+   # borders from wal (Lua config)
    # shellcheck disable=SC1090
    source "$HOME/.cache/wal/colors.sh"
-   cat > "$HOME/.config/hypr/colors.conf" <<EOF
-# Seeded from ~/.cache/wal/colors.sh (color0 inactive, color4 active)
-# Re-run / update after chwal if you change the palette.
+   cat > "$HOME/.config/hypr/colors.lua" <<EOF
+-- Seeded from ~/.cache/wal/colors.sh (color0 inactive, color4 active)
+-- Re-run / update after chwal if you change the palette.
 
-\$background = rgb(${background#\#})
-\$foreground = rgb(${foreground#\#})
-\$color0 = rgb(${color0#\#})
-\$color4 = rgb(${color4#\#})
-\$color7 = rgb(${color7#\#})
-\$color8 = rgb(${color8#\#})
-
-\$active_border = \$color4
-\$inactive_border = \$color0
+return {
+    background      = "rgb(${background#\#})",
+    foreground      = "rgb(${foreground#\#})",
+    color0          = "rgb(${color0#\#})",
+    color4          = "rgb(${color4#\#})",
+    color7          = "rgb(${color7#\#})",
+    color8          = "rgb(${color8#\#})",
+    active_border   = "rgb(${color4#\#})",
+    inactive_border = "rgb(${color0#\#})",
+}
 EOF
    hyprctl reload &>/dev/null
    # waybar picks up ~/.cache/wal/colors-waybar.css

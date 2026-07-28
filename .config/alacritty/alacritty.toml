@@ -48,6 +48,8 @@ vi_mode_style = "None"
 
 [env]
 TERM = "xterm-256color"
+VISUAL = "nvim_visual"
+EDITOR = "nvim_visual"
 
 [font]
 size = 14

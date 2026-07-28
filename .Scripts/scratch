@@ -16,7 +16,9 @@ hypr_toggle() {
 		# windowrule sends it to special:<class> and shows it
 		"$@" &
 	else
-		hyprctl dispatch togglespecialworkspace "$cls"
+		# Lua config: legacy `dispatch togglespecialworkspace` is invalid;
+		# use hl.dsp.workspace.toggle_special instead.
+		hyprctl eval "hl.dispatch(hl.dsp.workspace.toggle_special(\"$cls\"))"
 	fi
 }
 
