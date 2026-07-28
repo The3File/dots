@@ -1,0 +1,55 @@
+/* Minimal Waybar — colors from wal (color0 / color4 / foreground) */
+
+* {
+    border: none;
+    border-radius: 0;
+    font-family: monospace;
+    font-size: 12px;
+    min-height: 0;
+}
+
+window#waybar {
+    background: #000000;
+    color: #d0d0d0;
+    border-bottom: 1px solid #0066ff;
+}
+
+#workspaces button {
+    padding: 0 8px;
+    color: #808080;
+    background: transparent;
+}
+
+#workspaces button.active {
+    color: #d0d0d0;
+    border-bottom: 2px solid #0066ff;
+}
+
+#workspaces button:hover {
+    color: #d0d0d0;
+    background: #111111;
+}
+
+#clock,
+#network,
+#pulseaudio,
+#battery {
+    padding: 0 10px;
+    color: #d0d0d0;
+}
+
+#battery.warning {
+    color: #ff0099;
+}
+
+#battery.critical {
+    color: #ff0000;
+}
+
+#network.disconnected {
+    color: #808080;
+}
+
+#pulseaudio.muted {
+    color: #808080;
+}
