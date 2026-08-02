@@ -231,6 +231,49 @@ hl.window_rule({
     workspace = "special:scratchmath",
 })
 
+-- Keep non-scratch apps off special workspaces. While a scratch is open,
+-- Hyprland would otherwise spawn new windows there (behind the scratch float).
+local scratch_classes = {
+    scratchterm = true,
+    scratchmath = true,
+}
+
+hl.on("window.open", function(win)
+    local ws = win.workspace
+    if not (ws and ws.special) then
+        return
+    end
+
+    local cls = win.initial_class
+    if cls == nil or cls == "" then
+        cls = win.class
+    end
+    if scratch_classes[cls] then
+        return
+    end
+
+    local mon = win.monitor or hl.get_active_monitor()
+    local target = mon and mon.active_workspace
+    if not target or target.special then
+        return
+    end
+
+    hl.dispatch(hl.dsp.window.move({
+        workspace = target,
+        follow = true,
+        window = win,
+    }))
+
+    -- Dismiss scratch so the new window isn't hidden behind it.
+    local special = mon.active_special_workspace
+    if special then
+        local name = special.name:gsub("^special:", "")
+        if name ~= "" then
+            hl.dispatch(hl.dsp.workspace.toggle_special(name))
+        end
+    end
+end)
+
 hl.window_rule({
     match = { class = "^(fullscreen)$" },
     fullscreen = true,

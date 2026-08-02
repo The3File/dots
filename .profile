@@ -53,4 +53,7 @@ termux_specific(){
 ## >
 
 [[ -f ~/.bashrc ]] && source ~/.bashrc
-[[ ! $DISPLAY && $XDG_VTNR -eq 1 ]] && exec startx &>/dev/null
+# [[ ! $DISPLAY && $XDG_VTNR -eq 1 ]] && exec startx &>/dev/null
+if [ -z "$DISPLAY" ] && [ -z "$WAYLAND_DISPLAY" ] && [ "${XDG_VTNR:-0}" -eq 1 ]; then
+	exec start-hyprland &>/dev/null
+fi
