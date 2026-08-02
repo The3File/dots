@@ -1,0 +1,12 @@
+# Seeded from ~/.cache/wal/colors.sh (color0 inactive, color4 active)
+# Re-run / update after chwal if you change the palette.
+
+$background = rgb(191a1a)
+$foreground = rgb(c5c5c5)
+$color0 = rgb(191a1a)
+$color4 = rgb(5ca7a5)
+$color7 = rgb(c5c5c5)
+$color8 = rgb(525353)
+
+$active_border = $color4
+$inactive_border = $color0
