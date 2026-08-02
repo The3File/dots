@@ -1,28 +1,33 @@
-/* Minimal Waybar — colors from pywal */
+/* Waybar — runbar-inspired (bottom, lighter); colors from pywal + runbar thresholds */
 @import url("file:///home/ringdal/.cache/wal/colors-waybar.css");
 
 * {
     border: none;
     border-radius: 0;
-    font-family: monospace;
-    font-size: 12px;
+    font-family: Terminus, monospace;
+    font-size: 14px;
     min-height: 0;
 }
 
 window#waybar {
-    background: alpha(@background, 0.55);
+    background: #000000;
     color: @foreground;
-    border-bottom: 1px solid @color4;
+    border-top: 1px solid @color4;
+}
+
+#workspaces {
+    padding: 0 4px;
 }
 
 #workspaces button {
-    padding: 0 8px;
+    padding: 0 6px;
     color: @color8;
     background: transparent;
 }
 
 #workspaces button.active {
-    color: @foreground;
+    color: @color4;
+    padding: 0 4px;
     border-bottom: 2px solid @color4;
 }
 
@@ -31,26 +36,21 @@ window#waybar {
     background: @color0;
 }
 
-#clock,
-#network,
-#pulseaudio,
-#battery {
-    padding: 0 10px;
-    color: @foreground;
-}
-
-#battery.warning {
+#custom-sep {
+    padding: 0 8px;
     color: @color5;
 }
 
-#battery.critical {
-    color: @color1;
+#custom-vol,
+#custom-light,
+#custom-net,
+#custom-bat,
+#custom-clock {
+    padding: 0 8px;
+    color: @foreground;
+    background: transparent;
 }
 
-#network.disconnected {
-    color: @color8;
-}
-
-#pulseaudio.muted {
-    color: @color8;
+#custom-clock {
+    padding-right: 10px;
 }

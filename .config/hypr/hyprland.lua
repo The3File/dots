@@ -47,8 +47,8 @@ end)
 
 hl.config({
     general = {
-        gaps_in  = 5,
-        gaps_out = 10,
+        gaps_in  = 0,
+        gaps_out = 0,
         border_size = 2,
         col = {
             active_border   = colors.active_border,
@@ -60,7 +60,7 @@ hl.config({
     },
 
     decoration = {
-        rounding         = 15,
+        rounding         = 0,
         active_opacity   = 1.0,
         inactive_opacity = 1.0,
 
@@ -135,6 +135,9 @@ hl.bind(mod .. " + SHIFT + Return", hl.dsp.exec_cmd(terminal .. " --class float"
 hl.bind(mod .. " + O", hl.dsp.exec_cmd(browser))
 hl.bind(mod .. " + W", hl.dsp.exec_cmd(browserAlt))
 hl.bind(mod .. " + E", hl.dsp.exec_cmd(fileManager))
+hl.bind(mod .. " + D", function()
+    hl.exec_cmd("/home/ringdal/.Scripts/fuzzel_drun")
+end)
 
 -- Kill / force kill
 hl.bind(mod .. " + Q", hl.dsp.window.close())
@@ -195,16 +198,16 @@ hl.bind("ALT + SHIFT + L", hl.dsp.window.move({ x = 20, y = 0, relative = true }
 hl.bind(mod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
 hl.bind(mod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 
--- Volume
-hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("pamixer -i 5"), { locked = true, repeating = true })
-hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("pamixer -d 5"), { locked = true, repeating = true })
-hl.bind("XF86AudioMute", hl.dsp.exec_cmd("pamixer -t"), { locked = true })
-hl.bind(mod .. " + XF86AudioRaiseVolume", hl.dsp.exec_cmd("pamixer --allow-boost -i 5"), { locked = true })
-hl.bind(mod .. " + XF86AudioLowerVolume", hl.dsp.exec_cmd("pamixer --allow-boost -d 5"), { locked = true })
+-- Volume (RTMIN+1 refreshes waybar custom/vol)
+hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("pamixer -i 5; pkill -RTMIN+1 waybar"), { locked = true, repeating = true })
+hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("pamixer -d 5; pkill -RTMIN+1 waybar"), { locked = true, repeating = true })
+hl.bind("XF86AudioMute", hl.dsp.exec_cmd("pamixer -t; pkill -RTMIN+1 waybar"), { locked = true })
+hl.bind(mod .. " + XF86AudioRaiseVolume", hl.dsp.exec_cmd("pamixer --allow-boost -i 5; pkill -RTMIN+1 waybar"), { locked = true })
+hl.bind(mod .. " + XF86AudioLowerVolume", hl.dsp.exec_cmd("pamixer --allow-boost -d 5; pkill -RTMIN+1 waybar"), { locked = true })
 
--- Brightness
-hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("sudo light -A 5"), { locked = true, repeating = true })
-hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("sudo light -U 5"), { locked = true, repeating = true })
+-- Brightness (RTMIN+2 refreshes waybar custom/light)
+hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("sudo light -A 5; pkill -RTMIN+2 waybar"), { locked = true, repeating = true })
+hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("sudo light -U 5; pkill -RTMIN+2 waybar"), { locked = true, repeating = true })
 
 ----------------------
 ---- WINDOW RULES ----

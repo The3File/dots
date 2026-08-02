@@ -3,7 +3,11 @@
 launch(){
 	IFS=$'\n' read -rd '' -a apps < "$config"
 
-	read -r selection < <(printf '%s\n' "${apps[@]%,*}" | dmenu -i -b -p "$prompt" -fn "$font")
+	# -b puts dmenu at the bottom; under Hyprland that sits behind waybar.
+	dmenu_args=(-i -p "$prompt" -fn "$font")
+	[[ -z ${WAYLAND_DISPLAY:-} && -z ${WAYLAND_SOCKET:-} ]] && dmenu_args+=(-b)
+
+	read -r selection < <(printf '%s\n' "${apps[@]%,*}" | dmenu "${dmenu_args[@]}")
 
 	[[ $selection = "update_drun" ]] && update
 
