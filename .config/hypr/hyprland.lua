@@ -47,8 +47,8 @@ end)
 
 hl.config({
     general = {
-        gaps_in  = 0,
-        gaps_out = 0,
+        gaps_in  = 7,
+        gaps_out = 15,
         border_size = 2,
         col = {
             active_border   = colors.active_border,
@@ -60,14 +60,14 @@ hl.config({
     },
 
     decoration = {
-        rounding         = 0,
+        rounding         = 10,
         active_opacity   = 1.0,
         inactive_opacity = 1.0,
 
         blur = {
             enabled            = true,
-            size               = 3,
-            passes             = 3,
+            size               = 6,
+            passes             = 4,
             ignore_opacity     = true,
             new_optimizations  = true,
             xray               = false,
