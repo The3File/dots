@@ -17,7 +17,7 @@ end
 local terminal    = "alacritty"
 local fileManager = "alacritty -e lf"
 local browser     = "qutebrowser"
-local browserAlt  = "firefox"
+local browserAlt  = "brave"
 local mod         = "SUPER"
 
 ------------------
