@@ -71,8 +71,7 @@ EOF
    # shellcheck disable=SC1090
    source "$HOME/.cache/wal/colors.sh"
    cat > "$HOME/.config/hypr/colors.lua" <<EOF
--- Seeded from ~/.cache/wal/colors.sh (color0 inactive, color4 active)
--- Re-run / update after chwal if you change the palette.
+-- Seeded from ~/.cache/wal/colors.sh (color8 inactive, color4 active)
 
 return {
     background      = "rgb(${background#\#})",
@@ -82,7 +81,7 @@ return {
     color7          = "rgb(${color7#\#})",
     color8          = "rgb(${color8#\#})",
     active_border   = "rgb(${color4#\#})",
-    inactive_border = "rgb(${color0#\#})",
+    inactive_border = "rgb(${color8#\#})",
 }
 EOF
    hyprctl reload &>/dev/null

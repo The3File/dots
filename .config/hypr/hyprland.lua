@@ -6,7 +6,7 @@ local ok, colors = pcall(require, "colors")
 if not ok then
     colors = {
         active_border   = "rgb(5ca7a5)",
-        inactive_border = "rgb(191a1a)",
+        inactive_border = "rgb(4a5750)",
     }
 end
 
@@ -49,7 +49,7 @@ hl.config({
     general = {
         gaps_in  = 7,
         gaps_out = 15,
-        border_size = 2,
+        border_size = 1,
         col = {
             active_border   = colors.active_border,
             inactive_border = colors.inactive_border,
@@ -62,7 +62,9 @@ hl.config({
     decoration = {
         rounding         = 10,
         active_opacity   = 1.0,
-        inactive_opacity = 1.0,
+        inactive_opacity = 0.7,
+        dim_inactive     = true,
+        dim_strength     = 0.3,
 
         blur = {
             enabled            = true,

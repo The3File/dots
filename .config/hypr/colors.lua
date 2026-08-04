@@ -1,5 +1,4 @@
--- Seeded from ~/.cache/wal/colors.sh (color0 inactive, color4 active)
--- Re-run / update after chwal if you change the palette.
+-- Seeded from ~/.cache/wal/colors.sh (color8 inactive, color4 active)
 
 return {
     background      = "rgb(050907)",
@@ -9,5 +8,5 @@ return {
     color7          = "rgb(a4aba7)",
     color8          = "rgb(4a5750)",
     active_border   = "rgb(c7755f)",
-    inactive_border = "rgb(050907)",
+    inactive_border = "rgb(4a5750)",
 }
