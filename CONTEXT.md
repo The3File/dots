@@ -5,11 +5,12 @@ Living notes for agents working on this PC. **Update this file** when you learn 
 ## Session / OS
 
 - Arch Linux
-- Desktop: **Hyprland** (currently ~0.56.x), Wayland
+- Desktop: **Hyprland** (package ~0.56.2; reload/relogin to pick up after upgrade), Wayland
 - Config format: **Lua** (legacy hyprlang `.conf` retired)
 - Terminal: **alacritty**
 - Login: no display manager — TTY VT1 → `~/.profile` → `start-hyprland`
-- X11/bspwm still available via `startx` (`~/.xinitrc`); WM history: ported from bspwm + sxhkd
+- **X11/bspwm packages removed** (2026-08); configs kept for reference: `~/.xinitrc`, `~/.config/bspwm`, `~/.config/sxhkd`, scripts `runbar`/`dmenu_drun`. `startx` will not work until those packages are reinstalled. Keep `xorg-xwayland` + `xsecurelock` (lock via `~/.Scripts/lockscreen`).
+- No **snapd** / Waydroid / Android SDK on this machine (removed). Cura via Flatpak `com.ultimaker.cura`.
 
 ## Important paths
 
@@ -78,24 +79,6 @@ When the user asks about “the project,” “the site,” “the book,” etc.
 
 Other folders under `~/Projects/` exist but are not named active focus areas unless the user points at them.
 
-## Waydroid
-
-- Package: `waydroid` (images under `/var/lib/waydroid/images/`, **GAPPS**/MAINLINE).
-- Needs kernel **`bridge`** module (`ip link … type bridge`). Persisted in `/etc/modules-load.d/waydroid.conf`.
-- Service: `waydroid-container.service` (enabled). Binder via builtin `rust_binder` + binderfs (no DKMS).
-- Clipboard: `python-pyclip` + `wl-clipboard`.
-- **Internet:** after each session start, Android’s unreachable ip-rule blocks routing until fixed. Use:
-  - `waydroid-up` — start session + apply net fix
-  - `waydroid-up ui` — same, then full UI
-  - `waydroid-net-fix` — apply fix only (session already running)
-- Host forwarding: `/etc/sysctl.d/99-waydroid.conf` (`ip_forward` + IPv6 forwarding).
-- Guest: `private_dns_mode=off` (DoT to gateway dnsmasq fails); default via `192.168.240.1`.
-- Play Store: `com.android.vending` (GAPPS image). Launch via UI or `waydroid app launch com.android.vending`.
-- Usage:
-  - `waydroid session start` then `waydroid-net-fix` (or just `waydroid-up`)
-  - `waydroid show-full-ui`
-  - `waydroid status` / `waydroid session stop`
-
 ## Dotfiles sync (`dot`)
 
 Bare-repo git wrapper for tracked configs under `$HOME` (not a normal repo in `~`). Use this when the user asks to sync / commit / push machine config changes.
@@ -136,27 +119,58 @@ Install from scratch (user docs): `curl` of `.install.bash` from the `dots` repo
 - Primary browser: **qutebrowser** — Super+O
 - Secondary browser: **brave** — Super+W (`browserAlt` in `hyprland.lua`)
 - Voice dictation: **hyprwhspr** — Super+Shift+Space (toggle start/stop → paste); **Super+Escape** cancels recording (no paste)
-- Claude Code speak (opt-in TTS): **Super+Shift+V** → `claude-speak toggle` (flag `$XDG_RUNTIME_DIR/claude-speak.on`; default off). Hooks in `~/.claude/settings.json` → `claude-speak-hook` uses **`last_assistant_message`** (not laggy transcript) + `claude-speak-tts` (**Piper** `da_DK-talesyntese-medium`, fallback espeak-ng).
+- Claude Code / Cursor speak (opt-in TTS): **Super+Shift+V** → `claude-speak toggle` (flag `$XDG_RUNTIME_DIR/claude-speak.on`; default off). Claude Code: `~/.claude/settings.json` hooks → `claude-speak-hook`. Cursor: `~/.cursor/hooks.json` `afterAgentResponse` → `hooks/cursor-speak.sh`. Both use `claude-speak-tts` (Piper Danish).
+- Power menu: **alacritty_bye** — Super+Alt+Shift+Q (`~/.Scripts/alacritty_bye` → `bye`; float/pin 270×150 at 50,860)
+- Clipboard history: **fuzzel_clip** — Super+Insert (`cliphist` + fuzzel; bspwm used `clipmenu`). Watcher: `~/.Scripts/cliphist-watch` (autostart).
 
-## Claude Code speak (opt-in TTS)
+## Power / battery
 
-Lokal oplæsning af Claude Code — stille som default; tænd kun når du vil.
+ThinkPad T14s Gen 2a (AMD 5650U). Stack: **TLP** + **hypridle**. Do not install `power-profiles-daemon` alongside TLP.
+
+| Piece | Path / detail |
+|-------|----------------|
+| TLP service | `systemctl enable --now tlp` |
+| TLP drop-in | `/etc/tlp.d/01-ringdal.conf` — AC: EPP `balance_performance` + platform `balanced`; BAT: EPP `balance_power` + platform `low-power` |
+| hypridle | `~/.config/hypr/hypridle.conf`; autostart in `hyprland.lua` (`hyprland.start`) |
+| Idle timeouts | 5 min → DPMS off (AC+BAT); 15 min → `systemctl suspend` **only on battery** |
+| Suspend gate | `~/.Scripts/idle-suspend-ok` (`condition_cmd`; exit 0 iff `BAT0` Discharging and AC offline) |
+| Lid (logind) | BAT → suspend; **AC → ignore** (`HandleLidSwitchExternalPower=ignore` in `/etc/systemd/logind.conf`) |
+| thinkfan | AUR `thinkfan` 2.x; config `/etc/thinkfan.conf` (k10temp/amdgpu/thinkpad/nvme → tpacpi fan). Backup of old example: `/etc/thinkfan.conf.bak.*`. Modprobe: `fan_control=1` (`/etc/modprobe.d/99-thinkfan.conf` + pkg). Rebuild after `yaml-cpp` soname bumps (`yay -S thinkfan`). Do not leave stale units under `/usr/local/lib/systemd/system/thinkfan*` |
+| thinkfan sleep/wakeup | Drop-ins `/etc/systemd/system/thinkfan-{sleep,wakeup}.service.d/success-exit.conf` → `SuccessExitStatus=1` (pkill exit 1 must not fail the unit) |
+
+Decoration: user prefers **blur off** (`decoration.blur.enabled = false` in `hyprland.lua`); dim/inactive opacity also commented out. Saves GPU vs old blur passes=4.
+
+DPMS under Lua Hyprland: `hyprctl dispatch 'hl.dsp.dpms({action = "disable"})'` / `"enable"`. No hyprlock yet (idle/lid suspend without lock). Check: `tlp-stat -s`, EPP under `/sys/devices/system/cpu/cpu0/cpufreq/energy_performance_preference`, `platform_profile`.
+
+## Maintenance notes
+
+- Pacman: `ParallelDownloads = 5`, `DownloadUser = alpm` in `/etc/pacman.conf`; multilib **enabled**.
+- mkinitcpio HOOKS: `base systemd autodetect microcode modconf kms keyboard sd-vconsole block filesystems fsck` (rebuild with `mkinitcpio -P` after changes).
+- Periodic: `paccache -rk1` (or `-rk2`); orphan pass only after reviewing `pacman -Qdt`.
+- Remaining `.pacnew` under `/etc` (sudoers, pam, mirrorlist, libvirt, …) left unmerged on purpose — review before touching.
+- libvirt storage pool `mnt` undefined (path `~/mnt` missing). Pools `default` / `pool` / `ringdal` remain.
+- After orphan cleanup, **go** and **rust** were reinstalled explicitly (`.cargo` in use).
+
+## Claude Code / Cursor speak (opt-in TTS)
+
+Lokal oplæsning — stille som default; tænd kun når du vil. **Samme toggle** styrer både Claude Code CLI og Cursor-agenten.
 
 | Piece | Path / detail |
 |-------|----------------|
 | Toggle | Super+Shift+V → `~/.Scripts/claude-speak` (`on`/`off`/`toggle`/`status`) |
 | Flag | `$XDG_RUNTIME_DIR/claude-speak.on` (absent = silent) |
-| Hooks | `~/.claude/settings.json` — `Notification` + `Stop`, `async: true` |
-| Hook script | `~/.Scripts/claude-speak-hook` |
+| Claude Code hooks | `~/.claude/settings.json` — `Notification` + `Stop`, `async: true` |
+| Claude Code hook script | `~/.Scripts/claude-speak-hook` (Stop uses **`last_assistant_message`**) |
+| Cursor hooks | `~/.cursor/hooks.json` → `afterAgentResponse` → `~/.cursor/hooks/cursor-speak.sh` (field **`text`**) |
 | TTS | `~/.Scripts/claude-speak-tts` |
 | Voice | Piper `da_DK-talesyntese-medium` under `~/.local/share/piper/voices/` (pkg: `piper-tts`); fallback `espeak-ng -v da` |
 
 **Gotchas:**
-- Stop must use JSON field **`last_assistant_message`** — `transcript_path` lags and reads the *previous* turn.
+- Claude Code Stop must use **`last_assistant_message`** — `transcript_path` lags and reads the *previous* turn.
+- Cursor uses **`afterAgentResponse`** with `text` (current assistant message).
 - Speaks truncated prose (~500 chars), strips fenced code + URLs.
 - Piper voice files are local/data (not in the dots repo).
-- Power menu: **alacritty_bye** — Super+Alt+Shift+Q (`~/.Scripts/alacritty_bye` → `bye`; float/pin 270×150 at 50,860)
-- Clipboard history: **fuzzel_clip** — Super+Insert (`cliphist` + fuzzel; bspwm used `clipmenu`). Watcher: `~/.Scripts/cliphist-watch` (autostart).
+- Cursor user hooks may need a window reload / new agent chat before they load.
 
 ## hyprwhspr (dansk diktering)
 
@@ -165,7 +179,7 @@ Lokal oplæsning af Claude Code — stille som default; tænd kun når du vil.
 - Bind: `hyprwhspr record toggle` in `hyprland.lua` (Super+Shift+Space); cancel: `hyprwhspr record cancel` (Super+Escape)
 - Models: `~/.local/share/pywhispercpp/models/` — active **`large-v3-turbo`** (da) + Silero VAD; backend pywhispercpp/Vulkan on AMD iGPU. `medium`/`small`/`base` still on disk for rollback (`"model": "medium"` + `systemctl --user restart hyprwhspr`).
 - Paste goes to focused app (Claude Code / nvim / Obsidian under `~/AIOS`, etc.)
-- Recording indicator: Waybar `custom/hyprwhspr` shows `mic` / `rec` (`#f00`) / `wait` (`#fa0`). Script: `~/.config/waybar/hyprwhspr-status.sh`. Left-click toggles record; **right-click toggles Mic-OSD overlay**.
+- Recording indicator: Waybar `custom/hyprwhspr` shows `mic` / `rec` (`#f00`) / `wait` (`#fa0`). Script: `~/.config/waybar/hyprwhspr-status.sh` — tooltip lists binds (dictation Super+Shift+Space / Super+Escape + Claude/Cursor TTS Super+Shift+V, with speak on/off). Left-click toggles record; **right-click toggles Mic-OSD overlay**.
 - Overlay switch: `hyprwhspr-ui overlay on|off|toggle` (`~/.Scripts/hyprwhspr-ui`). Waybar stays either way. Service launcher `~/.Scripts/hyprwhspr-service` keeps `wait` working when overlay is off (drop-in `hyprwhspr.service.d/waybar-state.conf`).
 - Mic-OSD rice: `~/.config/hyprwhspr/theme/mic-osd.css` from wal via `hyprwhspr-theme-from-wal` (also run by `chwal` + `hyprwhspr-ui overlay on`). Rounded radius 10 / border 2 + transparent corners via `hyprwhspr_osd_patches.py` injected into the Mic-OSD **daemon**. Position: bottom-left (margin L=16, B=50 above waybar). `layer_rule` blur on namespace `mic-osd`.
 - Gotcha: Arch mesa ships `radeon_icd.json`; tools that look for `radeon_icd.x86_64.json` need a symlink in `/usr/share/vulkan/icd.d/` (already created). User must be in `input`/`audio` groups for ydotool paste (re-login if paste fails after first install).

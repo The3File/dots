@@ -10,17 +10,25 @@ if [[ -f $runtime/visualizer_state ]]; then
 	viz_state="$(tr -d '[:space:]' <"$runtime/visualizer_state" || true)"
 fi
 
+speak_flag="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/claude-speak.on"
+if [[ -f $speak_flag ]]; then
+	speak_state="on"
+else
+	speak_state="off"
+fi
+
 raw="$(/usr/lib/hyprwhspr/config/hyprland/hyprwhspr-tray.sh status 2>/dev/null || true)"
 [[ -n $raw ]] || {
 	printf '%s\n' '{"text":"mic","class":"stopped","tooltip":"hyprwhspr unavailable"}'
 	exit 0
 }
 
-python3 - "$raw" "$viz_state" <<'PY'
+python3 - "$raw" "$viz_state" "$speak_state" <<'PY'
 import json, sys
 
 raw = sys.argv[1]
 viz = (sys.argv[2] or "").lower()
+speak = (sys.argv[3] or "off").lower()
 
 try:
     data = json.loads(raw)
@@ -31,9 +39,28 @@ except Exception:
 cls = data.get("class") or "ready"
 tooltip = data.get("tooltip", "hyprwhspr")
 
-# Prefer our click hints over upstream tray script text.
-hint = "Left-click: toggle record\nRight-click: toggle Mic-OSD overlay"
-lines = [ln for ln in tooltip.split("\n") if not ln.startswith("Left-click:") and not ln.startswith("Right-click:")]
+# Prefer our click + keyboard hints over upstream tray script text.
+hint = (
+    "Dictation (hyprwhspr)\n"
+    "  Super+Shift+Space  toggle record\n"
+    "  Super+Escape         cancel (no paste)\n"
+    "  Left-click           toggle record\n"
+    "  Right-click          Mic-OSD overlay\n"
+    "\n"
+    f"Claude/Cursor TTS (speak: {speak})\n"
+    "  Super+Shift+V        toggle speak"
+)
+lines = [
+    ln for ln in tooltip.split("\n")
+    if not ln.startswith("Left-click:")
+    and not ln.startswith("Right-click:")
+    and not ln.startswith("Dictation")
+    and not ln.startswith("Claude TTS")
+    and not ln.startswith("Claude/Cursor TTS")
+    and not ln.startswith("  Super+")
+    and not ln.startswith("  Left-click")
+    and not ln.startswith("  Right-click")
+]
 # Insert hints after the first status line
 if lines:
     tooltip = lines[0] + "\n\n" + hint + ("\n" + "\n".join(lines[1:]) if len(lines) > 1 else "")

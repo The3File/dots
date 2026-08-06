@@ -40,6 +40,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("dunst")
     hl.exec_cmd("hyprpaper")
     hl.exec_cmd(os.getenv("HOME") .. "/.Scripts/cliphist-watch")
+    hl.exec_cmd("hypridle")
 end)
 
 -----------------------
@@ -48,9 +49,9 @@ end)
 
 hl.config({
     general = {
-        gaps_in  = 7,
-        gaps_out = 15,
-        border_size = 1,
+        gaps_in  = 0,
+        gaps_out = 0,
+        border_size = 2,
         col = {
             active_border   = colors.active_border,
             inactive_border = colors.inactive_border,
@@ -61,14 +62,14 @@ hl.config({
     },
 
     decoration = {
-        rounding         = 10,
-        active_opacity   = 1.0,
-        inactive_opacity = 0.7,
-        dim_inactive     = true,
-        dim_strength     = 0.3,
+        rounding         = 0,
+		  --active_opacity   = 1.0,
+		  --inactive_opacity = 0.7,
+        --dim_inactive     = true,
+        --dim_strength     = 0.3,
 
         blur = {
-            enabled            = true,
+            enabled            = false,
             size               = 6,
             passes             = 4,
             ignore_opacity     = true,
