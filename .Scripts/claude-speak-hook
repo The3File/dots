@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# Claude Code hook: speak Notification / Stop when claude-speak is on.
+# Usage: claude-speak-hook {notification|stop}   (JSON on stdin)
+#
+# Stop uses last_assistant_message (not transcript) — transcript lags and
+# would speak the previous turn. See Claude Code hooks docs.
+
+set -euo pipefail
+
+flag="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/claude-speak.on"
+[[ -f $flag ]] || exit 0
+
+mode=${1:-}
+[[ -n $mode ]] || exit 0
+
+json=$(cat)
+[[ -n $json ]] || exit 0
+
+tts=/home/ringdal/.Scripts/claude-speak-tts
+
+case $mode in
+	notification)
+		msg=$(printf '%s' "$json" | jq -r '.message // empty' 2>/dev/null || true)
+		[[ -n $msg ]] || exit 0
+		"$tts" "$msg"
+		;;
+	stop)
+		# Prefer in-memory final message (correct turn); transcript is async/laggy
+		text=$(printf '%s' "$json" | jq -r '.last_assistant_message // empty' 2>/dev/null || true)
+		if [[ -z $text ]]; then
+			path=$(printf '%s' "$json" | jq -r '.transcript_path // empty' 2>/dev/null || true)
+			if [[ -n $path && -f $path ]]; then
+				text=$(
+					jq -rs '
+						map(select(.type == "assistant"))
+						| last
+						| (.message.content // [])
+						| map(select(.type == "text") | .text)
+						| join("\n")
+					' "$path" 2>/dev/null || true
+				)
+			fi
+		fi
+		[[ -n $text ]] || exit 0
+		"$tts" "$text"
+		;;
+	*)
+		exit 0
+		;;
+esac

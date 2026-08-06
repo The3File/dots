@@ -121,9 +121,9 @@ Bare-repo git wrapper for tracked configs under `$HOME` (not a normal repo in `~
 **Agent habits:**
 - Sync **machine/dotfile** changes with `dot`, not `git` in a random project repo, and not by inventing a second dots workflow.
 - Only sync when the user asks (same rule as normal commits). Summarize what will be included first if unclear.
-- New paths (e.g. `CONTEXT.md`, new `~/.Scripts/…`) must be `dot add`’ed once; afterwards `dot up`’s `commit -am` picks up modifications to tracked files.
-- `~/CONTEXT.md` is **not** in the dots repo unless/until explicitly added — keep updating it locally either way.
-- Repo tracks selected files only (~180); includes `.Scripts/`, Hyprland/alacritty/waybar, etc. Do not bulk-add secrets (keys, tokens, full browser profiles).
+- New paths (e.g. new `~/.Scripts/…`) must be `dot add`’ed once; afterwards `dot up`’s `commit -am` picks up modifications to tracked files.
+- `~/CONTEXT.md` **is** tracked in the dots repo — keep it updated and include it in syncs when the user asks.
+- Repo tracks selected files only (~180); includes `.Scripts/`, Hyprland/alacritty/waybar, etc. Do not bulk-add secrets (keys, tokens, full browser profiles). Skip large local model blobs (Whisper/Piper voices under `~/.local/share/`).
 
 Install from scratch (user docs): `curl` of `.install.bash` from the `dots` repo — see `~/.dotfiles/README.md`.
 
@@ -136,7 +136,25 @@ Install from scratch (user docs): `curl` of `.install.bash` from the `dots` repo
 - Primary browser: **qutebrowser** — Super+O
 - Secondary browser: **brave** — Super+W (`browserAlt` in `hyprland.lua`)
 - Voice dictation: **hyprwhspr** — Super+Shift+Space (toggle start/stop → paste); **Super+Escape** cancels recording (no paste)
-- Claude Code speak (opt-in TTS): **Super+Shift+V** → `claude-speak toggle` (flag `$XDG_RUNTIME_DIR/claude-speak.on`; default off). Hooks in `~/.claude/settings.json` → `claude-speak-hook` + `espeak-ng -v da` (alerts + truncated last reply)
+- Claude Code speak (opt-in TTS): **Super+Shift+V** → `claude-speak toggle` (flag `$XDG_RUNTIME_DIR/claude-speak.on`; default off). Hooks in `~/.claude/settings.json` → `claude-speak-hook` uses **`last_assistant_message`** (not laggy transcript) + `claude-speak-tts` (**Piper** `da_DK-talesyntese-medium`, fallback espeak-ng).
+
+## Claude Code speak (opt-in TTS)
+
+Lokal oplæsning af Claude Code — stille som default; tænd kun når du vil.
+
+| Piece | Path / detail |
+|-------|----------------|
+| Toggle | Super+Shift+V → `~/.Scripts/claude-speak` (`on`/`off`/`toggle`/`status`) |
+| Flag | `$XDG_RUNTIME_DIR/claude-speak.on` (absent = silent) |
+| Hooks | `~/.claude/settings.json` — `Notification` + `Stop`, `async: true` |
+| Hook script | `~/.Scripts/claude-speak-hook` |
+| TTS | `~/.Scripts/claude-speak-tts` |
+| Voice | Piper `da_DK-talesyntese-medium` under `~/.local/share/piper/voices/` (pkg: `piper-tts`); fallback `espeak-ng -v da` |
+
+**Gotchas:**
+- Stop must use JSON field **`last_assistant_message`** — `transcript_path` lags and reads the *previous* turn.
+- Speaks truncated prose (~500 chars), strips fenced code + URLs.
+- Piper voice files are local/data (not in the dots repo).
 - Power menu: **alacritty_bye** — Super+Alt+Shift+Q (`~/.Scripts/alacritty_bye` → `bye`; float/pin 270×150 at 50,860)
 - Clipboard history: **fuzzel_clip** — Super+Insert (`cliphist` + fuzzel; bspwm used `clipmenu`). Watcher: `~/.Scripts/cliphist-watch` (autostart).
 

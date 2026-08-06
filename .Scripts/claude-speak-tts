@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# Shared TTS for Claude speak: Piper Danish when available, else espeak-ng.
+# Usage: claude-speak-tts "text to speak"
+# Env: CLAUDE_SPEAK_MAX_CHARS (default 500)
+
+set -euo pipefail
+
+text=${1:-}
+[[ -n $text ]] || exit 0
+
+MAX_CHARS=${CLAUDE_SPEAK_MAX_CHARS:-500}
+VOICE_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/piper/voices"
+PIPER_MODEL="$VOICE_DIR/da_DK-talesyntese-medium.onnx"
+PIPER_BIN=$(command -v piper-tts || command -v piper || true)
+
+# Drop fenced code blocks + URLs; collapse whitespace
+text=$(printf '%s' "$text" | sed '/^```/,/^```/d')
+text=$(printf '%s' "$text" | sed -E 's|https?://[^[:space:]]+||g')
+text=$(printf '%s' "$text" | tr -d '\000-\010\013\014\016-\037' | tr '\n\r\t' ' ' | sed 's/  */ /g; s/^ //; s/ $//')
+[[ -n $text ]] || exit 0
+
+if ((${#text} > MAX_CHARS)); then
+	text="${text:0:MAX_CHARS}"
+	text="${text% *}…"
+fi
+
+play_wav() {
+	local wav=$1
+	if command -v paplay >/dev/null 2>&1; then
+		paplay "$wav" &>/dev/null
+	elif command -v aplay >/dev/null 2>&1; then
+		aplay -q "$wav" &>/dev/null
+	else
+		return 1
+	fi
+}
+
+if [[ -n $PIPER_BIN && -f $PIPER_MODEL ]]; then
+	wav=$(mktemp --suffix=.wav)
+	if printf '%s' "$text" | "$PIPER_BIN" -m "$PIPER_MODEL" -f "$wav" &>/dev/null; then
+		(
+			play_wav "$wav" || true
+			rm -f "$wav"
+		) &>/dev/null &
+		exit 0
+	fi
+	rm -f "$wav"
+fi
+
+espeak-ng -v da -s 145 -p 40 "$text" &>/dev/null &
