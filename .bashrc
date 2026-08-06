@@ -1,5 +1,8 @@
 # ~/.bashrc
 
+# Drop inherited Mesa aniso force (Hyprland session may still have it until re-login)
+unset R600_TEX_ANISO RADV_ANISO AMD_ANISO 2>/dev/null
+
 [[ -a $HOME/.gpt_key ]] && source $HOME/.gpt_key
 # set vi mode
 set -o vi

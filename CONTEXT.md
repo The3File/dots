@@ -186,6 +186,10 @@ Lokal oplæsning — stille som default; tænd kun når du vil. **Samme toggle**
 - Mic-OSD rice: `~/.config/hyprwhspr/theme/mic-osd.css` from wal via `hyprwhspr-theme-from-wal` (also run by `chwal` + `hyprwhspr-ui overlay on`). Rounded radius 10 / border 2 + transparent corners via `hyprwhspr_osd_patches.py` injected into the Mic-OSD **daemon**. Position: bottom-left (margin L=16, B=50 above waybar). `layer_rule` blur on namespace `mic-osd`.
 - Gotcha: Arch mesa ships `radeon_icd.json`; tools that look for `radeon_icd.x86_64.json` need a symlink in `/usr/share/vulkan/icd.d/` (already created). User must be in `input`/`audio` groups for ydotool paste (re-login if paste fails after first install).
 
+## GPU / Mesa
+
+- Do **not** export `R600_TEX_ANISO` (or `RADV_ANISO` / `AMD_ANISO`) in `~/.profile` — Mesa logs `radeonsi: Forcing anisotropy filter to 8x` on every GL app. Alacritty clears them in `[env]` (empty) because it creates a GL context before the shell runs `unset` in `~/.bashrc`. Hyprland may still have the old exports until re-login.
+
 ## Preferences (add over time)
 
 - Prefer in-session fixes; never restart Hyprland/reboot unless the user asks (see safety rule).
