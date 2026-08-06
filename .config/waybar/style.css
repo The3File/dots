@@ -44,10 +44,29 @@ window#waybar {
 #custom-light,
 #custom-net,
 #custom-bat,
-#custom-clock {
+#custom-clock,
+#custom-hyprwhspr {
     padding: 0 8px;
     color: @foreground;
     background: transparent;
+}
+
+#custom-hyprwhspr {
+    color: @color8;
+}
+
+#custom-hyprwhspr.recording {
+    color: #f00;
+    border-bottom: 2px solid #f00;
+}
+
+#custom-hyprwhspr.processing {
+    color: #fa0;
+    border-bottom: 2px solid #fa0;
+}
+
+#custom-hyprwhspr.error {
+    color: #f00;
 }
 
 #custom-clock {

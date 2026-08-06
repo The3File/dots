@@ -87,6 +87,10 @@ EOF
    hyprctl reload &>/dev/null
    # waybar picks up ~/.cache/wal/colors-waybar.css
    pkill -USR2 waybar 2>/dev/null || true
+   # hyprwhspr Mic-OSD theme (if present)
+   if [[ -x $HOME/.Scripts/hyprwhspr-theme-from-wal ]]; then
+      "$HOME/.Scripts/hyprwhspr-theme-from-wal" &>/dev/null || true
+   fi
 }
 
 add_new_fav(){

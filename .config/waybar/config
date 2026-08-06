@@ -6,6 +6,8 @@
     "modules-left": ["hyprland/workspaces", "custom/sep"],
     "modules-center": [],
     "modules-right": [
+        "custom/hyprwhspr",
+        "custom/sep",
         "custom/vol",
         "custom/light",
         "custom/sep",
@@ -38,6 +40,17 @@
         "format": "||",
         "interval": "once",
         "tooltip": false
+    },
+
+    "custom/hyprwhspr": {
+        "format": "{}",
+        "exec": "$HOME/.config/waybar/hyprwhspr-status.sh",
+        "interval": 1,
+        "return-type": "json",
+        "exec-on-event": true,
+        "on-click": "/usr/lib/hyprwhspr/config/hyprland/hyprwhspr-tray.sh record",
+        "on-click-right": "$HOME/.Scripts/hyprwhspr-ui overlay toggle",
+        "tooltip": true
     },
 
     "custom/vol": {

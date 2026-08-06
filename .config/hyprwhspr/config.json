@@ -1,0 +1,9 @@
+{
+  "$schema": "https://raw.githubusercontent.com/goodroot/hyprwhspr/main/share/config.schema.json",
+  "primary_shortcut": "SUPER+SHIFT+SPACE",
+  "use_hypr_bindings": true,
+  "model": "medium",
+  "language": "da",
+  "whisper_prompt_da": "Transskriber klart, naturligt dansk. Brug korrekt tegnsætning og store bogstaver ved sætningsstart. Behold danske navne, stednavne og fagord præcist som sagt. Opfind ikke ekstra ord.",
+  "pywhispercpp_use_vad": true
+}
