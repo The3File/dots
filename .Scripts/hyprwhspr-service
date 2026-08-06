@@ -59,6 +59,73 @@ class WaybarStatePresenter:
         return
 
 
+def _perf(action: str) -> None:
+    """Fire hyprwhspr-perf in the background; never block dictation."""
+    import subprocess
+
+    script = Path("/home/ringdal/.Scripts/hyprwhspr-perf")
+    try:
+        if not script.is_file():
+            return
+        subprocess.Popen(
+            [str(script), action],
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            start_new_session=True,
+        )
+    except Exception as e:
+        print(f"[WARN] hyprwhspr-perf {action} failed: {e}", flush=True)
+
+
+_BUSY_STATES = frozenset({"recording", "processing", "paused"})
+
+
+def _wrap_presenter_perf(runner) -> None:
+    """Boost TLP while presenter reports busy; restore on clear/hide."""
+    if runner is None or getattr(runner, "_hyprwhspr_perf_wrapped", False):
+        return
+
+    orig_set = runner.set_state
+    orig_clear = runner.clear_state
+    orig_hide = getattr(runner, "hide", None)
+    orig_stop = getattr(runner, "stop", None)
+
+    def set_state(state: str, *args, **kwargs):
+        cleaned = (state or "").strip().lower()
+        if cleaned in _BUSY_STATES:
+            _perf("boost")
+        elif cleaned in ("success", "error", "ready", "idle", ""):
+            _perf("restore")
+        return orig_set(state, *args, **kwargs)
+
+    def clear_state(*args, **kwargs):
+        _perf("restore")
+        return orig_clear(*args, **kwargs)
+
+    runner.set_state = set_state  # type: ignore[method-assign]
+    runner.clear_state = clear_state  # type: ignore[method-assign]
+
+    if callable(orig_hide):
+
+        def hide(*args, **kwargs):
+            _perf("restore")
+            return orig_hide(*args, **kwargs)
+
+        runner.hide = hide  # type: ignore[method-assign]
+
+    if callable(orig_stop):
+
+        def stop(*args, **kwargs):
+            _perf("restore")
+            return orig_stop(*args, **kwargs)
+
+        runner.stop = stop  # type: ignore[method-assign]
+
+    runner._hyprwhspr_perf_wrapped = True
+
+
+
 def _ensure_daemon_with_patches(self) -> bool:
     """Upstream MicOSDRunner._ensure_daemon with rice patch import injected."""
     import signal
@@ -169,6 +236,8 @@ def _patch() -> None:
         if getattr(self, "_mic_osd_runner", None) is None:
             self._mic_osd_runner = WaybarStatePresenter()
             print("[INIT] Waybar state presenter enabled (no OSD UI)", flush=True)
+        _wrap_presenter_perf(getattr(self, "_mic_osd_runner", None))
+        print("[INIT] hyprwhspr-perf boost on recording/processing", flush=True)
 
     hypr_main.hyprwhsprApp.__init__ = patched_init
     hypr_main.main()

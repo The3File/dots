@@ -6,7 +6,7 @@ local ok, colors = pcall(require, "colors")
 if not ok then
     colors = {
         active_border   = "rgb(5ca7a5)",
-        inactive_border = "rgb(191a1a)",
+        inactive_border = "rgb(4a5750)",
     }
 end
 
@@ -17,7 +17,7 @@ end
 local terminal    = "alacritty"
 local fileManager = "alacritty -e lf"
 local browser     = "qutebrowser"
-local browserAlt  = "firefox"
+local browserAlt  = "brave"
 local mod         = "SUPER"
 
 ------------------
@@ -39,6 +39,11 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("waybar")
     hl.exec_cmd("dunst")
     hl.exec_cmd("hyprpaper")
+    hl.exec_cmd(os.getenv("HOME") .. "/.Scripts/cliphist-watch")
+    hl.exec_cmd("hypridle")
+    -- TTY→Hyprland never reaches graphical-session.target, so the enabled
+    -- user unit (WantedBy=graphical-session.target) does not auto-start.
+    hl.exec_cmd("systemctl --user start hyprwhspr.service")
 end)
 
 -----------------------
@@ -47,8 +52,8 @@ end)
 
 hl.config({
     general = {
-        gaps_in  = 5,
-        gaps_out = 10,
+        gaps_in  = 0,
+        gaps_out = 0,
         border_size = 2,
         col = {
             active_border   = colors.active_border,
@@ -60,14 +65,16 @@ hl.config({
     },
 
     decoration = {
-        rounding         = 15,
-        active_opacity   = 1.0,
-        inactive_opacity = 1.0,
+        rounding         = 0,
+		  --active_opacity   = 1.0,
+		  --inactive_opacity = 0.7,
+        --dim_inactive     = true,
+        --dim_strength     = 0.3,
 
         blur = {
-            enabled            = true,
-            size               = 3,
-            passes             = 3,
+            enabled            = false,
+            size               = 6,
+            passes             = 4,
             ignore_opacity     = true,
             new_optimizations  = true,
             xray               = false,
@@ -115,7 +122,39 @@ hl.config({
     },
 })
 
--- gestures: swipe off unless you add hl.gesture({ fingers = 3, direction = "horizontal", action = "workspace" })
+hl.gesture({
+    fingers = 3,
+    direction = "horizontal",
+    action = "workspace",
+})
+
+local function scratchterm_shown()
+    local s = hl.get_active_special_workspace()
+    return s and s.name:gsub("^special:", "") == "scratchterm"
+end
+
+-- Down opens only; up closes only (Super+P still toggles)
+hl.gesture({
+    fingers = 3,
+    direction = "down",
+    action = function()
+        if scratchterm_shown() then
+            return
+        end
+        hl.exec_cmd(os.getenv("HOME") .. "/.Scripts/scratch term")
+    end,
+})
+
+hl.gesture({
+    fingers = 3,
+    direction = "up",
+    action = function()
+        if not scratchterm_shown() then
+            return
+        end
+        hl.dispatch(hl.dsp.workspace.toggle_special("scratchterm"))
+    end,
+})
 
 hl.curve("easeOut", { type = "bezier", points = { { 0.16, 1 }, { 0.3, 1 } } })
 hl.animation({ leaf = "windows",    enabled = true, speed = 3, bezier = "easeOut", style = "popin 80%" })
@@ -135,6 +174,18 @@ hl.bind(mod .. " + SHIFT + Return", hl.dsp.exec_cmd(terminal .. " --class float"
 hl.bind(mod .. " + O", hl.dsp.exec_cmd(browser))
 hl.bind(mod .. " + W", hl.dsp.exec_cmd(browserAlt))
 hl.bind(mod .. " + E", hl.dsp.exec_cmd(fileManager))
+hl.bind(mod .. " + D", function()
+    hl.exec_cmd("/home/ringdal/.Scripts/fuzzel_drun")
+end)
+-- Clipboard history (bspwm: super + Insert → clipmenu)
+hl.bind(mod .. " + Insert", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scripts/fuzzel_clip"))
+
+-- Voice dictation (hyprwhspr): press to start, press again to paste
+hl.bind(mod .. " + SHIFT + Space", hl.dsp.exec_cmd("hyprwhspr record toggle"))
+-- Cancel recording without pasting (discard audio)
+hl.bind(mod .. " + Escape", hl.dsp.exec_cmd("hyprwhspr record cancel"))
+-- Claude Code speak on/off (opt-in TTS via hooks)
+hl.bind(mod .. " + SHIFT + V", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scripts/claude-speak toggle"))
 
 -- Kill / force kill
 hl.bind(mod .. " + Q", hl.dsp.window.close())
@@ -143,6 +194,8 @@ hl.bind(mod .. " + SHIFT + Q", hl.dsp.window.kill())
 -- Reload / exit
 hl.bind(mod .. " + SHIFT + R", hl.dsp.exec_cmd("hyprctl reload"))
 hl.bind(mod .. " + SHIFT + Escape", hl.dsp.exit())
+-- Power menu (bspwm: super + alt + shift + q → alacritty_bye)
+hl.bind(mod .. " + ALT + SHIFT + Q", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scripts/alacritty_bye"))
 
 -- Focus
 hl.bind(mod .. " + H", hl.dsp.focus({ direction = "left" }))
@@ -195,28 +248,37 @@ hl.bind("ALT + SHIFT + L", hl.dsp.window.move({ x = 20, y = 0, relative = true }
 hl.bind(mod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
 hl.bind(mod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 
--- Volume
-hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("pamixer -i 5"), { locked = true, repeating = true })
-hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("pamixer -d 5"), { locked = true, repeating = true })
-hl.bind("XF86AudioMute", hl.dsp.exec_cmd("pamixer -t"), { locked = true })
-hl.bind(mod .. " + XF86AudioRaiseVolume", hl.dsp.exec_cmd("pamixer --allow-boost -i 5"), { locked = true })
-hl.bind(mod .. " + XF86AudioLowerVolume", hl.dsp.exec_cmd("pamixer --allow-boost -d 5"), { locked = true })
+-- Volume (RTMIN+1 refreshes waybar custom/vol)
+hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("pamixer -i 5; pkill -RTMIN+1 waybar"), { locked = true, repeating = true })
+hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("pamixer -d 5; pkill -RTMIN+1 waybar"), { locked = true, repeating = true })
+hl.bind("XF86AudioMute", hl.dsp.exec_cmd("pamixer -t; pkill -RTMIN+1 waybar"), { locked = true })
+hl.bind(mod .. " + XF86AudioRaiseVolume", hl.dsp.exec_cmd("pamixer --allow-boost -i 5; pkill -RTMIN+1 waybar"), { locked = true })
+hl.bind(mod .. " + XF86AudioLowerVolume", hl.dsp.exec_cmd("pamixer --allow-boost -d 5; pkill -RTMIN+1 waybar"), { locked = true })
 
--- Brightness
-hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("sudo light -A 5"), { locked = true, repeating = true })
-hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("sudo light -U 5"), { locked = true, repeating = true })
+-- Brightness (RTMIN+2 refreshes waybar custom/light)
+hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("sudo light -A 5; pkill -RTMIN+2 waybar"), { locked = true, repeating = true })
+hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("sudo light -U 5; pkill -RTMIN+2 waybar"), { locked = true, repeating = true })
 
 ----------------------
 ---- WINDOW RULES ----
 ----------------------
 
-local float_classes = { "float", "bye", "cal", "net", "gass", "files", "follow" }
+local float_classes = { "float", "cal", "net", "gass", "files", "follow" }
 for _, cls in ipairs(float_classes) do
     hl.window_rule({
         match = { class = "^(" .. cls .. ")$" },
         float = true,
     })
 end
+
+-- Power menu (bspwm: bye rectangle 270x150+50+860, sticky)
+hl.window_rule({
+    match = { class = "^(bye)$" },
+    float = true,
+    pin = true,
+    size = { 270, 150 },
+    move = { 50, 860 },
+})
 
 hl.window_rule({
     match = { class = "^(scratchterm)$" },
@@ -230,6 +292,49 @@ hl.window_rule({
     size = { 1000, 400 },
     workspace = "special:scratchmath",
 })
+
+-- Keep non-scratch apps off special workspaces. While a scratch is open,
+-- Hyprland would otherwise spawn new windows there (behind the scratch float).
+local scratch_classes = {
+    scratchterm = true,
+    scratchmath = true,
+}
+
+hl.on("window.open", function(win)
+    local ws = win.workspace
+    if not (ws and ws.special) then
+        return
+    end
+
+    local cls = win.initial_class
+    if cls == nil or cls == "" then
+        cls = win.class
+    end
+    if scratch_classes[cls] then
+        return
+    end
+
+    local mon = win.monitor or hl.get_active_monitor()
+    local target = mon and mon.active_workspace
+    if not target or target.special then
+        return
+    end
+
+    hl.dispatch(hl.dsp.window.move({
+        workspace = target,
+        follow = true,
+        window = win,
+    }))
+
+    -- Dismiss scratch so the new window isn't hidden behind it.
+    local special = mon.active_special_workspace
+    if special then
+        local name = special.name:gsub("^special:", "")
+        if name ~= "" then
+            hl.dispatch(hl.dsp.workspace.toggle_special(name))
+        end
+    end
+end)
 
 hl.window_rule({
     match = { class = "^(fullscreen)$" },
@@ -253,9 +358,21 @@ hl.window_rule({
     tile = true,
 })
 
--- Blur translucent layers (waybar)
+-- Blur translucent layers (waybar, fuzzel launcher, hyprwhspr mic-osd)
 hl.layer_rule({
     match = { namespace = "waybar" },
+    blur = true,
+    ignore_alpha = 0.2,
+})
+
+hl.layer_rule({
+    match = { namespace = "launcher" },
+    blur = true,
+    ignore_alpha = 0.2,
+})
+
+hl.layer_rule({
+    match = { namespace = "mic-osd" },
     blur = true,
     ignore_alpha = 0.2,
 })

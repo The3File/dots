@@ -16,6 +16,13 @@ OSD_BORDER_WIDTH = 2
 OSD_MARGIN_BOTTOM = 50
 OSD_MARGIN_LEFT = 16
 
+# Waveform drama: level-feed buckets are raw RMS (~0.001–0.02 on this ThinkPad
+# mic). Upstream amplification=4.0 leaves bars near the noise floor.
+OSD_WAVEFORM_GAIN = 75.0
+OSD_WAVEFORM_GAMMA = 0.78  # <1 expands quiet speech into visible motion
+OSD_WAVEFORM_RISE = 0.68
+OSD_WAVEFORM_DECAY = 0.80
+
 
 def _rounded_rect(cr, x: float, y: float, w: float, h: float, radius: float) -> None:
     radius = min(radius, w / 2.0, h / 2.0)
@@ -97,6 +104,72 @@ def apply_osd_position() -> None:
     OSDWindow._setup_layer_shell = _setup_layer_shell
 
 
+def apply_osd_waveform_drama() -> None:
+    """Punchier Mic-OSD bars for quiet laptop mics."""
+    import numpy as np
+    from mic_osd.visualizations.base import BaseVisualization
+    from mic_osd.visualizations.waveform import WaveformVisualization
+
+    _orig_init = WaveformVisualization.__init__
+
+    def _init(self, *args, **kwargs):
+        _orig_init(self, *args, **kwargs)
+        self.amplification = OSD_WAVEFORM_GAIN
+        self.rise_rate = OSD_WAVEFORM_RISE
+        self.decay_rate = OSD_WAVEFORM_DECAY
+
+    def update(self, level: float, samples: np.ndarray = None):
+        BaseVisualization.update(self, level, samples)
+
+        if samples is not None and len(samples) > 0:
+            # Level feed already sends one RMS bucket per bar (num_bars floats).
+            # Fall back to chunking if a raw PCM buffer arrives instead.
+            if len(samples) == self.num_bars:
+                bucket_rms = np.asarray(samples, dtype=np.float64)
+            else:
+                chunk_size = len(samples) // self.num_bars
+                if chunk_size <= 0:
+                    self.bar_heights *= self.decay_rate
+                    self.state_manager.update()
+                    return
+                bucket_rms = np.array(
+                    [
+                        float(
+                            np.sqrt(
+                                np.mean(
+                                    samples[i * chunk_size : (i + 1) * chunk_size] ** 2
+                                )
+                            )
+                        )
+                        for i in range(self.num_bars)
+                    ],
+                    dtype=np.float64,
+                )
+
+            # Gain + gamma: quiet speech becomes large motion; loud still caps at 1.
+            scaled = np.clip(bucket_rms * self.amplification, 0.0, None)
+            new_heights = np.clip(np.power(scaled, OSD_WAVEFORM_GAMMA), 0.0, 1.0)
+
+            for i in range(self.num_bars):
+                if new_heights[i] > self.bar_heights[i]:
+                    self.bar_heights[i] = (
+                        self.rise_rate * new_heights[i]
+                        + (1 - self.rise_rate) * self.bar_heights[i]
+                    )
+                else:
+                    self.bar_heights[i] *= self.decay_rate
+                    if self.bar_heights[i] < new_heights[i]:
+                        self.bar_heights[i] = new_heights[i]
+        else:
+            self.bar_heights *= self.decay_rate
+
+        self.state_manager.update()
+
+    WaveformVisualization.__init__ = _init
+    WaveformVisualization.update = update
+
+
 def apply_all() -> None:
     apply_osd_chrome()
     apply_osd_position()
+    apply_osd_waveform_drama()

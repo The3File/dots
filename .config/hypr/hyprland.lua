@@ -128,20 +128,20 @@ hl.gesture({
     action = "workspace",
 })
 
-local function scratchterm_shown()
+local function scratchaios_shown()
     local s = hl.get_active_special_workspace()
-    return s and s.name:gsub("^special:", "") == "scratchterm"
+    return s and s.name:gsub("^special:", "") == "scratchaios"
 end
 
--- Down opens only; up closes only (Super+P still toggles)
+-- Down opens only; up closes only (Super+A still toggles)
 hl.gesture({
     fingers = 3,
     direction = "down",
     action = function()
-        if scratchterm_shown() then
+        if scratchaios_shown() then
             return
         end
-        hl.exec_cmd(os.getenv("HOME") .. "/.Scripts/scratch term")
+        hl.exec_cmd(os.getenv("HOME") .. "/.Scripts/scratch aios")
     end,
 })
 
@@ -149,10 +149,10 @@ hl.gesture({
     fingers = 3,
     direction = "up",
     action = function()
-        if not scratchterm_shown() then
+        if not scratchaios_shown() then
             return
         end
-        hl.dispatch(hl.dsp.workspace.toggle_special("scratchterm"))
+        hl.dispatch(hl.dsp.workspace.toggle_special("scratchaios"))
     end,
 })
 
@@ -225,7 +225,7 @@ hl.bind(mod .. " + grave", hl.dsp.focus({ last = true }))
 
 -- Scratchpads
 hl.bind(mod .. " + P", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scripts/scratch term"))
-hl.bind(mod .. " + A", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scripts/scratch math"))
+hl.bind(mod .. " + A", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scripts/scratch aios"))
 
 -- Window states
 hl.bind(mod .. " + T", hl.dsp.window.float({ action = "toggle" }))
@@ -283,21 +283,24 @@ hl.window_rule({
 hl.window_rule({
     match = { class = "^(scratchterm)$" },
     float = true,
+    size = { 1065, 612 },
+    move = { 809, 48 },
     workspace = "special:scratchterm",
 })
 
 hl.window_rule({
-    match = { class = "^(scratchmath)$" },
+    match = { class = "^(scratchaios)$" },
     float = true,
-    size = { 1000, 400 },
-    workspace = "special:scratchmath",
+    size = { 1060, 960 },
+    center = true,
+    workspace = "special:scratchaios",
 })
 
 -- Keep non-scratch apps off special workspaces. While a scratch is open,
 -- Hyprland would otherwise spawn new windows there (behind the scratch float).
 local scratch_classes = {
     scratchterm = true,
-    scratchmath = true,
+    scratchaios = true,
 }
 
 hl.on("window.open", function(win)

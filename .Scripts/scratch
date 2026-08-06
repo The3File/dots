@@ -22,11 +22,14 @@ hypr_toggle() {
 	fi
 }
 
-hypr_math() {
-	cas="qalc"
-	#cas="sage"
-	cls="scratchmath"
-	hypr_toggle $TERMINAL --class $cls,$cls -e $cas
+hypr_aios() {
+	cls="scratchaios"
+	local aios_dir="${HOME}/AIOS"
+	if tmux has-session -t '=AIOS' 2>/dev/null; then
+		hypr_toggle $TERMINAL --class $cls,$cls -e tmux a -t '=AIOS'
+	else
+		hypr_toggle $TERMINAL --class $cls,$cls -e tmux new -s 'AIOS' -c "$aios_dir" claude
+	fi
 }
 
 hypr_term() {
@@ -43,16 +46,16 @@ hypr_term() {
 get_id(){ id="$(xdotool search --class $cls)"; }
 toggle(){ bspc node "$id" --flag hidden -f; exit; }
 
-math(){
-	is_wayland && { hypr_math; return; }
+aios(){
+	is_wayland && { hypr_aios; return; }
 
-	cas="qalc"
-	#cas="sage"
-	cls="scratchmath"; get_id
-	[[ -z "$id" ]] && { $TERMINAL\
-		-o "window.position: {x: 1000, y: 700}"\
-		-o "window.dimensions: {columns: 86, lines: 14}"\
-		--class $cls,$cls -e $cas; } || toggle
+	cls="scratchaios"; get_id
+	[[ -z "$id" ]] || toggle
+
+	local aios_dir="${HOME}/AIOS"
+	tmux has-session -t '=AIOS' 2>/dev/null &&
+		{ $TERMINAL --class $cls,$cls -e tmux a -t '=AIOS'; } ||
+		{ $TERMINAL --class $cls,$cls -e tmux new -s 'AIOS' -c "$aios_dir" claude; }
 }
 
 term(){
