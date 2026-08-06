@@ -41,6 +41,9 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("hyprpaper")
     hl.exec_cmd(os.getenv("HOME") .. "/.Scripts/cliphist-watch")
     hl.exec_cmd("hypridle")
+    -- TTY→Hyprland never reaches graphical-session.target, so the enabled
+    -- user unit (WantedBy=graphical-session.target) does not auto-start.
+    hl.exec_cmd("systemctl --user start hyprwhspr.service")
 end)
 
 -----------------------

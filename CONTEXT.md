@@ -150,6 +150,8 @@ DPMS under Lua Hyprland: `hyprctl dispatch 'hl.dsp.dpms({action = "disable"})'` 
 - Remaining `.pacnew` under `/etc` (sudoers, pam, mirrorlist, libvirt, …) left unmerged on purpose — review before touching.
 - libvirt storage pool `mnt` undefined (path `~/mnt` missing). Pools `default` / `pool` / `ringdal` remain.
 - After orphan cleanup, **go** and **rust** were reinstalled explicitly (`.cargo` in use).
+- **vconsole:** late `systemd-vconsole-setup` restart (udev `90-vconsole.rules` on vtcon add) fails `loadkeys` once Hyprland owns the VT. Drop-in `/etc/systemd/system/systemd-vconsole-setup.service.d/graphics-mode.conf` → `SuccessExitStatus=1`. Early boot still applies `KEYMAP=dk-latin1` from `/etc/vconsole.conf`.
+- **libfprint:** unowned leftover `/usr/lib/udev/rules.d/40-libfprint0-custom.rules` (Validity `147e:2020` + missing `plugdev` group) removed 2026-08; this machine is Goodix `27c6:6594` via `libfprint-tod-git`.
 
 ## Claude Code / Cursor speak (opt-in TTS)
 
@@ -175,7 +177,7 @@ Lokal oplæsning — stille som default; tænd kun når du vil. **Samme toggle**
 ## hyprwhspr (dansk diktering)
 
 - Config: `~/.config/hyprwhspr/config.json` — `language=da`, `recording_mode=toggle`, model `small`, `use_hypr_bindings=true`, `paste_mode=null` (auto: terminals → Ctrl+Shift+V, else Ctrl+V)
-- Service: `systemctl --user status hyprwhspr` (enabled)
+- Service: `systemctl --user status hyprwhspr` (enabled; also started from `hyprland.start` because TTY→Hyprland never activates `graphical-session.target`)
 - Bind: `hyprwhspr record toggle` in `hyprland.lua` (Super+Shift+Space); cancel: `hyprwhspr record cancel` (Super+Escape)
 - Models: `~/.local/share/pywhispercpp/models/` — active **`large-v3-turbo`** (da) + Silero VAD; backend pywhispercpp/Vulkan on AMD iGPU. `medium`/`small`/`base` still on disk for rollback (`"model": "medium"` + `systemctl --user restart hyprwhspr`).
 - Paste goes to focused app (Claude Code / nvim / Obsidian under `~/AIOS`, etc.)
