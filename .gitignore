@@ -1,0 +1,6 @@
+.dotfiles
+install.bash
+README.md
+.config/wall.png
+.config/QtProject.conf
+.config/dconf/user

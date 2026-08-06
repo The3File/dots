@@ -180,6 +180,8 @@ hl.bind(mod .. " + Insert", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scripts/fuzz
 hl.bind(mod .. " + SHIFT + Space", hl.dsp.exec_cmd("hyprwhspr record toggle"))
 -- Cancel recording without pasting (discard audio)
 hl.bind(mod .. " + Escape", hl.dsp.exec_cmd("hyprwhspr record cancel"))
+-- Claude Code speak on/off (opt-in TTS via hooks)
+hl.bind(mod .. " + SHIFT + V", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scripts/claude-speak toggle"))
 
 -- Kill / force kill
 hl.bind(mod .. " + Q", hl.dsp.window.close())

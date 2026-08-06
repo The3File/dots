@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# Wayland app launcher for Hyprland (Super+D). Uses fuzzel + pywal colors.
+# Styled to match the rice: Terminus, radius 10, color4 frame, translucent color0 + blur.
+
+set -eo pipefail
+
+conf_dir="${XDG_CONFIG_HOME:-$HOME/.config}/fuzzel"
+mkdir -p "$conf_dir"
+
+hex() {
+	local c="${1#\#}"
+	printf '%s%s' "$c" "${2:-ff}"
+}
+
+color0="#191a1a"
+color4="#5ca7a5"
+color5="#c3a170"
+color7="#c5c5c5"
+color8="#525353"
+
+if [[ -f $HOME/.cache/wal/colors.sh ]]; then
+	# Extract only colorN= lines — full colors.sh trips `set -u` (FZF_DEFAULT_OPTS).
+	eval "$(grep -E '^color[0-9]+=' "$HOME/.cache/wal/colors.sh")"
+fi
+
+# ~80% opaque like dunst transparency=20; hyprland blurs the launcher layer.
+bg=$(hex "$color0" cc)
+fg=$(hex "$color7")
+accent=$(hex "$color4")
+prompt_fg=$(hex "$color5")
+muted=$(hex "$color8")
+sel_fg=$(hex "$color0")
+
+cat >"$conf_dir/fuzzel.ini" <<EOF
+font=Terminus:size=14
+dpi-aware=no
+prompt="apps: "
+icons-enabled=no
+layer=overlay
+anchor=center
+lines=12
+width=48
+horizontal-pad=20
+vertical-pad=16
+inner-pad=10
+keyboard-focus=exclusive
+exit-on-keyboard-focus-loss=no
+
+[colors]
+background=$bg
+text=$fg
+prompt=$prompt_fg
+input=$fg
+match=$accent
+selection=$accent
+selection-text=$sel_fg
+selection-match=$sel_fg
+border=$accent
+counter=$muted
+
+[border]
+width=2
+radius=10
+selection-radius=6
+EOF
+
+exec /usr/bin/fuzzel

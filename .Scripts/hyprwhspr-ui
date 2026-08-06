@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+# Easy switch for hyprwhspr recording UI.
+# Waybar (mic/rec/wait) is always on. Overlay (Mic-OSD) is optional.
+#
+# Usage:
+#   hyprwhspr-ui              # status
+#   hyprwhspr-ui overlay      # status of overlay
+#   hyprwhspr-ui overlay on
+#   hyprwhspr-ui overlay off
+#   hyprwhspr-ui overlay toggle
+
+set -euo pipefail
+
+notify() {
+	command -v notify-send >/dev/null 2>&1 || return 0
+	notify-send -a hyprwhspr -t 2500 "hyprwhspr" "$1" 2>/dev/null || true
+}
+
+overlay_enabled() {
+	python3 - <<'PY'
+import json, subprocess, re, sys
+out = subprocess.check_output(["hyprwhspr", "config", "show", "--all"], text=True, stderr=subprocess.DEVNULL)
+m = re.search(r"\{[\s\S]*\}", out)
+sys.exit(0 if m and json.loads(m.group()).get("mic_osd_enabled") is True else 1)
+PY
+}
+
+overlay_status() {
+	if overlay_enabled; then
+		echo "overlay: on  (Mic-OSD + Waybar)"
+	else
+		echo "overlay: off (Waybar only)"
+	fi
+}
+
+restart_service() {
+	# Drop leftover OSD daemons when turning overlay off.
+	pkill -f 'mic_osd.main|mic-osd.*--daemon' 2>/dev/null || true
+	systemctl --user restart hyprwhspr.service
+}
+
+overlay_on() {
+	# Refresh wal-matched theme before showing overlay
+	if [[ -x $HOME/.Scripts/hyprwhspr-theme-from-wal ]]; then
+		"$HOME/.Scripts/hyprwhspr-theme-from-wal" >/dev/null || true
+	fi
+	hyprwhspr mic-osd enable >/dev/null
+	restart_service
+	notify "Overlay on (Mic-OSD + Waybar)"
+	overlay_status
+}
+
+overlay_off() {
+	hyprwhspr mic-osd disable >/dev/null
+	restart_service
+	notify "Overlay off (Waybar only)"
+	overlay_status
+}
+
+overlay_toggle() {
+	if overlay_enabled; then
+		overlay_off
+	else
+		overlay_on
+	fi
+}
+
+usage() {
+	cat <<'EOF'
+hyprwhspr-ui — switch recording indicators
+
+  hyprwhspr-ui                 show status
+  hyprwhspr-ui overlay         show overlay status
+  hyprwhspr-ui overlay on      enable Mic-OSD overlay (+ Waybar)
+  hyprwhspr-ui overlay off     Waybar only
+  hyprwhspr-ui overlay toggle  flip overlay
+
+Waybar tip: right-click mic/rec/wait to toggle overlay.
+EOF
+}
+
+cmd="${1:-status}"
+case "$cmd" in
+	-h|--help|help) usage ;;
+	status|"")
+		overlay_status
+		systemctl --user is-active --quiet hyprwhspr.service && echo "service: active" || echo "service: inactive"
+		;;
+	overlay)
+		case "${2:-status}" in
+			on|enable) overlay_on ;;
+			off|disable) overlay_off ;;
+			toggle) overlay_toggle ;;
+			status|"") overlay_status ;;
+			*) usage; exit 1 ;;
+		esac
+		;;
+	# Shorthand
+	on|enable) overlay_on ;;
+	off|disable) overlay_off ;;
+	toggle) overlay_toggle ;;
+	*) usage; exit 1 ;;
+esac

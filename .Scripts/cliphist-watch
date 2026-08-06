@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Keep cliphist fed from Wayland clipboard (+ primary). Restart-safe.
+
+set -euo pipefail
+
+pkill -f 'wl-paste .+ cliphist store' 2>/dev/null || true
+# Let previous watchers die before respawning
+sleep 0.05
+
+wl-paste --type text --watch cliphist store &
+wl-paste --type image --watch cliphist store &
+wl-paste --primary --type text --watch cliphist store &
