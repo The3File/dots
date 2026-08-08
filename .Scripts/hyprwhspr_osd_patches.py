@@ -169,7 +169,96 @@ def apply_osd_waveform_drama() -> None:
     WaveformVisualization.update = update
 
 
+def apply_osd_elapsed_fix() -> None:
+    """Fix Mic-OSD MM:SS drifting across recordings.
+
+    Upstream leaves WaveformVisualization._recording_start_time set when cancel
+    (or any path) hides without writing a non-recording state. The next take
+    writes ``recording`` again; the daemon poll skips ``set_state`` because
+    ``_last_visualizer_state`` is still ``recording``, so the clock keeps
+    counting from the previous take.
+
+    Also freeze the clock on ``processing`` (like pause) instead of zeroing it.
+    """
+    import time
+
+    from mic_osd.main import MicOSD, VISUALIZER_STATE_FILE
+    from mic_osd.visualizations.waveform import WaveformVisualization
+
+    def _reset_elapsed(viz) -> None:
+        if viz is None:
+            return
+        if hasattr(viz, "_recording_start_time"):
+            viz._recording_start_time = None
+            viz._elapsed_seconds = 0.0
+            viz._show_elapsed_time = False
+
+    def set_state(self, state_str: str) -> None:
+        self.state_manager.set_state_from_string(state_str)
+
+        if state_str == "recording":
+            if self._recording_start_time is None:
+                self._recording_start_time = time.time()
+            self._show_elapsed_time = True
+        elif state_str in ("paused", "processing"):
+            # Freeze: keep final duration visible, stop incrementing.
+            if self._recording_start_time is not None:
+                self._elapsed_seconds += time.time() - self._recording_start_time
+                self._recording_start_time = None
+            self._show_elapsed_time = True
+        else:
+            self._recording_start_time = None
+            self._elapsed_seconds = 0.0
+            self._show_elapsed_time = False
+
+    WaveformVisualization.set_state = set_state
+
+    _orig_hide = MicOSD._hide
+
+    def _hide(self):
+        _orig_hide(self)
+        # Next show must re-apply state even if it is again "recording".
+        self._last_visualizer_state = None
+        _reset_elapsed(getattr(self, "visualization", None))
+
+    MicOSD._hide = _hide
+
+    _orig_show = MicOSD._show
+
+    def _show(self):
+        already_visible = bool(
+            self.visible and self.audio_monitor and self.update_timer_id
+        )
+        # Force poll / re-apply so a new session cannot inherit the prior clock.
+        self._last_visualizer_state = None
+        _orig_show(self)
+
+        if not already_visible:
+            return
+
+        # Upstream _show early-returns when still visible (e.g. success animation
+        # interrupted by a new take). Re-read state and start a fresh clock.
+        state = "recording"
+        try:
+            if VISUALIZER_STATE_FILE.exists():
+                state = VISUALIZER_STATE_FILE.read_text().strip() or "recording"
+        except Exception:
+            pass
+
+        self._last_visualizer_state = state
+        viz = getattr(self, "visualization", None)
+        if state == "recording":
+            _reset_elapsed(viz)
+        if viz is not None and hasattr(viz, "set_state"):
+            viz.set_state(state)
+        if self.window and hasattr(self.window, "set_visualizer_state"):
+            self.window.set_visualizer_state(state)
+
+    MicOSD._show = _show
+
+
 def apply_all() -> None:
     apply_osd_chrome()
     apply_osd_position()
     apply_osd_waveform_drama()
+    apply_osd_elapsed_fix()

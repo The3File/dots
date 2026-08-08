@@ -181,7 +181,7 @@ end)
 hl.bind(mod .. " + Insert", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scripts/fuzzel_clip"))
 
 -- Voice dictation (hyprwhspr): press to start, press again to paste
-hl.bind(mod .. " + SHIFT + Space", hl.dsp.exec_cmd("hyprwhspr record toggle"))
+hl.bind(mod .. " + Space", hl.dsp.exec_cmd("hyprwhspr record toggle"))
 -- Cancel recording without pasting (discard audio)
 hl.bind(mod .. " + Escape", hl.dsp.exec_cmd("hyprwhspr record cancel"))
 -- Claude Code speak on/off (opt-in TTS via hooks)
