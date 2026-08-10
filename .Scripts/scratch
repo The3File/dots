@@ -28,7 +28,7 @@ hypr_aios() {
 	if tmux has-session -t '=AIOS' 2>/dev/null; then
 		hypr_toggle $TERMINAL --class $cls,$cls -e tmux a -t '=AIOS'
 	else
-		hypr_toggle $TERMINAL --class $cls,$cls -e tmux new -s 'AIOS' -c "$aios_dir" claude
+		hypr_toggle $TERMINAL --class $cls,$cls -e tmux new -s 'AIOS' -c "$aios_dir" "${HOME}/AIOS/aios"
 	fi
 }
 
@@ -55,7 +55,7 @@ aios(){
 	local aios_dir="${HOME}/AIOS"
 	tmux has-session -t '=AIOS' 2>/dev/null &&
 		{ $TERMINAL --class $cls,$cls -e tmux a -t '=AIOS'; } ||
-		{ $TERMINAL --class $cls,$cls -e tmux new -s 'AIOS' -c "$aios_dir" claude; }
+		{ $TERMINAL --class $cls,$cls -e tmux new -s 'AIOS' -c "$aios_dir" "${HOME}/AIOS/aios"; }
 }
 
 term(){
