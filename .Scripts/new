@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+bash_script(){ 
+   printf '%s\n\n%s\n\n%s' "#!/usr/bin/env bash"\
+      "main(){<++>}" "main \"\$@\"" > "$n"
+   chmod a+x "$n"; nvim "$n"
+}
+
+possix_script(){ 
+   printf '%s\n\n%s' "#!/bin/sh" "<++>" > "$n"
+   chmod a+x "$n"; nvim "$n"
+}
+
+main(){
+	[[ "$2" ]] && n="$2" || read -rp $'\r\e[K'"name: " n || exit 0
+   case "$1" in
+      bash) bash_script ;;
+      sh) possix_script ;;
+   esac
+}
+
+main "$@"

@@ -1,0 +1,3 @@
+# ThinkPad extras (packages only)
+tlp
+thinkfan

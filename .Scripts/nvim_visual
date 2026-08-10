@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# $VISUAL / $EDITOR wrapper: open nvim in a new Alacritty window (blocks until quit).
+exec alacritty -e nvim "$@"

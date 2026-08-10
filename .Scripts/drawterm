@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+main(){
+   get_size
+   query_min_size || return
+   alacritty --class float,float --title float\
+		-o "window.position: {x: $X, y: $Y}"\
+		-o "window.dimensions: {columns: $W, lines: $H}"
+}
+
+prompt_draw(){
+   slop -f "%x %y %w %h" -b 2 -t 0 -q -l -c 0.3,0.4,0.6,0.6
+}
+
+get_size(){
+   read -r X Y W H < <(prompt_draw)
+   (( W/=1920/188, W-=3, H/=1080/50, H-- ))
+}
+
+query_min_size(){
+   (( W>=10 && H>=1 )) || false
+}
+
+main

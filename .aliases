@@ -1,0 +1,76 @@
+# ~/.aliases vim: ft=sh
+## CFG
+alias deps="nvim ${CONFIG%/*}/dependencies.md"
+alias con="nvim $CONFIG"
+alias arc="nvim ~/.aliases"
+alias brc="nvim ~/.bashrc"
+alias prc="nvim ~/.profile"
+alias xrc="nvim ~/.Xresources"
+alias lrc="nvim ~/.config/lf/lfrc"
+alias crc="nvim ~/.config/picom.conf"
+alias src="nvim ~/.config/sxhkd/sxhkdrc"
+alias vrc="nvim ~/.config/nvim/init.vim"
+alias trc="nvim ~/.config/tmux/tmux.conf"
+alias drc="nvim ~/.config/wal/templates/dunstrc"
+
+## APL
+alias ssshd="sudo /bin/sshd"
+alias kdeconnectd="/usr/lib/kdeconnectd"
+alias ccp="rsync --progress"
+alias x="extract"
+alias spe="speedtest-cli"
+alias vim="nvim"
+alias nts="notes"
+alias skl="skole"
+alias s="svim"
+
+## QOL
+alias dfh="df -h | awk 'NR==1 || /nvme/'"
+alias gogl="googler"
+alias here="alacritty &>/dev/null &disown"
+alias gitl="git log --all --decorate --oneline --graph"
+alias bt="bluetoothctl"
+alias es="expressvpn status"
+alias ec="expressvpn connect"
+alias ed="expressvpn disconnect"
+alias bsp="~/.config/bspwm/bspwmrc"
+alias xr="xrdb ~/.Xresources"
+[[ $(uname -o) = "Android" ]] || alias localip="read -ra ip < <(ip a s wlan0 | grep \'inet \'); echo $ip"
+alias pf="echo;pfetch;echo"
+alias nf="printf '\e[1A\e[K\n'; neofetch | head -41; read -rsn1 -p $'\e[?25l'; printf '\e[?25h'"
+
+## ls
+#alias ls="ls --color=auto --group-directories-first"
+#alias la="ls -a"
+
+## lsd
+alias ls="lsd --date '+%d/%m/%y %X'"
+alias la="ls -A"
+
+## fd
+#alias ls="fd -d 1 . -c always"
+#alias la="ls -H"
+
+## all
+alias ll="ls -l"
+alias lla="la -l"
+
+
+alias tree="lsd --tree"
+alias publicip="curl ifconfig.co"
+alias :q="exit"
+alias br="bulkrename"
+
+## TSM
+alias hej="echo hej $USER!"
+
+## PHONE
+alias fastboot="sudo fastboot"
+alias fr="fastboot reboot"
+alias ff="fastboot flash"
+alias ap="adb push"
+alias arr="adb reboot recovery"
+[[ $(uname -o) = "Android" ]] || alias sshfon="ssh $(ip r | awk '{getline $1; print $3}') -p 8022 -i '$HOME/.ssh/id_rsa'"
+
+# Termux
+alias cdsd="cd $SDCARD"

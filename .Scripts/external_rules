@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# vim: ft=sh
+
+wid=$1
+class=$2
+instance=$3
+consequences=$4

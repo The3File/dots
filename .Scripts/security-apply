@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# One-shot: sudo auth, firewall, kdeconnect removal. Run from a TTY/alacritty.
+set -euo pipefail
+
+die() { echo "security-apply: $*" >&2; exit 1; }
+
+# --- sudo: fingerprint or password (PAM fprintd + system-auth) ---
+if sudo grep -qE '^%wheel ALL=\(ALL:ALL\) NOPASSWD: ALL' /etc/sudoers; then
+	sudo cp /etc/sudoers "/etc/sudoers.bak.$(date +%Y%m%d-%H%M%S)"
+	sudo sed -i 's/^%wheel ALL=(ALL:ALL) NOPASSWD: ALL$/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
+	sudo visudo -cf /etc/sudoers || die "sudoers invalid after edit — restored from latest .bak"
+	echo "sudo: NOPASSWD removed — use finger or password"
+else
+	echo "sudo: already requires authentication"
+fi
+
+# --- firewall: default deny in, allow out ---
+if ! pacman -Q ufw &>/dev/null; then
+	sudo pacman -S --needed --noconfirm ufw
+fi
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+# Loopback + established are implicit; enable without interactive prompt
+sudo ufw --force enable
+sudo systemctl enable ufw
+echo "ufw: enabled (deny incoming, allow outgoing)"
+
+# --- KDE Connect ---
+if pacman -Q kdeconnect &>/dev/null; then
+	sudo pacman -Rns --noconfirm kdeconnect
+	echo "kdeconnect: removed"
+else
+	echo "kdeconnect: not installed"
+fi
+
+echo "---"
+sudo ufw status verbose

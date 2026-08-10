@@ -1,0 +1,142 @@
+#!/usr/bin/env bash
+
+fz(){ fzf -m --ansi --height 40% --reverse "$@";}
+
+editor(){ nvim +"set ft=tex" "$@";}
+
+query_move(){
+	[[ $2 =~ / ]] && mkdir -p ${2%/*}
+	mv -vi "$1" "$2"
+}
+
+edit(){
+	select_note edit
+	cd "${note%/*}"
+	editor "${note##*/}"
+}
+
+delete(){
+	select_note delete
+	read -rp "delete $note? [y/N] " r
+	[[ $r =~ y|Y ]] && rm "$note"
+}
+
+move(){
+	select_note move
+	get_new_name
+	query_move "$note" "${new_name}.tex"
+}
+
+show(){
+	printf '\e[1m%s\n\e[m%s\n'\
+		"entering subshell..." "ctrl+d to return"
+	exec $SHELL
+}
+
+new(){
+	get_new_name || exit 1
+	prep_tmp
+	editor $new_name
+	check_file_changed || { rm "$new_name"; printf '%s\n' "deleted unchanged"; }
+}
+
+get_new_name(){
+	tree -C
+	read -rep "new name: " || return 1
+	[[ -a $REPLY ]] && { echo exists; exit 1; }
+	[[ ${REPLY} =~ .*/.* ]] && {
+		dir=${REPLY%/*}; mkdir "${working_dir}/${dir}"; cd "${working_dir}/${dir}"
+	}
+	new_name="${REPLY##*/}"
+	new_name="${new_name%.tex}.tex"
+	read -p "$(echo "create ${new_name}" in $(pwd))"
+}
+
+print_template(){
+	while read -r line; do
+		if [[ $line =~ "<-->" ]]; then
+			temp_var="${line//<-->/${new_name%.tex}}"
+			temp_var="${temp_var//_/\ }"
+			temp_var="${temp_var//-/\.}"
+			for word in $temp_var; do
+				title+="${word^} "
+			done
+			printf '%s\n' "${title}"
+		else 
+			printf '%s\n' "$line"
+		fi
+	done < "$working_dir/template.tex"
+}
+
+prep_tmp(){
+	print_template >> "$new_name"
+	first_modify="$(stat -c %Y $new_name)"
+}
+
+check_file_changed(){
+	current_modify="$(stat -c "%Y" $new_name)"
+	((first_modify<current_modify)) || return 1
+}
+
+mv_tmp(){
+	default="note_$(date '+%d-%m_%H%M')"
+	query_move "$tmp" "${new_name:-$default}.tex"
+}
+
+sync(){
+	status=$(git status --porcelain)
+	[[ -z "$status" ]] && pull || push
+}
+
+push(){
+	git add .; git commit -m "$status"
+	git push -u origin master
+}
+
+pull(){
+	printf '%s\n' "No changes, checking remote.."
+	git pull
+}
+
+print_tags(){
+	printf '\n\n%s\n%s' "[//]: # ($(date -Iseconds))"\
+		"[//]: # (tags: [<++>])"
+}
+
+print_notes(){
+	IFS=$'\n' read -rd '' -a notes < <(
+		fd -c always "\.tex" -E "template.tex" $working_dir
+	)
+	printf '%s\n' "${notes[@]#*${working_dir##*/}/}"
+}
+
+print_opts(){
+	opts=("new" "sync" "edit" "delete" "move" "show")
+	printf '%s\n' "${opts[@]}"
+}
+
+select_note(){
+	note="$(print_notes | fz --prompt="$1 > " -q "$q")"
+	[[ -z "$note" ]] && exit 0
+}
+
+get_opts(){
+	q="$2"
+	opt=$(print_opts | fz --prompt="$class > " -0 -1 -q "$1")
+	[[ $opt ]] || exit
+}
+
+main(){
+	class="$(printf '%s\n' "math" "history" "dansk" "engelsk" | fz --prompt="$1 > " -1 -q "$1")"
+	case $class in
+		math) working_dir="$SKOLE/matematik/B"; shift 1 ;;
+		history) working_dir="$SKOLE/historie"; shift 1 ;;
+		dansk) working_dir="$SKOLE/dansk"; shift 1 ;;
+		engelsk) working_dir="$SKOLE/engelsk"; shift 1 ;;
+	esac
+	[[ "$working_dir" ]] && cd "$working_dir" || exit
+	get_opts "$@"
+	eval "$opt"
+}
+
+main "$@"

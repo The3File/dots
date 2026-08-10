@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+# Wayland app launcher for Hyprland (Super+D). Uses fuzzel + pywal colors.
+# Matches system: Terminus 14, solid black bg, rounding 0; anchored bottom-left.
+
+set -eo pipefail
+
+conf_dir="${XDG_CONFIG_HOME:-$HOME/.config}/fuzzel"
+mkdir -p "$conf_dir"
+
+hex() {
+	local c="${1#\#}"
+	printf '%s%s' "$c" "${2:-ff}"
+}
+
+color4="#5ca7a5"
+color5="#c3a170"
+color7="#c5c5c5"
+color8="#525353"
+
+if [[ -f $HOME/.cache/wal/colors.sh ]]; then
+	# Extract only colorN= lines — full colors.sh trips `set -u` (FZF_DEFAULT_OPTS).
+	eval "$(grep -E '^color[0-9]+=' "$HOME/.cache/wal/colors.sh")"
+fi
+
+# Solid opaque black like alacritty.toml / waybar.
+bg=$(hex "#000000")
+fg=$(hex "$color7")
+accent=$(hex "$color4")
+prompt_fg=$(hex "$color5")
+muted=$(hex "$color8")
+sel_fg=$(hex "#000000")
+
+cat >"$conf_dir/fuzzel.ini" <<EOF
+font=Terminus:size=14
+dpi-aware=no
+prompt="apps: "
+icons-enabled=no
+layer=overlay
+anchor=bottom-left
+# Equal air left & above waybar (fuzzel respects waybar exclusive zone)
+x-margin=24
+y-margin=24
+lines=12
+width=48
+horizontal-pad=20
+vertical-pad=16
+inner-pad=10
+keyboard-focus=exclusive
+exit-on-keyboard-focus-loss=no
+
+[colors]
+background=$bg
+text=$fg
+prompt=$prompt_fg
+input=$fg
+match=$accent
+selection=$accent
+selection-text=$sel_fg
+selection-match=$sel_fg
+border=$accent
+counter=$muted
+
+[border]
+width=2
+radius=0
+selection-radius=0
+EOF
+
+exec /usr/bin/fuzzel

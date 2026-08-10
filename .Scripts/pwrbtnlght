@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+dev_pwr="/sys/devices/platform/thinkpad_acpi/leds/tpacpi::power/brightness"
+dev_mcm="/sys/devices/platform/thinkpad_acpi/leds/platform::micmute/brightness"
+dev_mute="/sys/devices/platform/thinkpad_acpi/leds/platform::mute/brightness"
+
+check_device(){
+	read -rp "chooose device from"$'\n'"1. $dev_pwr"$'\n'"2. $dev_mcm"$'\n'"3. $dev_mute"$'\n'"> "
+	case "$REPLY" in
+		1) b="$dev_pwr" ;;
+		2) b="$dev_mcm" ;;
+		3) b="$dev_mute" ;;
+	esac
+}
+
+toggle(){
+	read -r state < $b
+	case $state in
+		0) s=1; msg="Turned on" ;;
+		1) s=0; msg="Turned off"
+	esac
+}
+
+case "$1" in
+	on) s=1; msg="Turned on" ;;
+	off) s=0; msg="Turned off" ;;
+	*) toggle
+esac
+
+case "$2" in
+	1) b="$dev_pwr"; dev="power button" ;;
+	2) b="$dev_mcm"; dev="mic mute" ;;
+	*) check_device
+esac
+
+printf '\e[1;32m%s\e[2;39m' "$msg the $dev light"
+echo "$s" | sudo tee "$b" &>/dev/null && read -t .2 -p " - success"$'\n'

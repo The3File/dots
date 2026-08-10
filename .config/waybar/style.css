@@ -1,0 +1,74 @@
+/* Waybar — runbar-inspired (bottom, lighter); colors from pywal + runbar thresholds */
+@import url("file:///home/ringdal/.cache/wal/colors-waybar.css");
+
+* {
+    border: none;
+    border-radius: 0;
+    font-family: Terminus, monospace;
+    font-size: 14px;
+    min-height: 0;
+}
+
+window#waybar {
+    background: #000000;
+    color: @foreground;
+}
+
+#workspaces {
+    padding: 0 4px;
+}
+
+#workspaces button {
+    padding: 0 6px;
+    color: @color8;
+    background: transparent;
+}
+
+#workspaces button.active {
+    color: @color4;
+    padding: 0 4px;
+    border-bottom: 2px solid @color4;
+}
+
+#workspaces button:hover {
+    color: @foreground;
+    background: @color0;
+}
+
+#custom-sep {
+    padding: 0 8px;
+    color: @color5;
+}
+
+#custom-vol,
+#custom-light,
+#custom-net,
+#custom-bat,
+#custom-clock,
+#custom-hyprwhspr {
+    padding: 0 8px;
+    color: @foreground;
+    background: transparent;
+}
+
+#custom-hyprwhspr {
+    color: @color8;
+}
+
+#custom-hyprwhspr.recording {
+    color: #f00;
+    border-bottom: 2px solid #f00;
+}
+
+#custom-hyprwhspr.processing {
+    color: #fa0;
+    border-bottom: 2px solid #fa0;
+}
+
+#custom-hyprwhspr.error {
+    color: #f00;
+}
+
+#custom-clock {
+    padding-right: 10px;
+}

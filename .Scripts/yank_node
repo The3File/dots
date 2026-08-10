@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+query(){
+	bspc query -N -n "$@" || return 1
+}
+
+receptacle="$(query 'any.leaf.!window')"
+
+if query "any.marked"; then
+	node="any.marked"
+	echo yanking marked
+else
+	node="focused"
+	echo yanking focused
+fi
+
+if [[ "$receptacle" ]]; then
+	destination="$receptacle"
+else
+	destination='newest.!automatic'
+fi
+
+bspc node $node -n $destination --follow
+echo yanking $node to $destination

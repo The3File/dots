@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+IFS=$'\n'
+[[ "$@" ]] && for file in "$@"; do
+	files+=("$file")
+done || files=(./*)
+
+trap 'rm $tmp' EXIT
+tmp="$(mktemp XXX.bulkrename)"
+
+error() { printf '%s\n' "error: $1"; exit 1; }
+
+for name in "${files[@]}"; do
+	[[ -a "$name" ]] || error "parsing $name"
+	[[ -d "$name" ]] && ons+=("d $name") && continue
+	[[ -x "$name" ]] && ons+=("x $name") && continue
+	[[ -f "$name" ]] && ons+=("f $name") && continue
+done
+
+printf '%s\n' "${ons[@]}" > $tmp
+
+nvim "$tmp"
+
+IFS=$'\n' read -d '' -ra nns < "$tmp"
+((${#ons[@]}==${#nns[@]})) || error "dont delete lines"
+
+for((i=0;i<${#nns[@]};i++));{
+	o="${ons[i]#*\ }"; n="${nns[i]#*\ }"
+	[[ "$o" = "$n" ]] && continue
+	[[ -d ${n%\/*} ]] || mkdir -p ${n%\/*}
+	mv -v "$o" "$n"
+}

@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# Opt-in Claude Code speech: on | off | toggle | status
+# Flag: $XDG_RUNTIME_DIR/claude-speak.on (absent = silent)
+
+set -euo pipefail
+
+flag="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/claude-speak.on"
+stopts="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/claude-speak.stopts"
+tts=/home/ringdal/.Scripts/claude-speak-tts
+
+is_on() { [[ -f $flag ]]; }
+
+cmd=${1:-status}
+case $cmd in
+	on)
+		mkdir -p "$(dirname "$flag")"
+		: >"$flag"
+		CLAUDE_SPEAK_MAX_CHARS=80 "$tts" 'tale tændt'
+		printf 'claude-speak: on\n'
+		;;
+	off)
+		rm -f "$flag"
+		CLAUDE_SPEAK_MAX_CHARS=80 "$tts" 'tale slukket'
+		printf 'claude-speak: off\n'
+		;;
+	stop|shutup)
+		# Silence in-progress/queued speech NOW (e.g. when Filip starts dictating):
+		# stamp the stop time so queued lines requested earlier are skipped, and
+		# kill whatever is currently synthesizing/playing.
+		date +%s%N >"$stopts" 2>/dev/null || true
+		for p in paplay aplay espeak-ng piper piper-tts; do pkill -x "$p" 2>/dev/null || true; done
+		;;
+	toggle)
+		if is_on; then
+			exec "$0" off
+		else
+			exec "$0" on
+		fi
+		;;
+	status)
+		if is_on; then
+			printf 'claude-speak: on\n'
+		else
+			printf 'claude-speak: off\n'
+		fi
+		;;
+	*)
+		printf 'usage: claude-speak {on|off|toggle|status}\n' >&2
+		exit 2
+		;;
+esac

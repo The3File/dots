@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# i need to go to bed
+
+reset(){ printf '\e[?25l\e[2J\e[H'; }
+
+a_in(){
+	printf '\e[%sH\e[2C' "$((p+2))"; tr=
+	for i in "${ai[@]}";{ printf '\e[K\r\e[2C\e[m\e[1;36m%s\e[s' "$i"; read -t $at; }
+	for i in " " "[" Y "/" n "]" " ";{ tr+="$i"; printf '\e[u%s' "$tr"; read -t $at; }
+}
+
+a_out(){
+	printf '\e[?25l\e[%sD' "${#tr}"
+	for ((i=-4;i<${#tr};i++)){ tr=${tr%?}; printf '\e[K%s\e[%sD' "$tr" "${#tr}"; read -t $at; }
+	for i in "${ao[@]}";{ printf '\r\e[K\e[2C\e[1;36m%s\e[s\e[m' "$i"; read -t $at; }; st=''
+}
+
+parse_animation(){
+	t="${o[p]}"; at="0.02"; st="2"
+	ai=("> $t" ">$t" "$t>" "$t >")
+	ao=("$t>" "$t>" ">$t " "> $t")
+}
+
+confirm(){ parse_animation; reset; printl; a_in; read_confirm; a_out; }
+
+read_confirm(){ read -rsn1 -p $'\e[?25h'; case_confirm $REPLY; }
+
+case_confirm(){
+	case $1 in
+		''|y) eval "${o[p]}"; exit 0 ;;
+		q) exit 0 ;;
+		h|$'\e'|n) return ;;
+	esac
+}
+
+printl(){
+	for i in {0..2}; do case $i in
+			$p) printf '\n\e[2C\e[1;36m> %s\e[m' "${o[p]}" ;;
+			*) printf '\n\e[%sm\e[2C  %s' "$st" "${o[i]}"
+	esac; done
+}
+
+case_key(){
+    [[ $1 == $'\e' ]] && {
+        read -rsn 2 -t .01
+        [[ ${1}${REPLY} == $'\e\e['* ]] && read -rsn 1 _
+        local e=${1}${REPLY}
+    }
+	case ${e:-$1} in
+		k|$'\e[A') ((p=p>0?p-1:0)) ;;
+		j|$'\e[B') ((p=p<${#o[@]}-1?p+1:2)) ;;
+		''|l) confirm ;;
+		$'\e'|q) exit 0 ;;
+	esac
+}
+
+# Hacky fix
+#lockscreen(){ systemctl suspend -i; }
+
+main(){
+	trap "printf '\e[m\e[2J\e[H\e[?25h\e[?1049l'" EXIT
+	p=0; o=("poweroff" "reboot" "lockscreen")
+	printf '\e[?1049h'
+	for((;;)){ reset; printl; read -rsn1 key; case_key "$key"; }
+}
+
+main

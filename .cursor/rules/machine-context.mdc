@@ -1,0 +1,14 @@
+---
+description: Point agents at ~/AGENTS.md for machine facts (Hyprland, scripts, paths)
+alwaysApply: true
+---
+
+# Machine context pointer
+
+Authoritative living notes for this PC: `/home/ringdal/AGENTS.md`
+
+- **Read** that file before desktop / Hyprland / `~/.Scripts` / environment work.
+- **Re-read** it occasionally in long sessions, or when machine assumptions may be stale — do not rely on chat memory alone.
+- **Append** durable discoveries there (paths, commands, gotchas, preferences).
+- Hard safety constraints (no session restart, etc.) live in `machine-interaction.mdc` — follow those first.
+- Project-specific development guides live in each repo’s `README.md` (and `.cursor/rules/` when present); re-read those the same way when working in that repo.

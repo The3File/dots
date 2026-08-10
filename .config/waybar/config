@@ -1,0 +1,98 @@
+{
+    "layer": "top",
+    "position": "bottom",
+    "height": 26,
+    "spacing": 0,
+    "modules-left": ["hyprland/workspaces", "custom/sep"],
+    "modules-center": [],
+    "modules-right": [
+        "custom/hyprwhspr",
+        "custom/sep",
+        "custom/vol",
+        "custom/light",
+        "custom/sep",
+        "custom/net",
+        "custom/sep",
+        "custom/bat",
+        "custom/sep",
+        "custom/clock"
+    ],
+
+    "hyprland/workspaces": {
+        "format": "{id}",
+        "on-click": "activate",
+        "sort-by-number": true,
+        "persistent-workspaces": {
+            "1": [],
+            "2": [],
+            "3": [],
+            "4": [],
+            "5": [],
+            "6": [],
+            "7": [],
+            "8": [],
+            "9": [],
+            "10": []
+        }
+    },
+
+    "custom/sep": {
+        "format": "||",
+        "interval": "once",
+        "tooltip": false
+    },
+
+    "custom/hyprwhspr": {
+        "format": "{}",
+        "exec": "$HOME/.config/waybar/hyprwhspr-status.sh",
+        "interval": 1,
+        "return-type": "json",
+        "exec-on-event": true,
+        "on-click": "/usr/lib/hyprwhspr/config/hyprland/hyprwhspr-tray.sh record",
+        "on-click-right": "$HOME/.Scripts/hyprwhspr-ui overlay toggle",
+        "tooltip": true
+    },
+
+    "custom/vol": {
+        "exec": "$HOME/.config/waybar/runbar-color.sh vol",
+        "return-type": "json",
+        "interval": 5,
+        "signal": 1,
+        "markup": "pango",
+        "on-click": "pamixer -t",
+        "tooltip": false
+    },
+
+    "custom/light": {
+        "exec": "$HOME/.config/waybar/runbar-color.sh light",
+        "return-type": "json",
+        "interval": 5,
+        "signal": 2,
+        "markup": "pango",
+        "tooltip": false
+    },
+
+    "custom/net": {
+        "exec": "$HOME/.config/waybar/runbar-color.sh net",
+        "return-type": "json",
+        "interval": 5,
+        "markup": "pango",
+        "on-click": "alacritty --class net -e bash -c 'nmcli d st; read -rsn1'",
+        "tooltip": false
+    },
+
+    "custom/bat": {
+        "exec": "$HOME/.config/waybar/runbar-color.sh bat",
+        "return-type": "json",
+        "interval": 30,
+        "markup": "pango",
+        "tooltip": false
+    },
+
+    "custom/clock": {
+        "exec": "date '+%a %d %b %H%M' | tr '[:upper:]' '[:lower:]'",
+        "interval": 30,
+        "tooltip": false,
+        "on-click": "alacritty --class cal -e bash -c 'cal -mw; read -rsn1'"
+    }
+}

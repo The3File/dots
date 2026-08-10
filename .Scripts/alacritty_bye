@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Power menu float — size/pos via Hyprland windowrule on class `bye`
+# (bspwm: rectangle 270x150+50+860 sticky)
+
+${TERMINAL:-alacritty} \
+	-o 'window.dimensions.columns=28' \
+	-o 'window.dimensions.lines=5' \
+	--class bye,bye --title bye -e bye

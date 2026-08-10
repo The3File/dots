@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+
+launch(){
+	IFS=$'\n' read -rd '' -a apps < "$config"
+
+	# -b puts dmenu at the bottom; under Hyprland that sits behind waybar.
+	dmenu_args=(-i -p "$prompt" -fn "$font")
+	[[ -z ${WAYLAND_DISPLAY:-} && -z ${WAYLAND_SOCKET:-} ]] && dmenu_args+=(-b)
+
+	read -r selection < <(printf '%s\n' "${apps[@]%,*}" | dmenu "${dmenu_args[@]}")
+
+	[[ $selection = "update_drun" ]] && update
+
+	for i in "${!apps[@]}"; do
+		[[ "${apps[$i]}" = "$selection",* ]] || continue
+
+		app="${apps[$i]#*,}"
+		entry="${apps[$i]}"
+		unset apps[$i]
+
+		printf '%s\n%s\n' "$entry" "${apps[@]}" > "$config"
+	done
+
+	echo "Launching ${app%\ *}"
+	exec ${app%\ *}
+}
+
+update(){
+	unset apps
+	files=("/usr/share/applications/*.desktop" "$HOME/.local/share/applications/*.desktop")
+	for file in ${files[@]}; do
+		while read line; do
+			[[ $line =~ "Name=" && -z $name ]] &&
+				{ name="${line#*=}"; continue; }
+			[[ $line =~ "Exec=" && -z $exec ]] &&
+				{ exec="${line#*=}"; continue; }
+		done < "$file"
+
+		apps+=("$name,$exec"); unset name exec
+	done
+	printf '%s\n' "${apps[@]}" "update_drun" > "$config"
+	exit 0
+}
+
+prompt="apps:"
+font="ypn envypn:size=14"
+config="$HOME/.desktop_files"
+
+case $1 in '') launch ;; -u) update ;;
+	*) printf '%s\n' "use -u to update file" "run '$EDITOR $0' to configure"
+esac

@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+read_ps(){
+	script_name="$1"
+	while read -r ps; do
+		[[ "$ps" =~ $script_name && ! "$ps" =~ ukill|vim ]] || continue
+		set $ps
+		pid=$1
+		pids+=("$1")
+		[[ $proc_name ]] || proc_name=$6
+	done < <(ps ax)
+}
+
+grep_ps(){
+	for pid in ${pids[@]}; do echo $proc_name $pid; done
+	[[ -z ${pids[@]} ]] && exit 1 || exit 0
+}
+
+kill_ps(){
+	for pid in ${pids[@]}; do
+		kill -15 "$pid" || kill -9 "$pid" && echo "'$proc_name' killed" || exit 1
+	done
+}
+
+usage(){ printf '%s\n' "usage: ukill [-gnh] <script_name>"; exit 1; }
+
+
+while getopts g:k a; do
+	[[ $a ]] || usage
+	case $a in
+		g) opt="grep_ps" ;;
+		k) opt="kill_ps" ;;
+	esac
+	shift
+done
+
+read_ps "$@"
+eval $opt

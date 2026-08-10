@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+get_current_state(){
+	[[ $(< "$HOME/.keylock") = "enable" ]] && state="disable" || state="enable"
+	IFS='' devices=("AT Translated Set 2 keyboard" "TPPS/2 Elan TrackPoint" "SYNA0001:00 06CB:CE67 Touchpad")
+}
+
+lock_keys_now(){
+	for device in ${devices[@]}; do
+		xinput $state $device || break 1
+	done
+}
+
+notify_change(){
+	printf '%s' "$state" > "$HOME/.keylock"
+	echo "key" > "$PANELFIFO"
+}
+
+get_current_state
+lock_keys_now
+notify_change

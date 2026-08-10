@@ -1,0 +1,6 @@
+# AUR (via yay)
+brave-bin
+hyprwhspr
+piper-tts
+light
+obsidian

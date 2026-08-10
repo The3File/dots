@@ -1,0 +1,141 @@
+#!/usr/bin/env bash
+
+dir="$HOME/Pictures/favoritter"
+: "$(< .cache/wal/wal)"
+current="${_##*/}"
+
+usage(){ printf '%s\n' "$1."\
+	"chwal [-rl] [-f '/path/to/image']"\
+	"-r: reload current" "-l: light theme"\
+	"-f: add image to rotation"
+	exit 1
+}
+
+next_fav(){
+   get_next_fav || next="$dir/$current"
+   backend="$(cat "${next%.*}.backend")"
+	printf '%s\n' "LAST: $current" "NEXT: ${next##*/}" '' "FAVOTITES:" "${files[@]}"
+	change_wal
+}
+
+get_next_fav(){
+	[[ $r = "1" ]] && return 1
+
+	get_files
+
+	for ((i=0;i<=${#files[@]};i++));{
+		[[ "${files[$i]}" = "$current" ]] || continue
+		sel_next_or_first
+	}
+}
+
+get_files(){
+	for file in ${dir}/*; { [[ $file = *.backend ]] || files+=("${file##*/}"); }
+	num_files="$((${#files[@]}-1))"
+}
+
+sel_next_or_first(){
+	if [[ ${files[$i]} = ${files[$num_files]} ]]
+	then next="$dir/${files[0]}"
+	else next="$dir/${files[$((i+1))]}"; fi
+}
+
+change_wal(){
+   wal -tqi $next ${l} --backend $backend -a 0
+   cp $next "$HOME/.config/wall.png"
+
+   if [[ -n "$WAYLAND_DISPLAY" || "$XDG_SESSION_TYPE" == "wayland" ]]; then
+      apply_hyprland
+   else
+      $CONFIG &>/dev/null
+   fi
+}
+
+apply_hyprland(){
+   # wallpaper
+   if pgrep -x hyprpaper >/dev/null; then
+      hyprctl hyprpaper wallpaper ",$next" &>/dev/null \
+         || hyprctl hyprpaper wallpaper "[,$next]" &>/dev/null
+   fi
+   # rewrite hyprpaper.conf so it survives restart
+   cat > "$HOME/.config/hypr/hyprpaper.conf" <<EOF
+splash = false
+
+wallpaper {
+    monitor =
+    path = $next
+    fit_mode = cover
+}
+EOF
+   # borders from wal (Lua config)
+   # shellcheck disable=SC1090
+   source "$HOME/.cache/wal/colors.sh"
+   cat > "$HOME/.config/hypr/colors.lua" <<EOF
+-- Seeded from ~/.cache/wal/colors.sh (color0 inactive, color4 active)
+
+return {
+    background      = "rgb(${background#\#})",
+    foreground      = "rgb(${foreground#\#})",
+    color0          = "rgb(${color0#\#})",
+    color4          = "rgb(${color4#\#})",
+    color7          = "rgb(${color7#\#})",
+    color8          = "rgb(${color8#\#})",
+    active_border   = "rgb(${color4#\#})",
+    inactive_border = "rgb(${color0#\#})",
+}
+EOF
+   hyprctl reload &>/dev/null
+   # waybar picks up ~/.cache/wal/colors-waybar.css
+   pkill -USR2 waybar 2>/dev/null || true
+   # hyprwhspr Mic-OSD theme (if present)
+   if [[ -x $HOME/.Scripts/hyprwhspr-theme-from-wal ]]; then
+      "$HOME/.Scripts/hyprwhspr-theme-from-wal" &>/dev/null || true
+   fi
+}
+
+add_new_fav(){
+	[[ -f "$1" ]] || usage "Not a valid path"
+	name="${1##*/}"
+	[[ -f $dir/$name ]] && { printf '%s\n' "already in favorites"; exit; }
+
+	prompt_user_backend
+	case_backend
+
+	save_new_fav "$1"
+	next="$dir/$name"
+	change_wal
+}
+
+prompt_user_backend(){
+   read -rp $'\e[1;34m'"backends:"$'\n\e[0;34m'"w: wal"$'\n'\
+"c: colorz"$'\n'"h: haishoku"$'\n'"t: colorthief"\
+$'\n\e[1;32m'"choose > "$'\e[0m' b
+}
+
+case_backend(){
+   case $b in
+		w) backend="wal" ;;
+		c) backend="colorz" ;;
+      h) backend="haishoku" ;;
+		t) backend="colorthief" ;;
+		*) exit 1
+   esac
+}
+
+save_new_fav(){
+	printf '%s' "$backend" > "$dir/${name%.*}.backend"
+   cp "$1" "$dir/$name"
+}
+
+main(){
+	while getopts "rlf:" o; do case $o in
+         f) [[ $OPTARG ]] && add_new_fav $OPTARG; exit 0 ;;
+			l) l="-l" ;;
+			r) r="1" ;;
+			*) usage; exit 1
+		esac
+	done
+   next_fav
+}
+
+main "$@"

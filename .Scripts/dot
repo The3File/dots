@@ -1,0 +1,106 @@
+#!/usr/bin/env bash
+
+dotfiles="$HOME/.dotfiles"
+readme="$HOME/README.md"
+bootstrap_home="$HOME/bootstrap"
+
+git_do(){
+	git --git-dir="$dotfiles" --work-tree="$HOME" "$@"
+}
+
+# Kit lives only under ~/.dotfiles/. Repo path bootstrap/ is staged briefly for commits.
+extract_bootstrap(){
+	[[ -d $dotfiles ]] || return 0
+	git --git-dir="$dotfiles" cat-file -e HEAD:bootstrap/install-pkgs 2>/dev/null || {
+		rm -rf "$bootstrap_home"
+		return 0
+	}
+	mkdir -p "$dotfiles/pkgs" "$dotfiles/etc"
+	git --git-dir="$dotfiles" show HEAD:bootstrap/install-pkgs >"$dotfiles/install-pkgs"
+	git --git-dir="$dotfiles" show HEAD:bootstrap/pkgs/official.txt >"$dotfiles/pkgs/official.txt"
+	git --git-dir="$dotfiles" show HEAD:bootstrap/pkgs/aur.txt >"$dotfiles/pkgs/aur.txt"
+	git --git-dir="$dotfiles" show HEAD:bootstrap/pkgs/thinkpad.txt >"$dotfiles/pkgs/thinkpad.txt"
+	chmod +x "$dotfiles/install-pkgs"
+	local path rel
+	while IFS= read -r path; do
+		[[ -z $path ]] && continue
+		rel=${path#bootstrap/etc/}
+		mkdir -p "$dotfiles/etc/$(dirname "$rel")"
+		git --git-dir="$dotfiles" show "HEAD:$path" >"$dotfiles/etc/$rel"
+	done < <(git --git-dir="$dotfiles" ls-tree -r --name-only HEAD bootstrap/etc 2>/dev/null || true)
+	rm -rf "$bootstrap_home"
+}
+
+get_bootstrap(){
+	[[ -f $dotfiles/install-pkgs ]] || return 0
+	# Allow staging updates to kit paths that normally live only under ~/.dotfiles/
+	git_do ls-files -z -- bootstrap 2>/dev/null | xargs -0 -r git --git-dir="$dotfiles" --work-tree="$HOME" update-index --no-skip-worktree --
+	rm -rf "$bootstrap_home"
+	mkdir -p "$bootstrap_home/pkgs"
+	cp -a "$dotfiles/install-pkgs" "$bootstrap_home/install-pkgs"
+	cp -a "$dotfiles/pkgs/." "$bootstrap_home/pkgs/" 2>/dev/null || true
+	if [[ -d $dotfiles/etc ]]; then
+		mkdir -p "$bootstrap_home/etc"
+		cp -a "$dotfiles/etc/." "$bootstrap_home/etc/"
+	fi
+	git_do add --all -- bootstrap
+}
+
+put_bootstrap(){
+	rm -rf "$bootstrap_home"
+	# Kit stays in ~/.dotfiles/; hide missing ~/bootstrap from status
+	git_do ls-files -z -- bootstrap 2>/dev/null | xargs -0 -r git --git-dir="$dotfiles" --work-tree="$HOME" update-index --skip-worktree --
+}
+
+get_readme(){
+	git_do update-index --no-assume-unchanged "$readme"
+	cp "$dotfiles/README.md" "$readme"
+	git_do add "$readme"
+}
+
+put_readme(){
+	[[ -a "$readme" ]] && mv "$readme" "$dotfiles"
+	git_do update-index --assume-unchanged "$readme"
+}
+
+commit(){
+	get_readme
+	get_bootstrap
+	[[ "$message" ]] || message="$changes"
+	git_do commit -am "$message"
+}
+
+push(){
+	# Stage README + bootstrap kit so edits under ~/.dotfiles/ are included
+	get_readme
+	get_bootstrap
+	changes=$(git_do status --porcelain)
+	if [[ $changes ]]; then
+		[[ "$message" ]] || message="$changes"
+		git_do commit -am "$message"
+	fi
+	git_do push
+	extract_bootstrap
+}
+
+case_opts(){
+	case $1 in
+		up) shift; message="$@"; push ;;
+		pull) git_do "$@"; extract_bootstrap ;;
+		*) git_do "$@"
+	esac
+}
+
+get_status(){
+	changes=$(git_do status --porcelain)
+	[[ $changes ]] && printf '%s\n' "$changes"
+}
+
+main(){ get_status
+	[[ $1 ]] || exit
+	case_opts "$@"
+	put_readme
+	put_bootstrap
+}
+
+main "$@"

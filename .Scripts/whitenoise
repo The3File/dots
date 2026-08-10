@@ -1,0 +1,11 @@
+#!/bin/bash
+termux-wake-lock; trap 'q' INT; trap 'e' EXIT
+q(){ play -nq synth whitenoise fade t 1 20 15 &
+printf '\e[K\e[A\r%s\e[K\n\e[J' "whitenoise stopper"
+sleep 2; kill -9 $p; wait $p &>/dev/null; exit; }
+e(){ stty echo; printf '\e[?25h'; termux-wake-unlock; }
+p() { play -nq synth whitenoise fade t 7 & p="$!";}
+printf '\e[?25l%s\e[K' "whitenoise starter"; p &&
+{ sleep 7;printf '\r%s\n\e[K'"whitenoise afspiller";}
+while read -rsn1 -p $'\r\e[K'"tryk q for at afslutte" q
+do [[ "$q" = "q" ]] && q; done

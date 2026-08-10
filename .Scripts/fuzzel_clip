@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# Clipboard history picker for Hyprland (Super+Insert).
+# Wayland stand-in for bspwm clipmenu + dmenu.
+
+set -eo pipefail
+
+conf_dir="${XDG_CONFIG_HOME:-$HOME/.config}/fuzzel"
+mkdir -p "$conf_dir"
+
+hex() {
+	local c="${1#\#}"
+	printf '%s%s' "$c" "${2:-ff}"
+}
+
+color4="#5ca7a5"
+color5="#c3a170"
+color7="#c5c5c5"
+color8="#525353"
+
+if [[ -f $HOME/.cache/wal/colors.sh ]]; then
+	eval "$(grep -E '^color[0-9]+=' "$HOME/.cache/wal/colors.sh")"
+fi
+
+# Solid opaque black like alacritty / waybar / fuzzel_drun (Hyprland rounding=0).
+bg=$(hex "#000000")
+fg=$(hex "$color7")
+accent=$(hex "$color4")
+prompt_fg=$(hex "$color5")
+muted=$(hex "$color8")
+sel_fg=$(hex "#000000")
+
+cat >"$conf_dir/fuzzel.ini" <<EOF
+font=Terminus:size=14
+dpi-aware=no
+prompt="clipboard: "
+icons-enabled=no
+layer=overlay
+anchor=center
+lines=10
+width=64
+horizontal-pad=20
+vertical-pad=16
+inner-pad=10
+keyboard-focus=exclusive
+exit-on-keyboard-focus-loss=no
+
+[colors]
+background=$bg
+text=$fg
+prompt=$prompt_fg
+input=$fg
+match=$accent
+selection=$accent
+selection-text=$sel_fg
+selection-match=$sel_fg
+border=$accent
+counter=$muted
+
+[border]
+width=2
+radius=0
+selection-radius=0
+EOF
+
+sel=$(cliphist list | /usr/bin/fuzzel --dmenu --prompt='clipboard: ') || exit 0
+[[ -n $sel ]] || exit 0
+printf '%s\n' "$sel" | cliphist decode | wl-copy

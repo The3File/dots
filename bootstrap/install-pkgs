@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+# Install packages from ~/.dotfiles/pkgs/*.txt (bootstrap kit).
+set -euo pipefail
+
+DOTFILES="${DOTFILES:-$HOME/.dotfiles}"
+list_dir="${DOTFILES}/pkgs"
+official="${list_dir}/official.txt"
+aur="${list_dir}/aur.txt"
+thinkpad="${list_dir}/thinkpad.txt"
+
+do_thinkpad=0
+do_desktop=1
+
+usage() {
+	printf '%s\n' "usage: install-pkgs [--desktop|--no-desktop] [--thinkpad]"
+}
+
+while [[ $# -gt 0 ]]; do
+	case "$1" in
+	--thinkpad) do_thinkpad=1; shift ;;
+	--desktop) do_desktop=1; shift ;;
+	--no-desktop) do_desktop=0; shift ;;
+	-h | --help) usage; exit 0 ;;
+	*) usage >&2; exit 2 ;;
+	esac
+done
+
+read_pkgs() {
+	local file=$1
+	[[ -f $file ]] || return 0
+	sed -e 's/#.*//' -e '/^[[:space:]]*$/d' "$file"
+}
+
+need_root_pacman() {
+	if [[ $(id -u) -eq 0 ]]; then
+		pacman "$@"
+	else
+		sudo pacman "$@"
+	fi
+}
+
+ensure_yay() {
+	command -v yay >/dev/null 2>&1 && return 0
+	printf '%s\n' "yay not found — bootstrapping"
+	need_root_pacman -S --needed --noconfirm git base-devel
+	local tmp
+	tmp=$(mktemp -d)
+	# shellcheck disable=SC2064
+	trap "rm -rf '$tmp'" RETURN
+	git clone --depth 1 https://aur.archlinux.org/yay.git "$tmp/yay"
+	(cd "$tmp/yay" && makepkg -si --noconfirm)
+}
+
+install_official() {
+	local -a pkgs=()
+	mapfile -t pkgs < <(read_pkgs "$official")
+	if ((do_thinkpad)); then
+		local -a extra=()
+		mapfile -t extra < <(read_pkgs "$thinkpad")
+		pkgs+=("${extra[@]}")
+	fi
+	((${#pkgs[@]})) || return 0
+	printf '%s\n' "pacman: installing ${#pkgs[@]} packages…"
+	need_root_pacman -S --needed --noconfirm "${pkgs[@]}"
+}
+
+install_aur() {
+	((do_desktop)) || return 0
+	local -a pkgs=()
+	mapfile -t pkgs < <(read_pkgs "$aur")
+	((${#pkgs[@]})) || return 0
+	ensure_yay
+	printf '%s\n' "yay: installing ${#pkgs[@]} AUR packages…"
+	yay -S --needed --noconfirm "${pkgs[@]}"
+}
+
+main() {
+	if ! command -v pacman >/dev/null 2>&1; then
+		printf '%s\n' "install-pkgs: pacman not found (Arch only) — skipping" >&2
+		exit 0
+	fi
+	((do_desktop)) || {
+		printf '%s\n' "install-pkgs: --no-desktop — nothing to do"
+		exit 0
+	}
+	[[ -d $list_dir ]] || {
+		printf '%s\n' "install-pkgs: missing $list_dir (run extract from bare dots first)" >&2
+		exit 1
+	}
+	install_official
+	install_aur
+	printf '%s\n' "install-pkgs: done"
+}
+
+main "$@"

@@ -1,0 +1,247 @@
+#!/usr/bin/env python3
+"""hyprwhspr service launcher: Waybar state file + rice-styled Mic-OSD.
+
+Mic-OSD is a separate daemon process — chrome/position patches are injected
+into its startup code so rounded corners and bottom-left placement actually apply.
+"""
+
+from __future__ import annotations
+
+import os
+import sys
+from pathlib import Path
+
+LIB = Path("/usr/lib/hyprwhspr/lib")
+SCRIPTS = Path("/home/ringdal/.Scripts")
+sys.path.insert(0, str(LIB))
+sys.path.insert(0, str(SCRIPTS))
+os.environ.setdefault("HYPRWHSPR_ROOT", "/usr/lib/hyprwhspr")
+
+
+class WaybarStatePresenter:
+    """Persist visualizer_state for Waybar; no overlay, no notifications."""
+
+    def __init__(self) -> None:
+        from src.paths import RUNTIME_DIR, VISUALIZER_STATE_FILE
+
+        self._runtime = RUNTIME_DIR
+        self._state_file = VISUALIZER_STATE_FILE
+
+    def is_available(self) -> bool:
+        return True
+
+    def show(self) -> bool:
+        return True
+
+    def hide(self) -> None:
+        self.clear_state()
+
+    def stop(self) -> None:
+        self.clear_state()
+
+    def set_state(self, state: str) -> None:
+        try:
+            self._runtime.mkdir(parents=True, exist_ok=True)
+            self._state_file.write_text((state or "").strip())
+        except Exception as e:
+            print(f"[WARN] Failed to write visualizer_state: {e}", flush=True)
+
+    def clear_state(self) -> None:
+        try:
+            self._state_file.unlink(missing_ok=True)
+        except Exception:
+            pass
+
+    def set_preview_text(self, text: str) -> None:
+        return
+
+    def clear_preview_text(self) -> None:
+        return
+
+
+def _perf(action: str) -> None:
+    """Fire hyprwhspr-perf in the background; never block dictation."""
+    import subprocess
+
+    script = Path("/home/ringdal/.Scripts/hyprwhspr-perf")
+    try:
+        if not script.is_file():
+            return
+        subprocess.Popen(
+            [str(script), action],
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            start_new_session=True,
+        )
+    except Exception as e:
+        print(f"[WARN] hyprwhspr-perf {action} failed: {e}", flush=True)
+
+
+_BUSY_STATES = frozenset({"recording", "processing", "paused"})
+
+
+def _wrap_presenter_perf(runner) -> None:
+    """Boost TLP while presenter reports busy; restore on clear/hide."""
+    if runner is None or getattr(runner, "_hyprwhspr_perf_wrapped", False):
+        return
+
+    orig_set = runner.set_state
+    orig_clear = runner.clear_state
+    orig_hide = getattr(runner, "hide", None)
+    orig_stop = getattr(runner, "stop", None)
+
+    def set_state(state: str, *args, **kwargs):
+        cleaned = (state or "").strip().lower()
+        if cleaned in _BUSY_STATES:
+            _perf("boost")
+        elif cleaned in ("success", "error", "ready", "idle", ""):
+            _perf("restore")
+        return orig_set(state, *args, **kwargs)
+
+    def clear_state(*args, **kwargs):
+        _perf("restore")
+        return orig_clear(*args, **kwargs)
+
+    runner.set_state = set_state  # type: ignore[method-assign]
+    runner.clear_state = clear_state  # type: ignore[method-assign]
+
+    if callable(orig_hide):
+
+        def hide(*args, **kwargs):
+            _perf("restore")
+            return orig_hide(*args, **kwargs)
+
+        runner.hide = hide  # type: ignore[method-assign]
+
+    if callable(orig_stop):
+
+        def stop(*args, **kwargs):
+            _perf("restore")
+            return orig_stop(*args, **kwargs)
+
+        runner.stop = stop  # type: ignore[method-assign]
+
+    runner._hyprwhspr_perf_wrapped = True
+
+
+
+def _ensure_daemon_with_patches(self) -> bool:
+    """Upstream MicOSDRunner._ensure_daemon with rice patch import injected."""
+    import signal
+    import subprocess
+    import time
+
+    from mic_osd.runner import MicOSDRunner
+    from src.paths import MIC_OSD_PID_FILE
+
+    if getattr(self, "_process", None) is not None and self._process.poll() is None:
+        return True
+
+    # Never reuse an old unpatched daemon — kill pidfile leftovers.
+    try:
+        if MIC_OSD_PID_FILE.exists():
+            old_pid = int(MIC_OSD_PID_FILE.read_text().strip())
+            if MicOSDRunner._is_mic_osd_daemon_pid(old_pid):
+                try:
+                    os.kill(old_pid, signal.SIGTERM)
+                except ProcessLookupError:
+                    pass
+            MIC_OSD_PID_FILE.unlink(missing_ok=True)
+    except Exception:
+        pass
+
+    lib_dir = self._mic_osd_dir.parent
+    scripts = "/home/ringdal/.Scripts"
+    code = f"""
+import signal
+signal.signal(signal.SIGUSR1, signal.SIG_IGN)
+signal.signal(signal.SIGUSR2, signal.SIG_IGN)
+
+import sys
+sys.path.insert(0, '{lib_dir}')
+sys.path.insert(0, '{scripts}')
+import hyprwhspr_osd_patches
+hyprwhspr_osd_patches.apply_all()
+from mic_osd.main import main
+sys.argv = ['mic-osd', '--daemon', '--viz', '{self._style}']
+sys.exit(main())
+"""
+
+    env = os.environ.copy()
+    lib_path = MicOSDRunner._layer_shell_ld_preload()
+    if lib_path:
+        env["LD_PRELOAD"] = lib_path
+    env["HYPRWHSPR_MIC_OSD_DAEMON"] = "1"
+
+    try:
+        python_cmd = sys.executable or "python3"
+        self._process = subprocess.Popen(
+            [python_cmd, "-c", code],
+            env=env,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.PIPE,
+            start_new_session=True,
+        )
+        time.sleep(0.2)
+        if self._process.poll() is not None:
+            stderr_output = ""
+            try:
+                stderr_output = self._process.stderr.read().decode("utf-8", errors="ignore").strip()
+            except Exception:
+                pass
+            msg = stderr_output or f"exit code {self._process.returncode}"
+            print(f"[MIC-OSD] Daemon crashed on startup: {msg}", flush=True)
+            self._process = None
+            return False
+        try:
+            self._process.stderr.close()
+        except Exception:
+            pass
+        MIC_OSD_PID_FILE.parent.mkdir(parents=True, exist_ok=True)
+        MIC_OSD_PID_FILE.write_text(str(self._process.pid))
+        self._orphaned_daemon_pid = None
+        print(f"[MIC-OSD] Daemon started (PID {self._process.pid}) [rice patches]", flush=True)
+        return True
+    except Exception as e:
+        print(f"[MIC-OSD] Failed to start daemon: {e}", flush=True)
+        import traceback
+
+        traceback.print_exc()
+        self._process = None
+        return False
+
+
+def _patch() -> None:
+    import hyprwhspr_osd_patches
+    from mic_osd import runner as osd_runner
+
+    hyprwhspr_osd_patches.apply_all()
+    osd_runner.MicOSDRunner._ensure_daemon = _ensure_daemon_with_patches
+    print(
+        f"[INIT] Mic-OSD rice: radius={hyprwhspr_osd_patches.OSD_RADIUS} "
+        f"border={hyprwhspr_osd_patches.OSD_BORDER_WIDTH} "
+        f"bottom-left margins "
+        f"L={hyprwhspr_osd_patches.OSD_MARGIN_LEFT} "
+        f"B={hyprwhspr_osd_patches.OSD_MARGIN_BOTTOM}",
+        flush=True,
+    )
+
+    import main as hypr_main
+
+    orig_init = hypr_main.hyprwhsprApp.__init__
+
+    def patched_init(self, *args, **kwargs):
+        orig_init(self, *args, **kwargs)
+        if getattr(self, "_mic_osd_runner", None) is None:
+            self._mic_osd_runner = WaybarStatePresenter()
+            print("[INIT] Waybar state presenter enabled (no OSD UI)", flush=True)
+        _wrap_presenter_perf(getattr(self, "_mic_osd_runner", None))
+        print("[INIT] hyprwhspr-perf boost on recording/processing", flush=True)
+
+    hypr_main.hyprwhsprApp.__init__ = patched_init
+    hypr_main.main()
+
+
+if __name__ == "__main__":
+    _patch()

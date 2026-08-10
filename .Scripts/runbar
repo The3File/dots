@@ -1,0 +1,204 @@
+#!/usr/bin/env bash
+
+get_config(){
+	bspc rule -a lemonbar layer=below
+	
+	# lemonbar_position: b for bottom, t for top
+	lp="b"
+
+	# colors
+	padding="28"
+	source "$HOME/.cache/wal/colors.sh"
+	#bg="#000000" 
+	bg="$color0"
+	fg="$color7"
+}
+
+parse_all_out(){
+	sep="%{F$color5}||%{F-}"
+	printf '%s\n' " $W $sep $K %{r} $V $L $sep $H $R $sep $N $sep $B $sep $D "
+}
+
+print_bar(){
+	lemonbar -p -n lemonbar\
+		-g 1920x26\
+		-${lp}\
+		-B "#a5${bg#\#}"\
+		-F "$fg"\
+		-u 2\
+		-f "-xos4-terminus-medium-*-*-*-14-*-*-*-*-*-*-*"
+}
+
+ws() {
+	set $(xprop -root _NET_CURRENT_DESKTOP)
+	current_space="$3"
+	spaces=()
+
+	for ((i=1;i<=10;i++));{
+		case $i in
+			$((current_space+1))) spaces+=("%{F$color4}[ $i ]%{F-}%{B-}") ;;
+			*) spaces+=($i)
+		esac
+	}
+
+	export W="${spaces[@]}"
+}
+
+net(){
+	get_net_ip
+	get_net_link
+	get_net_signal
+
+	[[ $ssid ]] && parse_net_out || net="%{F#f00}no connection%{F-}"
+
+	export N="%{A:net_show:}$net%{A}"
+}
+
+parse_net_out(){
+	get_color "$signal" "-20" "-40" "-55" "-60"
+	net="${ssid[1],,}: ${color}${signal[1]} ${signal[2]}%{F-} [${ip[1]}]"
+}
+
+get_net_ip(){
+	read -ra ip < <(ip a s wlp3s0 | grep 'inet ')
+}
+
+get_net_link(){
+	read -ra ssid < <(iw wlp3s0 link | grep SSID)
+}
+
+get_net_signal(){
+	read -ra signal < <(iw wlp3s0 link | grep 'signal')
+	signal="${signal##*:}"
+}
+
+net_show(){
+	alacritty --class net -e bash -c "nmcli d st; read -rsn1"
+}
+
+bat(){
+	BAT0="/sys/class/power_supply/BAT0"
+
+	read -r status < ${BAT0}/status
+	read -r capacity < ${BAT0}/capacity
+
+	get_color $capacity
+
+	export B="${status,,}: ${color}${capacity}%%%{F-}"
+}
+
+get_audio_sink(){
+	while read -r line; do
+		[[ $line =~ "Default Sink:" ]] || continue
+		[[ $line =~ "bluez" ]] && echo "blth" || echo "spkr"
+		#set $line; echo "${3%%.*}"
+		break
+	done < <(pactl info)
+}
+
+volume(){
+	volume="$(pamixer --get-volume)"
+	mute="$(pamixer --get-mute)"
+
+	sink=$(get_audio_sink)
+
+	[[ $mute = true ]] && { v="(${volume}%)"; volume="0";} || v="${volume}%%"
+
+	get_color $volume
+	[[ volume -gt 100 ]] && color="%{F#F00}"
+
+	export V="$sink: ${color}${v}%{F-}"
+}
+
+light(){
+	read -r light_file < "/sys/class/backlight/amdgpu_bl1/brightness"
+	light=$((light_file*100/64764))
+	get_color $light
+	export L="scrn: ${color}${light}%%%{F-}"
+}
+
+keylock(){
+	read -r K < "$HOME/.keylock"
+
+	[[ $K = enable ]] && color="%{F$color2}" || color="%{F$color1}"
+
+	export K="kbd: ${color}${K}d%{F-}"
+}
+
+misc(){
+	: "$(date '+%a %d %b %H%M')"
+	export D="%{A:date_show:}${_,,}%{A}"
+
+	set $(df -h | grep "/home$")
+	get_color $((100-${5%\%}))
+	export H="home: ${color}${4}%{F-}"
+
+	set $(df -h | grep "/$")
+	get_color $((100-${5%\%}))
+	export R="root: ${color}${4}%{F-}"
+}
+
+date_show(){
+	alacritty --class cal -e bash -c "cal -mw; read -rsn1"
+}
+
+start_while_loop(){
+	start_timed_update
+	start_read_fifo
+}
+
+start_timed_update(){
+	while :; do
+		echo > $PANELFIFO
+		sleep 10
+	done &
+}
+
+start_read_fifo(){
+	while read -u 3 line <& 3; do
+		case $line in
+			ws) ws ;;
+			net) net ;;
+			vol) volume ;;
+			light) light ;;
+			key) keylock ;;
+			*) net; bat; misc ;;
+		esac
+		parse_all_out
+	done < "$PANELFIFO" | print_bar | while read; do eval $REPLY; done &
+	exec 3<&-
+}
+
+get_color(){
+   [[ $1 -gt ${2:-85} ]] && color="%{F#0c0}"
+   [[ $1 -le ${2:-85} ]] && color="%{F#5b0}"
+   [[ $1 -le ${2:-70} ]] && color="%{F#9b0}"
+   [[ $1 -le ${3:-55} ]] && color="%{F#ba0}"
+   [[ $1 -le ${4:-40} ]] && color="%{F#c80}"
+   [[ $1 -le ${4:-25} ]] && color="%{F#d50}"
+   [[ $1 -le ${5:-10} ]] && color="%{F#f00}"
+}
+
+update_all(){ ws; net; light; bat; misc; keylock; volume; ((:;:)); volume; }
+
+mk_fifo(){
+	[[ -e "$PANELFIFO" ]] && rm "$PANELFIFO"
+	mkfifo "$PANELFIFO"
+	exec 3<>$PANELFIFO
+}
+
+main(){
+	trap 'killall lemonbar; bspc config bottom_padding 26' EXIT TERM KILL
+	
+	mk_fifo
+	get_config
+	update_all
+	start_while_loop
+	bspc config bottom_padding $padding
+
+	sleep 3
+	xdo above -t "$(xdo id -N Bspwm -n root)" "$(xdo id -m -a lemonbar)" &
+	wait
+}
+
+main

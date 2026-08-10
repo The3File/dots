@@ -1,0 +1,26 @@
+[Default Applications]
+image/*=sxiv.desktop
+image/jpg=sxiv.desktop
+image/png=sxiv.desktop
+image/jpeg=sxiv.desktop
+image/gif=gif.desktop
+text/plain=nvim.desktop
+text/x-shellscript=nvim.desktop
+audio/*=mpv.desktop
+video/*=mpv.desktop
+text/html=brave-browser.desktop
+application/pdf=zathura.desktop
+inode/directory=thunar.desktop
+video/mp4=vlc.desktop
+x-scheme-handler/http=brave-browser.desktop
+x-scheme-handler/https=brave-browser.desktop
+x-scheme-handler/magnet=transmission-remote.desktop;
+application/xhtml+xml=brave-browser.desktop
+video/quicktime=userapp-mpv-MRU3D2.desktop
+x-scheme-handler/prusaslicer=PrusaSlicerURLProtocol.desktop
+x-scheme-handler/claude-cli=claude-code-url-handler.desktop
+
+[Added Associations]
+video/quicktime=userapp-mpv-MRU3D2.desktop;
+application/pdf=org.pwmt.zathura-pdf-mupdf.desktop;
+inode/directory=obsidian.desktop;

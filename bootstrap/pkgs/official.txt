@@ -1,0 +1,80 @@
+# Core tooling (also installed in foundation; --needed is fine)
+base-devel
+git
+openssh
+curl
+wget
+unzip
+zip
+sudo
+polkit
+
+# Hyprland desktop
+hyprland
+hyprpaper
+hypridle
+waybar
+alacritty
+fuzzel
+dunst
+python-pywal
+cliphist
+wl-clipboard
+xdg-desktop-portal
+xdg-desktop-portal-gtk
+xorg-xwayland
+xsecurelock
+qt5-wayland
+mesa
+vulkan-radeon
+seatd
+
+# Audio / input
+pipewire
+wireplumber
+pipewire-pulse
+pipewire-alsa
+pamixer
+playerctl
+libinput
+wtype
+ydotool
+xclip
+gtk4-layer-shell
+python-gobject
+
+# Network / bluetooth
+networkmanager
+bluez
+bluez-utils
+
+# Editors / cli
+tmux
+neovim
+lf
+fzf
+fd
+bat
+jq
+ripgrep
+nodejs
+npm
+python
+python-pip
+espeak-ng
+
+# Apps
+qutebrowser
+thunar
+mpv
+zathura
+zathura-pdf-mupdf
+sxiv
+flatpak
+
+# Fonts
+ttf-liberation
+ttf-dejavu
+noto-fonts
+noto-fonts-emoji
+woff2-font-awesome

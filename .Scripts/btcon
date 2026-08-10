@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+case $1 in
+	jabra) dev="2C:FD:B3:C5:D7:E0" ;;
+	phone) dev="5C:17:CF:29:D3:32" ;;
+	keyboard) dev="F2:4B:FB:D7:3B:D1" ;;
+esac
+
+echo "connect $dev" | bluetoothctl
