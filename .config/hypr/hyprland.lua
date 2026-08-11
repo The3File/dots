@@ -245,8 +245,8 @@ hl.bind(mod .. " + XF86AudioRaiseVolume", hl.dsp.exec_cmd("pamixer --allow-boost
 hl.bind(mod .. " + XF86AudioLowerVolume", hl.dsp.exec_cmd("pamixer --allow-boost -d 5; pkill -RTMIN+1 waybar"), { locked = true })
 
 -- Brightness (RTMIN+2 refreshes waybar custom/light)
-hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("sudo light -A 5; pkill -RTMIN+2 waybar"), { locked = true, repeating = true })
-hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("sudo light -U 5; pkill -RTMIN+2 waybar"), { locked = true, repeating = true })
+hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("light -A 5; pkill -RTMIN+2 waybar"), { locked = true, repeating = true })
+hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("light -U 5; pkill -RTMIN+2 waybar"), { locked = true, repeating = true })
 
 ----------------------
 ---- WINDOW RULES ----
@@ -348,4 +348,10 @@ hl.window_rule({
 hl.window_rule({
     match = { class = "^(jetbrains-studio)$" },
     tile = true,
+})
+
+-- Chromium/Brave on Wayland over-scales touchpad scroll; dampen only here.
+hl.window_rule({
+    match = { class = "^(brave-browser)$" },
+    scroll_touchpad = 0.2,
 })
