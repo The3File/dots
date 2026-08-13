@@ -2,6 +2,7 @@
 # Shared TTS for Claude speak: Piper Danish when available, else espeak-ng.
 # Usage: claude-speak-tts "text to speak"
 # Env: CLAUDE_SPEAK_MAX_CHARS (default 500)
+#      CLAUDE_SPEAK_SYNC=1 — wait for playback to finish (battery warn, etc.)
 
 set -euo pipefail
 
@@ -42,24 +43,48 @@ play_wav() {
 	fi
 }
 
+should_skip() {
+	local s
+	s=$(cat "$STOP" 2>/dev/null || echo 0)
+	[[ ${T0:-0} -lt ${s:-0} ]]
+}
+
+# Run playback under the shared flock. Default: background. SYNC=1: foreground.
+play_locked() {
+	if [[ ${CLAUDE_SPEAK_SYNC:-0} == 1 ]]; then
+		(
+			flock -w 30 9 || exit 0
+			"$@"
+		) 9>"$LOCK"
+	else
+		(
+			flock -w 30 9 || exit 0
+			"$@"
+		) 9>"$LOCK" &>/dev/null &
+	fi
+}
+
+play_piper_wav() {
+	local wav=$1
+	should_skip && { rm -f "$wav"; return 0; }
+	play_wav "$wav" || true
+	rm -f "$wav"
+}
+
+play_espeak() {
+	should_skip && return 0
+	espeak-ng -v da -s 145 -p 40 "$text" &>/dev/null || true
+}
+
 if [[ -n $PIPER_BIN && -f $PIPER_MODEL ]]; then
 	wav=$(mktemp --suffix=.wav)
 	if printf '%s' "$text" | "$PIPER_BIN" -m "$PIPER_MODEL" -f "$wav" &>/dev/null; then
-		# Synthesis ran in parallel; serialize only playback via flock so queued
+		# Synthesis finished; serialize only playback via flock so queued
 		# updates play one after another instead of overlapping.
-		(
-			flock -w 30 9 || exit 0
-			s=$(cat "$STOP" 2>/dev/null || echo 0); [[ ${T0:-0} -lt ${s:-0} ]] && { rm -f "$wav"; exit 0; }
-			play_wav "$wav" || true
-			rm -f "$wav"
-		) 9>"$LOCK" &>/dev/null &
+		play_locked play_piper_wav "$wav"
 		exit 0
 	fi
 	rm -f "$wav"
 fi
 
-(
-	flock -w 30 9 || exit 0
-	s=$(cat "$STOP" 2>/dev/null || echo 0); [[ ${T0:-0} -lt ${s:-0} ]] && exit 0
-	espeak-ng -v da -s 145 -p 40 "$text" &>/dev/null || true
-) 9>"$LOCK" &>/dev/null &
+play_locked play_espeak

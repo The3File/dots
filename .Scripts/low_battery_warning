@@ -1,12 +1,98 @@
 #!/usr/bin/env bash
+# Battery TTS warnings at 20% / 10% / 5% while discharging (Danish Piper).
+# Autostart from hyprland.lua; safe to re-run (single instance via flock).
+# Unmutes and raises volume for the announcement, then restores.
+# Usage: low_battery_warning [test]
 
-read -r level < "/sys/class/power_supply/BAT0/capacity"
-read -r status < "/sys/class/power_supply/BAT0/status"
+set -euo pipefail
 
-[[ "$status" = "Discharging" ]] || exit
-[[ "$level" -le 15 ]] || exit
+BAT=/sys/class/power_supply/BAT0
+TTS="${HOME}/.Scripts/claude-speak-tts"
+LOCK="${XDG_RUNTIME_DIR:-/tmp}/battery-warn.lock"
+INTERVAL=30
+# Floor while speaking; previous volume/mute restored after.
+WARN_VOL=100
 
-[[ "$level" -le 5 ]] || { notify-send -u critical "BATTERY UNDER 15%"; exit; }
+refresh_waybar_vol() {
+	pkill -RTMIN+1 waybar 2>/dev/null || true
+}
 
-notify-send -u critical "BATTERY UNDER 5%"
-beep -r 3
+with_loud_volume() {
+	local saved_vol saved_mute
+	saved_vol=$(pamixer --get-volume 2>/dev/null || echo 50)
+	saved_mute=$(pamixer --get-mute 2>/dev/null || echo false)
+	pamixer -u 2>/dev/null || true
+	if ((saved_vol < WARN_VOL)); then
+		pamixer --set-volume "$WARN_VOL" 2>/dev/null || true
+		refresh_waybar_vol
+	fi
+	echo "battery-warn: volume $(pamixer --get-volume)% (floor ${WARN_VOL})" >&2
+	"$@"
+	pamixer --set-volume "$saved_vol" 2>/dev/null || true
+	if [[ $saved_mute == true ]]; then
+		pamixer -m 2>/dev/null || true
+	fi
+	refresh_waybar_vol
+}
+
+speak() {
+	local pct=$1 msg
+	case $pct in
+		20) msg='Batteri tyve procent.' ;;
+		10) msg='Batteri ti procent.' ;;
+		5) msg='Advarsel. Batteri fem procent.' ;;
+		*) return ;;
+	esac
+	notify-send -u critical "Batteri ${pct}%" "$msg" 2>/dev/null || true
+	with_loud_volume env CLAUDE_SPEAK_SYNC=1 CLAUDE_SPEAK_MAX_CHARS=80 "$TTS" "$msg" || true
+}
+
+if [[ ${1:-} == test ]]; then
+	ORIG=$(pamixer --get-volume)
+	ORIG_MUTE=$(pamixer --get-mute)
+	pamixer -u
+	pamixer --set-volume 20
+	refresh_waybar_vol
+	for t in 20 10 5; do
+		speak "$t"
+	done
+	pamixer --set-volume "$ORIG"
+	[[ $ORIG_MUTE == true ]] && pamixer -m || pamixer -u
+	refresh_waybar_vol
+	exit 0
+fi
+
+exec 9>"$LOCK"
+flock -n 9 || exit 0
+
+prev=
+while true; do
+	if [[ ! -r $BAT/capacity || ! -r $BAT/status ]]; then
+		sleep "$INTERVAL"
+		continue
+	fi
+	read -r capacity <"$BAT/capacity"
+	read -r status <"$BAT/status"
+
+	# Only warn while draining; reset edge state when plugged in / full.
+	if [[ $status != Discharging ]]; then
+		prev=
+		sleep "$INTERVAL"
+		continue
+	fi
+
+	# First sample after start/unplug: arm without speaking (no spam at login).
+	if [[ -z ${prev:-} ]]; then
+		prev=$capacity
+		sleep "$INTERVAL"
+		continue
+	fi
+
+	for t in 20 10 5; do
+		if ((prev > t && capacity <= t)); then
+			speak "$t"
+		fi
+	done
+	prev=$capacity
+	sleep "$INTERVAL"
+done
