@@ -1,0 +1,234 @@
+#!/usr/bin/env bash
+# Platform performance mode for waybar + fuzzel.
+# Usage: perf-mode {status|menu|set <mode>|signal}
+#
+# Modes map to ACPI platform_profile (+ matching amd-pstate EPP):
+#   low-power | balanced | performance | auto
+# auto = tlp bat/ac (restores TLP AC/BAT defaults from /etc/tlp.d).
+
+set -euo pipefail
+
+PLATFORM_PATH=/sys/firmware/acpi/platform_profile
+BOOST_FLAG="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/hyprwhspr-perf.boosted"
+APPLY=/usr/local/libexec/ringdal-perf-apply
+ASKPASS=/home/ringdal/.Scripts/zenity-askpass-password
+WAYBAR_SIGNAL=3
+
+on_battery() {
+	local online ac st
+	for ac in /sys/class/power_supply/AC*/online /sys/class/power_supply/ADP*/online; do
+		[[ -r $ac ]] || continue
+		online=$(<"$ac")
+		[[ $online == 1 ]] && return 1
+		[[ $online == 0 ]] && return 0
+	done
+	st=$(cat /sys/class/power_supply/BAT0/status 2>/dev/null || true)
+	[[ $st == Discharging ]]
+}
+
+current_platform() {
+	cat "$PLATFORM_PATH" 2>/dev/null || echo '?'
+}
+
+current_epp() {
+	cat /sys/devices/system/cpu/cpu0/cpufreq/energy_performance_preference 2>/dev/null || echo '?'
+}
+
+boosted() {
+	[[ -f $BOOST_FLAG ]]
+}
+
+# Short bar label (Terminus / runbar style).
+label_for() {
+	case "$1" in
+	low-power) printf 'low' ;;
+	balanced) printf 'bal' ;;
+	performance) printf 'max' ;;
+	*) printf '%s' "$1" ;;
+	esac
+}
+
+signal_waybar() {
+	pkill -RTMIN+"$WAYBAR_SIGNAL" waybar 2>/dev/null || true
+}
+
+# Prefer root helper (NOPASSWD); fall back to askpass+PTY for one-shot.
+sudo_apply() {
+	local mode=$1
+	if [[ -x $APPLY ]] && sudo -n "$APPLY" "$mode" >/dev/null 2>&1; then
+		rm -f "$BOOST_FLAG"
+		return 0
+	fi
+	export SUDO_ASKPASS=$ASKPASS
+	if [[ -x $APPLY ]]; then
+		python3 -c '
+import os, sys, pty
+os.environ["SUDO_ASKPASS"] = sys.argv[1]
+sys.exit(pty.spawn(["/usr/bin/sudo", "-A", "-k", "--", sys.argv[2], sys.argv[3]]))
+' "$ASKPASS" "$APPLY" "$mode" || return 1
+	else
+		# Helper not installed yet — last-resort inline write.
+		python3 -c '
+import os, sys, pty
+os.environ["SUDO_ASKPASS"] = sys.argv[1]
+code = sys.argv[2]
+sys.exit(pty.spawn(["/usr/bin/sudo", "-A", "-k", "--", "bash", "-c", code]))
+' "$ASKPASS" "printf '%s\\n' '$mode' >'$PLATFORM_PATH'" || return 1
+	fi
+	rm -f "$BOOST_FLAG"
+}
+
+cmd_status() {
+	local platform epp src text cls tooltip boost_note
+	platform=$(current_platform)
+	epp=$(current_epp)
+	if on_battery; then
+		src=battery
+	else
+		src=ac
+	fi
+
+	if boosted; then
+		text="perf: boost"
+		cls="boost"
+		boost_note="hyprwhspr temporary boost active"
+	else
+		text="perf: $(label_for "$platform")"
+		case "$platform" in
+		low-power) cls=low-power ;;
+		balanced) cls=balanced ;;
+		performance) cls=performance ;;
+		*) cls=unknown ;;
+		esac
+		boost_note="no temporary boost"
+	fi
+
+	tooltip=$(
+		cat <<EOF
+Performance mode
+  platform: $platform
+  epp:      $epp
+  power:    $src
+  boost:    $boost_note
+
+Click: choose mode (fuzzel)
+  low-power / balanced / performance
+  auto = TLP restore (AC/BAT defaults)
+EOF
+	)
+
+	python3 -c 'import json,sys; print(json.dumps({"text":sys.argv[1],"class":sys.argv[2],"tooltip":sys.argv[3]}, ensure_ascii=False))' \
+		"$text" "$cls" "$tooltip"
+}
+
+cmd_set() {
+	local mode=${1:-} apply_arg
+	case "$mode" in
+	low-power | balanced | performance)
+		apply_arg=$mode
+		;;
+	auto)
+		if on_battery; then
+			apply_arg=tlp-bat
+		else
+			apply_arg=tlp-ac
+		fi
+		;;
+	*)
+		printf 'usage: %s set {low-power|balanced|performance|auto}\n' "${0##*/}" >&2
+		return 2
+		;;
+	esac
+	sudo_apply "$apply_arg"
+	signal_waybar
+	notify-send -a perf-mode -t 2000 "perf" "mode → $(current_platform) (epp $(current_epp))" 2>/dev/null || true
+}
+
+cmd_menu() {
+	local conf_dir choice current marked
+	conf_dir="${XDG_CONFIG_HOME:-$HOME/.config}/fuzzel"
+	mkdir -p "$conf_dir"
+
+	local color4="#5ca7a5" color5="#c3a170" color7="#c5c5c5" color8="#525353"
+	if [[ -f $HOME/.cache/wal/colors.sh ]]; then
+		# shellcheck disable=SC1090
+		eval "$(grep -E '^color[0-9]+=' "$HOME/.cache/wal/colors.sh")"
+	fi
+
+	hex() {
+		local c="${1#\#}"
+		printf '%s%s' "$c" "${2:-ff}"
+	}
+
+	cat >"$conf_dir/fuzzel.ini" <<EOF
+font=Terminus:size=14
+dpi-aware=no
+prompt="perf: "
+icons-enabled=no
+layer=overlay
+anchor=bottom-left
+x-margin=24
+y-margin=24
+lines=6
+width=36
+horizontal-pad=20
+vertical-pad=16
+inner-pad=10
+keyboard-focus=exclusive
+exit-on-keyboard-focus-loss=no
+
+[colors]
+background=$(hex "#000000")
+text=$(hex "$color7")
+prompt=$(hex "$color5")
+input=$(hex "$color7")
+match=$(hex "$color4")
+selection=$(hex "$color4")
+selection-text=$(hex "#000000")
+selection-match=$(hex "#000000")
+border=$(hex "$color4")
+counter=$(hex "$color8")
+
+[border]
+width=2
+radius=0
+selection-radius=0
+EOF
+
+	current=$(current_platform)
+	choice=$(
+		{
+			for mode in low-power balanced performance; do
+				if [[ $mode == "$current" ]] && ! boosted; then
+					printf '* %s\n' "$mode"
+				else
+					printf '  %s\n' "$mode"
+				fi
+			done
+			printf '  auto (tlp restore)\n'
+		} | /usr/bin/fuzzel --dmenu --prompt='perf: ' || true
+	)
+	[[ -n $choice ]] || exit 0
+
+	choice=${choice#\* }
+	choice=${choice#  }
+	case "$choice" in
+	low-power | balanced | performance)
+		cmd_set "$choice"
+		;;
+	'auto (tlp restore)' | auto)
+		cmd_set auto
+		;;
+	esac
+}
+
+case "${1:-}" in
+status) cmd_status ;;
+menu) cmd_menu ;;
+set) cmd_set "${2:-}" ;;
+signal) signal_waybar ;;
+*)
+	printf 'usage: %s {status|menu|set <mode>|signal}\n' "${0##*/}" >&2
+	exit 2
+	;;
+esac

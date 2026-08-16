@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Install root-owned perf apply helper + narrow sudoers NOPASSWD.
+# Run once from Alacritty (finger/password). Safe to re-run.
+set -euo pipefail
+
+SRC=/home/ringdal/.Scripts/ringdal-perf-apply.in
+DST=/usr/local/libexec/ringdal-perf-apply
+SUDOERS=/etc/sudoers.d/ringdal-perf
+USER_NAME=${SUDO_USER:-$(id -un)}
+
+[[ -f $SRC ]] || {
+	echo "missing $SRC" >&2
+	exit 1
+}
+
+install -d -m 755 /usr/local/libexec
+install -m 755 "$SRC" "$DST"
+
+# Only this binary, no args wildcards that escalate elsewhere.
+cat >"$SUDOERS" <<EOF
+# Narrow: platform_profile / EPP / tlp ac|bat for waybar + hyprwhspr-perf
+$USER_NAME ALL=(root) NOPASSWD: $DST
+EOF
+chmod 440 "$SUDOERS"
+visudo -cf "$SUDOERS"
+
+echo "installed: $DST"
+echo "sudoers:   $SUDOERS"
+cur=$(cat /sys/firmware/acpi/platform_profile 2>/dev/null || echo balanced)
+sudo -n "$DST" "$cur"
+echo "sudo -n OK (rewrote current profile: $cur)"

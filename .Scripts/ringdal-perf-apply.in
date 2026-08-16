@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# Privileged helper: write platform_profile + EPP, or run tlp ac/bat.
+# Installed to /usr/local/libexec/ringdal-perf-apply (root-owned) with
+# a narrow sudoers NOPASSWD rule — do not put this under $HOME for sudo -n.
+#
+# Usage (as root / via sudo -n):
+#   ringdal-perf-apply performance|balanced|low-power
+#   ringdal-perf-apply tlp-ac|tlp-bat
+
+set -euo pipefail
+
+PLATFORM_PATH=/sys/firmware/acpi/platform_profile
+EPP_GLOB=/sys/devices/system/cpu/cpu*/cpufreq/energy_performance_preference
+
+epp_for() {
+	case "$1" in
+	low-power) printf 'balance_power' ;;
+	balanced) printf 'balance_performance' ;;
+	performance) printf 'performance' ;;
+	*) return 1 ;;
+	esac
+}
+
+write_profile() {
+	local mode=$1 epp
+	epp=$(epp_for "$mode")
+	printf '%s\n' "$mode" >"$PLATFORM_PATH"
+	local f
+	for f in $EPP_GLOB; do
+		[[ -e $f ]] || continue
+		printf '%s\n' "$epp" >"$f"
+	done
+}
+
+case "${1:-}" in
+performance | balanced | low-power)
+	write_profile "$1"
+	;;
+tlp-ac)
+	exec /usr/bin/tlp ac
+	;;
+tlp-bat)
+	exec /usr/bin/tlp bat
+	;;
+*)
+	printf 'usage: %s {performance|balanced|low-power|tlp-ac|tlp-bat}\n' "${0##*/}" >&2
+	exit 2
+	;;
+esac

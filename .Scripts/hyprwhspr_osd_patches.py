@@ -22,6 +22,19 @@ OSD_WAVEFORM_GAIN = 75.0
 OSD_WAVEFORM_GAMMA = 0.78  # <1 expands quiet speech into visible motion
 OSD_WAVEFORM_RISE = 0.68
 OSD_WAVEFORM_DECAY = 0.80
+# Post-gain/gamma (0..1): below this → silence. Raise if room noise still wiggles.
+OSD_WAVEFORM_NOISE_GATE = 0.24
+
+# "sine" = amplitude-driven scene wave; "bars" = upstream equalizer (easy revert).
+OSD_WAVEFORM_RENDER = "sine"
+# Sine look: cycles across the strip; ends pinned to midline via sin(π·t) window.
+OSD_SINE_CYCLES = 2.0
+OSD_SINE_MIN_AMP = 0.0  # quiet → flat line; speech lifts the middle
+OSD_SINE_HEIGHT = 0.48  # fraction of wave strip used as max peak
+OSD_SINE_PIN_ENDS = True  # multiply by sin(π·t) so left/right stay on center_y
+# One shared amplitude (mean/max of buckets) + dense samples → soft pure sine.
+OSD_SINE_SOFT = True
+OSD_SINE_SAMPLES = 96
 
 
 def _rounded_rect(cr, x: float, y: float, w: float, h: float, radius: float) -> None:
@@ -150,6 +163,12 @@ def apply_osd_waveform_drama() -> None:
             scaled = np.clip(bucket_rms * self.amplification, 0.0, None)
             new_heights = np.clip(np.power(scaled, OSD_WAVEFORM_GAMMA), 0.0, 1.0)
 
+            # Noise gate: subtract threshold and renormalize so speech still hits 1.
+            gate = OSD_WAVEFORM_NOISE_GATE
+            if gate > 0.0:
+                denom = max(1e-6, 1.0 - gate)
+                new_heights = np.clip((new_heights - gate) / denom, 0.0, 1.0)
+
             for i in range(self.num_bars):
                 if new_heights[i] > self.bar_heights[i]:
                     self.bar_heights[i] = (
@@ -160,13 +179,131 @@ def apply_osd_waveform_drama() -> None:
                     self.bar_heights[i] *= self.decay_rate
                     if self.bar_heights[i] < new_heights[i]:
                         self.bar_heights[i] = new_heights[i]
+                if self.bar_heights[i] < 0.02:
+                    self.bar_heights[i] = 0.0
         else:
             self.bar_heights *= self.decay_rate
+            self.bar_heights[self.bar_heights < 0.02] = 0.0
 
         self.state_manager.update()
 
     WaveformVisualization.__init__ = _init
     WaveformVisualization.update = update
+
+
+def apply_osd_waveform_render() -> None:
+    """Replace equalizer bars with a sine scene-wave when RENDER=sine."""
+    if OSD_WAVEFORM_RENDER != "sine":
+        return
+
+    import cairo
+    from mic_osd.theme import theme
+    from mic_osd.visualizations.base import VisualizerState
+    from mic_osd.visualizations.waveform import WaveformVisualization
+
+    def draw(self, cr: cairo.Context, width: int, height: int) -> None:
+        padding = 16
+        indicator_width = 30
+        wave_start_x = padding + indicator_width
+        wave_width = width - wave_start_x - padding
+        wave_height = height - (padding * 2)
+        center_y = height / 2.0
+
+        self._draw_recording_indicator(cr, padding, center_y)
+
+        n = max(2, int(self.num_bars))
+        bar_left = theme.bar_left
+        bar_right = theme.bar_right
+
+        is_processing = self.state_manager.current_state == VisualizerState.PROCESSING
+        is_success = self.state_manager.current_state == VisualizerState.SUCCESS
+        wave_phase = self.state_manager.animation_phase
+        # Gentle drift while recording; full speed while processing.
+        phase = wave_phase if is_processing else wave_phase * 0.35
+        pulse_value = self.state_manager.get_animation_value() if is_success else 1.0
+
+        heights = [float(h) for h in self.bar_heights[:n]]
+        if OSD_SINE_SOFT:
+            # Single envelope — no per-bucket ripples on the sine.
+            mean_amp = sum(heights) / n
+            max_amp = max(heights) if heights else 0.0
+            base_amp = 0.45 * mean_amp + 0.55 * max_amp
+            samples = max(8, int(OSD_SINE_SAMPLES))
+        else:
+            base_amp = None
+            samples = n
+
+        points: list[tuple[float, float]] = []
+        for i in range(samples):
+            t = i / (samples - 1)
+            if OSD_SINE_SOFT:
+                amp = base_amp
+            else:
+                amp = heights[min(i, n - 1)]
+
+            if is_processing:
+                # Soft global breathe — avoid per-point harmonics (short ripples).
+                amp = max(amp, 0.7) * (0.82 + 0.18 * math.sin(wave_phase))
+            elif is_success:
+                amp = amp * (0.7 + 0.3 * pulse_value)
+
+            amp = max(OSD_SINE_MIN_AMP, min(1.0, amp))
+
+            sine = math.sin(t * 2 * math.pi * OSD_SINE_CYCLES + phase)
+            if OSD_SINE_PIN_ENDS:
+                sine *= math.sin(math.pi * t)
+            x = wave_start_x + t * wave_width
+            y = center_y - amp * (wave_height * OSD_SINE_HEIGHT) * sine
+            points.append((x, y))
+
+        if not points:
+            self._draw_elapsed_time(cr, width, height)
+            return
+
+        opacity = pulse_value if is_success else 1.0
+
+        # Soft fill under the curve down to the midline.
+        cr.new_path()
+        cr.move_to(points[0][0], center_y)
+        cr.line_to(points[0][0], points[0][1])
+        for x, y in points[1:]:
+            cr.line_to(x, y)
+        cr.line_to(points[-1][0], center_y)
+        cr.close_path()
+        mid_r = (bar_left[0] + bar_right[0]) * 0.5
+        mid_g = (bar_left[1] + bar_right[1]) * 0.5
+        mid_b = (bar_left[2] + bar_right[2]) * 0.5
+        cr.set_source_rgba(mid_r, mid_g, mid_b, 0.18 * opacity)
+        cr.fill()
+
+        # Glow pass
+        cr.new_path()
+        cr.move_to(*points[0])
+        for x, y in points[1:]:
+            cr.line_to(x, y)
+        cr.set_line_width(5.0)
+        cr.set_line_cap(cairo.LINE_CAP_ROUND)
+        cr.set_line_join(cairo.LINE_JOIN_ROUND)
+        cr.set_source_rgba(mid_r, mid_g, mid_b, 0.28 * opacity)
+        cr.stroke()
+
+        # Gradient stroke: short segments left → right theme colors.
+        cr.set_line_width(2.0)
+        cr.set_line_cap(cairo.LINE_CAP_ROUND)
+        cr.set_line_join(cairo.LINE_JOIN_ROUND)
+        for i in range(len(points) - 1):
+            t = i / max(1, len(points) - 2)
+            r = bar_left[0] * (1 - t) + bar_right[0] * t
+            g = bar_left[1] * (1 - t) + bar_right[1] * t
+            b = bar_left[2] * (1 - t) + bar_right[2] * t
+            cr.set_source_rgba(r, g, b, 0.92 * opacity)
+            cr.move_to(*points[i])
+            cr.line_to(*points[i + 1])
+            cr.stroke()
+
+        self._draw_elapsed_time(cr, width, height)
+
+    WaveformVisualization.draw = draw
 
 
 def apply_osd_elapsed_fix() -> None:
@@ -261,4 +398,5 @@ def apply_all() -> None:
     apply_osd_chrome()
     apply_osd_position()
     apply_osd_waveform_drama()
+    apply_osd_waveform_render()
     apply_osd_elapsed_fix()

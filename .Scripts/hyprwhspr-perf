@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+# Temporary peak performance while hyprwhspr records/transcribes.
+# Usage: hyprwhspr-perf {boost|restore|status}
+# Fail-soft: boost/restore always exit 0 (dictation must not break).
+
+set -u
+
+FLAG="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/hyprwhspr-perf.boosted"
+APPLY=/usr/local/libexec/ringdal-perf-apply
+WAYBAR_SIGNAL=3
+
+warn() { printf '[hyprwhspr-perf] WARN: %s\n' "$*" >&2; }
+
+on_battery() {
+	local online ac
+	for ac in /sys/class/power_supply/AC*/online /sys/class/power_supply/ADP*/online; do
+		[[ -r $ac ]] || continue
+		online=$(<"$ac")
+		[[ $online == 1 ]] && return 1
+		[[ $online == 0 ]] && return 0
+	done
+	local st
+	st=$(cat /sys/class/power_supply/BAT0/status 2>/dev/null || true)
+	[[ $st == Discharging ]]
+}
+
+signal_waybar() {
+	pkill -RTMIN+"$WAYBAR_SIGNAL" waybar 2>/dev/null || true
+}
+
+apply() {
+	local mode=$1
+	if [[ ! -x $APPLY ]]; then
+		warn "missing $APPLY — run: sudo ~/.Scripts/perf-apply-install"
+		return 1
+	fi
+	if ! sudo -n "$APPLY" "$mode" >/dev/null 2>&1; then
+		warn "sudo -n $APPLY $mode failed (install/reinstall sudoers?)"
+		return 1
+	fi
+	return 0
+}
+
+cmd_boost() {
+	if [[ -f $FLAG ]]; then
+		signal_waybar
+		return 0
+	fi
+	if apply performance; then
+		: >"$FLAG" 2>/dev/null || warn "could not write $FLAG"
+		signal_waybar
+	fi
+	return 0
+}
+
+cmd_restore() {
+	if [[ ! -f $FLAG ]]; then
+		signal_waybar
+		return 0
+	fi
+	if on_battery; then
+		apply tlp-bat || true
+	else
+		apply tlp-ac || true
+	fi
+	rm -f "$FLAG" 2>/dev/null || true
+	signal_waybar
+	return 0
+}
+
+cmd_status() {
+	local epp platform flagged src
+	epp=$(cat /sys/devices/system/cpu/cpu0/cpufreq/energy_performance_preference 2>/dev/null || echo '?')
+	platform=$(cat /sys/firmware/acpi/platform_profile 2>/dev/null || echo '?')
+	if [[ -f $FLAG ]]; then
+		flagged=yes
+	else
+		flagged=no
+	fi
+	if on_battery; then
+		src=battery
+	else
+		src=ac
+	fi
+	printf 'source=%s boosted=%s epp=%s platform=%s\n' "$src" "$flagged" "$epp" "$platform"
+}
+
+case "${1:-}" in
+boost) cmd_boost ;;
+restore) cmd_restore ;;
+status) cmd_status ;;
+*)
+	printf 'usage: %s {boost|restore|status}\n' "${0##*/}" >&2
+	exit 2
+	;;
+esac
