@@ -13,6 +13,8 @@
         "custom/sep",
         "custom/net",
         "custom/sep",
+        "custom/perf",
+        "custom/sep",
         "custom/bat",
         "custom/sep",
         "custom/clock"
@@ -79,6 +81,17 @@
         "markup": "pango",
         "on-click": "alacritty --class net -e bash -c 'nmcli d st; read -rsn1'",
         "tooltip": false
+    },
+
+    "custom/perf": {
+        "format": "{}",
+        "exec": "$HOME/.Scripts/perf-mode status",
+        "interval": 2,
+        "return-type": "json",
+        "exec-on-event": true,
+        "signal": 3,
+        "on-click": "$HOME/.Scripts/perf-mode menu",
+        "tooltip": true
     },
 
     "custom/bat": {

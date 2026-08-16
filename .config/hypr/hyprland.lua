@@ -53,8 +53,8 @@ end)
 
 hl.config({
     general = {
-        gaps_in  = 0,
-        gaps_out = 0,
+        gaps_in  = 5,
+        gaps_out = 10,
         border_size = 2,
         col = {
             active_border   = colors.active_border,
@@ -66,7 +66,7 @@ hl.config({
     },
 
     decoration = {
-        rounding         = 0,
+        rounding         = 8,
 		  --active_opacity   = 1.0,
 		  --inactive_opacity = 0.7,
         --dim_inactive     = true,

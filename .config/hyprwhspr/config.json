@@ -4,19 +4,40 @@
   "use_hypr_bindings": true,
   "model": "large-v3-turbo",
   "language": "da",
-  "whisper_prompt_da": "Transskriber klart, naturligt dansk. Brug korrekt tegnsætning og store bogstaver ved sætningsstart. Behold danske navne, stednavne og fagord præcist som sagt. Opfind ikke ekstra ord.",
+  "whisper_prompt_da": "Transskriber klart, naturligt dansk. Brug korrekt tegns\u00e6tning og store bogstaver ved s\u00e6tningsstart. Behold danske navne, stednavne og fagord pr\u00e6cist som sagt. Opfind ikke ekstra ord.",
   "pywhispercpp_use_vad": true,
   "paste_mode": null,
   "applications": {
-    "scratchterm": { "auto_paste": "ctrl+shift+v" },
-    "scratchaios": { "auto_paste": "ctrl+shift+v" },
-    "float": { "auto_paste": "ctrl+shift+v" },
-    "cal": { "auto_paste": "ctrl+shift+v" },
-    "net": { "auto_paste": "ctrl+shift+v" },
-    "gass": { "auto_paste": "ctrl+shift+v" },
-    "files": { "auto_paste": "ctrl+shift+v" },
-    "follow": { "auto_paste": "ctrl+shift+v" },
-    "fullscreen": { "auto_paste": "ctrl+shift+v" },
-    "bye": { "auto_paste": "ctrl+shift+v" }
-  }
+    "scratchterm": {
+      "auto_paste": "ctrl+shift+v"
+    },
+    "scratchaios": {
+      "auto_paste": "ctrl+shift+v"
+    },
+    "float": {
+      "auto_paste": "ctrl+shift+v"
+    },
+    "cal": {
+      "auto_paste": "ctrl+shift+v"
+    },
+    "net": {
+      "auto_paste": "ctrl+shift+v"
+    },
+    "gass": {
+      "auto_paste": "ctrl+shift+v"
+    },
+    "files": {
+      "auto_paste": "ctrl+shift+v"
+    },
+    "follow": {
+      "auto_paste": "ctrl+shift+v"
+    },
+    "fullscreen": {
+      "auto_paste": "ctrl+shift+v"
+    },
+    "bye": {
+      "auto_paste": "ctrl+shift+v"
+    }
+  },
+  "mic_osd_style": "waveform"
 }

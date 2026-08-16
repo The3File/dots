@@ -43,12 +43,30 @@ window#waybar {
 #custom-vol,
 #custom-light,
 #custom-net,
+#custom-perf,
 #custom-bat,
 #custom-clock,
 #custom-hyprwhspr {
     padding: 0 8px;
     color: @foreground;
     background: transparent;
+}
+
+#custom-perf.low-power {
+    color: #0c0;
+}
+
+#custom-perf.balanced {
+    color: #f80;
+}
+
+#custom-perf.performance {
+    color: #f00;
+}
+
+#custom-perf.boost {
+    color: #f00;
+    border-bottom: 2px solid #f00;
 }
 
 #custom-hyprwhspr {
