@@ -5,7 +5,8 @@
 
 set -u
 
-FLAG="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/hyprwhspr-perf.boosted"
+RUNTIME="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+FLAG="$RUNTIME/hyprwhspr-perf.boosted"
 APPLY=/usr/local/libexec/ringdal-perf-apply
 WAYBAR_SIGNAL=3
 
@@ -54,11 +55,27 @@ cmd_boost() {
 }
 
 cmd_restore() {
+	local manual="$RUNTIME/perf-mode.manual" pinned
 	if [[ ! -f $FLAG ]]; then
 		signal_waybar
 		return 0
 	fi
-	if on_battery; then
+	# Prefer pinned menu mode; otherwise TLP AC/BAT defaults.
+	if [[ -f $manual ]]; then
+		pinned=$(<"$manual")
+		case "$pinned" in
+		low-power | balanced | performance)
+			apply "$pinned" || true
+			;;
+		*)
+			if on_battery; then
+				apply tlp-bat || true
+			else
+				apply tlp-ac || true
+			fi
+			;;
+		esac
+	elif on_battery; then
 		apply tlp-bat || true
 	else
 		apply tlp-ac || true

@@ -24,3 +24,9 @@ You are on a **live desktop session**. Treat the compositor, terminals, and agen
 
 - Prefer `~/.Scripts/` and `~/.config/` over invasive system changes.
 - Ask before dropping network, killing audio, or restarting systemd user/session services tied to the desktop.
+
+## sudo / privileged commands
+
+- Use `~/.Scripts/claude-sudo-run <cmd>…` (never raw `sudo -A` / `pty.spawn(["/usr/bin/sudo",…])` with password-only askpass).
+- That wrapper shows the **exact argv** in zenity before fingerprint/password. Bare askpass cannot — `SUDO_COMMAND` is empty under `sudo -A`.
+- Hooks rewrite bare `sudo` → `claude-sudo-run` (Claude + Cursor); `/usr/bin/sudo` inside Python is not rewritten — call the wrapper yourself.

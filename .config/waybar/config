@@ -3,17 +3,21 @@
     "position": "bottom",
     "height": 26,
     "spacing": 0,
-    "modules-left": ["hyprland/workspaces", "custom/sep"],
-    "modules-center": [],
-    "modules-right": [
+    "modules-left": [
+        "hyprland/workspaces",
+        "custom/sep",
+        "custom/perf",
+        "custom/sep",
         "custom/hyprwhspr",
         "custom/sep",
+        "custom/keylock"
+    ],
+    "modules-center": [],
+    "modules-right": [
         "custom/vol",
         "custom/light",
         "custom/sep",
         "custom/net",
-        "custom/sep",
-        "custom/perf",
         "custom/sep",
         "custom/bat",
         "custom/sep",
@@ -39,7 +43,7 @@
     },
 
     "custom/sep": {
-        "format": "||",
+        "format": "|",
         "interval": "once",
         "tooltip": false
     },
@@ -79,8 +83,19 @@
         "return-type": "json",
         "interval": 5,
         "markup": "pango",
-        "on-click": "alacritty --class net -e bash -c 'nmcli d st; read -rsn1'",
+        "on-click": "$HOME/.Scripts/fuzzel_nm",
         "tooltip": false
+    },
+
+    "custom/keylock": {
+        "format": "{}",
+        "exec": "$HOME/.Scripts/lock_keys status",
+        "interval": 5,
+        "return-type": "json",
+        "exec-on-event": true,
+        "signal": 4,
+        "on-click": "$HOME/.Scripts/lock_keys toggle",
+        "tooltip": true
     },
 
     "custom/perf": {

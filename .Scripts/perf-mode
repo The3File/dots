@@ -5,11 +5,18 @@
 # Modes map to ACPI platform_profile (+ matching amd-pstate EPP):
 #   low-power | balanced | performance | auto
 # auto = tlp bat/ac (restores TLP AC/BAT defaults from /etc/tlp.d).
+#
+# Manual picks stick until AC plug/unplug (or explicit auto). While the
+# profile follows power source, the bar shows (chg)/(bat). Boost never
+# shows those tags.
 
 set -euo pipefail
 
 PLATFORM_PATH=/sys/firmware/acpi/platform_profile
-BOOST_FLAG="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/hyprwhspr-perf.boosted"
+RUNTIME="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+BOOST_FLAG="$RUNTIME/hyprwhspr-perf.boosted"
+MANUAL_FLAG="$RUNTIME/perf-mode.manual"
+POWER_FLAG="$RUNTIME/perf-mode.power"
 APPLY=/usr/local/libexec/ringdal-perf-apply
 ASKPASS=/home/ringdal/.Scripts/zenity-askpass-password
 WAYBAR_SIGNAL=3
@@ -26,6 +33,21 @@ on_battery() {
 	[[ $st == Discharging ]]
 }
 
+power_src() {
+	if on_battery; then
+		printf 'battery'
+	else
+		printf 'ac'
+	fi
+}
+
+tlp_arg_for_src() {
+	case "$1" in
+	battery) printf 'tlp-bat' ;;
+	*) printf 'tlp-ac' ;;
+	esac
+}
+
 current_platform() {
 	cat "$PLATFORM_PATH" 2>/dev/null || echo '?'
 }
@@ -36,6 +58,14 @@ current_epp() {
 
 boosted() {
 	[[ -f $BOOST_FLAG ]]
+}
+
+manual() {
+	[[ -f $MANUAL_FLAG ]]
+}
+
+manual_mode() {
+	cat "$MANUAL_FLAG" 2>/dev/null || true
 }
 
 # Short bar label (Terminus / runbar style).
@@ -78,21 +108,48 @@ sys.exit(pty.spawn(["/usr/bin/sudo", "-A", "-k", "--", "bash", "-c", code]))
 	rm -f "$BOOST_FLAG"
 }
 
+# Non-interactive apply for status poll (never askpass).
+quiet_apply() {
+	[[ -x $APPLY ]] || return 1
+	sudo -n "$APPLY" "$1" >/dev/null 2>&1
+}
+
+# On AC plug/unplug: drop manual pin and restore TLP for the new source.
+# Skips apply while hyprwhspr boost is active (restore will follow TLP).
+sync_power_source() {
+	local src prev
+	src=$(power_src)
+	if [[ -f $POWER_FLAG ]]; then
+		prev=$(<"$POWER_FLAG")
+		if [[ $prev != "$src" ]]; then
+			rm -f "$MANUAL_FLAG"
+			if ! boosted; then
+				quiet_apply "$(tlp_arg_for_src "$src")" || true
+			fi
+		fi
+	fi
+	printf '%s\n' "$src" >"$POWER_FLAG"
+}
+
 cmd_status() {
-	local platform epp src text cls tooltip boost_note
+	local platform epp src src_abbr text cls tooltip boost_note power_note
+	sync_power_source
+
 	platform=$(current_platform)
 	epp=$(current_epp)
-	if on_battery; then
-		src=battery
+	src=$(power_src)
+	if [[ $src == battery ]]; then
+		src_abbr=bat
 	else
-		src=ac
+		src_abbr=chg
 	fi
 
 	if boosted; then
 		text="perf: boost"
 		cls="boost"
 		boost_note="hyprwhspr temporary boost active"
-	else
+		power_note="power tag hidden (boost overrides)"
+	elif manual; then
 		text="perf: $(label_for "$platform")"
 		case "$platform" in
 		low-power) cls=low-power ;;
@@ -101,6 +158,17 @@ cmd_status() {
 		*) cls=unknown ;;
 		esac
 		boost_note="no temporary boost"
+		power_note="manual pin ($(manual_mode)); clears on AC plug/unplug"
+	else
+		text="perf: $(label_for "$platform") ($src_abbr)"
+		case "$platform" in
+		low-power) cls=low-power ;;
+		balanced) cls=balanced ;;
+		performance) cls=performance ;;
+		*) cls=unknown ;;
+		esac
+		boost_note="no temporary boost"
+		power_note="follows AC/BAT (TLP)"
 	fi
 
 	tooltip=$(
@@ -110,9 +178,10 @@ Performance mode
   epp:      $epp
   power:    $src
   boost:    $boost_note
+  source:   $power_note
 
 Click: choose mode (fuzzel)
-  low-power / balanced / performance
+  low-power / balanced / performance (pin until plug/unplug)
   auto = TLP restore (AC/BAT defaults)
 EOF
 	)
@@ -126,26 +195,25 @@ cmd_set() {
 	case "$mode" in
 	low-power | balanced | performance)
 		apply_arg=$mode
+		printf '%s\n' "$mode" >"$MANUAL_FLAG"
 		;;
 	auto)
-		if on_battery; then
-			apply_arg=tlp-bat
-		else
-			apply_arg=tlp-ac
-		fi
+		rm -f "$MANUAL_FLAG"
+		apply_arg=$(tlp_arg_for_src "$(power_src)")
 		;;
 	*)
 		printf 'usage: %s set {low-power|balanced|performance|auto}\n' "${0##*/}" >&2
 		return 2
 		;;
 	esac
+	printf '%s\n' "$(power_src)" >"$POWER_FLAG"
 	sudo_apply "$apply_arg"
 	signal_waybar
 	notify-send -a perf-mode -t 2000 "perf" "mode → $(current_platform) (epp $(current_epp))" 2>/dev/null || true
 }
 
 cmd_menu() {
-	local conf_dir choice current marked
+	local conf_dir choice current pinned
 	conf_dir="${XDG_CONFIG_HOME:-$HOME/.config}/fuzzel"
 	mkdir -p "$conf_dir"
 
@@ -195,17 +263,21 @@ radius=0
 selection-radius=0
 EOF
 
-	current=$(current_platform)
+	pinned=$(manual_mode)
 	choice=$(
 		{
 			for mode in low-power balanced performance; do
-				if [[ $mode == "$current" ]] && ! boosted; then
+				if [[ -n $pinned && $mode == "$pinned" ]] && ! boosted; then
 					printf '* %s\n' "$mode"
 				else
 					printf '  %s\n' "$mode"
 				fi
 			done
-			printf '  auto (tlp restore)\n'
+			if ! manual && ! boosted; then
+				printf '* auto (tlp restore)\n'
+			else
+				printf '  auto (tlp restore)\n'
+			fi
 		} | /usr/bin/fuzzel --dmenu --prompt='perf: ' || true
 	)
 	[[ -n $choice ]] || exit 0

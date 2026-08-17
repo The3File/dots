@@ -1,7 +1,67 @@
 #!/usr/bin/env bash
-xinput enable 'AT Translated Set 2 keyboard' && printf '%s' "enable" > "$HOME/.keylock"
-if [[ $1 = suspend ]]; then
-	env XSECURELOCK_PASSWORD_PROMPT=time_hex xsecurelock -- systemctl suspend
+# Wayland session lock (hyprlock). Replaces xsecurelock (X11-only / refuses Wayland).
+#
+# Usage: lockscreen [suspend]
+#   (no args)  — lock until PAM unlock (password / fingerprint)
+#   suspend    — lock, then suspend; hyprlock still holds the session on wake
+
+set -euo pipefail
+
+HYPRLOCK_CONF="${HOME}/.config/hypr/hyprlock.conf"
+
+ensure_session_env() {
+	export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+	if [[ -z ${WAYLAND_DISPLAY:-} ]]; then
+		local sock
+		for sock in "${XDG_RUNTIME_DIR}"/wayland-*; do
+			[[ -S $sock ]] || continue
+			export WAYLAND_DISPLAY=${sock##*/}
+			break
+		done
+	fi
+	if [[ -z ${HYPRLAND_INSTANCE_SIGNATURE:-} && -d ${XDG_RUNTIME_DIR}/hypr ]]; then
+		local d
+		for d in "${XDG_RUNTIME_DIR}"/hypr/*; do
+			[[ -d $d ]] || continue
+			export HYPRLAND_INSTANCE_SIGNATURE=${d##*/}
+			break
+		done
+	fi
+}
+
+ensure_session_env
+
+if ! command -v hyprlock >/dev/null 2>&1; then
+	printf 'lockscreen: hyprlock not installed\n' >&2
+	exit 1
+fi
+
+run_lock() {
+	if [[ -f $HYPRLOCK_CONF ]]; then
+		hyprlock -c "$HYPRLOCK_CONF" --grace 0 --no-fade-in
+	else
+		hyprlock --grace 0 --no-fade-in
+	fi
+}
+
+if [[ ${1:-} == suspend ]]; then
+	# Lock first so the session is covered before sleep; keep hyprlock as
+	# the foreground waiter so wake still requires auth.
+	if pgrep -x hyprlock >/dev/null 2>&1; then
+		systemctl suspend
+		exit 0
+	fi
+	run_lock &
+	lock_pid=$!
+	# Brief settle so the lock surface is up before DPMS/suspend.
+	for _ in 1 2 3 4 5 6 7 8 9 10; do
+		pgrep -x hyprlock >/dev/null 2>&1 && break
+		sleep 0.1
+	done
+	systemctl suspend
+	wait "$lock_pid"
 else
-	env XSECURELOCK_PASSWORD_PROMPT=time_hex xsecurelock
+	# Already locked → nothing to do (avoid stacking).
+	pgrep -x hyprlock >/dev/null 2>&1 && exit 0
+	run_lock
 fi

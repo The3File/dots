@@ -1,9 +1,137 @@
 #!/usr/bin/env bash
+# Bluetooth connect menu (fuzzel) + CLI shortcuts.
+# Usage:
+#   btcon              → fuzzel picker
+#   btcon jabra|phone|keyboard|buds|…
+#   btcon disconnect   → disconnect all connected
+#
+# Old sxhkd: Super+Shift+B (dmenu-bluetooth). Bound the same in hyprland.lua.
 
-case $1 in
-	jabra) dev="2C:FD:B3:C5:D7:E0" ;;
-	phone) dev="5C:17:CF:29:D3:32" ;;
-	keyboard) dev="F2:4B:FB:D7:3B:D1" ;;
+set -euo pipefail
+
+conf_dir="${XDG_CONFIG_HOME:-$HOME/.config}/fuzzel"
+mkdir -p "$conf_dir"
+
+# Friendly name → MAC (paired devices on this machine).
+declare -A DEVS=(
+	[jabra]=2C:FD:B3:C5:D7:E0
+	[phone]=5C:17:CF:29:D3:32
+	[keyboard]=F2:4B:FB:D7:3B:D1
+	[buds]=24:11:53:C8:30:54
+	[buds3]=C4:77:64:B5:B4:C6
+	[xbox]=F4:6A:D7:9C:C4:CB
+)
+
+write_fuzzel_ini() {
+	local color4="#5ca7a5" color5="#c3a170" color7="#c5c5c5" color8="#525353"
+	if [[ -f $HOME/.cache/wal/colors.sh ]]; then
+		# shellcheck disable=SC1090
+		eval "$(grep -E '^color[0-9]+=' "$HOME/.cache/wal/colors.sh")"
+	fi
+	hex() {
+		local c="${1#\#}"
+		printf '%s%s' "$c" "${2:-ff}"
+	}
+	cat >"$conf_dir/fuzzel.ini" <<EOF
+font=Terminus:size=14
+dpi-aware=no
+prompt="bt: "
+icons-enabled=no
+layer=overlay
+anchor=bottom-left
+x-margin=24
+y-margin=24
+lines=10
+width=40
+horizontal-pad=20
+vertical-pad=16
+inner-pad=10
+keyboard-focus=exclusive
+exit-on-keyboard-focus-loss=no
+
+[colors]
+background=$(hex "#000000")
+text=$(hex "$color7")
+prompt=$(hex "$color5")
+input=$(hex "$color7")
+match=$(hex "$color4")
+selection=$(hex "$color4")
+selection-text=$(hex "#000000")
+selection-match=$(hex "#000000")
+border=$(hex "$color4")
+counter=$(hex "$color8")
+
+[border]
+width=2
+radius=0
+selection-radius=0
+EOF
+}
+
+connected_macs() {
+	bluetoothctl devices Connected 2>/dev/null | awk '{print $2}'
+}
+
+connect_mac() {
+	local mac=$1 name=${2:-$1}
+	notify-send -a btcon -t 2000 "bt" "connecting $name…" 2>/dev/null || true
+	if bluetoothctl connect "$mac"; then
+		notify-send -a btcon -t 2000 "bt" "connected: $name" 2>/dev/null || true
+	else
+		notify-send -a btcon -t 3000 "bt" "failed: $name" 2>/dev/null || true
+		return 1
+	fi
+}
+
+disconnect_all() {
+	local mac
+	for mac in $(connected_macs); do
+		bluetoothctl disconnect "$mac" >/dev/null 2>&1 || true
+	done
+	notify-send -a btcon -t 2000 "bt" "disconnected" 2>/dev/null || true
+}
+
+cmd_menu() {
+	local choice line name mac mark connected
+	write_fuzzel_ini
+	connected=$(connected_macs | tr '\n' ' ')
+
+	choice=$(
+		{
+			for name in jabra phone keyboard buds buds3 xbox; do
+				mac=${DEVS[$name]}
+				mark='  '
+				[[ " $connected " == *" $mac "* ]] && mark='* '
+				printf '%s%s  %s\n' "$mark" "$name" "$mac"
+			done
+			printf '  disconnect all\n'
+		} | /usr/bin/fuzzel --dmenu --prompt='bt: ' || true
+	)
+	[[ -n $choice ]] || exit 0
+	choice=${choice#\* }
+	choice=${choice#  }
+
+	case "$choice" in
+	'disconnect all')
+		disconnect_all
+		;;
+	*)
+		name=${choice%% *}
+		mac=${DEVS[$name]:-}
+		[[ -n $mac ]] || exit 1
+		connect_mac "$mac" "$name"
+		;;
+	esac
+}
+
+case "${1:-}" in
+'') cmd_menu ;;
+disconnect) disconnect_all ;;
+jabra | phone | keyboard | buds | buds3 | xbox)
+	connect_mac "${DEVS[$1]}" "$1"
+	;;
+*)
+	printf 'usage: %s [jabra|phone|keyboard|buds|buds3|xbox|disconnect]\n' "${0##*/}" >&2
+	exit 2
+	;;
 esac
-
-echo "connect $dev" | bluetoothctl

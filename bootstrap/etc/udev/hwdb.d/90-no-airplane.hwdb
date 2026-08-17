@@ -1,0 +1,9 @@
+# Disable ThinkPad flight-mode / wireless Fn key soft-rfkill.
+# Default (60-keyboard.hwdb): KEYBOARD_KEY_04=wlan  → kernel rfkill handler
+# kills Wi‑Fi (and often BT). Map it away so the key does nothing to radios.
+#
+# Apply: sudo ~/.Scripts/rfkill-no-airplane-apply
+# (also: systemd-hwdb update && udevadm trigger)
+
+evdev:name:ThinkPad Extra Buttons:dmi:bvn*:bvr*:bd*:svnLENOVO*:pn*:*
+ KEYBOARD_KEY_04=reserved

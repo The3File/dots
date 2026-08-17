@@ -1,0 +1,7 @@
+# ThinkPad Extra Buttons LEDs — take micmute (+ power) off the kernel
+# audio-micmute trigger so userspace can drive polarity:
+#   mic muted → LED on; mic live → LED off; power LED always off.
+# Managed by ~/.Scripts/thinkpad-leds-apply
+
+ACTION=="add", SUBSYSTEM=="leds", KERNEL=="platform::micmute", RUN+="/bin/sh -c 'echo none > /sys/class/leds/%k/trigger; echo 0 > /sys/class/leds/%k/brightness'"
+ACTION=="add", SUBSYSTEM=="leds", KERNEL=="tpacpi::power", RUN+="/bin/sh -c 'echo none > /sys/class/leds/%k/trigger; echo 0 > /sys/class/leds/%k/brightness'"

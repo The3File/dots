@@ -1,21 +1,248 @@
 #!/usr/bin/env bash
+# Disable/enable laptop keyboard, trackpoint, and touchpad (Hyprland).
+# Wayland stand-in for the old xinput lock_keys + runbar "kbd: enabled/disabled".
+#
+# Usage: lock_keys {toggle|enable|disable|status|ensure|signal}
+# Flag file ~/.keylock holds "enable" or "disable" (same as runbar).
+# Waybar: custom/keylock (signal RTMIN+4). Click → toggle.
+# Toggle from ThinkPad ACPI hotkey (acpid_events) — not Super+Shift+K.
+# Disable = devices off, screen stays on (no locker).
+# Enable = hyprlock auth (password / fingerprint) so unlock is not free.
+# Debounce after either transition absorbs double firmware ACPI events.
 
-get_current_state(){
-	[[ $(< "$HOME/.keylock") = "enable" ]] && state="disable" || state="enable"
-	IFS='' devices=("AT Translated Set 2 keyboard" "TPPS/2 Elan TrackPoint" "SYNA0001:00 06CB:CE67 Touchpad")
+set -euo pipefail
+
+FLAG="${HOME}/.keylock"
+WAYBAR_SIGNAL=4
+RUNTIME="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+AUTHING="${RUNTIME}/lock_keys.authing"
+BUSY="${RUNTIME}/lock_keys.busy"
+DEBOUNCE="${RUNTIME}/lock_keys.debounce"
+DEBOUNCE_SEC=3
+HYPRLOCK_CONF="${HOME}/.config/hypr/hyprlock.conf"
+
+# Hyprland device names (hyprctl devices -j).
+DEVICES=(
+	at-translated-set-2-keyboard
+	tpps/2-elan-trackpoint
+	syna0001:00-06cb:ce67-touchpad
+)
+
+ensure_session_env() {
+	export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+	RUNTIME=$XDG_RUNTIME_DIR
+	AUTHING="${RUNTIME}/lock_keys.authing"
+	BUSY="${RUNTIME}/lock_keys.busy"
+	DEBOUNCE="${RUNTIME}/lock_keys.debounce"
+
+	if [[ -z ${WAYLAND_DISPLAY:-} ]]; then
+		local sock
+		for sock in "${XDG_RUNTIME_DIR}"/wayland-*; do
+			[[ -S $sock ]] || continue
+			export WAYLAND_DISPLAY=${sock##*/}
+			break
+		done
+	fi
+
+	if [[ -z ${HYPRLAND_INSTANCE_SIGNATURE:-} && -d ${XDG_RUNTIME_DIR}/hypr ]]; then
+		local d
+		for d in "${XDG_RUNTIME_DIR}"/hypr/*; do
+			[[ -d $d ]] || continue
+			export HYPRLAND_INSTANCE_SIGNATURE=${d##*/}
+			break
+		done
+	fi
 }
 
-lock_keys_now(){
-	for device in ${devices[@]}; do
-		xinput $state $device || break 1
+ensure_session_env
+
+signal_waybar() {
+	pkill -RTMIN+"$WAYBAR_SIGNAL" waybar 2>/dev/null || true
+}
+
+current_state() {
+	local s
+	s=$(cat "$FLAG" 2>/dev/null || echo enable)
+	case "$s" in
+	enable | disable) printf '%s' "$s" ;;
+	*) printf 'enable' ;;
+	esac
+}
+
+set_devices() {
+	# $1 = true|false (hypr enabled)
+	local enabled=$1 name
+	for name in "${DEVICES[@]}"; do
+		hyprctl eval "hl.device({ name = \"$name\", enabled = $enabled })" >/dev/null 2>&1 || true
 	done
 }
 
-notify_change(){
-	printf '%s' "$state" > "$HOME/.keylock"
-	echo "key" > "$PANELFIFO"
+apply_state() {
+	local state=$1
+	case "$state" in
+	enable) set_devices true ;;
+	disable) set_devices false ;;
+	*) return 1 ;;
+	esac
+	printf '%s' "$state" >"$FLAG"
 }
 
-get_current_state
-lock_keys_now
-notify_change
+mark_debounce() {
+	date +%s >"$DEBOUNCE"
+}
+
+in_debounce() {
+	local now then
+	[[ -f $DEBOUNCE ]] || return 1
+	now=$(date +%s)
+	then=$(cat "$DEBOUNCE" 2>/dev/null || echo 0)
+	((now - then < DEBOUNCE_SEC))
+}
+
+# Keyboard temporarily on for password; fingerprint works either way.
+# AUTHING is held for the whole enable/disable command so waybar status
+# cannot yank devices back to disabled between auth and apply_state.
+screen_auth() {
+	ensure_session_env
+
+	if pgrep -x hyprlock >/dev/null 2>&1; then
+		while pgrep -x hyprlock >/dev/null 2>&1; do
+			sleep 0.2
+		done
+		return 0
+	fi
+
+	if ! command -v hyprlock >/dev/null 2>&1; then
+		notify-send -a lock_keys -u critical "kbd" "hyprlock mangler" 2>/dev/null || true
+		return 1
+	fi
+
+	set_devices true
+	# Foreground until unlock (PAM via /etc/pam.d/hyprlock → login).
+	if [[ -f $HYPRLOCK_CONF ]]; then
+		hyprlock -c "$HYPRLOCK_CONF" --grace 0 --no-fade-in
+	else
+		hyprlock --grace 0 --no-fade-in
+	fi
+}
+
+acquire_busy() {
+	exec 8>"$BUSY"
+	flock -n 8 || return 1
+	: >"$AUTHING"
+}
+
+release_busy() {
+	rm -f "$AUTHING"
+	flock -u 8 2>/dev/null || true
+}
+
+cmd_disable() {
+	if in_debounce; then
+		return 0
+	fi
+	if ! acquire_busy; then
+		return 0
+	fi
+	trap release_busy EXIT
+
+	if [[ $(current_state) == disable ]]; then
+		release_busy
+		trap - EXIT
+		return 0
+	fi
+
+	# No locker on disable — screen stays on; only input devices go off.
+	apply_state disable
+	signal_waybar
+	notify-send -a lock_keys -t 2000 "kbd" "disabled" 2>/dev/null || true
+	mark_debounce
+
+	release_busy
+	trap - EXIT
+}
+
+cmd_enable() {
+	if in_debounce; then
+		return 0
+	fi
+	if ! acquire_busy; then
+		return 0
+	fi
+	trap release_busy EXIT
+
+	if [[ $(current_state) == enable ]]; then
+		apply_state enable
+		signal_waybar
+		release_busy
+		trap - EXIT
+		return 0
+	fi
+
+	if ! screen_auth; then
+		apply_state disable
+		signal_waybar
+		release_busy
+		trap - EXIT
+		return 1
+	fi
+	apply_state enable
+	signal_waybar
+	notify-send -a lock_keys -t 2000 "kbd" "enabled" 2>/dev/null || true
+	mark_debounce
+
+	release_busy
+	trap - EXIT
+}
+
+cmd_toggle() {
+	if [[ $(current_state) == enable ]]; then
+		cmd_disable
+	else
+		cmd_enable
+	fi
+}
+
+cmd_ensure() {
+	# Re-apply flag after hyprctl reload / compositor start — never prompt.
+	[[ -f $AUTHING ]] && return 0
+	apply_state "$(current_state)"
+}
+
+cmd_status() {
+	local state text cls tooltip
+	state=$(current_state)
+	# Reload resets devices; keep them off while flagged disabled — but never
+	# during an in-progress auth/transition (AUTHING held for the whole cmd).
+	if [[ $state == disable && ! -f $AUTHING ]]; then
+		set_devices false
+	fi
+	if [[ $state == enable ]]; then
+		text="kbd: enabled"
+		cls="enabled"
+	else
+		text="kbd: disabled"
+		cls="disabled"
+	fi
+	tooltip="Laptop keyboard / trackpoint / touchpad
+  state: ${state}d
+
+ThinkPad ACPI hotkey: toggle (unlock → hyprlock)
+Click: same toggle
+Flag: $FLAG"
+	python3 -c 'import json,sys; print(json.dumps({"text":sys.argv[1],"class":sys.argv[2],"tooltip":sys.argv[3]}, ensure_ascii=False))' \
+		"$text" "$cls" "$tooltip"
+}
+
+case "${1:-toggle}" in
+toggle) cmd_toggle ;;
+enable) cmd_enable ;;
+disable) cmd_disable ;;
+status) cmd_status ;;
+ensure) cmd_ensure ;;
+signal) signal_waybar ;;
+*)
+	printf 'usage: %s {toggle|enable|disable|status|ensure|signal}\n' "${0##*/}" >&2
+	exit 2
+	;;
+esac

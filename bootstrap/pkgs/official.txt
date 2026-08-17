@@ -23,7 +23,7 @@ wl-clipboard
 xdg-desktop-portal
 xdg-desktop-portal-gtk
 xorg-xwayland
-xsecurelock
+hyprlock
 qt5-wayland
 mesa
 vulkan-radeon

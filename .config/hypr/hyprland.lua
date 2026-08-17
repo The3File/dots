@@ -41,6 +41,14 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("hyprpaper")
     hl.exec_cmd(os.getenv("HOME") .. "/.Scripts/cliphist-watch")
     hl.exec_cmd(os.getenv("HOME") .. "/.Scripts/low_battery_warning")
+    hl.exec_cmd(os.getenv("HOME") .. "/.Scripts/lock_keys ensure")
+    -- ACPI firmware buttons still work while lock_keys disables the laptop kb.
+    hl.exec_cmd(os.getenv("HOME") .. "/.Scripts/acpid_events")
+    -- Undo accidental ThinkPad flight-mode soft-rfkill (hwdb remaps the key too).
+    hl.exec_cmd(os.getenv("HOME") .. "/.Scripts/rfkill-guard")
+    -- ThinkPad LEDs: power off; micmute inverted (muted=on) via pwrbtnlght.
+    hl.exec_cmd(os.getenv("HOME") .. "/.Scripts/pwrbtnlght sync")
+    hl.exec_cmd(os.getenv("HOME") .. "/.Scripts/pwrbtnlght watch")
     hl.exec_cmd("hypridle")
     -- TTY→Hyprland never reaches graphical-session.target, so the enabled
     -- user unit (WantedBy=graphical-session.target) does not auto-start.
@@ -189,6 +197,12 @@ hl.bind(mod .. " + ALT + SHIFT + Q", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scr
 -- Next wallpaper / wal palette
 hl.bind(mod .. " + ALT + SHIFT + W", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scripts/chwal"))
 
+-- Bluetooth / WiFi (old sxhkd: Super+Shift+B / Super+Shift+W)
+-- Keylock toggle is ThinkPad ACPI hotkey only (acpid_events → lock_keys toggle),
+-- not Super+Shift+K (that bind is window.swap up below).
+hl.bind(mod .. " + SHIFT + B", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scripts/btcon"))
+hl.bind(mod .. " + SHIFT + W", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scripts/fuzzel_nm"))
+
 -- Focus
 hl.bind(mod .. " + H", hl.dsp.focus({ direction = "left" }))
 hl.bind(mod .. " + J", hl.dsp.focus({ direction = "down" }))
@@ -244,6 +258,7 @@ hl.bind(mod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("pamixer -i 5; pkill -RTMIN+1 waybar"), { locked = true, repeating = true })
 hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("pamixer -d 5; pkill -RTMIN+1 waybar"), { locked = true, repeating = true })
 hl.bind("XF86AudioMute", hl.dsp.exec_cmd("pamixer -t; pkill -RTMIN+1 waybar"), { locked = true })
+hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scripts/pwrbtnlght mic-toggle"), { locked = true })
 hl.bind(mod .. " + XF86AudioRaiseVolume", hl.dsp.exec_cmd("pamixer --allow-boost -i 5; pkill -RTMIN+1 waybar"), { locked = true })
 hl.bind(mod .. " + XF86AudioLowerVolume", hl.dsp.exec_cmd("pamixer --allow-boost -d 5; pkill -RTMIN+1 waybar"), { locked = true })
 

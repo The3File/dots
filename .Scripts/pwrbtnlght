@@ -1,37 +1,180 @@
 #!/usr/bin/env bash
+# ThinkPad LED control (power / micmute / mute indicators).
+#
+# Usage:
+#   pwrbtnlght                 → fuzzel menu
+#   pwrbtnlght on|off|toggle [power|micmute|mute]
+#   pwrbtnlght sync            → micmute LED follows mute (inverted); power off
+#   pwrbtnlght watch           → keep syncing on Pulse/PipeWire source events
+#
+# Micmute polarity (desired): muted → LED on; unmuted → LED off.
+# Kernel audio-micmute trigger is the opposite / fights us — udev sets
+# trigger=none (see thinkpad-leds-apply). Writes sysfs as user (video group).
 
-dev_pwr="/sys/devices/platform/thinkpad_acpi/leds/tpacpi::power/brightness"
-dev_mcm="/sys/devices/platform/thinkpad_acpi/leds/platform::micmute/brightness"
-dev_mute="/sys/devices/platform/thinkpad_acpi/leds/platform::mute/brightness"
+set -euo pipefail
 
-check_device(){
-	read -rp "chooose device from"$'\n'"1. $dev_pwr"$'\n'"2. $dev_mcm"$'\n'"3. $dev_mute"$'\n'"> "
-	case "$REPLY" in
-		1) b="$dev_pwr" ;;
-		2) b="$dev_mcm" ;;
-		3) b="$dev_mute" ;;
-	esac
+LED_ROOT=/sys/devices/platform/thinkpad_acpi/leds
+declare -A LEDS=(
+	[power]="$LED_ROOT/tpacpi::power/brightness"
+	[micmute]="$LED_ROOT/platform::micmute/brightness"
+	[mute]="$LED_ROOT/platform::mute/brightness"
+)
+
+conf_dir="${XDG_CONFIG_HOME:-$HOME/.config}/fuzzel"
+RUNTIME="${XDG_RUNTIME_DIR:-/tmp}"
+WATCH_LOCK="${RUNTIME}/pwrbtnlght-watch.lock"
+
+die() {
+	printf 'pwrbtnlght: %s\n' "$*" >&2
+	exit 1
 }
 
-toggle(){
-	read -r state < $b
-	case $state in
-		0) s=1; msg="Turned on" ;;
-		1) s=0; msg="Turned off"
-	esac
+read_led() {
+	local path=$1
+	[[ -r $path ]] || die "cannot read $path"
+	cat "$path"
 }
 
-case "$1" in
-	on) s=1; msg="Turned on" ;;
-	off) s=0; msg="Turned off" ;;
-	*) toggle
-esac
+write_led() {
+	local path=$1 val=$2
+	[[ -w $path ]] || die "cannot write $path (user in video group?)"
+	printf '%s\n' "$val" >"$path"
+}
 
-case "$2" in
-	1) b="$dev_pwr"; dev="power button" ;;
-	2) b="$dev_mcm"; dev="mic mute" ;;
-	*) check_device
-esac
+set_led() {
+	local name=$1 action=$2 path cur next msg
+	path=${LEDS[$name]:-}
+	[[ -n $path ]] || die "unknown led '$name' (power|micmute|mute)"
+	cur=$(read_led "$path")
+	case "$action" in
+	on) next=1 ;;
+	off) next=0 ;;
+	toggle)
+		if [[ $cur == 0 ]]; then next=1; else next=0; fi
+		;;
+	*) die "action must be on|off|toggle" ;;
+	esac
+	write_led "$path" "$next"
+	if [[ $next == 1 ]]; then msg="on"; else msg="off"; fi
+	notify-send -a pwrbtnlght -t 1500 "led" "$name → $msg" 2>/dev/null || true
+}
 
-printf '\e[1;32m%s\e[2;39m' "$msg the $dev light"
-echo "$s" | sudo tee "$b" &>/dev/null && read -t .2 -p " - success"$'\n'
+# muted → micmute LED on; live mic → LED off. Always force power LED off.
+cmd_sync() {
+	local muted=false
+	if command -v pamixer >/dev/null 2>&1; then
+		[[ $(pamixer --default-source --get-mute 2>/dev/null || echo false) == true ]] && muted=true
+	elif command -v pactl >/dev/null 2>&1; then
+		pactl get-source-mute @DEFAULT_SOURCE@ 2>/dev/null | grep -q 'yes' && muted=true
+	fi
+
+	if [[ $muted == true ]]; then
+		write_led "${LEDS[micmute]}" 1
+	else
+		write_led "${LEDS[micmute]}" 0
+	fi
+	write_led "${LEDS[power]}" 0
+}
+
+cmd_watch() {
+	exec 9>"$WATCH_LOCK"
+	flock -n 9 || exit 0
+
+	cmd_sync || true
+
+	# Re-sync when any source changes (mute / default / new device).
+	pactl subscribe 2>/dev/null | while read -r line; do
+		case "$line" in
+		*on\ source* | *on\ server*)
+			cmd_sync || true
+			;;
+		esac
+	done
+}
+
+# Toggle default source mute, sync LEDs, refresh waybar vol module.
+cmd_mic_toggle() {
+	pamixer --default-source -t
+	cmd_sync
+	pkill -RTMIN+1 waybar 2>/dev/null || true
+}
+
+write_fuzzel_ini() {
+	local color4="#5ca7a5" color5="#c3a170" color7="#c5c5c5" color8="#525353"
+	mkdir -p "$conf_dir"
+	if [[ -f $HOME/.cache/wal/colors.sh ]]; then
+		# shellcheck disable=SC1090
+		eval "$(grep -E '^color[0-9]+=' "$HOME/.cache/wal/colors.sh")"
+	fi
+	hex() {
+		local c="${1#\#}"
+		printf '%s%s' "$c" "${2:-ff}"
+	}
+	cat >"$conf_dir/fuzzel.ini" <<EOF
+font=Terminus:size=14
+dpi-aware=no
+prompt="led: "
+icons-enabled=no
+layer=overlay
+anchor=bottom-left
+x-margin=24
+y-margin=24
+lines=8
+width=36
+horizontal-pad=20
+vertical-pad=16
+inner-pad=10
+keyboard-focus=exclusive
+exit-on-keyboard-focus-loss=no
+
+[colors]
+background=$(hex "#000000")
+text=$(hex "$color7")
+prompt=$(hex "$color5")
+input=$(hex "$color7")
+match=$(hex "$color4")
+selection=$(hex "$color4")
+selection-text=$(hex "#000000")
+selection-match=$(hex "#000000")
+border=$(hex "$color4")
+counter=$(hex "$color8")
+
+[border]
+width=2
+radius=0
+selection-radius=0
+EOF
+}
+
+cmd_menu() {
+	local choice name cur mark
+	write_fuzzel_ini
+	choice=$(
+		{
+			for name in power micmute mute; do
+				cur=$(read_led "${LEDS[$name]}" 2>/dev/null || echo '?')
+				if [[ $cur == 1 ]]; then mark='*'; else mark=' '; fi
+				printf '%s %s  (%s)\n' "$mark" "$name" "$cur"
+			done
+		} | /usr/bin/fuzzel --dmenu --prompt='led: ' || true
+	)
+	[[ -n $choice ]] || exit 0
+	choice=${choice#\* }
+	choice=${choice#  }
+	name=${choice%% *}
+	set_led "$name" toggle
+}
+
+case "${1:-}" in
+'' | menu) cmd_menu ;;
+on | off | toggle)
+	set_led "${2:-power}" "$1"
+	;;
+sync) cmd_sync ;;
+watch) cmd_watch ;;
+mic-toggle) cmd_mic_toggle ;;
+*)
+	printf 'usage: %s [menu|on|off|toggle|sync|watch|mic-toggle] [power|micmute|mute]\n' "${0##*/}" >&2
+	exit 2
+	;;
+esac

@@ -1,22 +1,53 @@
 #!/usr/bin/env bash
+# ACPI event listener (acpi_listen). Firmware buttons still fire while
+# lock_keys has disabled the laptop keyboard / trackpoint / touchpad.
+#
+# ThinkPad ibm/hotkey 00001317 is the sole lock/unlock toggle for keylock
+# (no Super+Shift+K). Unlock still goes through hyprlock auth.
+# Autostart: hyprland.lua hyprland.start
 
-coproc acpi_listen
-trap 'kill $COPROC_PID' EXIT
-trap 'xinput enable "AT Translated Set 2 keyboard"' EXIT
+set -euo pipefail
 
-notify_plugged(){ [[ $1 = *ACPI* ]] && echo > $PANELFIFO; }
+LOCK_KEYS="${HOME}/.Scripts/lock_keys"
+BYE="${HOME}/.Scripts/alacritty_bye"
+LOCKSCREEN="${HOME}/.Scripts/lockscreen"
+RUNTIME="${XDG_RUNTIME_DIR:-/tmp}"
+LOCKFILE="${RUNTIME}/acpid_events.lock"
 
-power_menu(){ [[ $1 = "PBTN" ]] && alacritty_bye; }
+# One instance per user session.
+exec 9>"$LOCKFILE"
+flock -n 9 || exit 0
 
-handler(){
+# hyprctl needs HIS when not inherited (e.g. odd spawn paths).
+if [[ -z ${HYPRLAND_INSTANCE_SIGNATURE:-} && -d ${XDG_RUNTIME_DIR:-/dev/null}/hypr ]]; then
+	for d in "${XDG_RUNTIME_DIR}"/hypr/*; do
+		[[ -d $d ]] || continue
+		export HYPRLAND_INSTANCE_SIGNATURE=${d##*/}
+		break
+	done
+fi
+
+coproc ACPI { acpi_listen; }
+trap 'kill "${ACPI_PID}" 2>/dev/null || true' EXIT
+
+handler() {
 	case "$1" in
-		button/power) bye ;;
-		ibm/hotkey) [[ $4 = 00001317 ]] && /home/ringdal/.Scripts/lock_keys ;;
-		ac_adapter) notify_plugged $2 ;;
-		button/prog1|button/suspend) lockscreen ;;
+	button/power)
+		"$BYE" &
+		;;
+	ibm/hotkey)
+		# ThinkPad firmware hotkey (survives lock_keys): lock + unlock.
+		# lock_keys debounce absorbs double firmware events.
+		if [[ ${4:-} == 00001317 ]]; then
+			"$LOCK_KEYS" toggle
+		fi
+		;;
+	button/prog1 | button/suspend)
+		"$LOCKSCREEN" &
+		;;
 	esac
 }
 
-while read -u "${COPROC[0]}" -a event; do
+while read -u "${ACPI[0]}" -a event; do
 	handler "${event[@]}" &
 done

@@ -23,7 +23,10 @@ sudo ufw default allow outgoing
 # Loopback + established are implicit; enable without interactive prompt
 sudo ufw --force enable
 sudo systemctl enable ufw
-echo "ufw: enabled (deny incoming, allow outgoing)"
+# LocalSend discovery + transfer (default port)
+sudo ufw allow 53317/tcp comment 'LocalSend'
+sudo ufw allow 53317/udp comment 'LocalSend'
+echo "ufw: enabled (deny incoming, allow outgoing; LocalSend 53317 tcp/udp)"
 
 # --- KDE Connect ---
 if pacman -Q kdeconnect &>/dev/null; then

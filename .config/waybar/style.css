@@ -46,10 +46,20 @@ window#waybar {
 #custom-perf,
 #custom-bat,
 #custom-clock,
-#custom-hyprwhspr {
+#custom-hyprwhspr,
+#custom-keylock {
     padding: 0 8px;
     color: @foreground;
     background: transparent;
+}
+
+/* runbar keylock: color2 when enabled, color1 when disabled */
+#custom-keylock.enabled {
+    color: #0c0;
+}
+
+#custom-keylock.disabled {
+    color: #f00;
 }
 
 #custom-perf.low-power {
