@@ -1,4 +1,7 @@
 [Desktop Entry]
 Type=Application
-Name=feh image viewer
-Exec=/usr/bin/sxiv -b %u
+Name=imv image viewer
+Exec=/usr/bin/imv %F
+NoDisplay=true
+Categories=Graphics;Viewer;
+MimeType=image/png;image/jpeg;image/jpg;image/gif;image/webp;image/bmp;image/svg+xml;

@@ -1,4 +1,6 @@
 [Desktop Entry]
 Type=Application
-Name=feh image viewer
-Exec=/usr/bin/feh %u
+Name=imv image viewer
+Exec=/usr/bin/imv %F
+NoDisplay=true
+Categories=Graphics;Viewer;

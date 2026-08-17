@@ -57,8 +57,8 @@ cmd preview_full_screen ${{
 	read -rsn1
 }}
 map i preview_full_screen
-map o &xdg-open $f
-map O $xdg-open --ask $f
+map o &xdg-open "$f"
+map O $xdg-open "$f"
 
 # use enter for shell commands
 map <enter> shell
@@ -86,10 +86,11 @@ map gy cd ~/Movies/youtube
 ##################
 
 cmd open ${{
-    case $(file --mime-type $f -b) in
+    case $(file --mime-type -b "$f") in
         text/*) nvim $fx;;
-		  video/*) mpv $fx;;
-        *) for f in $fx; do setsid xdg-open $f > /dev/null 2> /dev/null & done;;
+        image/*) imv $fx;;
+        video/*) mpv $fx;;
+        *) for f in $fx; do setsid xdg-open "$f" > /dev/null 2> /dev/null & done;;
     esac
 }}
 
@@ -128,11 +129,11 @@ cmd new-script ${{
 }}
 
 
-map bf !chwal -f $fx
+map bf !chwal -f "$fx"
 map bw change_wal
-map bg $feh --bg-fill $f
+map bg $chwal -w "$f"
 
-cmd change_wal %{{
+cmd change_wal ${{
 	[[ -f "$fx" ]] || { printf "wal: $fx: not a picture"; exit; }
 	printf '\r%s' "backend: [c]olorthief color[z] [h]aishoku [w]al "
 	read -rsn1 backend
@@ -143,9 +144,7 @@ cmd change_wal %{{
 		h) backend="haishoku" ;;
 		*) exit
 	esac
-	wal --backend $backend -i "$fx"
-	. ~/.config/bspwm/bspwmrc config
-	esac
+	chwal -i "$fx" -b "$backend"
 }}
 
 cmd new-text %[[ "$a" ]] && { reset_terminal; nvim "$a"; }

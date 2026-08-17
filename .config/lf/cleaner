@@ -1,4 +1,3 @@
 #!/bin/sh
-if [ -n "$FIFO_UEBERZUG" ]; then
-	printf '{"action": "remove", "identifier": "PREVIEW"}\n' > "$FIFO_UEBERZUG"
-fi
+# Previews use chafa in-terminal; nothing to tear down (was ueberzug on X11).
+exit 0

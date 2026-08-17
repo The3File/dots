@@ -5,9 +5,12 @@ dir="$HOME/Pictures/favoritter"
 current="${_##*/}"
 
 usage(){ printf '%s\n' "$1."\
-	"chwal [-rl] [-f '/path/to/image']"\
+	"chwal [-rl] [-f FILE] [-i FILE] [-w FILE] [-b backend]"\
 	"-r: reload current" "-l: light theme"\
-	"-f: add image to rotation"
+	"-f: add image to rotation"\
+	"-i: apply image (wal + hyprland), no favorites"\
+	"-w: wallpaper only (hyprpaper, no palette)"\
+	"-b: wal backend (with -i/-f): wal|colorz|haishoku|colorthief"
 	exit 1
 }
 
@@ -41,8 +44,8 @@ sel_next_or_first(){
 }
 
 change_wal(){
-   wal -tqi $next ${l} --backend $backend -a 0
-   cp $next "$HOME/.config/wall.png"
+   wal -tqi "$next" ${l} --backend "$backend" -a 0
+   cp "$next" "$HOME/.config/wall.png"
 
    if [[ -n "$WAYLAND_DISPLAY" || "$XDG_SESSION_TYPE" == "wayland" ]]; then
       apply_hyprland
@@ -51,13 +54,11 @@ change_wal(){
    fi
 }
 
-apply_hyprland(){
-   # wallpaper
+apply_hyprpaper(){
    if pgrep -x hyprpaper >/dev/null; then
-      hyprctl hyprpaper wallpaper ",$next" &>/dev/null \
-         || hyprctl hyprpaper wallpaper "[,$next]" &>/dev/null
+      hyprctl hyprpaper wallpaper ",$next,cover" &>/dev/null \
+         || hyprctl hyprpaper wallpaper ",$next" &>/dev/null
    fi
-   # rewrite hyprpaper.conf so it survives restart
    cat > "$HOME/.config/hypr/hyprpaper.conf" <<EOF
 splash = false
 
@@ -67,6 +68,17 @@ wallpaper {
     fit_mode = cover
 }
 EOF
+}
+
+set_wallpaper_only(){
+	[[ -f "$1" ]] || usage "Not a valid path"
+	next="$1"
+	cp "$next" "$HOME/.config/wall.png"
+	apply_hyprpaper
+}
+
+apply_hyprland(){
+   apply_hyprpaper
    # borders from wal (Lua config)
    # shellcheck disable=SC1090
    source "$HOME/.cache/wal/colors.sh"
@@ -98,8 +110,10 @@ add_new_fav(){
 	name="${1##*/}"
 	[[ -f $dir/$name ]] && { printf '%s\n' "already in favorites"; exit; }
 
-	prompt_user_backend
-	case_backend
+	if [[ -z "${backend:-}" ]]; then
+		prompt_user_backend
+		case_backend
+	fi
 
 	save_new_fav "$1"
 	next="$dir/$name"
@@ -128,14 +142,33 @@ save_new_fav(){
 }
 
 main(){
-	while getopts "rlf:" o; do case $o in
-         f) [[ $OPTARG ]] && add_new_fav $OPTARG; exit 0 ;;
-			l) l="-l" ;;
-			r) r="1" ;;
-			*) usage; exit 1
-		esac
+	local fav="" img_apply="" wall_only=""
+	while getopts "rlf:i:w:b:" o; do case $o in
+		f) fav=$OPTARG ;;
+		i) img_apply=$OPTARG ;;
+		w) wall_only=$OPTARG ;;
+		b) backend=$OPTARG ;;
+		l) l="-l" ;;
+		r) r="1" ;;
+		*) usage; exit 1
+	esac
 	done
-   next_fav
+	if [[ -n $wall_only ]]; then
+		set_wallpaper_only "$wall_only"
+		exit 0
+	fi
+	if [[ -n $fav ]]; then
+		add_new_fav "$fav"
+		exit 0
+	fi
+	if [[ -n $img_apply ]]; then
+		[[ -f $img_apply ]] || usage "Not a valid path"
+		next=$img_apply
+		[[ -n ${backend:-} ]] || backend=wal
+		change_wal
+		exit 0
+	fi
+	next_fav
 }
 
 main "$@"

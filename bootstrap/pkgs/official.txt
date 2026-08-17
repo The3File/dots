@@ -69,7 +69,8 @@ thunar
 mpv
 zathura
 zathura-pdf-mupdf
-sxiv
+imv
+chafa
 flatpak
 
 # Fonts

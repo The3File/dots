@@ -90,8 +90,8 @@ semantic_escape_chars = ",│`|:\"' ()[]{}<>\t"
 decorations = "none"
 dynamic_padding = true
 #opacity = 0.65
-#opacity = 0.85
-opacity = 1
+opacity = 0.90
+#opacity = 1
 title = "alacritty"
 #"window.decorations_theme_variant" = "dark"
 
