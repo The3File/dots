@@ -26,7 +26,12 @@ sudo systemctl enable ufw
 # LocalSend discovery + transfer (default port)
 sudo ufw allow 53317/tcp comment 'LocalSend'
 sudo ufw allow 53317/udp comment 'LocalSend'
-echo "ufw: enabled (deny incoming, allow outgoing; LocalSend 53317 tcp/udp)"
+# Sunshine (Moonlight streaming host) — HTTP/HTTPS+web UI, video, audio, control/input
+sudo ufw allow 47984:47990/tcp comment 'Sunshine'
+sudo ufw allow 48010/tcp comment 'Sunshine'
+sudo ufw allow 47998:48010/udp comment 'Sunshine'
+sudo ufw allow 48100:48110/udp comment 'Sunshine'
+echo "ufw: enabled (deny incoming, allow outgoing; LocalSend 53317 tcp/udp; Sunshine 47984-47990+48010/tcp, 47998-48010+48100-48110/udp)"
 
 # --- KDE Connect ---
 if pacman -Q kdeconnect &>/dev/null; then
