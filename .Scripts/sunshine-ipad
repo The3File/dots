@@ -1,0 +1,127 @@
+#!/usr/bin/env bash
+# Create/remove a Hyprland headless virtual output for Sunshine -> Moonlight (iPad)
+# streaming as a real extended display (not mirroring).
+#
+# Usage: sunshine-ipad {on [portrait|landscape] [left|right]|off|status}
+# Default orientation is landscape, default side is right.
+#
+# Sunshine's wlr-capture backend caches output_name at process startup and
+# never refreshes it (not via SIGHUP, not via the HTTP API) - see
+# https://github.com/LizardByte/Sunshine/issues/2955. So the order here is
+# load-bearing: create+position the headless output and write its name into
+# sunshine.conf BEFORE starting sunshine, every time.
+#
+# The Moonlight iOS app can't negotiate or rotate a portrait-shaped stream,
+# so "portrait" does NOT create a portrait-mode virtual output. Instead it
+# keeps the raw mode landscape (what Moonlight expects) and rotates the
+# rendered content 90 degrees onto that buffer via Hyprland's `transform`,
+# the same trick used to run a physically-rotated monitor. Hold the iPad
+# turned 90 degrees to view it upright.
+#
+# Workspace 11 is pinned to the virtual output via `hl.workspace_rule` every
+# time it's created, so Super+11 always lands there regardless of which
+# monitor currently has focus; workspaces 1-10 stay on the physical screen.
+
+set -euo pipefail
+
+CONF="${HOME}/.config/sunshine/sunshine.conf"
+STATE="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/sunshine-ipad-output"
+IPAD_W=1546
+IPAD_H=1080
+SERVICE="sunshine"
+IPAD_WORKSPACE=11
+
+primary_name() {
+    hyprctl monitors -j | jq -r '[.[] | select(.name | startswith("HEADLESS") | not)][0].name'
+}
+
+primary_x() {
+    hyprctl monitors -j | jq -r '[.[] | select(.name | startswith("HEADLESS") | not)][0].width'
+}
+
+set_conf_key() {
+    local key="$1" val="$2"
+    grep -vE "^${key}[[:space:]]*=" "${CONF}" 2>/dev/null > "${CONF}.tmp" || true
+    mv "${CONF}.tmp" "${CONF}"
+    echo "${key} = ${val}" >> "${CONF}"
+}
+
+case "${1:-}" in
+    on)
+        systemctl --user stop "${SERVICE}" 2>/dev/null || true
+
+        ipad_res="${IPAD_W}x${IPAD_H}@60"
+        if [[ "${2:-landscape}" == "portrait" ]]; then
+            transform=1
+        else
+            transform=0
+        fi
+
+        side="${3:-right}"
+
+        prim="$(primary_name)"
+        pmode="$(hyprctl monitors -j | jq -r --arg n "${prim}" '.[] | select(.name == $n) | "\(.width)x\(.height)@\(.refreshRate)"')"
+        px="$(primary_x)"
+
+        before="$(hyprctl monitors -j | jq -r '.[].name')"
+        hyprctl output create headless >/dev/null
+        sleep 0.3
+        after="$(hyprctl monitors -j | jq -r '.[].name')"
+        new="$(comm -13 <(echo "${before}" | sort) <(echo "${after}" | sort) | head -1)"
+        if [[ -z "${new}" ]]; then
+            echo "Failed to detect newly created headless output" >&2
+            exit 1
+        fi
+
+        if [[ "${side}" == "left" ]]; then
+            prim_x=${IPAD_W}
+            headless_x=0
+        else
+            prim_x=0
+            headless_x=${px}
+        fi
+
+        # Repeated monitor rules accumulate across toggles and drift Hyprland's
+        # "auto" layout, so re-pin the physical screen explicitly every time
+        # instead of trusting auto (this is what broke it once already).
+        hyprctl eval "hl.monitor({output='${prim}', mode='${pmode}', position='${prim_x}x0', scale=1})" >/dev/null
+        hyprctl eval "hl.monitor({output='${new}', mode='${ipad_res}', position='${headless_x}x0', scale=1, transform=${transform}})" >/dev/null
+
+        hyprctl eval "hl.workspace_rule({workspace='${IPAD_WORKSPACE}', monitor='${new}'})" >/dev/null 2>&1 || true
+
+        echo "${new}" > "${STATE}"
+        mkdir -p "$(dirname "${CONF}")"
+        touch "${CONF}"
+        set_conf_key "capture" "wlr"
+        set_conf_key "output_name" "${new}"
+        set_conf_key "encoder" "vaapi"
+
+        systemctl --user start "${SERVICE}"
+        echo "${new} created at ${ipad_res}, positioned ${side} of primary; sunshine restarted to capture it"
+        ;;
+    off)
+        systemctl --user stop "${SERVICE}" 2>/dev/null || true
+        if [[ -f "${STATE}" ]]; then
+            name="$(cat "${STATE}")"
+            hyprctl output remove "${name}" 2>&1 || echo "${name} already gone"
+            rm -f "${STATE}"
+        else
+            echo "No tracked headless output to remove"
+        fi
+        # A "left" session shifts the primary screen's x-position; restore it.
+        prim="$(primary_name)"
+        pmode="$(hyprctl monitors -j | jq -r --arg n "${prim}" '.[] | select(.name == $n) | "\(.width)x\(.height)@\(.refreshRate)"')"
+        hyprctl eval "hl.monitor({output='${prim}', mode='${pmode}', position='0x0', scale=1})" >/dev/null
+        ;;
+    status)
+        if [[ -f "${STATE}" ]] && hyprctl monitors -j | jq -e --arg n "$(cat "${STATE}")" '.[] | select(.name == $n)' >/dev/null 2>&1; then
+            echo "on ($(cat "${STATE}"))"
+        else
+            echo "off"
+        fi
+        ;;
+    *)
+        echo "Usage: sunshine-ipad {on [portrait|landscape] [left|right]|off|status}" >&2
+        exit 1
+        ;;
+esac

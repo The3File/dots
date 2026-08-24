@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Wrap dictation toggle: hush any in-progress speech the moment recording is
+# toggled (so it doesn't talk over Filip), then run the real hyprwhspr toggle.
+/home/ringdal/.local/bin/tale stop >/dev/null 2>&1 || true
+exec hyprwhspr record toggle

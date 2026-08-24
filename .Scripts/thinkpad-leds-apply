@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Install udev rules so ThinkPad micmute/power LEDs are userspace-controlled.
+# (Kernel audio-micmute trigger fights the desired inverted polarity.)
+set -euo pipefail
+
+if [[ -n ${SUDO_USER:-} ]]; then
+	user_home=$(getent passwd "$SUDO_USER" | cut -d: -f6)
+else
+	user_home=$HOME
+fi
+
+src="${user_home}/.dotfiles/etc/udev/rules.d/99-thinkpad-leds.rules"
+dst="/etc/udev/rules.d/99-thinkpad-leds.rules"
+
+[[ -f $src ]] || { printf 'missing %s\n' "$src" >&2; exit 1; }
+
+install -D -m 644 "$src" "$dst"
+udevadm control --reload
+udevadm trigger -c add -s leds --action=add
+
+# Apply immediately (trigger ATTR may need a nudge).
+for led in platform::micmute tpacpi::power; do
+	trig="/sys/class/leds/${led}/trigger"
+	bri="/sys/class/leds/${led}/brightness"
+	[[ -w $trig ]] && printf 'none\n' >"$trig" || true
+	[[ -w $bri ]] && printf '0\n' >"$bri" || true
+done
+
+printf 'Installed %s — micmute/power LED triggers set to none.\n' "$dst"
+printf 'Userspace: pwrbtnlght sync|watch (Hyprland autostart).\n'

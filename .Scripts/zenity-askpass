@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# SUDO_ASKPASS helper: always show the real command when we know it.
+#
+# Prefer SUDO_DISPLAY_CMD (set by claude-sudo-run). SUDO_COMMAND is usually
+# unset for askpass under `sudo -A` — do not rely on it alone.
+
+set -euo pipefail
+
+cmd=${SUDO_DISPLAY_CMD:-${SUDO_COMMAND:-}}
+cmd=$(printf '%s' "$cmd" | tr -s '[:space:]' ' ' | sed 's/^ //;s/ $//')
+# sudo passes the password prompt as $1; ignore it for the body when we have cmd.
+prompt=${1:-[sudo] password for $(id -un):}
+
+if [[ -n $cmd ]]; then
+	title="sudo"
+	# Keep title short (window chrome); full argv in the body — no paraphrase.
+	text="Kommando:
+${cmd}
+
+Adgangskode:"
+else
+	title="sudo"
+	text=$prompt
+fi
+
+if password=$(zenity-rice --entry --hide-text --title="$title" --width=640 --text="$text" 2>/dev/null); then
+	printf '%s\n' "$password"
+	exit 0
+fi
+exit 1

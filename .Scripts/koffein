@@ -1,0 +1,235 @@
+#!/usr/bin/env bash
+# Hold maskinen vågen — også med lukket låg.
+#
+# Usage: koffein [-v] {on|off|toggle|status|signal|<varighed>}
+#   koffein            → tænd (samme som "on")
+#   koffein 2h         → tænd, sluk selv om 2 timer (2h / 45m / 30s / 90 = minutter)
+#   koffein -v on      → hold også skærmen tændt (fuld caffeine)
+#   koffein off        → slut
+#   koffein status     → menneske-linje i terminal, waybar-JSON når stdout ikke er tty
+#
+# Standard blokerer logind's låg-håndtering (HandleLidSwitch=suspend på batteri),
+# men lader hypridle slukke skærmen efter 5 min. -v tager også en idle-lås, som
+# hypridle respekterer (ignore_systemd_inhibit = false).
+#
+# Bevidst dvale (bye-menuen, systemctl suspend) blokeres IKKE med vilje.
+# Låsen lever præcis så længe processen lever, så "off" = dræb processen.
+# Polkit tillader begge låse uden kodeord for en aktiv session — ingen sudo.
+#
+# Waybar: custom/koffein (signal RTMIN+5). Klik → sluk. Skjult når den er slukket.
+
+set -euo pipefail
+
+RUNTIME="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+STATE="$RUNTIME/koffein.state"
+WAYBAR_SIGNAL=5
+
+PID=""
+MODE=""
+UNTIL=""
+
+die() {
+	printf 'koffein: %s\n' "$1" >&2
+	exit 1
+}
+
+# Lever låsen? Sætter PID/MODE/UNTIL fra state-filen.
+running() {
+	PID=""
+	MODE=""
+	UNTIL=""
+	[[ -r $STATE ]] || return 1
+	# shellcheck disable=SC1090
+	source "$STATE"
+	[[ -n ${PID:-} ]] || return 1
+	if { tr '\0' ' ' <"/proc/$PID/cmdline" | grep -q systemd-inhibit; } 2>/dev/null; then
+		return 0
+	fi
+	rm -f "$STATE"
+	return 1
+}
+
+signal_waybar() {
+	pkill -RTMIN+"$WAYBAR_SIGNAL" waybar 2>/dev/null || true
+}
+
+# "2h" / "45m" / "30s" / "90" (bare tal = minutter) → sekunder
+parse_duration() {
+	local d=$1 n unit
+	n=${d%[hmsHMS]}
+	unit=${d#"$n"}
+	[[ $n =~ ^[0-9]+$ ]] || return 1
+	case "${unit,,}" in
+	h) printf '%s' $((n * 3600)) ;;
+	s) printf '%s' "$n" ;;
+	m | '') printf '%s' $((n * 60)) ;;
+	*) return 1 ;;
+	esac
+}
+
+fmt_left() {
+	local s=$1 h m
+	((s < 0)) && s=0
+	h=$((s / 3600))
+	m=$(((s % 3600) / 60))
+	if ((h > 0)); then
+		printf '%dt%02dm' "$h" "$m"
+	elif ((m > 0)); then
+		printf '%dm' "$m"
+	else
+		printf '%ds' "$s"
+	fi
+}
+
+stop() {
+	if running; then
+		pkill -P "$PID" 2>/dev/null || true
+		kill "$PID" 2>/dev/null || true
+	fi
+	rm -f "$STATE"
+	signal_waybar
+}
+
+start() {
+	local mode=$1 secs=$2 what why until_ pid
+	if [[ $mode == lid+idle ]]; then
+		what='handle-lid-switch:idle'
+		why='koffein: låget ignoreres, skærmen bliver tændt'
+	else
+		what='handle-lid-switch'
+		why='koffein: låget ignoreres'
+	fi
+
+	if [[ $secs == inf ]]; then
+		until_=inf
+	else
+		until_=$(($(date +%s) + secs))
+	fi
+
+	# Skal startes fra den grafiske session (ikke som user-unit): polkit-reglen
+	# for lid-låsen er "implicit any: no", så en sessionsløs proces kan nægtes.
+	setsid systemd-inhibit --what="$what" --who=koffein --why="$why" --mode=block \
+		sleep "${secs/inf/infinity}" </dev/null >/dev/null 2>&1 &
+	pid=$!
+
+	# setsid exec'er normalt direkte; forker den, er låsen barnets.
+	if ! { tr '\0' ' ' <"/proc/$pid/cmdline" | grep -q systemd-inhibit; } 2>/dev/null; then
+		local child
+		child=$(pgrep -P "$pid" 2>/dev/null | head -1 || true)
+		if [[ -n $child ]]; then
+			pid=$child
+		fi
+	fi
+
+	printf 'PID=%s\nMODE=%s\nUNTIL=%s\n' "$pid" "$mode" "$until_" >"$STATE"
+	signal_waybar
+}
+
+human_status() {
+	if running; then
+		local left=''
+		if [[ $UNTIL != inf ]]; then
+			left=" (slukker om $(fmt_left $((UNTIL - $(date +%s)))))"
+		fi
+		if [[ $MODE == lid+idle ]]; then
+			printf 'koffein: tændt — låget ignoreres, skærmen bliver tændt%s\n' "$left"
+		else
+			printf 'koffein: tændt — låget ignoreres, skærmen slukker som normalt%s\n' "$left"
+		fi
+	else
+		printf 'koffein: slukket\n'
+	fi
+}
+
+json_status() {
+	if running; then
+		local text tip left=''
+		if [[ $MODE == lid+idle ]]; then
+			text='koffein+'
+		else
+			text='koffein'
+		fi
+		if [[ $UNTIL == inf ]]; then
+			tip='Slukker først når du siger til.'
+		else
+			left=$(fmt_left $((UNTIL - $(date +%s))))
+			text="$text $left"
+			tip="Slukker om $left ($(date -d "@$UNTIL" +%H:%M))."
+		fi
+		if [[ $MODE == lid+idle ]]; then
+			tip="Låget ignoreres. Skærmen bliver tændt.\n$tip"
+		else
+			tip="Låget ignoreres. Skærmen slukker som normalt.\n$tip"
+		fi
+		printf '{"text":"%s","tooltip":"%s","class":"on"}\n' "$text" "$tip"
+	else
+		printf '{"text":"","tooltip":"","class":"off"}\n'
+	fi
+}
+
+# Kun støj i terminalen, ikke når waybar kalder.
+say_off() {
+	if [[ -t 1 ]]; then
+		printf 'koffein: slukket\n'
+	fi
+}
+
+say_on() {
+	if [[ -t 1 ]]; then
+		human_status
+	fi
+}
+
+main() {
+	local mode=lid
+	while [[ ${1:-} == -* ]]; do
+		case $1 in
+		-v | --vågen | --vaagen) mode=lid+idle ;;
+		-h | --help)
+			sed -n '2,20p' "$0" | sed 's/^# \?//'
+			exit 0
+			;;
+		*) die "ukendt flag: $1 (prøv -h)" ;;
+		esac
+		shift
+	done
+
+	local cmd=${1:-on} secs
+	case "$cmd" in
+	status)
+		if [[ -t 1 ]]; then human_status; else json_status; fi
+		;;
+	signal)
+		signal_waybar
+		;;
+	off)
+		stop
+		say_off
+		;;
+	toggle)
+		if running; then
+			stop
+			say_off
+		else
+			start "$mode" inf
+			say_on
+		fi
+		;;
+	on | *)
+		if [[ $cmd == on ]]; then
+			secs=inf
+		else
+			secs=$(parse_duration "$cmd") || die "forstod ikke '$cmd' (prøv on, off, status eller fx 2h)"
+		fi
+		# Erstat en kørende lås frem for at stable to.
+		if running; then
+			stop
+		fi
+		start "$mode" "$secs"
+		say_on
+		;;
+	esac
+	return 0
+}
+
+main "$@"

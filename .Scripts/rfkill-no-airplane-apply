@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# Install hwdb that neuters the ThinkPad flight-mode key (no radio soft-block).
+set -euo pipefail
+
+# Under sudo, $HOME is /root — use the invoking user.
+if [[ -n ${SUDO_USER:-} ]]; then
+	user_home=$(getent passwd "$SUDO_USER" | cut -d: -f6)
+else
+	user_home=$HOME
+fi
+
+src="${user_home}/.dotfiles/etc/udev/hwdb.d/90-no-airplane.hwdb"
+dst="/etc/udev/hwdb.d/90-no-airplane.hwdb"
+
+[[ -f $src ]] || { printf 'missing %s\n' "$src" >&2; exit 1; }
+
+install -D -m 644 "$src" "$dst"
+systemd-hwdb update
+udevadm trigger -s input --action=change
+printf 'Installed %s — flight-mode key remapped to reserved.\n' "$dst"
+printf 'Press the key once; radios should stay up (rfkill-guard is backup).\n'

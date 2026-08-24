@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# Undo soft-rfkill from the ThinkPad flight-mode key / SW_RFKILL_ALL.
+# Kernel rfkill input handler can still flip radios before hwdb remaps; this
+# watches /dev/rfkill and clears soft blocks immediately.
+#
+# Autostart: hyprland.lua. Needs rw on /dev/rfkill (logind ACL or rfkill group).
+
+set -euo pipefail
+
+RUNTIME="${XDG_RUNTIME_DIR:-/tmp}"
+LOCKFILE="${RUNTIME}/rfkill-guard.lock"
+
+exec 9>"$LOCKFILE"
+flock -n 9 || exit 0
+
+command -v rfkill >/dev/null || exit 0
+[[ -r /dev/rfkill && -w /dev/rfkill ]] || exit 0
+
+unblock_if_needed() {
+	if rfkill list 2>/dev/null | grep -q 'Soft blocked: yes'; then
+		rfkill unblock all 2>/dev/null || true
+	fi
+}
+
+unblock_if_needed
+
+# rfkill event: one line per state change on any switch
+rfkill event 2>/dev/null | while read -r _; do
+	unblock_if_needed
+done
