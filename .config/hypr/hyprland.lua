@@ -73,6 +73,14 @@ hl.config({
         layout           = "dwindle",
     },
 
+    -- Hardware cursor planes get confused by the Sunshine/Moonlight virtual
+    -- output topology and clamp the cursor to one monitor, blocking it from
+    -- crossing into the other (known Hyprland multi-monitor cursor bug).
+    -- Software cursor rendering avoids it; cost is negligible.
+    cursor = {
+        no_hardware_cursors = true,
+    },
+
     decoration = {
         rounding         = 8,
 		  --active_opacity   = 1.0,
