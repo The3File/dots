@@ -11,7 +11,8 @@
         "custom/sep",
         "custom/hyprwhspr",
         "custom/sep",
-        "custom/keylock"
+        "custom/keylock",
+        "custom/koffein"
     ],
     "modules-center": [],
     "modules-right": [
@@ -96,6 +97,17 @@
         "exec-on-event": true,
         "signal": 4,
         "on-click": "$HOME/.Scripts/lock_keys toggle",
+        "tooltip": true
+    },
+
+    "custom/koffein": {
+        "format": "{}",
+        "exec": "$HOME/.Scripts/koffein status",
+        "interval": 30,
+        "return-type": "json",
+        "exec-on-event": true,
+        "signal": 5,
+        "on-click": "$HOME/.Scripts/koffein off",
         "tooltip": true
     },
 

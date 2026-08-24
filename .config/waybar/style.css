@@ -62,6 +62,17 @@ window#waybar {
     color: #f00;
 }
 
+/* koffein: vises kun naar den er taendt (tom tekst = skjult modul) */
+#custom-koffein {
+    padding: 0 8px;
+    color: @foreground;
+    background: transparent;
+}
+
+#custom-koffein.on {
+    color: #f80;
+}
+
 #custom-perf.low-power {
     color: #0c0;
 }
