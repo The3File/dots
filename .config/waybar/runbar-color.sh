@@ -27,9 +27,15 @@ json_text() {
 }
 
 vol() {
-	local volume mute v color
+	local volume mute v color label defsink
 	volume="$(pamixer --get-volume)"
 	mute="$(pamixer --get-mute)"
+	defsink="$(pactl get-default-sink 2>/dev/null || true)"
+	if [[ $defsink == bluez_output.* ]]; then
+		label="bth"
+	else
+		label="vol"
+	fi
 	if [[ $mute == true ]]; then
 		v="(${volume}%)"
 		color="$(get_color 0)"
@@ -38,7 +44,7 @@ vol() {
 		color="$(get_color "$volume")"
 		[[ $volume -gt 100 ]] && color="#f00"
 	fi
-	json_text "vol: $(span "$color" "$v")"
+	json_text "${label}: $(span "$color" "$v")"
 }
 
 light() {
