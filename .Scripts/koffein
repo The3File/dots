@@ -17,6 +17,7 @@
 # Polkit tillader begge låse uden kodeord for en aktiv session — ingen sudo.
 #
 # Waybar: custom/koffein (signal RTMIN+5). Klik → sluk. Skjult når den er slukket.
+# Genvej: Super+Alt+Shift+K → koffein toggle (hyprland.lua).
 
 set -euo pipefail
 

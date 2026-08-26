@@ -204,6 +204,8 @@ hl.bind(mod .. " + SHIFT + Escape", hl.dsp.exit())
 hl.bind(mod .. " + ALT + SHIFT + Q", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scripts/alacritty_bye"))
 -- Next wallpaper / wal palette
 hl.bind(mod .. " + ALT + SHIFT + W", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scripts/chwal"))
+-- Hold maskinen vaagen, ogsaa med lukket laag (waybar viser "koffein" naar den er taendt)
+hl.bind(mod .. " + ALT + SHIFT + K", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scripts/koffein toggle"))
 
 -- Bluetooth / WiFi (old sxhkd: Super+Shift+B / Super+Shift+W)
 -- Keylock toggle is ThinkPad ACPI hotkey only (acpid_events → lock_keys toggle),
