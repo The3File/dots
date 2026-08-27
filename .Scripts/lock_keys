@@ -57,6 +57,9 @@ ensure_session_env() {
 ensure_session_env
 
 signal_waybar() {
+	# Baren er quickshell; waybar-signalet bliver staaende, saa den gamle bar
+	# stadig virker hvis man starter den som fallback.
+	qs -c ringdal ipc call keylock refresh &>/dev/null || true
 	pkill -RTMIN+"$WAYBAR_SIGNAL" waybar 2>/dev/null || true
 }
 

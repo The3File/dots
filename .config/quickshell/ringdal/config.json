@@ -1,0 +1,19 @@
+{
+  "bar": {
+    "height": 26,
+    "screens": [],
+    "font": {
+      "family": "Terminus",
+      "size": 14
+    }
+  },
+  "intervals": {
+    "whspr": 1000,
+    "perf": 2000,
+    "keylock": 5000,
+    "net": 5000,
+    "backlight": 5000,
+    "koffein": 30000,
+    "clock": 30000
+  }
+}

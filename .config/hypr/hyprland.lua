@@ -36,7 +36,9 @@ hl.monitor({
 -------------------
 
 hl.on("hyprland.start", function()
-    hl.exec_cmd("waybar")
+    -- Baren: quickshell (~/.config/quickshell/ringdal). Waybar-configen
+    -- ligger stadig som fallback: pkill qs && waybar &
+    hl.exec_cmd("qs -c ringdal")
     hl.exec_cmd("dunst")
     hl.exec_cmd("hyprpaper")
     hl.exec_cmd(os.getenv("HOME") .. "/.Scripts/cliphist-watch")
@@ -272,9 +274,9 @@ hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scripts/pwrb
 hl.bind(mod .. " + XF86AudioRaiseVolume", hl.dsp.exec_cmd("pamixer --allow-boost -i 5; pkill -RTMIN+1 waybar"), { locked = true })
 hl.bind(mod .. " + XF86AudioLowerVolume", hl.dsp.exec_cmd("pamixer --allow-boost -d 5; pkill -RTMIN+1 waybar"), { locked = true })
 
--- Brightness (RTMIN+2 refreshes waybar custom/light)
-hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("light -A 5; pkill -RTMIN+2 waybar"), { locked = true, repeating = true })
-hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("light -U 5; pkill -RTMIN+2 waybar"), { locked = true, repeating = true })
+-- Brightness (sysfs siger ikke selv til, saa baren skal vaekkes; RTMIN+2 er waybar-fallback)
+hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("light -A 5; qs -c ringdal ipc call backlight refresh; pkill -RTMIN+2 waybar"), { locked = true, repeating = true })
+hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("light -U 5; qs -c ringdal ipc call backlight refresh; pkill -RTMIN+2 waybar"), { locked = true, repeating = true })
 
 ----------------------
 ---- WINDOW RULES ----
