@@ -193,8 +193,16 @@ hl.bind(mod .. " + Insert", hl.dsp.exec_cmd("qs -c ringdal ipc call pill udklip"
 
 -- Voice dictation (hyprwhspr): press to start, press again to paste
 hl.bind(mod .. " + Space", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scripts/hyprwhspr-record-toggle"))
--- Cancel recording without pasting (discard audio)
-hl.bind(mod .. " + Escape", hl.dsp.exec_cmd("hyprwhspr record cancel"))
+-- Afbryd det der koerer lige nu. ÉN tast, ÉN mening -- hvad der bliver
+-- afbrudt, afgoeres af hvad der er i gang: dikterer han, kasseres optagelsen;
+-- goer han ikke, springes den linje over, der laeses hoejt. Input vinder over
+-- output, samme rangorden som resten af pillen.
+-- Beslutningen ligger i `pill afbryd`, fordi pillen allerede VED om der
+-- dikteres (Voice) og om der tales (Tale) -- ikke i et script der skulle
+-- gaette sig til begge dele.
+-- Faldet bagud er med vilje: er qs nede (exit 255), skal dikteringen stadig
+-- kunne kasseres. Er qs oppe, svarer den 0 ogsaa naar der intet var at goere.
+hl.bind(mod .. " + Escape", hl.dsp.exec_cmd("qs -c ringdal ipc call pill afbryd || hyprwhspr record cancel"))
 -- Stemmen skrues op og ned: fuld -> vigtigt -> tavs -> fuld.
 -- Pegede foer paa `claude-speak toggle`, som satte et flag INTET laeste --
 -- den stemme Filip faktisk hoerer kommer fra `tale`. Genvejen var doed.

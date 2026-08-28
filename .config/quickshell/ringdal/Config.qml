@@ -56,6 +56,11 @@ Singleton {
     // Alt andet end hvile faar mere luft end hvilen. Sker der noget, maa
     // formen godt aande -- hvilen er den der skal fylde mindst.
     readonly property int activePadding: _body.activePadding ?? 34
+    // Mens der tales vokser output-pillen -- men kun lidt. Morfens stoerrelse
+    // skal svare til begivenhedens: tale er ikke et spoergsmaal, det er noget
+    // der gaar over af sig selv. Derfor mellem hvile og aktiv, ikke helt oppe.
+    readonly property int talePadding: _body.talePadding ?? 29
+    readonly property int taleHeight: _body.taleHeight ?? 40
     readonly property int activeHeight: _body.activeHeight ?? 42
     // Lyttetilstanden har sin egen, mindre luft: pillen er smal der, og
     // boelgen skal have plads frem for kanten.
@@ -99,6 +104,9 @@ Singleton {
     // Hvor laenge der maa gaa uden livstegn foer prikken holder op med at
     // aande. Jeg siger noget ved hvert faseskift, saa der er langt imellem.
     readonly property int agentStale: _body.agentStale ?? 240000
+    // Samme slags vagthund for talen. Kortere, fordi en enkelt talt linje er
+    // kort: gaar der saa lang tid uden et nyt push, er afspilleren doed.
+    readonly property int taleStale: _body.taleStale ?? 90000
     // Hvor laenge "godkendt" bliver staaende, naar fingeraftrykket gik igennem.
     // Det skal kunne naas med oejnene, ogsaa naar man ikke sad og kiggede paa
     // pillen i forvejen -- man laegger fingeren og ser op bagefter.

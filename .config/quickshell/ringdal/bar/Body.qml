@@ -129,16 +129,21 @@ Item {
         readonly property bool asking: Sudo.showing
         readonly property bool noting: !alertShape.asking && Notifs.popup
         readonly property bool wide: alertShape.asking || alertShape.noting
+        // Tale vokser, men kun lidt, og den taber til baade root-adgang og en
+        // besked: de venter paa ham, tale gaar over af sig selv.
+        readonly property bool talking: !alertShape.wide && Tale.talking
 
         width: {
             if (alertShape.wide)
                 return Config.notifyWidth + 2 * Config.activePadding;
-            return alerts.any ? alerts.implicitWidth + 2 * Config.restPadding : 0;
+            if (!alerts.any) return 0;
+            return alerts.implicitWidth
+                + 2 * (alertShape.talking ? Config.talePadding : Config.restPadding);
         }
         height: {
             if (alertShape.asking) return sudo.implicitHeight + 2 * Config.activePadding;
             if (alertShape.noting) return notify.implicitHeight + 2 * Config.activePadding;
-            return Config.restHeight;
+            return alertShape.talking ? Config.taleHeight : Config.restHeight;
         }
         radius: Math.min(height / 2, Config.bodyMaxRadius)
         visible: width > 0

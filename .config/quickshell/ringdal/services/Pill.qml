@@ -70,6 +70,30 @@ Singleton {
         if (Menu.active) Menu.back(); else root.close();
     }
 
+    // Afbryd det, der koerer lige nu. Én tast, én mening -- HVAD der bliver
+    // afbrudt, afgoeres af hvad der er i gang.
+    //
+    // Dikterer han, er det dikteringen: det er hans egen stemme paa vej ind,
+    // og den kan ikke vente. Dikterer han ikke, er der kun oplaesningen at
+    // afbryde, og saa springes den linje over, der laeses nu.
+    //
+    // De to kan aldrig staa i vejen for hinanden, fordi input altid vinder
+    // over output -- samme rangorden som resten af pillen bygger paa.
+    function afbryd(): string {
+        if (Voice.listening || Voice.paused) {
+            afbrydStemme.running = true;
+            return "afbroed dikteringen";
+        }
+        if (!Tale.talking) return "der er ingenting at afbryde";
+        Tale.skip();
+        return "sprang linjen over";
+    }
+
+    Process {
+        id: afbrydStemme
+        command: ["hyprwhspr", "record", "cancel"]
+    }
+
     // Menuen kan ogsaa lukke sig selv (sidste lag + escape). Saa foelger
     // pillen med, i stedet for at staa aaben og tom.
     Connections {
@@ -83,6 +107,7 @@ Singleton {
         function close(): void { root.close(); }
         function toggle(): void { root.toggle(); }
         function back(): void { root.back(); }
+        function afbryd(): string { return root.afbryd(); }
         function wifi(): void { root.enter("wifi"); }
         function bluetooth(): void { root.enter("bt"); }
         function beskeder(): void { root.enter("notifs"); }
