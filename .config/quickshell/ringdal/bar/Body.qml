@@ -14,14 +14,13 @@ import qs.widgets
 //   aabner   Super+D. Har tastaturet, saa den staar over alt andet du kunne
 //            komme til at ramme -- men ikke over stemmen.
 //   aaben    du klikkede. Bliver staaende til du gaar ud af den.
-//   besked   noget kom ind. Kort, og traekker sig selv -- undtagen kritiske.
 //   niveau   du skruede paa lyd eller lys. Kort, og kun bredere.
 //   kig      musen blev haengende. Passiv -- viser mere, goer intet.
 //   hvile    klokken og batteriet.
 //
-// Beskeden ligger under den aabne menu med vilje: er du i gang med at vaelge
-// et netvaerk, skal listen ikke forsvinde under haanden paa dig. Beskeden
-// bliver i listen imens og kommer frem naar du er faerdig.
+// Beskeder er IKKE en fase her. De har deres egen form ved siden af (se
+// afvigelses-pillen nedenfor) -- kroppen er det Filip goer, og en besked maa
+// ikke skubbe det til side.
 //
 // Kig og aaben er skilt ad med vilje: pillen ligger i det hjoerne musen kommer
 // forbi hele tiden, og en flade der aabner sig uopfordret er vaerre end ingen
@@ -42,7 +41,6 @@ Item {
         if (Voice.listening || Voice.paused) return "listening";
         if (Launcher.active) return "launch";
         if (root.opened) return "open";
-        if (Notifs.popup) return "notify";
         if (Level.active) return "level";
         if (root._peeking) return "peek";
         return "rest";
@@ -54,7 +52,6 @@ Item {
     readonly property bool peeking: phase === "peek"
     readonly property bool showingPanel: phase === "open"
     readonly property bool launching: phase === "launch"
-    readonly property bool notifying: phase === "notify"
 
     readonly property alias shape: shape
     readonly property alias alertShape: alertShape
@@ -109,6 +106,13 @@ Item {
     }
 
     // ---- afvigelses-pillen ------------------------------------------------
+    // Den lille pille ved siden af kroppen. Her staar det der afviger -- og
+    // her kommer beskederne ind.
+    //
+    // Beskeder laa foerst i kroppen, men kroppen er det Filip *goer*: stemmen,
+    // menuen, aabneren. En besked er noget der sker for ham, ikke noget han er
+    // i gang med, og den maa ikke skubbe det han laver til side. Derfor har
+    // den sin egen form -- den samme som "laast" og "koffein" bor i.
     Rectangle {
         id: alertShape
 
@@ -116,18 +120,37 @@ Item {
         anchors.rightMargin: Config.bodyMargin
         anchors.bottom: shape.bottom
 
-        width: alerts.any ? alerts.implicitWidth + 2 * Config.restPadding : 0
-        height: Config.restHeight
+        readonly property bool noting: Notifs.popup
+
+        width: {
+            if (alertShape.noting)
+                return Config.notifyWidth + 2 * Config.activePadding;
+            return alerts.any ? alerts.implicitWidth + 2 * Config.restPadding : 0;
+        }
+        height: alertShape.noting
+            ? notify.implicitHeight + 2 * Config.activePadding
+            : Config.restHeight
         radius: Math.min(height / 2, Config.bodyMaxRadius)
         visible: width > 0
 
         color: Theme.barBackground
         border.width: 1
-        border.color: Theme.color8
+        border.color: alertShape.noting
+            ? (Notifs.critical ? Theme.stateBad : Theme.color5)
+            : Theme.color8
         clip: true
 
         Behavior on width {
             NumberAnimation { duration: Config.morphDuration; easing.type: Easing.OutCubic }
+        }
+        Behavior on height {
+            NumberAnimation { duration: Config.morphDuration; easing.type: Easing.OutCubic }
+        }
+        Behavior on radius {
+            NumberAnimation { duration: Config.morphDuration; easing.type: Easing.OutCubic }
+        }
+        Behavior on border.color {
+            ColorAnimation { duration: Config.morphDuration }
         }
 
         // Midt i formen. Uden det saetter indholdet sig oppe i venstre
@@ -135,6 +158,17 @@ Item {
         Alerts {
             id: alerts
             anchors.centerIn: parent
+            opacity: alertShape.noting ? 0 : 1
+            visible: opacity > 0
+            Behavior on opacity { NumberAnimation { duration: Config.morphDuration / 2 } }
+        }
+
+        NotifyContent {
+            id: notify
+            anchors.centerIn: parent
+            opacity: alertShape.noting ? 1 : 0
+            visible: opacity > 0
+            Behavior on opacity { NumberAnimation { duration: Config.morphDuration / 2 } }
         }
     }
 
@@ -160,7 +194,6 @@ Item {
             if (root.voicing) return Config.bodyVoiceWidth;
             if (root.launching) return Config.launchWidth + 2 * Config.activePadding;
             if (root.showingPanel) return Config.openWidth + 2 * Config.activePadding;
-            if (root.notifying) return Config.notifyWidth + 2 * Config.activePadding;
             if (root.levelling) return level.implicitWidth + 2 * Config.activePadding;
             if (root.peeking) return peek.implicitWidth + 2 * Config.activePadding;
             return rest.implicitWidth + 2 * Config.restPadding;
@@ -169,7 +202,6 @@ Item {
             if (root.voicing) return Config.bodyVoiceHeight;
             if (root.launching) return launch.implicitHeight + 2 * Config.activePadding;
             if (root.showingPanel) return panel.implicitHeight + 2 * Config.activePadding;
-            if (root.notifying) return notify.implicitHeight + 2 * Config.activePadding;
             if (root.levelling || root.peeking) return Config.activeHeight;
             return Config.restHeight;
         }
@@ -181,7 +213,6 @@ Item {
         border.width: 1
         border.color: {
             if (root.voicing) return Voice.color;
-            if (root.notifying) return Notifs.critical ? Theme.stateBad : Theme.color5;
             if (root.launching || root.showingPanel) return Theme.color4;
             return Theme.color8;
         }
@@ -251,14 +282,6 @@ Item {
             id: launch
             anchors.centerIn: parent
             opacity: root.launching ? 1 : 0
-            visible: opacity > 0
-            Behavior on opacity { NumberAnimation { duration: Config.morphDuration / 2 } }
-        }
-
-        NotifyContent {
-            id: notify
-            anchors.centerIn: parent
-            opacity: root.notifying ? 1 : 0
             visible: opacity > 0
             Behavior on opacity { NumberAnimation { duration: Config.morphDuration / 2 } }
         }
