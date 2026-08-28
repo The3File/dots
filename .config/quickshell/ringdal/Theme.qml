@@ -33,18 +33,16 @@ Singleton {
     // Baren er ugennemsigtig sort som alacritty/fuzzel — ikke wal-baggrunden.
     readonly property color barBackground: "#000000"
 
-    // Kanten om pillerne. Paletten's lyseste tone — den samme som teksten er
-    // skrevet med, saa kanten er lige saa lys som det den holder om. Mod en
-    // moerk baggrund laeses den som hvid, og den foelger med naar tapetet
-    // skifter i stedet for at vaere et fast #fff der en dag ikke passer.
+    // Kanten om pillerne. Hvid, og med vilje IKKE fra paletten — samme valg
+    // som den sorte baggrund ovenfor. Paletten kan lande et hvilket som helst
+    // sted (color4 blev rustroed, color7 graagroen), og kanten er det der
+    // holder pillen sammen mod tapetet: den skal vaere lys hver gang, ikke
+    // naesten-lys naar tapetet tillader det.
     //
-    // Hyprland tegner sine vinduer med color4 (~/.config/hypr/colors.lua),
-    // som er moerkere. Skal de to matche igen, er det chwal der saar
-    // colors.lua — ikke en haandrettelse her.
-    //
-    // Tykkelsen bor i Config (borderWidth): den er en Hyprland-indstilling og
-    // ikke en farve.
-    readonly property color pillBorder: root.color7
+    // Vinduernes kant er en anden ting og bliver ved med at vaere det: den
+    // saar chwal fra wal ind i ~/.config/hypr/colors.lua. Det er kun
+    // TYKKELSEN de to deler (Config.borderWidth = border_size).
+    readonly property color pillBorder: "#ffffff"
 
     // ---- tilstandsfarver (var style.css-klasser) --------------------------
     readonly property color stateGood: "#0c0"   // .enabled, perf low-power
