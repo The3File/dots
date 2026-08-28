@@ -17,7 +17,7 @@ Item {
 
     property var _cb: null
 
-    function run(args, cb): void {
+    function run(args: var, cb: var): void {
         if (proc.running) return;
         root._cb = cb ?? null;
         proc.command = [root.script].concat(args ?? []);

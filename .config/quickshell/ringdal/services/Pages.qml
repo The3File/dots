@@ -27,7 +27,7 @@ Singleton {
     readonly property string btScript: `${Config.scripts}/btcon`
 
     // ---- roden -----------------------------------------------------------
-    function rootPage() {
+    function rootPage(): var {
         return {
             title: "",
             load: () => Menu.fill([
@@ -55,7 +55,7 @@ Singleton {
     // ---- wifi ------------------------------------------------------------
     // Samme liste som fuzzel_nm's menu: NetworkManagers profiler, aktive
     // foerst markeret, og de to handlinger nederst.
-    function wifiPage() {
+    function wifiPage(): var {
         return {
             title: "wifi",
             load: () => nm.run(["list"], text => {
@@ -88,7 +88,7 @@ Singleton {
         };
     }
 
-    function wifiScanPage() {
+    function wifiScanPage(): var {
         return {
             title: "nyt wifi",
             load: () => nm.run(["ssids"], text => {
@@ -119,7 +119,7 @@ Singleton {
         };
     }
 
-    function wifiDeletePage() {
+    function wifiDeletePage(): var {
         return {
             title: "slet forbindelse",
             load: () => nm.run(["list"], text => {
@@ -137,7 +137,7 @@ Singleton {
 
     // ---- bluetooth -------------------------------------------------------
     // Samme fire punkter som btcon's hovedmenu.
-    function btPage() {
+    function btPage(): var {
         return {
             title: "bluetooth",
             load: () => bt.run(["power"], text => {
@@ -168,7 +168,7 @@ Singleton {
     }
 
     // btcon list: "navn [on|trusted|paired|ok]  MAC"
-    function _parseDevice(line: string) {
+    function _parseDevice(line: string): var {
         const mac = line.slice(-17);
         const head = line.slice(0, -17).trim();
         const bracket = head.indexOf(" [");
@@ -186,7 +186,7 @@ Singleton {
         };
     }
 
-    function btDevicesPage() {
+    function btDevicesPage(): var {
         return {
             title: "gemte enheder",
             load: () => bt.run(["list"], text => {
@@ -206,7 +206,7 @@ Singleton {
     }
 
     // Samme handlinger som btcon's device_action_menu, i samme raekkefoelge.
-    function btDevicePage(mac: string, name: string) {
+    function btDevicePage(mac: string, name: string): var {
         return {
             title: name,
             load: () => bt.run(["list"], text => {
@@ -255,7 +255,7 @@ Singleton {
         };
     }
 
-    function btScanPage() {
+    function btScanPage(): var {
         return {
             title: "scan + par ny enhed",
             // btcon scan skanner i 12 sekunder. Det er meningen -- en enhed
@@ -275,7 +275,7 @@ Singleton {
     }
 
     // ---- beskeder --------------------------------------------------------
-    function notifsPage() {
+    function notifsPage(): var {
         return {
             title: "beskeder",
             load: () => {

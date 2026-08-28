@@ -40,19 +40,19 @@ Singleton {
 
     signal closed()
 
-    function open(page): void {
+    function open(page: var): void {
         root.stack = [page];
         root._enter();
     }
 
     // Aabn direkte paa et underlag, med roden bagved. Saa virker "tilbage"
     // ogsaa naar man kom ind udefra i stedet for gennem roden.
-    function open2(base, page): void {
+    function open2(base: var, page: var): void {
         root.stack = [base, page];
         root._enter();
     }
 
-    function push(page): void {
+    function push(page: var): void {
         root.stack = root.stack.concat([page]);
         root._enter();
     }
@@ -83,13 +83,13 @@ Singleton {
         root.stack[root.stack.length - 1].load();
     }
 
-    function fill(list): void {
+    function fill(list: var): void {
         root.items = list ?? [];
         root.status = "";
         if (root.index >= root.view.length) root.index = 0;
     }
 
-    function ask(title: string, masked: bool, submit): void {
+    function ask(title: string, masked: bool, submit: var): void {
         root.prompt = { title: title, masked: masked, submit: submit };
     }
 
@@ -105,7 +105,7 @@ Singleton {
         root.index = (root.index + delta + n) % n;
     }
 
-    function select(item): void {
+    function select(item: var): void {
         const i = root.view.indexOf(item);
         if (i >= 0) root.index = i;
     }
@@ -126,7 +126,7 @@ Singleton {
         return root.items.map(i => i.label ?? "");
     }
 
-    function activate(item): void {
+    function activate(item: var): void {
         const it = item ?? root.current;
         if (it && it.run) it.run();
     }
