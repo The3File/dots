@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# wallpaper-start — start awww-daemon og saet baggrunden igen efter en genstart.
+#
+# hyprpaper laeste sin baggrund fra en configfil og havde derfor ikke brug for
+# det her. awww holder tilstanden i daemonen: den husker godt nok det sidste
+# billede i sin cache, men den skal spoerges (`awww restore`), og den kan foerst
+# spoerges naar den er oppe. Derfor et lille script i stedet for en linje i
+# autostarten -- der er et kaploeb at vente paa.
+#
+# Kaldes fra hyprland.lua ved opstart. Kan koeres i haanden, hvis baggrunden er
+# blevet vaek.
+
+set -uo pipefail
+
+FALDBACK="$HOME/.config/wall.png"   # chwal holder den her opdateret
+VENT=50                             # x 0,1 s = 5 sekunder
+
+pgrep -x awww-daemon >/dev/null 2>&1 || { awww-daemon >/dev/null 2>&1 & }
+
+# Vent paa at daemonen svarer. `query` er det billigste livstegn den har.
+for ((i = 0; i < VENT; i++)); do
+  awww query >/dev/null 2>&1 && break
+  sleep 0.1
+done
+
+if ! awww query >/dev/null 2>&1; then
+  echo "wallpaper-start: awww-daemon svarer ikke" >&2
+  exit 1
+fi
+
+# Det sidste billede foerst. Er cachen tom (foerste koersel, ryddet cache),
+# falder vi tilbage paa den kopi chwal altid lægger.
+if ! awww restore >/dev/null 2>&1; then
+  [ -f "$FALDBACK" ] || { echo "wallpaper-start: ingen baggrund at gendanne" >&2; exit 1; }
+  awww img "$FALDBACK" --resize crop -t none >/dev/null 2>&1
+fi

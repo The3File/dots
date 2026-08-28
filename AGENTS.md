@@ -19,7 +19,7 @@ Living notes for agents working on this PC. **Update this file** when you learn 
 | Hyprland config | `~/.config/hypr/hyprland.lua` |
 | Border / wal colors | `~/.config/hypr/colors.lua` |
 | Hyprlock | `~/.config/hypr/hyprlock.conf` |
-| Hyprpaper | `~/.config/hypr/hyprpaper.conf` |
+| Baggrund (awww) | ingen configfil — daemonen husker selv; start via `~/.Scripts/wallpaper-start` |
 | Pillen (Quickshell) | `~/.config/quickshell/ringdal/` (+ `config.json`) |
 | Waybar (fallback) | `~/.config/waybar/` (config + style.css) |
 | Config backups | `~/.config/hypr/*.bak` (e.g. `hyprland.conf.bak`, `colors.conf.bak`) |
@@ -47,6 +47,14 @@ hyprctl eval 'hl.dispatch(hl.dsp.workspace.toggle_special("scratchterm"))'
 - App launcher: **the pill** — Super+D → `qs -c ringdal ipc call launcher toggle` (`services/Launcher.qml`, `bar/LaunchContent.qml`). Substring match like fuzzel, but ordered by what he opens most (`~/.cache/quickshell-launcher.json`). `~/.Scripts/fuzzel_drun` is kept untouched as fallback.
 - Fuzzel rice: **bottom-left**, equal air left & above waybar (`x-margin=y-margin=24`; exclusive zone already clears the bar), **radius 0** / border color4; **opaque black bg** like Alacritty/Waybar (Hyprland `rounding = 0`). Regenerates `~/.config/fuzzel/fuzzel.ini` each launch (`fuzzel_drun` + `fuzzel_clip`).
 - Gotcha: don’t `source` full `~/.cache/wal/colors.sh` under `set -u` — it expands unset `FZF_DEFAULT_OPTS` and aborts. `fuzzel_drun` greps `colorN=` only. Also `exit-on-keyboard-focus-loss=no` so Super release doesn’t kill the launcher.
+
+## Baggrund (awww)
+
+- **awww afløste hyprpaper 2026-08-28.** Pakken hedder `awww` (ikke `swww` — den *provider* swww og er efterfølgeren): `/usr/bin/awww` + `/usr/bin/awww-daemon`. Skift sker med `awww img <sti> --resize crop` (`--resize crop` = hyprpapers `fit_mode = cover`).
+- **Den store forskel:** hyprpaper læste sin baggrund fra en configfil, så et skift skulle skrives to steder — nu og til næste opstart. awww holder tilstanden i daemonen og husker selv det sidste billede. Derfor findes `~/.config/hypr/hyprpaper.conf` stadig, men **intet læser den længere**.
+- **`~/.Scripts/wallpaper-start`** starter daemonen og sætter baggrunden igen efter en genstart. Den findes, fordi der er et kapløb: `awww restore` kan først kaldes, når daemonen svarer på `awww query`. Faldback er `~/.config/wall.png`, som `chwal` altid holder opdateret. Idempotent — kan køres i hånden, hvis baggrunden er blevet væk.
+- Overgangen er blød med vilje (`-t fade`, 1,2 s): et baggrundsskift er ikke en besked, og et hårdt klip river blikket til sig uden grund. Ligger i `apply_wallpaper()` i `~/.Scripts/chwal`.
+- **Latent bug i `chwal` (ikke rørt):** linje 4 læser `.cache/wal/wal` med en *relativ* sti, så `current` bliver tom, når scriptet køres fra en anden mappe end `$HOME`. Det rammer kun rotationen (`chwal` uden argumenter, som starter fra det forkerte sted); `-i`, `-w` og `-f` er upåvirkede.
 
 ## Scratchpads
 
@@ -189,7 +197,7 @@ Install from scratch: `curl` of `.install.bash` from the `dots` repo — intervi
 
 ## Key apps / binds
 
-- File manager: **lf** (Super+E → `alacritty -e lf`). Config `~/.config/lf/lfrc`. Images: **imv** (not sxiv). Wallpaper from lf: `bg` = hyprpaper only (`chwal -w`), `bw` = wal + Hyprland (`chwal -i`), `bf` = add favorite (`chwal -f`). Preview: **chafa** (no ueberzug).
+- File manager: **lf** (Super+E → `alacritty -e lf`). Config `~/.config/lf/lfrc`. Images: **imv** (not sxiv). Wallpaper from lf: `bg` = wallpaper only (`chwal -w`), `bw` = wal + Hyprland (`chwal -i`), `bf` = add favorite (`chwal -f`). Preview: **chafa** (no ueberzug).
 - Default browser (XDG / `$BROWSER`): **brave**. Keybinds unchanged: **qutebrowser** — Super+O; **brave** — Super+W (`browserAlt` in `hyprland.lua`).
 - Brave Wayland touchpad scroll is hypersensitive (Chromium); dampened with `hl.window_rule({ match = { class = "^(brave-browser)$" }, scroll_touchpad = 0.2 })` in `hyprland.lua`. Tweak the factor if needed (lower = slower).
 - Voice dictation: **hyprwhspr** — Super+Space (toggle start/stop → paste); **Super+Escape** cancels recording (no paste)

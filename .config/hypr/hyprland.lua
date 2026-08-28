@@ -42,7 +42,10 @@ hl.on("hyprland.start", function()
     -- Beskeder kommer fra pillen nu (services/Notifs.qml). dunst maa ikke
     -- starte: der kan kun vaere én paa org.freedesktop.Notifications, og den
     -- der naar det foerst vinder. Vil du tilbage: `dunst &` efter `pkill qs`.
-    hl.exec_cmd("hyprpaper")
+    -- Baggrunden: awww (afloeste hyprpaper 28-08). Gaar gennem et script, fordi
+    -- awww holder tilstanden i daemonen og ikke i en configfil -- den skal
+    -- spoerges om det sidste billede, og den skal vaere oppe foerst.
+    hl.exec_cmd(os.getenv("HOME") .. "/.Scripts/wallpaper-start")
     hl.exec_cmd(os.getenv("HOME") .. "/.Scripts/cliphist-watch")
     hl.exec_cmd(os.getenv("HOME") .. "/.Scripts/low_battery_warning")
     hl.exec_cmd(os.getenv("HOME") .. "/.Scripts/lock_keys ensure")

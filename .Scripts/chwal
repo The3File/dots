@@ -9,7 +9,7 @@ usage(){ printf '%s\n' "$1."\
 	"-r: reload current" "-l: light theme"\
 	"-f: add image to rotation"\
 	"-i: apply image (wal + hyprland), no favorites"\
-	"-w: wallpaper only (hyprpaper, no palette)"\
+	"-w: wallpaper only (awww, no palette)"\
 	"-b: wal backend (with -i/-f): wal|colorz|haishoku|colorthief"
 	exit 1
 }
@@ -54,31 +54,30 @@ change_wal(){
    fi
 }
 
-apply_hyprpaper(){
-   if pgrep -x hyprpaper >/dev/null; then
-      hyprctl hyprpaper wallpaper ",$next,cover" &>/dev/null \
-         || hyprctl hyprpaper wallpaper ",$next" &>/dev/null
-   fi
-   cat > "$HOME/.config/hypr/hyprpaper.conf" <<EOF
-splash = false
-
-wallpaper {
-    monitor =
-    path = $next
-    fit_mode = cover
-}
-EOF
+# awww afloeste hyprpaper 2026-08-28. Forskellen der betyder noget her:
+# hyprpaper laeste sin baggrund fra en configfil, saa skiftet skulle skrives to
+# steder — nu og til naeste opstart. awww holder tilstanden i daemonen og
+# husker selv det sidste billede, saa der er kun ét kald. Gendannelsen efter en
+# genstart ligger i ~/.Scripts/wallpaper-start.
+#
+# --resize crop svarer til hyprpapers fit_mode = cover.
+# Overgangen er blød med vilje: et baggrundsskift er ikke en besked, og et hårdt
+# klip river blikket til sig uden grund.
+apply_wallpaper(){
+   awww img "$next" \
+      --resize crop \
+      -t fade --transition-duration 1.2 --transition-fps 60 &>/dev/null
 }
 
 set_wallpaper_only(){
 	[[ -f "$1" ]] || usage "Not a valid path"
 	next="$1"
 	cp "$next" "$HOME/.config/wall.png"
-	apply_hyprpaper
+	apply_wallpaper
 }
 
 apply_hyprland(){
-   apply_hyprpaper
+   apply_wallpaper
    # borders from wal (Lua config)
    # shellcheck disable=SC1090
    source "$HOME/.cache/wal/colors.sh"
