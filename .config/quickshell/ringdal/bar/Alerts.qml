@@ -3,8 +3,12 @@ import Quickshell
 import qs
 import qs.services
 
-// Afvigelserne. En lille pille ved siden af kroppen, der kun findes naar noget
-// ikke er som det plejer -- og som slet ikke fylder naar alt er normalt.
+// Output-pillen. Den lille form ved siden af kroppen.
+//
+// Kroppen er INPUT -- det Filip putter ind i maskinen. Her er alt det maskinen
+// giver ham tilbage: afvigelser, beskeder, og prikken der siger at Claude
+// arbejder. Den findes kun naar der er noget, og fylder ingenting naar alt er
+// som det plejer.
 //
 // Det er samme regel koffein altid har fulgt, sat i system: tastaturlaasen,
 // nettet og koffein staar ikke og fortaeller at alt er i orden. De siger til,
@@ -22,7 +26,7 @@ Item {
     // skjules af en aaben menu eller af at han dikterer.
     readonly property bool asking: Agent.waiting
 
-    readonly property bool any: locked || offline || awake || asking || waiting > 0
+    readonly property bool any: Agent.active || locked || offline || awake || waiting > 0
 
     implicitWidth: any ? row.implicitWidth : 0
     implicitHeight: row.implicitHeight
@@ -43,6 +47,29 @@ Item {
             text: "intet net"
             color: Theme.stateBad
             visible: root.offline
+        }
+
+        // Prikken. Ingen ord -- ordene gaar gennem beskedfladen, og en linje
+        // der staar stille kan alligevel ikke skelnes fra en der er gaaet i
+        // staa. Det er aandedraettet der er beviset.
+        Item {
+            anchors.verticalCenter: parent.verticalCenter
+            width: Agent.active ? 7 : 0
+            height: 7
+            visible: width > 0
+
+            Rectangle {
+                anchors.fill: parent
+                radius: width / 2
+                color: Agent.color
+
+                SequentialAnimation on opacity {
+                    running: Agent.working && !Agent.stale
+                    loops: Animation.Infinite
+                    NumberAnimation { to: 0.2; duration: 900; easing.type: Easing.InOutSine }
+                    NumberAnimation { to: 1.0; duration: 900; easing.type: Easing.InOutSine }
+                }
+            }
         }
 
         Label {

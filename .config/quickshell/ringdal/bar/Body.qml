@@ -16,13 +16,11 @@ import qs.widgets
 //   aaben    du klikkede. Bliver staaende til du gaar ud af den.
 //   niveau   du skruede paa lyd eller lys. Kort, og kun bredere.
 //   kig      musen blev haengende. Passiv -- viser mere, goer intet.
-//   agent    Claude arbejder. Traeder i stedet for hvilen -- det ER handlingen
-//            der er i gang, og han kigger et andet sted hen.
 //   hvile    klokken og batteriet.
 //
-// Beskeder er IKKE en fase her. De har deres egen form ved siden af (se
-// afvigelses-pillen nedenfor) -- kroppen er det Filip goer, og en besked maa
-// ikke skubbe det til side.
+// Kroppen er INPUT: det Filip putter ind i maskinen -- stemmen, menuen,
+// aabneren. Output -- beskeder og agenten -- bor i pillen ved siden af. Uden
+// den opdeling bliver det uklart hvad der er hans, og hvad der er maskinens.
 //
 // Kig og aaben er skilt ad med vilje: pillen ligger i det hjoerne musen kommer
 // forbi hele tiden, og en flade der aabner sig uopfordret er vaerre end ingen
@@ -44,7 +42,6 @@ Item {
         if (Launcher.active) return "launch";
         if (root.opened) return "open";
         if (Level.active) return "level";
-        if (Agent.showing) return "agent";
         if (root._peeking) return "peek";
         return "rest";
     }
@@ -53,7 +50,6 @@ Item {
     readonly property bool voicing: phase === "listening" || phase === "thinking"
     readonly property bool levelling: phase === "level"
     readonly property bool peeking: phase === "peek"
-    readonly property bool agenting: phase === "agent"
     readonly property bool showingPanel: phase === "open"
     readonly property bool launching: phase === "launch"
 
@@ -200,14 +196,13 @@ Item {
             if (root.showingPanel) return Config.openWidth + 2 * Config.activePadding;
             if (root.levelling) return level.implicitWidth + 2 * Config.activePadding;
             if (root.peeking) return peek.implicitWidth + 2 * Config.activePadding;
-            if (root.agenting) return agent.implicitWidth + 2 * Config.activePadding;
             return rest.implicitWidth + 2 * Config.restPadding;
         }
         height: {
             if (root.voicing) return Config.bodyVoiceHeight;
             if (root.launching) return launch.implicitHeight + 2 * Config.activePadding;
             if (root.showingPanel) return panel.implicitHeight + 2 * Config.activePadding;
-            if (root.levelling || root.peeking || root.agenting) return Config.activeHeight;
+            if (root.levelling || root.peeking ) return Config.activeHeight;
             return Config.restHeight;
         }
         // Vokser den op til en menu, holder hjoernerne op med at vaere en
@@ -219,7 +214,6 @@ Item {
         border.color: {
             if (root.voicing) return Voice.color;
             if (root.launching || root.showingPanel) return Theme.color4;
-            if (root.agenting) return Agent.color;
             return Theme.color8;
         }
         clip: true
@@ -272,14 +266,6 @@ Item {
             id: peek
             anchors.centerIn: parent
             opacity: root.peeking ? 1 : 0
-            visible: opacity > 0
-            Behavior on opacity { NumberAnimation { duration: Config.morphDuration / 2 } }
-        }
-
-        AgentContent {
-            id: agent
-            anchors.centerIn: parent
-            opacity: root.agenting ? 1 : 0
             visible: opacity > 0
             Behavior on opacity { NumberAnimation { duration: Config.morphDuration / 2 } }
         }

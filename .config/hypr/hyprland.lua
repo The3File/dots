@@ -194,8 +194,10 @@ hl.bind(mod .. " + Insert", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scripts/fuzz
 hl.bind(mod .. " + Space", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scripts/hyprwhspr-record-toggle"))
 -- Cancel recording without pasting (discard audio)
 hl.bind(mod .. " + Escape", hl.dsp.exec_cmd("hyprwhspr record cancel"))
--- Claude Code speak on/off (opt-in TTS via hooks)
-hl.bind(mod .. " + SHIFT + V", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scripts/claude-speak toggle"))
+-- Stemmen skrues op og ned: fuld -> vigtigt -> tavs -> fuld.
+-- Pegede foer paa `claude-speak toggle`, som satte et flag INTET laeste --
+-- den stemme Filip faktisk hoerer kommer fra `tale`. Genvejen var doed.
+hl.bind(mod .. " + SHIFT + V", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.local/bin/tale skru"))
 
 -- Kill / force kill
 hl.bind(mod .. " + Q", hl.dsp.window.close())
@@ -212,10 +214,13 @@ hl.bind(mod .. " + ALT + SHIFT + W", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scr
 hl.bind(mod .. " + ALT + SHIFT + K", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scripts/koffein toggle"))
 
 -- Bluetooth / WiFi (old sxhkd: Super+Shift+B / Super+Shift+W)
+-- Samme taster, men de aabner nu pillen i stedet for fuzzel. Menuerne kalder
+-- de samme scripts indeni, saa funktionaliteten er den samme; scriptene virker
+-- stadig fra en terminal som fallback.
 -- Keylock toggle is ThinkPad ACPI hotkey only (acpid_events → lock_keys toggle),
 -- not Super+Shift+K (that bind is window.swap up below).
-hl.bind(mod .. " + SHIFT + B", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scripts/btcon"))
-hl.bind(mod .. " + SHIFT + W", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scripts/fuzzel_nm"))
+hl.bind(mod .. " + SHIFT + B", hl.dsp.exec_cmd("qs -c ringdal ipc call pill bluetooth"))
+hl.bind(mod .. " + SHIFT + W", hl.dsp.exec_cmd("qs -c ringdal ipc call pill wifi"))
 
 -- Focus
 hl.bind(mod .. " + H", hl.dsp.focus({ direction = "left" }))
