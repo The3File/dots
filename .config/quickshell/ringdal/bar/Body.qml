@@ -158,15 +158,15 @@ Item {
 
         color: Theme.barBackground
         border.width: Config.borderWidth
-        // Grundfarven er vinduernes egen kant. Kun det der afviger, faar en
-        // anden -- ellers betyder farve ingenting.
+        // Kun det der afviger, faar en anden farve end grundkanten -- ellers
+        // betyder farve ingenting.
         border.color: {
             if (alertShape.asking)
                 return Sudo.accepted ? Theme.stateGood : Theme.stateBad;
             if (alertShape.noting)
                 return Notifs.critical ? Theme.stateBad : Theme.color5;
             if (alertShape.listing) return Theme.color5;
-            return Theme.windowBorder;
+            return Theme.pillBorder;
         }
         clip: true
 
@@ -262,15 +262,15 @@ Item {
 
         color: Theme.barBackground
         border.width: Config.borderWidth
-        // Samme kant som vinduerne har, undtagen naar der bliver dikteret --
-        // der skifter hele formen alligevel, og farven foelger stemmen.
+        // Grundkanten, undtagen naar der bliver dikteret -- der skifter hele
+        // formen alligevel, og farven foelger stemmen.
         //
-        // Aabneren og menuen havde foer deres egen kantfarve. Den var color4,
-        // og det er nu grundfarven, saa den sagde ikke laengere noget: formen
-        // er allerede vokset til en liste.
+        // Aabneren og menuen havde foer deres egen kantfarve (color4). Den er
+        // vaek: formen er allerede vokset til en liste, saa farven sagde det
+        // samme én gang til.
         border.color: {
             if (root.voicing) return Voice.color;
-            return Theme.windowBorder;
+            return Theme.pillBorder;
         }
         clip: true
 
