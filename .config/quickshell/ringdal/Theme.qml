@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs
 import qs.services
 
 // Al præsentation ét sted: pywal-paletten, runbar-tærskelrampen og de
@@ -33,16 +34,31 @@ Singleton {
     // Baren er ugennemsigtig sort som alacritty/fuzzel — ikke wal-baggrunden.
     readonly property color barBackground: "#000000"
 
-    // Kanten om pillerne. Hvid, og med vilje IKKE fra paletten — samme valg
-    // som den sorte baggrund ovenfor. Paletten kan lande et hvilket som helst
-    // sted (color4 blev rustroed, color7 graagroen), og kanten er det der
-    // holder pillen sammen mod tapetet: den skal vaere lys hver gang, ikke
-    // naesten-lys naar tapetet tillader det.
+    // Kanten om pillerne. Den foelger tapetet — men daempet.
+    //
+    // Den lyse tone i paletten (color7, samme som teksten) trukket et stykke
+    // ned mod pillens egen sorte. Ren er den for haard: 2 px fuldt lys hele
+    // vejen rundt raaber hoejere end det den holder om. Og et fast hvidt var
+    // det samme problem plus at det holdt op med at hoere til tapetet.
+    //
+    // Hvor langt ned den trækkes, er en skrue i config.json (borderTone), saa
+    // det kan proeves af mens pillen koerer.
     //
     // Vinduernes kant er en anden ting og bliver ved med at vaere det: den
     // saar chwal fra wal ind i ~/.config/hypr/colors.lua. Det er kun
     // TYKKELSEN de to deler (Config.borderWidth = border_size).
-    readonly property color pillBorder: "#ffffff"
+    readonly property color pillBorder: root._toned(root.color7, Config.borderTone)
+
+    // Bland en farve ned mod pillens baggrund. Ikke gennemsigtighed: kanten
+    // ligger paa tapetet, saa alpha ville lade et lyst sted i billedet slaa
+    // igennem og goere kanten uens hele vejen rundt.
+    function _toned(c: color, t: real): color {
+        const b = root.barBackground;
+        return Qt.rgba(b.r + (c.r - b.r) * t,
+                       b.g + (c.g - b.g) * t,
+                       b.b + (c.b - b.b) * t,
+                       1);
+    }
 
     // ---- tilstandsfarver (var style.css-klasser) --------------------------
     readonly property color stateGood: "#0c0"   // .enabled, perf low-power

@@ -30,6 +30,7 @@
     "voiceHeight": 60,
     "maxRadius": 20,
     "borderWidth": 2,
+    "borderTone": 0.85,
     "morphDuration": 320,
     "workspaceLinger": 1200,
     "voiceWidth": 240,

@@ -53,6 +53,11 @@ Singleton {
     // hyprland.lua -- en tyndere kant end vinduernes faar pillen til at ligne
     // noget der er lagt oven paa skaermen i stedet for noget der hoerer til.
     readonly property int borderWidth: _body.borderWidth ?? 2
+    // Hvor meget af tapetets lyse tone kanten faar. 1 = tonen ren, 0 = den
+    // forsvinder i pillen. Den findes, fordi "lys nok til at holde formen
+    // sammen" og "ikke saa lys at den raaber" er en smagsting, der skal kunne
+    // proeves af med det samme -- JSON'en laeses om mens pillen koerer.
+    readonly property real borderTone: _body.borderTone ?? 0.85
     // Bredde naar kroppen lytter. 0 = behold fuld bredde.
     readonly property int bodyVoiceWidth: _body.voiceWidth ?? 240
     // Luft inde i pillerne, og mellem det de indeholder.
