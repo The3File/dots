@@ -15,5 +15,40 @@
     "backlight": 5000,
     "koffein": 30000,
     "clock": 30000
+  },
+  "voice": {
+    "enabled": true,
+    "width": 320,
+    "height": 52,
+    "marginLeft": 16,
+    "marginBottom": 50,
+    "levelInterval": 100,
+    "stateInterval": 250
+  },
+  "body": {
+    "margin": 8,
+    "voiceHeight": 60,
+    "maxRadius": 20,
+    "morphDuration": 320,
+    "workspaceLinger": 1200,
+    "voiceWidth": 240,
+    "restPadding": 24,
+    "restSpacing": 20,
+    "restHeight": 34,
+    "align": "right",
+    "levelLinger": 1600,
+    "levelWidth": 210,
+    "peekDelay": 300,
+    "openWidth": 360,
+    "overlayHeight": 640,
+    "activePadding": 34,
+    "activeHeight": 42,
+    "voicePadding": 16,
+    "launchWidth": 420,
+    "launchLines": 8,
+    "notifyWidth": 340,
+    "notifyLinger": 6000,
+    "notifyMax": 20,
+    "menuLines": 10
   }
 }

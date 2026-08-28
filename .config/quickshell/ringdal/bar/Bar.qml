@@ -1,54 +1,81 @@
 import QtQuick
 import Quickshell
+import Quickshell.Wayland
 import qs
 import qs.services
-import qs.widgets
-import qs.bar.items
 
-// Selve baren. Raekkefoelgen er waybars modules-left / modules-right, ordret.
+// Fladen kroppen tegnes paa. Selv er den tom og gennemsigtig.
+//
+// Den er hoejere end baren ser ud, fordi kroppen skal kunne vokse uden at faa
+// et nyt vindue. Til gengaeld reserveres kun barens egen hoejde, saa vinduerne
+// under ikke rykker sig naar den morfer.
+//
+// mask gør at museklik kun rammer selve kroppen -- alt det gennemsigtige
+// ovenover falder igennem til vinduet bagved.
 PanelWindow {
     id: root
 
     required property ShellScreen barScreen
 
     screen: barScreen
+    color: "transparent"
+
     anchors { left: true; right: true; bottom: true }
-    implicitHeight: Config.barHeight
-    color: Theme.barBackground
+    // Hoejt nok til den stoerste form pillen kan tage. Vinduet er
+    // gennemsigtigt og klik falder igennem alt undtagen selve pillen, saa
+    // hoejden koster ingenting -- og er den for lav, bliver en aaben menu
+    // klippet af vindueskanten uden at noget ser forkert ud i koden.
+    implicitHeight: Math.min(barScreen.height, Config.overlayHeight)
 
-    Row {
-        id: left
-        anchors { left: parent.left; top: parent.top; bottom: parent.bottom }
+    // Pillen svæver. Den reserverer ikke plads, saa vinduerne gaar helt ud
+    // til kanten -- en lille ting i et hjoerne skal ikke koste en stribe
+    // hen over hele bunden. Til gengaeld kan den ligge oven paa noget i
+    // selve hjoernet; det er byttet.
+    exclusionMode: ExclusionMode.Ignore
+    WlrLayershell.layer: WlrLayer.Top
 
-        Workspaces { screen: root.barScreen; height: root.height }
-        Sep {}
-        ServiceItem { service: Perf; onClicked: Perf.openMenu() }
-        Sep {}
-        ServiceItem {
-            service: Whspr
-            onClicked: Whspr.toggleRecord()
-            onRightClicked: Whspr.toggleOverlay()
+    // Bundet til geometrien og ikke bare til elementet, saa klikfladen
+    // foelger med naar kroppen morfer. Radius er med, saa klik i de runde
+    // hjoerner ogsaa falder igennem.
+    mask: Region {
+        x: body.shape.x
+        y: body.shape.y
+        width: body.shape.width
+        height: body.shape.height
+        radius: body.shape.radius
+
+        // Afvigelses-pillen er sin egen form og skal kunne klikkes for sig.
+        Region {
+            x: body.alertShape.x
+            y: body.alertShape.y
+            width: body.alertShape.width
+            height: body.alertShape.height
+            radius: body.alertShape.radius
         }
-        Sep {}
-        ServiceItem { service: Keylock; onClicked: Keylock.toggle() }
-        ServiceItem { service: Koffein; onClicked: Koffein.turnOff() }
     }
 
-    Row {
-        id: right
-        anchors { right: parent.right; top: parent.top; bottom: parent.bottom }
+    // Tastaturet gribes kun naar der er en grund. Pillen maa aldrig staa og
+    // stjaele det Filip skriver.
+    //
+    // Aabneren er den ene undtagelse der skal have det uden at man klikker:
+    // man trykker Super+D og skriver videre uden at flytte musen. Det er ogsaa
+    // den eneste tilstand der kan spaerre tastaturet, hvis den saetter sig
+    // fast -- derfor lukker baade Esc, klik udenfor, dikteringen og
+    // `qs -c ringdal ipc call launcher close` den.
+    //
+    // Menuen har ogsaa et felt man skriver i nu (samme soegning som fuzzel
+    // havde), saa den skal ogsaa have tastaturet -- ikke kun aabneren.
+    WlrLayershell.keyboardFocus: (Launcher.active || body.opened)
+        ? WlrKeyboardFocus.Exclusive
+        : WlrKeyboardFocus.None
 
-        ServiceItem { service: Audio; onClicked: Audio.toggleMute() }
-        ServiceItem { service: Backlight }
-        Sep {}
-        ServiceItem { service: Net; onClicked: Net.openPicker() }
-        Sep {}
-        ServiceItem { service: Battery }
-        Sep {}
-        ServiceItem {
-            service: Clock
-            onClicked: Clock.openCalendar()
-            rightPadding: Theme.clockRightPadding
-        }
+    Body {
+        id: body
+        anchors.fill: parent
+        bodyScreen: root.barScreen
+        hostWindow: root
+
+        focus: true
+        Keys.onEscapePressed: body.close()
     }
 }

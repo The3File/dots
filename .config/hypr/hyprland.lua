@@ -39,7 +39,9 @@ hl.on("hyprland.start", function()
     -- Baren: quickshell (~/.config/quickshell/ringdal). Waybar-configen
     -- ligger stadig som fallback: pkill qs && waybar &
     hl.exec_cmd("qs -c ringdal")
-    hl.exec_cmd("dunst")
+    -- Beskeder kommer fra pillen nu (services/Notifs.qml). dunst maa ikke
+    -- starte: der kan kun vaere én paa org.freedesktop.Notifications, og den
+    -- der naar det foerst vinder. Vil du tilbage: `dunst &` efter `pkill qs`.
     hl.exec_cmd("hyprpaper")
     hl.exec_cmd(os.getenv("HOME") .. "/.Scripts/cliphist-watch")
     hl.exec_cmd(os.getenv("HOME") .. "/.Scripts/low_battery_warning")
@@ -84,7 +86,7 @@ hl.config({
     },
 
     decoration = {
-        rounding         = 0,
+        rounding         = 15,
 		  --active_opacity   = 1.0,
 		  --inactive_opacity = 0.7,
         --dim_inactive     = true,
@@ -182,9 +184,9 @@ hl.bind(mod .. " + SHIFT + Return", hl.dsp.exec_cmd(terminal .. " --class float"
 hl.bind(mod .. " + O", hl.dsp.exec_cmd(browser))
 hl.bind(mod .. " + W", hl.dsp.exec_cmd(browserAlt))
 hl.bind(mod .. " + E", hl.dsp.exec_cmd(fileManager))
-hl.bind(mod .. " + D", function()
-    hl.exec_cmd("/home/ringdal/.Scripts/fuzzel_drun")
-end)
+-- Applikationsaabner: pillen, ikke fuzzel. Samme tast, ny flade.
+-- fuzzel_drun ligger stadig i ~/.Scripts som fallback.
+hl.bind(mod .. " + D", hl.dsp.exec_cmd("qs -c ringdal ipc call launcher toggle"))
 -- Clipboard history (bspwm: super + Insert → clipmenu)
 hl.bind(mod .. " + Insert", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scripts/fuzzel_clip"))
 

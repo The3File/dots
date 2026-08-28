@@ -14,6 +14,11 @@ Singleton {
     readonly property string text:
         Markup.esc(Qt.formatDateTime(clock.date, "ddd dd MMM HHmm").toLowerCase())
 
+    // Kort form til den simplificerede krop. Datoen er der stadig, den
+    // staar bare ikke fremme laengere.
+    readonly property string shortText:
+        Qt.formatDateTime(clock.date, "HH:mm")
+
     readonly property bool visible: true
     readonly property color color: Theme.foreground
     readonly property bool underline: false

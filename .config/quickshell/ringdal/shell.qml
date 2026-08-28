@@ -2,8 +2,9 @@ import Quickshell
 import qs
 import qs.bar
 
-// Roden. En bar pr. skaerm -- ogsaa dem der bliver sat til midt i en session.
-// Config.barScreens kan snaevre det ind til fx ["eDP-1"].
+// Roden. Én krop pr. skaerm. Alt hvad shellen viser -- bar, stemme, og senere
+// menuer og notifikationer -- er tilstande i den krop, ikke selvstaendige
+// vinduer.
 ShellRoot {
     Variants {
         model: Quickshell.screens

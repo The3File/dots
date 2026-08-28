@@ -33,6 +33,13 @@ Singleton {
     readonly property string text:
         `${statusText}: ` + Markup.colored(`${percent}%`, Theme.rampColor(percent))
 
+    // Kort form: kun tallet, farvet. Ordet "discharging" fortalte ikke
+    // noget Filip handlede paa -- farven og retningen goer.
+    readonly property bool charging:
+        device?.state === UPowerDeviceState.Charging
+        || device?.state === UPowerDeviceState.FullyCharged
+    readonly property string shortText: `${percent}%`
+
     readonly property bool visible: ready
     readonly property color color: Theme.foreground
     readonly property bool underline: false

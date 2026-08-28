@@ -15,6 +15,21 @@ Singleton {
             .replace(/>/g, "&gt;");
     }
 
+    // Beskeder maa sende lidt markup (<b>, <i>, <a>). Vi tegner dem som ren
+    // tekst, saa taggene skal ud og entiteterne tilbage til tegn -- ellers
+    // staar der "&amp;" midt i en linje.
+    function strip(s: string): string {
+        return String(s ?? "")
+            .replace(/<br\s*\/?>/gi, " ")
+            .replace(/<[^>]+>/g, "")
+            .replace(/&lt;/g, "<")
+            .replace(/&gt;/g, ">")
+            .replace(/&quot;/g, '"')
+            .replace(/&apos;/g, "'")
+            .replace(/&amp;/g, "&")
+            .trim();
+    }
+
     // Farvet stump tekst.
     function colored(text: string, color): string {
         return `<font color="${color}">${esc(text)}</font>`;

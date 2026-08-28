@@ -37,5 +37,6 @@
     }
   },
   "pywhispercpp_use_vad": true,
-  "whisper_prompt_da": "Transskriber klart, naturligt dansk. Brug korrekt tegns\u00e6tning og store bogstaver ved s\u00e6tningsstart. Behold danske navne, stednavne og fagord pr\u00e6cist som sagt. Opfind ikke ekstra ord."
+  "whisper_prompt_da": "Transskriber klart, naturligt dansk. Brug korrekt tegnsætning og store bogstaver ved sætningsstart. Behold danske navne, stednavne og fagord præcist som sagt. Opfind ikke ekstra ord.",
+  "mic_osd_enabled": false
 }

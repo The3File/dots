@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
-# NetworkManager WiFi / connection picker (fuzzel).
-# Usage: fuzzel_nm
-# Replaces nm-dmenu / nm-menu. Old sxhkd: Super+Shift+W.
+# NetworkManager WiFi / connection picker.
+# Usage: fuzzel_nm [menu|list|ssids|up <name>|down <name>|connect <ssid> <pass>|delete <name>]
+#
+# menu (default) er den gamle fuzzel-menu og staar uroert -- den er fallback.
+# De oevrige underkommandoer er den samme nmcli-logik uden menu, saa pillen
+# (quickshell: services/Nm.qml) kan bruge praecis den samme kode i stedet for
+# at faa sin egen halve udgave af det samme.
 
 set -euo pipefail
 
@@ -104,6 +108,71 @@ delete_con() {
 	nmcli connection delete "$con" && notify "deleted: $con"
 }
 
+# --- ikke-interaktiv indgang (bruges af pillen) ------------------------------
+
+active_cons() {
+	nmcli -t -f NAME c show --active 2>/dev/null | sed '/^$/d'
+}
+
+# "*<TAB>navn" for aktive forbindelser, " <TAB>navn" for resten.
+cmd_list() {
+	local active c
+	active=$(active_cons)
+	while IFS= read -r c; do
+		[[ -n $c ]] || continue
+		if printf '%s\n' "$active" | grep -qxF "$c"; then
+			printf '*\t%s\n' "$c"
+		else
+			printf ' \t%s\n' "$c"
+		fi
+	done < <(list_cons)
+}
+
+# "styrke<TAB>sikkerhed<TAB>ssid", staerkeste foerst.
+cmd_ssids() {
+	nmcli device wifi rescan >/dev/null 2>&1 || true
+	sleep 2
+	nmcli -t -f SIGNAL,SECURITY,SSID d wifi list 2>/dev/null |
+		awk -F: 'NF >= 3 && $3 != "" {
+			ssid = $3
+			for (i = 4; i <= NF; i++) ssid = ssid ":" $i
+			if (!seen[ssid]++) printf "%s\t%s\t%s\n", $1, $2, ssid
+		}' | sort -rn
+}
+
+cmd_up() {
+	nmcli connection up "$1" >/dev/null 2>&1 && notify "up: $1" || {
+		notify "failed: $1"
+		return 1
+	}
+}
+
+cmd_down() {
+	nmcli connection down "$1" >/dev/null 2>&1 && notify "down: $1" || {
+		notify "failed: $1"
+		return 1
+	}
+}
+
+cmd_connect() {
+	local ssid=$1 pass=${2:-} rc=0
+	if [[ -n $pass ]]; then
+		nmcli device wifi connect "$ssid" password "$pass" >/dev/null 2>&1 || rc=$?
+	else
+		nmcli device wifi connect "$ssid" >/dev/null 2>&1 || rc=$?
+	fi
+	if [[ $rc -eq 0 ]]; then
+		notify "connected: $ssid"
+	else
+		notify "failed: $ssid"
+		return 1
+	fi
+}
+
+cmd_delete() {
+	nmcli connection delete "$1" >/dev/null 2>&1 && notify "deleted: $1" || return 1
+}
+
 main() {
 	local active choice name
 	active=$(active_con)
@@ -144,4 +213,32 @@ main() {
 	esac
 }
 
-main "$@"
+usage() {
+	printf 'usage: %s [menu|list|ssids|up <name>|down <name>|connect <ssid> [pass]|delete <name>]\n' "${0##*/}" >&2
+}
+
+case "${1:-menu}" in
+menu | '') main ;;
+list) cmd_list ;;
+ssids) cmd_ssids ;;
+up)
+	[[ -n ${2:-} ]] || { usage; exit 2; }
+	cmd_up "$2"
+	;;
+down)
+	[[ -n ${2:-} ]] || { usage; exit 2; }
+	cmd_down "$2"
+	;;
+connect)
+	[[ -n ${2:-} ]] || { usage; exit 2; }
+	cmd_connect "$2" "${3:-}"
+	;;
+delete)
+	[[ -n ${2:-} ]] || { usage; exit 2; }
+	cmd_delete "$2"
+	;;
+*)
+	usage
+	exit 2
+	;;
+esac

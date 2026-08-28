@@ -36,6 +36,14 @@ Singleton {
     readonly property bool underline: false
     readonly property string tooltip: ""
 
+    // Skru et trin. Klemmes ved 100 -- boost hoerer til paa tasterne, ikke
+    // paa et uheldigt musehjul.
+    function nudge(step: int): void {
+        if (!sink?.audio) return;
+        const next = Math.max(0, Math.min(100, root.percent + step));
+        sink.audio.volume = next / 100;
+    }
+
     function toggleMute(): void {
         if (sink?.audio) sink.audio.muted = !sink.audio.muted;
     }
