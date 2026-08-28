@@ -49,10 +49,11 @@ Singleton {
     // Hvor hoej kroppen bliver naar den lytter.
     readonly property int bodyVoiceHeight: _body.voiceHeight ?? 60
     readonly property int bodyMaxRadius: _body.maxRadius ?? 20
-    // Kanten om pillerne. Skal vaere den samme som `border_size` i
-    // hyprland.lua -- en tyndere kant end vinduernes faar pillen til at ligne
-    // noget der er lagt oven paa skaermen i stedet for noget der hoerer til.
-    readonly property int borderWidth: _body.borderWidth ?? 2
+    // Kanten om pillerne. Vinduerne har 2 (border_size i hyprland.lua); pillen
+    // har 1 med vilje -- den er lille og ligger i et hjoerne, og 2 px hele
+    // vejen rundt om en lav form blev en streg man kiggede paa i stedet for
+    // igennem.
+    readonly property int borderWidth: _body.borderWidth ?? 1
     // Hvor meget af tapetets lyse tone kanten faar. 1 = tonen ren, 0 = den
     // forsvinder i pillen. Den findes, fordi "lys nok til at holde formen
     // sammen" og "ikke saa lys at den raaber" er en smagsting, der skal kunne

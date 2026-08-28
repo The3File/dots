@@ -29,7 +29,7 @@
     "margin": 8,
     "voiceHeight": 60,
     "maxRadius": 20,
-    "borderWidth": 2,
+    "borderWidth": 1,
     "borderTone": 0.7,
     "morphDuration": 320,
     "workspaceLinger": 1200,
