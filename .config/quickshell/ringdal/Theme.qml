@@ -33,6 +33,16 @@ Singleton {
     // Baren er ugennemsigtig sort som alacritty/fuzzel — ikke wal-baggrunden.
     readonly property color barBackground: "#000000"
 
+    // Kanten om et vindue. Hyprland tegner den med color4 (~/.config/hypr/
+    // colors.lua, som chwal saar fra den samme palette), saa pillerne tager
+    // den samme farve: de ligger side om side med vinduerne paa skaermen og
+    // maa ikke se ud som om de hoerer til et andet skrivebord.
+    //
+    // Skifter paletten, skifter begge dele med — der er ingen kopi at holde
+    // opdateret. Tykkelsen bor i Config (borderWidth), fordi den er en
+    // Hyprland-indstilling og ikke en farve.
+    readonly property color windowBorder: root.color4
+
     // ---- tilstandsfarver (var style.css-klasser) --------------------------
     readonly property color stateGood: "#0c0"   // .enabled, perf low-power
     readonly property color stateWarn: "#f80"   // .on (koffein), perf balanced

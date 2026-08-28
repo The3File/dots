@@ -157,14 +157,16 @@ Item {
         visible: width > 0
 
         color: Theme.barBackground
-        border.width: 1
+        border.width: Config.borderWidth
+        // Grundfarven er vinduernes egen kant. Kun det der afviger, faar en
+        // anden -- ellers betyder farve ingenting.
         border.color: {
             if (alertShape.asking)
                 return Sudo.accepted ? Theme.stateGood : Theme.stateBad;
             if (alertShape.noting)
                 return Notifs.critical ? Theme.stateBad : Theme.color5;
             if (alertShape.listing) return Theme.color5;
-            return Theme.color8;
+            return Theme.windowBorder;
         }
         clip: true
 
@@ -259,11 +261,16 @@ Item {
         radius: Math.min(height / 2, Config.bodyMaxRadius)
 
         color: Theme.barBackground
-        border.width: 1
+        border.width: Config.borderWidth
+        // Samme kant som vinduerne har, undtagen naar der bliver dikteret --
+        // der skifter hele formen alligevel, og farven foelger stemmen.
+        //
+        // Aabneren og menuen havde foer deres egen kantfarve. Den var color4,
+        // og det er nu grundfarven, saa den sagde ikke laengere noget: formen
+        // er allerede vokset til en liste.
         border.color: {
             if (root.voicing) return Voice.color;
-            if (root.launching || root.showingPanel) return Theme.color4;
-            return Theme.color8;
+            return Theme.windowBorder;
         }
         clip: true
 

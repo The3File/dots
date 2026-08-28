@@ -49,6 +49,10 @@ Singleton {
     // Hvor hoej kroppen bliver naar den lytter.
     readonly property int bodyVoiceHeight: _body.voiceHeight ?? 60
     readonly property int bodyMaxRadius: _body.maxRadius ?? 20
+    // Kanten om pillerne. Skal vaere den samme som `border_size` i
+    // hyprland.lua -- en tyndere kant end vinduernes faar pillen til at ligne
+    // noget der er lagt oven paa skaermen i stedet for noget der hoerer til.
+    readonly property int borderWidth: _body.borderWidth ?? 2
     // Bredde naar kroppen lytter. 0 = behold fuld bredde.
     readonly property int bodyVoiceWidth: _body.voiceWidth ?? 240
     // Luft inde i pillerne, og mellem det de indeholder.
