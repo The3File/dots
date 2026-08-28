@@ -1,22 +1,27 @@
 #!/usr/bin/env python3
 """Authenticate on a real PTY, then run the command with that ticket.
 
-Two steps on purpose. `sudo -v` does nothing but authenticate, and the instant
-it succeeds the shell prints a marker. That marker is the only way to know the
-finger was accepted *before* the command starts producing output — which is
-what lets the pill confirm it on screen instead of leaving Filip guessing
-whether anything happened.
+Two things have to be true at once, and they pull in opposite directions:
 
-The marker is an OSC escape sequence, not a word: if it ever slips past the
-filter it is invisible in a terminal rather than looking like output.
+  * PAM only offers the fingerprint when the tty looks like /dev/pts/* — see
+    /etc/pam.d/sudo. So there has to be a PTY.
+  * The command must keep the caller's real stdin, stdout and stderr, or
+    `echo x | sudo tee f` writes an empty file. That one is easy to miss: the
+    pipe ends, but a PTY never reports end-of-input, so `cat` sits there
+    forever and the command hangs instead of failing.
 
-A real PTY is required, not optional: /etc/pam.d/sudo only offers the
-fingerprint when the tty looks like /dev/pts/*. And it has to be pty.spawn
-rather than pty.fork, because spawn also forwards stdin — `echo x | sudo tee f`
-has to keep working.
+The way out is that PAM does not care what fd 0/1/2 are — it wants a
+controlling terminal. So the child gets a PTY as its controlling terminal (via
+pty.fork) and then hands fd 0/1/2 back to the real ones. sudo talks to the user
+through /dev/tty, which is the PTY; the command talks through the pipes.
 
-Both sudo calls run inside the same PTY, so the second one finds the ticket the
-first one made (sudo scopes tickets per tty by default).
+That also gives the "finger accepted" marker somewhere clean to live: it is
+written to /dev/tty, so it travels on the PTY and can never turn up in the
+command's own output. It is an OSC escape rather than a word, so it stays
+invisible if it ever slips past the filter anyway.
+
+Both sudo calls run inside the same PTY, because sudo scopes its ticket per tty
+by default.
 """
 
 from __future__ import annotations
@@ -24,19 +29,20 @@ from __future__ import annotations
 import os
 import pty
 import shutil
+import signal
 import subprocess
 import sys
 
 MARKER = b"\x1b]777;sudo-ok\x07"
 
 # -K first, as its own call: it throws the old ticket away without asking for
-# anything, so every run really does require a fresh finger. It cannot be folded
-# into the -v call as `-k -v` — that combination deliberately refuses to save the
-# ticket it just earned, and then the second sudo has nothing to work with
-# ("a password is required", after the finger was accepted).
+# anything, so every run really does require a fresh finger. It cannot be
+# folded into the -v call as `-k -v` — that combination deliberately refuses to
+# save the ticket it just earned, and then the second sudo says "a password is
+# required" even though the finger was accepted.
 SCRIPT = (
     'sudo -K 2>/dev/null; sudo -A -v'
-    ' && printf "\\033]777;sudo-ok\\007"'
+    ' && printf "\\033]777;sudo-ok\\007" > /dev/tty'
     ' && shift && exec sudo -n -- "$@"'
 )
 
@@ -47,46 +53,91 @@ def main() -> int:
         print("sudo-pty: command required", file=sys.stderr)
         return 1
 
+    qs = shutil.which("qs") if os.environ.get("SUDO_PILL") == "1" else None
+
+    # Keep the caller's real stdio before pty.fork() replaces it in the child.
+    saved = [os.dup(0), os.dup(1), os.dup(2)]
+
+    # $0 is a label, $1 is a placeholder the script shifts away, then "$@" is
+    # the real argv. Nothing is ever re-parsed by a shell: the command runs as
+    # the exact argv that was shown on screen.
+    cmd = ["/bin/bash", "-c", SCRIPT, "sudo-pty", "-", *argv]
+
+    pid, master = pty.fork()
+    if pid == 0:
+        # pty.fork() leaves the slave on 0/1/2 and nowhere else. Handing those
+        # three back to the real stdio would close the last handle on the
+        # terminal, and the kernel hangs up the session the moment that
+        # happens — the child died of SIGHUP before it ever ran. So park a
+        # copy on a spare fd first: that is what keeps /dev/tty alive for PAM.
+        keep = os.dup(0)
+        os.set_inheritable(keep, True)
+        for want, have in enumerate(saved):
+            os.dup2(have, want)
+        for have in saved:
+            if have > 2:
+                os.close(have)
+        try:
+            os.execvp(cmd[0], cmd)
+        finally:
+            os._exit(127)
+
+    for have in saved:
+        os.close(have)
+
+    def stop(_signum, _frame) -> None:
+        try:
+            os.kill(pid, signal.SIGTERM)
+        except ProcessLookupError:
+            pass
+
+    signal.signal(signal.SIGTERM, stop)
+    signal.signal(signal.SIGINT, stop)
+
     told = False
     # The marker can be split across two reads, so keep just enough of the tail
     # to recognise it when the rest arrives.
     carry = b""
-    qs = shutil.which("qs") if os.environ.get("SUDO_PILL") == "1" else None
 
-    def kvitter() -> None:
-        # Fire and forget: the pill saying "godkendt" must never be able to
-        # hold up the command it is confirming.
-        subprocess.Popen(
-            [qs, "-c", "ringdal", "ipc", "call", "sudo", "godkendt"],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-            start_new_session=True,
-        )
-
-    def filtrer(fd: int) -> bytes:
-        nonlocal told, carry
-        data = os.read(fd, 4096)
+    while True:
+        try:
+            data = os.read(master, 4096)
+        except OSError:
+            break  # child is gone; Linux reports EIO on the master
         if not data:
-            return data
-        if told:
-            return data
-        buf = carry + data
-        i = buf.find(MARKER)
-        if i < 0:
-            keep = len(MARKER) - 1
-            carry = buf[-keep:] if keep else b""
-            return buf[: len(buf) - len(carry)]
-        told = True
-        if qs:
-            kvitter()
-        carry = b""
-        return buf[:i] + buf[i + len(MARKER) :]
+            break
 
-    # $0 is a label, $1 is a placeholder the script shifts away, then "$@" is
-    # the real argv. Passing it this way means nothing is ever re-parsed by a
-    # shell: the command runs as the exact argv that was shown on screen.
-    cmd = ["/bin/bash", "-c", SCRIPT, "sudo-pty", "-", *argv]
-    return os.waitstatus_to_exitcode(pty.spawn(cmd, filtrer))
+        if told:
+            out = data
+        else:
+            buf = carry + data
+            i = buf.find(MARKER)
+            if i < 0:
+                keep = len(MARKER) - 1
+                carry = buf[-keep:] if keep else b""
+                out = buf[: len(buf) - len(carry)]
+            else:
+                told = True
+                carry = b""
+                out = buf[:i] + buf[i + len(MARKER) :]
+                if qs:
+                    # Fire and forget: the pill saying "godkendt" must never be
+                    # able to hold up the command it is confirming.
+                    subprocess.Popen(
+                        [qs, "-c", "ringdal", "ipc", "call", "sudo", "godkendt"],
+                        stdout=subprocess.DEVNULL,
+                        stderr=subprocess.DEVNULL,
+                        start_new_session=True,
+                    )
+
+        # PAM's chatter, not the command's output — so it goes to stderr.
+        if out:
+            sys.stderr.buffer.write(out)
+            sys.stderr.buffer.flush()
+
+    os.close(master)
+    _, status = os.waitpid(pid, 0)
+    return os.waitstatus_to_exitcode(status)
 
 
 if __name__ == "__main__":

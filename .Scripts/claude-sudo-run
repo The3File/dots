@@ -56,8 +56,16 @@ else
 	export SUDO_ASKPASS=$SCRIPTS/zenity-askpass
 fi
 
-"$SCRIPTS/sudo-pty" "$@" &
+# The command runs in the background so the watchdog below can still reach it.
+# Gotcha with teeth: a background job in a non-interactive shell gets its stdin
+# pointed at /dev/null, before anything else gets a say. `echo x | sudo tee f`
+# then wrote an empty file, and the blame landed on sudo for two rounds. An
+# explicit redirection is what overrides it, so keep a copy of the real stdin
+# and hand it over by name.
+exec 3<&0
+"$SCRIPTS/sudo-pty" "$@" <&3 &
 kok=$!
+exec 3<&-
 
 # Dismissing the question is a refusal — otherwise the only way out would be to
 # sit and wait for PAM to give up. Only an explicit "nej" kills: once the finger
@@ -67,7 +75,7 @@ kok=$!
 if ((i_pillen)); then
 	(
 		while kill -0 "$kok" 2>/dev/null; do
-			[[ $("$SCRIPTS/pill-sudo" hent 2>/dev/null) == nej ]] && {
+			[[ $("$SCRIPTS/pill-sudo" afvist 2>/dev/null) == ja ]] && {
 				kill "$kok" 2>/dev/null
 				break
 			}

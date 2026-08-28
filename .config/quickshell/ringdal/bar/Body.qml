@@ -35,11 +35,6 @@ Item {
     // kaldes udefra.
     readonly property bool opened: Pill.opened
     readonly property bool _peeking: Pill.peeking
-    // Et spoergsmaal om root-adgang ligger og venter paa svar. Gotcha: linjen
-    // er ogsaa det eneste sted Sudo bliver naevnt fra noget der selv bliver
-    // bygget -- og en singleton ingen naevner, bygger Quickshell aldrig. Uden
-    // den findes IPC-indgangen `sudo` slet ikke.
-    readonly property bool asking: Sudo.pending
 
     readonly property string phase: {
         if (Voice.thinking || Voice.failed) return "thinking";
@@ -125,24 +120,38 @@ Item {
         anchors.rightMargin: Config.bodyMargin
         anchors.bottom: shape.bottom
 
-        readonly property bool noting: Notifs.popup
+        // Root-adgang vinder over en besked: den venter paa ham, og den er
+        // kortvarig. En besked kan komme igen, det kan et spoergsmaal ikke.
+        //
+        // Gotcha: linjen er ogsaa det eneste sted Sudo bliver naevnt fra noget
+        // der selv bliver bygget -- og en singleton ingen naevner, bygger
+        // Quickshell aldrig. Fjernes den, findes IPC-indgangen `sudo` ikke.
+        readonly property bool asking: Sudo.showing
+        readonly property bool noting: !alertShape.asking && Notifs.popup
+        readonly property bool wide: alertShape.asking || alertShape.noting
 
         width: {
-            if (alertShape.noting)
+            if (alertShape.wide)
                 return Config.notifyWidth + 2 * Config.activePadding;
             return alerts.any ? alerts.implicitWidth + 2 * Config.restPadding : 0;
         }
-        height: alertShape.noting
-            ? notify.implicitHeight + 2 * Config.activePadding
-            : Config.restHeight
+        height: {
+            if (alertShape.asking) return sudo.implicitHeight + 2 * Config.activePadding;
+            if (alertShape.noting) return notify.implicitHeight + 2 * Config.activePadding;
+            return Config.restHeight;
+        }
         radius: Math.min(height / 2, Config.bodyMaxRadius)
         visible: width > 0
 
         color: Theme.barBackground
         border.width: 1
-        border.color: alertShape.noting
-            ? (Notifs.critical ? Theme.stateBad : Theme.color5)
-            : Theme.color8
+        border.color: {
+            if (alertShape.asking)
+                return Sudo.accepted ? Theme.stateGood : Theme.stateBad;
+            if (alertShape.noting)
+                return Notifs.critical ? Theme.stateBad : Theme.color5;
+            return Theme.color8;
+        }
         clip: true
 
         Behavior on width {
@@ -163,7 +172,7 @@ Item {
         Alerts {
             id: alerts
             anchors.centerIn: parent
-            opacity: alertShape.noting ? 0 : 1
+            opacity: alertShape.wide ? 0 : 1
             visible: opacity > 0
             Behavior on opacity { NumberAnimation { duration: Config.morphDuration / 2 } }
         }
@@ -172,6 +181,14 @@ Item {
             id: notify
             anchors.centerIn: parent
             opacity: alertShape.noting ? 1 : 0
+            visible: opacity > 0
+            Behavior on opacity { NumberAnimation { duration: Config.morphDuration / 2 } }
+        }
+
+        SudoContent {
+            id: sudo
+            anchors.centerIn: parent
+            opacity: alertShape.asking ? 1 : 0
             visible: opacity > 0
             Behavior on opacity { NumberAnimation { duration: Config.morphDuration / 2 } }
         }

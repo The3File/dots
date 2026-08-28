@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # Stil et root-spoergsmaal i pillen.
 #
-# Bloklerende (rejser og venter paa svaret):
-#   pill-sudo valg "<kommando>"        -> "ja" | "nej"
+# Blokerende (rejser og venter paa svaret):
 #   pill-sudo kode "<kommando>"        -> "ja:<adgangskode>" | "nej"
 #
 # Raa (til den der selv styrer forloebet — fingeraftrykket):
-#   pill-sudo rejs finger|kode|valg "<kommando>"
+#   pill-sudo rejs finger|kode "<kommando>"
 #   pill-sudo hent                     -> "venter" | "ja" | "nej" | "ingenting"
+#   pill-sudo afvist                   -> "ja" hvis der blev sagt nej
 #   pill-sudo afbryd
 #
 # Exit 2 = pillen kunne ikke spoerge (den koerer ikke, eller den staar allerede
@@ -26,14 +26,13 @@ timeout=${PILL_SUDO_TIMEOUT:-120}
 tick=0.15
 
 brug() {
-	echo "brug: pill-sudo valg|kode <kommando> | rejs <slags> <kommando> | hent | afbryd" >&2
+	echo "brug: pill-sudo kode <kommando> | rejs finger|kode <kommando> | hent | afvist | afbryd" >&2
 	exit 2
 }
 
 rejs() { # <slags> <kommando>
 	local slags=$1 cmd=$2 raise raised
 	case $slags in
-	valg) raise=spoerg ;;
 	kode) raise=kode ;;
 	finger) raise=finger ;;
 	*) echo "ukendt: $slags" >&2; return 2 ;;
@@ -54,11 +53,15 @@ hent)
 	"${QS[@]}" svar 2>/dev/null || exit 2
 	exit 0
 	;;
+afvist)
+	"${QS[@]}" afvist 2>/dev/null || exit 2
+	exit 0
+	;;
 afbryd)
 	"${QS[@]}" afbryd >/dev/null 2>&1 || exit 2
 	exit 0
 	;;
-valg | kode)
+kode)
 	[[ $# -eq 2 ]] || brug
 	rejs "$1" "$2" || exit 2
 	;;

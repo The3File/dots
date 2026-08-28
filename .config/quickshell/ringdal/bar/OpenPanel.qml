@@ -70,14 +70,8 @@ Item {
         // Samme felt uanset om man soeger i en liste eller svarer paa noget.
         // Det er kun tegnene der skjules, og hvad retur betyder.
         Item {
-            id: fieldRow
-            // Skal der ikke skrives, forsvinder feltet -- men bliver i traeet,
-            // for det er det der holder tastaturet. Derfor opacity og hoejde,
-            // ikke visible: et usynligt element kan ikke tage imod Escape.
-            readonly property bool shown: Menu.field || Menu.prompt !== null
-            opacity: fieldRow.shown ? 1 : 0
             width: parent.width
-            height: fieldRow.shown ? Config.fontSize + 10 : 0
+            height: Config.fontSize + 10
 
             Text {
                 id: prompt
@@ -153,7 +147,7 @@ Item {
                 : (Menu.prompt !== null ? ""
                    : (root.view.length === 0 ? "ingenting" : ""))
             wrapMode: Text.Wrap
-            color: Menu.statusColor
+            color: Theme.color8
             font.family: Config.fontFamily
             font.pixelSize: Config.fontSize
             renderType: Text.NativeRendering

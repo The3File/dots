@@ -100,8 +100,9 @@ Singleton {
     // aande. Jeg siger noget ved hvert faseskift, saa der er langt imellem.
     readonly property int agentStale: _body.agentStale ?? 240000
     // Hvor laenge "godkendt" bliver staaende, naar fingeraftrykket gik igennem.
-    // Kort nok til ikke at vaere i vejen, langt nok til at blive set.
-    readonly property int sudoKvittering: _body.sudoKvittering ?? 900
+    // Det skal kunne naas med oejnene, ogsaa naar man ikke sad og kiggede paa
+    // pillen i forvejen -- man laegger fingeren og ser op bagefter.
+    readonly property int sudoKvittering: _body.sudoKvittering ?? 1800
     // Hoejden paa den gennemsigtige flade pillen tegnes paa.
     readonly property int overlayHeight: _body.overlayHeight ?? 640
     // Alle formskift bruger den samme varighed. Ét tal, ét formsprog.

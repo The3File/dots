@@ -368,24 +368,20 @@ Singleton {
     }
 
     // ---- root-adgang -----------------------------------------------------
-    // Rejst udefra af Sudo-servicen, ikke noget man kan navigere hen til.
-    // Kommandoen staar ordret i status -- det er hele grunden til at spoerge,
-    // saa den maa hverken forkortes eller skrives om.
+    // Kun adgangskoden, og kun naar fingeraftrykket gav op. Selve
+    // spoergsmaalet staar i output-pillen -- det er maskinen der spoerger. Det
+    // her er det eneste led hvor Filip skal skrive noget, og det er input, saa
+    // det hoerer hjemme i kroppen.
+    //
+    // Der er ikke noget at vaelge imellem: koden ER svaret. Kommandoen staar
+    // ordret over feltet, saa han kan se hvad han giver adgang til, mens han
+    // taster. fill() rydder status, saa den skal saettes bagefter.
     function sudoPage(): var {
         return {
             title: "sudo",
             load: () => {
-                // Ved finger og kode er der ikke noget at vaelge imellem:
-                // fingeren eller koden ER svaret. fill() rydder status, saa
-                // kommandoen skal saettes bagefter.
-                Menu.fill(Sudo.kind === "valg" ? [
-                    { label: "ja", color: Theme.stateBad, run: () => Sudo.besvar("ja") },
-                    { label: "nej", run: () => Sudo.besvar("nej") }
-                ] : []);
-                Menu.field = Sudo.kind !== "finger";
-                Menu.status = Sudo.kind === "finger"
-                    ? `${Sudo.cmd}\n\nroer laeseren`
-                    : Sudo.cmd;
+                Menu.fill([]);
+                Menu.status = Sudo.cmd;
             }
         };
     }
