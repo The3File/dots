@@ -367,6 +367,26 @@ Singleton {
         };
     }
 
+    // ---- root-adgang -----------------------------------------------------
+    // Rejst udefra af Sudo-servicen, ikke noget man kan navigere hen til.
+    // Kommandoen staar ordret i status -- det er hele grunden til at spoerge,
+    // saa den maa hverken forkortes eller skrives om.
+    function sudoPage(): var {
+        return {
+            title: "sudo",
+            load: () => {
+                // Ved kode er der ikke noget at vaelge imellem; feltet er
+                // svaret. fill() rydder status, saa kommandoen skal saettes
+                // bagefter.
+                Menu.fill(Sudo.kind === "kode" ? [] : [
+                    { label: "ja", color: Theme.stateBad, run: () => Sudo.besvar("ja") },
+                    { label: "nej", run: () => Sudo.besvar("nej") }
+                ]);
+                Menu.status = Sudo.cmd;
+            }
+        };
+    }
+
     function bekraeftPage(hvad: string, handling: string): var {
         return {
             title: hvad + "?",

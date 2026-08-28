@@ -140,9 +140,13 @@ Item {
         Text {
             width: parent.width
             visible: text !== ""
-            text: Menu.prompt !== null ? ""
-                : (Menu.status !== "" ? Menu.status
+            // Status vises ogsaa mens der spoerges om noget: root-adgang
+            // skriver kommandoen der, og den skal blive staaende mens koden
+            // tastes.
+            text: Menu.status !== "" ? Menu.status
+                : (Menu.prompt !== null ? ""
                    : (root.view.length === 0 ? "ingenting" : ""))
+            wrapMode: Text.Wrap
             color: Theme.color8
             font.family: Config.fontFamily
             font.pixelSize: Config.fontSize

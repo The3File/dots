@@ -54,6 +54,16 @@ Singleton {
 
     function notifs(): void { root.enter("notifs"); }
 
+    // En side der bliver rejst udefra, ikke navigeret til -- fx spoergsmaalet
+    // om lov til at koere noget som root. Den faar ingen rod bagved: der er
+    // ikke noget at gaa "tilbage" til, kun et
+    // spoergsmaal der skal besvares eller forlades.
+    function modal(page: var): void {
+        root.opened = true;
+        root.peeking = false;
+        Menu.open(page);
+    }
+
     // Esc gaar ét lag tilbage foer den lukker -- man skal ikke miste hele
     // menuen fordi man fortroed at gaa ind i wifi.
     function back(): void {
@@ -87,6 +97,14 @@ Singleton {
         function pick(label: string): string {
             if (!Menu.active) return "menuen er lukket";
             return Menu.pick(label) ? `valgte: ${label}` : `fandt ikke: ${label}`;
+        }
+        // Skriv i feltet, naar der spoerges om noget -- en wifi-kode, en
+        // adgangskode. Det var menuens sidste tilstand uden en vej udefra, og
+        // saa var den ikke faerdig.
+        function skriv(tekst: string): string {
+            if (Menu.prompt === null) return "der spoerges ikke om noget";
+            Menu.answer(tekst);
+            return "svaret";
         }
 
         function state(): string {

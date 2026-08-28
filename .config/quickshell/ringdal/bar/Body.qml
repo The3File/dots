@@ -35,6 +35,11 @@ Item {
     // kaldes udefra.
     readonly property bool opened: Pill.opened
     readonly property bool _peeking: Pill.peeking
+    // Et spoergsmaal om root-adgang ligger og venter paa svar. Gotcha: linjen
+    // er ogsaa det eneste sted Sudo bliver naevnt fra noget der selv bliver
+    // bygget -- og en singleton ingen naevner, bygger Quickshell aldrig. Uden
+    // den findes IPC-indgangen `sudo` slet ikke.
+    readonly property bool asking: Sudo.pending
 
     readonly property string phase: {
         if (Voice.thinking || Voice.failed) return "thinking";

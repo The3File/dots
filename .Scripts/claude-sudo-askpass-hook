@@ -17,17 +17,29 @@ import sys
 HELPER = "/home/ringdal/.Scripts/claude-sudo-run"
 
 
+# Only where a command can actually START: string start, after a separator,
+# or on a fresh line. Matching after *any* whitespace was wrong — it also hit
+# the word inside heredoc bodies and quoted strings, so writing a file that
+# merely mentioned sudo rewrote the prose, and `ipc call sudo state` became a
+# call to a target that does not exist. Both cost an evening.
+#
+# Trade-off: `time sudo x` and `env A=1 sudo x` are no longer rewritten. They
+# then hit the terminal without an askpass and fail loudly, which is the safe
+# way to be wrong. Still open: a heredoc line that begins with sudo.
+COMMAND_POSITION = r"(^|[;|&`(\n]\s*)sudo\b"
+
+
 def rewrite_command(command: str) -> str | None:
     if HELPER in command:
         return None
     # Bare `sudo` only — leave `/usr/bin/sudo` inside python strings alone.
-    if not re.search(r"(^|[\s;|&`(])sudo(\s|$)", command):
+    if not re.search(COMMAND_POSITION, command):
         return None
 
     def repl(match: re.Match[str]) -> str:
         return f"{match.group(1)}{HELPER}"
 
-    rewritten = re.sub(r"(^|[\s;|&`(])sudo\b", repl, command)
+    rewritten = re.sub(COMMAND_POSITION, repl, command)
     rewritten = re.sub(
         rf"({re.escape(HELPER)})(?:\s+(?:-A|--askpass|-k|--reset-timestamp))+",
         r"\1",
