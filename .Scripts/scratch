@@ -2,10 +2,17 @@
 
 is_wayland() { [[ -n "$WAYLAND_DISPLAY" || "$XDG_SESSION_TYPE" == "wayland" ]]; }
 
-# --- herdr ------------------------------------------------------------------
-# herdr replaces tmux here. It is a background server: the panes live inside it,
-# so closing the scratch window never kills what is running. `herdr --session X`
-# launches-or-attaches in one go, so the old has-session/attach/new dance is gone.
+# --- herdr (kun AIOS) --------------------------------------------------------
+# AIOS koerer i herdr; scratch-terminalen koerer i tmux (delt 28-08-2026).
+# Grunden til delingen: herdr er agent-bevidst og kan noget for AIOS, som tmux
+# ikke kan. Den almindelige terminal har ikke brug for det -- der er tmux
+# hurtigere at have med at goere, og genvejerne sidder i fingrene.
+#
+# Begge dele beholder det vigtige: en baggrundsserver, saa det at lukke
+# scratch-vinduet aldrig draeber det, der koerer. `herdr --session X` og
+# `tmux new-session -A -s X` gaar begge "start eller kobl paa" i ét kald.
+#
+# NB: prefix er forskellig. tmux: Ctrl+A (hans egen config). herdr: Ctrl+B.
 #
 # What herdr has no flag for is "start this session running CMD". So the first
 # time a session is needed we start its server headless, create the workspace
@@ -68,8 +75,7 @@ hypr_aios() {
 
 hypr_term() {
 	cls="scratchterm"
-	herdr_ensure 'scratch' "$HOME"
-	hypr_toggle $TERMINAL --class $cls,$cls -e herdr --session 'scratch'
+	hypr_toggle $TERMINAL --class $cls,$cls -e tmux new-session -A -s scratch -c "$HOME"
 }
 
 # --- bspwm / X11 (original) ---------------------------------------------------
@@ -93,8 +99,7 @@ term(){
 	cls="scratchterm"; get_id
 	[[ -z "$id" ]] || toggle
 
-	herdr_ensure 'scratch' "$HOME"
-	$TERMINAL --class $cls,$cls -e herdr --session 'scratch'
+	$TERMINAL --class $cls,$cls -e tmux new-session -A -s scratch -c "$HOME"
 }
 
 eval $1

@@ -59,11 +59,15 @@ hyprctl eval 'hl.dispatch(hl.dsp.workspace.toggle_special("scratchterm"))'
 ## Scratchpads
 
 - Script: `~/.Scripts/scratch` (`term` / `aios`)
-- Multiplexer: **herdr** (not tmux — swapped 2026-08-28). `~/.local/bin/herdr`, installed via `herdr.dev/install.sh`, updates with `herdr update`. Background server: closing a scratch window never kills what runs inside. `herdr --session <navn>` launches-or-attaches in one call.
-- Super+P → scratch term (`scratchterm` → `special:scratchterm`); herdr session `scratch`
-- Super+A → AIOS (`scratchaios` → `special:scratchaios`); herdr session `AIOS`, cwd `~/AIOS`, runs `~/AIOS/aios`
-- Gotcha: herdr has no “start session running CMD” flag. `herdr_ensure()` in the script starts the server headless on first use, creates the workspace itself (the JSON gives back the root pane id) and pushes the command in with `herdr pane run`. It bails early if the server is already up or already has workspaces, so it stays idempotent.
-- Prefix is `ctrl+b` like tmux; `prefix+q` detaches, `herdr server stop` ends a session.
+- **To multiplexere, med vilje (delt 2026-08-28).** AIOS kører i **herdr**, den almindelige scratch-terminal i **tmux**. herdr er agent-bevidst og kan noget for AIOS (pillen spørger den, om der lever en session — se `tale __lever`); den almindelige terminal har ikke brug for det, og der er tmux hurtigere at have med at gøre med genveje der sidder i fingrene.
+- Begge beholder det vigtige: en baggrundsserver, så det at lukke scratch-vinduet aldrig dræber det, der kører. `herdr --session <navn>` og `tmux new-session -A -s <navn>` gør begge "start eller kobl på" i ét kald.
+- **Prefix er forskellig:** tmux **Ctrl+A** (hans egen `~/.config/tmux/tmux.conf`), herdr **Ctrl+B**.
+- herdr: `~/.local/bin/herdr`, installeret via `herdr.dev/install.sh`, opdateres med `herdr update`.
+- Super+P → scratch term (`scratchterm` → `special:scratchterm`); **tmux**-session `scratch`, cwd `~`
+- Super+A → AIOS (`scratchaios` → `special:scratchaios`); **herdr**-session `AIOS`, cwd `~/AIOS`, kører `~/AIOS/aios`
+- Gotcha ved skiftet: et allerede åbent scratch-vindue kører videre på den gamle multiplexer. Vinduet skal lukkes én gang, før Super+P giver tmux.
+- Gotcha: herdr has no “start session running CMD” flag (gælder kun AIOS nu). `herdr_ensure()` in the script starts the server headless on first use, creates the workspace itself (the JSON gives back the root pane id) and pushes the command in with `herdr pane run`. It bails early if the server is already up or already has workspaces, so it stays idempotent.
+- herdr: `prefix+q` detacher, `herdr server stop` afslutter en session.
 - Size/pos: AIOS `1060×960` centered; scratchterm `1065×612` @ `809,48` in `hyprland.lua`
 - 3-finger down opens AIOS, up closes it (Super+A still toggles)
 - Special workspaces animate with `slidefadevert -50%` (top → down); applies to all specials
