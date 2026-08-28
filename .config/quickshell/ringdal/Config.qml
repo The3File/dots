@@ -57,7 +57,7 @@ Singleton {
     // forsvinder i pillen. Den findes, fordi "lys nok til at holde formen
     // sammen" og "ikke saa lys at den raaber" er en smagsting, der skal kunne
     // proeves af med det samme -- JSON'en laeses om mens pillen koerer.
-    readonly property real borderTone: _body.borderTone ?? 0.85
+    readonly property real borderTone: _body.borderTone ?? 0.7
     // Bredde naar kroppen lytter. 0 = behold fuld bredde.
     readonly property int bodyVoiceWidth: _body.voiceWidth ?? 240
     // Luft inde i pillerne, og mellem det de indeholder.
