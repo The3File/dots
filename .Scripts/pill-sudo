@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# Stil et sudo-spoergsmaal i pillen og vent paa svaret.
+#
+#   pill-sudo valg "<kommando>"   -> "ja" | "nej"
+#   pill-sudo kode "<kommando>"   -> "ja:<adgangskode>" | "nej"
+#
+# Exit 2 = pillen kunne ikke spoerge (den koerer ikke, eller den staar allerede
+# med et ubesvaret spoergsmaal). Kalderen skal saa falde tilbage til zenity --
+# et sudo-spoergsmaal maa aldrig forsvinde bare fordi shellen er nede.
+#
+# Hvorfor to kald og ikke ét: et IPC-kald der ventede paa et menneske, ville
+# blokere hele Quickshells traad imens. Derfor rejser vi spoergsmaalet, vender
+# tilbage med det samme, og henter svaret indtil der staar andet end "venter".
+
+set -uo pipefail
+
+QS=(qs -c ringdal ipc call sudo)
+timeout=${PILL_SUDO_TIMEOUT:-120}
+tick=0.15
+
+if [[ $# -lt 2 ]]; then
+	echo "brug: pill-sudo valg|kode <kommando>" >&2
+	exit 2
+fi
+
+kind=$1
+cmd=$2
+case $kind in
+valg) raise=spoerg ;;
+kode) raise=kode ;;
+*) echo "ukendt: $kind" >&2; exit 2 ;;
+esac
+
+raised=$("${QS[@]}" "$raise" "$cmd" 2>/dev/null) || exit 2
+[[ $raised == spurgt ]] || exit 2
+
+deadline=$((SECONDS + timeout))
+while ((SECONDS < deadline)); do
+	answer=$("${QS[@]}" svar 2>/dev/null) || exit 2
+	if [[ $answer != venter ]]; then
+		printf '%s\n' "$answer"
+		exit 0
+	fi
+	sleep "$tick"
+done
+
+# Han svarede ikke. Ryd spoergsmaalet vaek, saa pillen ikke staar tilbage med
+# noget ingen venter paa laengere.
+"${QS[@]}" afbryd >/dev/null 2>&1 || true
+echo nej

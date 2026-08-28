@@ -1,0 +1,147 @@
+#!/usr/bin/env bash
+# NetworkManager WiFi / connection picker (fuzzel).
+# Usage: fuzzel_nm
+# Replaces nm-dmenu / nm-menu. Old sxhkd: Super+Shift+W.
+
+set -euo pipefail
+
+conf_dir="${XDG_CONFIG_HOME:-$HOME/.config}/fuzzel"
+mkdir -p "$conf_dir"
+
+write_fuzzel_ini() {
+	local color4="#5ca7a5" color5="#c3a170" color7="#c5c5c5" color8="#525353" prompt=${1:-nm: }
+	if [[ -f $HOME/.cache/wal/colors.sh ]]; then
+		# shellcheck disable=SC1090
+		eval "$(grep -E '^color[0-9]+=' "$HOME/.cache/wal/colors.sh")"
+	fi
+	hex() {
+		local c="${1#\#}"
+		printf '%s%s' "$c" "${2:-ff}"
+	}
+	cat >"$conf_dir/fuzzel.ini" <<EOF
+font=Terminus:size=14
+dpi-aware=no
+prompt="$prompt"
+icons-enabled=no
+layer=overlay
+anchor=bottom-left
+x-margin=24
+y-margin=24
+lines=12
+width=48
+horizontal-pad=20
+vertical-pad=16
+inner-pad=10
+keyboard-focus=exclusive
+exit-on-keyboard-focus-loss=no
+
+[colors]
+background=$(hex "#000000")
+text=$(hex "$color7")
+prompt=$(hex "$color5")
+input=$(hex "$color7")
+match=$(hex "$color4")
+selection=$(hex "$color4")
+selection-text=$(hex "#000000")
+selection-match=$(hex "#000000")
+border=$(hex "$color4")
+counter=$(hex "$color8")
+
+[border]
+width=2
+radius=0
+selection-radius=0
+EOF
+}
+
+pick() {
+	local prompt=$1
+	shift
+	write_fuzzel_ini "$prompt"
+	printf '%s\n' "$@" | /usr/bin/fuzzel --dmenu --prompt="$prompt" || true
+}
+
+active_con() {
+	nmcli -t -f NAME c show --active 2>/dev/null | head -1 || true
+}
+
+list_cons() {
+	nmcli -t -f NAME c show 2>/dev/null | sed '/^$/d'
+}
+
+notify() {
+	notify-send -a fuzzel_nm -t 2500 "nm" "$1" 2>/dev/null || true
+}
+
+new_wifi() {
+	local ssid pass
+	notify "scanning WiFi…"
+	nmcli device wifi rescan >/dev/null 2>&1 || true
+	sleep 1
+	mapfile -t ssids < <(nmcli -t -f SSID d wifi list 2>/dev/null | sed '/^$/d' | awk '!seen[$0]++')
+	[[ ${#ssids[@]} -gt 0 ]] || {
+		notify "no networks found"
+		return 1
+	}
+	ssid=$(pick 'wifi: ' "${ssids[@]}")
+	[[ -n $ssid ]] || return 0
+	write_fuzzel_ini 'pass: '
+	pass=$(/usr/bin/fuzzel --dmenu --password --prompt='pass: ' </dev/null || true)
+	[[ -n $pass ]] || return 0
+	if nmcli device wifi connect "$ssid" password "$pass"; then
+		notify "connected: $ssid"
+	else
+		notify "failed: $ssid"
+	fi
+}
+
+delete_con() {
+	local con
+	mapfile -t cons < <(list_cons)
+	[[ ${#cons[@]} -gt 0 ]] || return 0
+	con=$(pick 'delete: ' "${cons[@]}")
+	[[ -n $con ]] || return 0
+	nmcli connection delete "$con" && notify "deleted: $con"
+}
+
+main() {
+	local active choice name
+	active=$(active_con)
+	mapfile -t cons < <(list_cons)
+
+	local lines=()
+	local c
+	for c in "${cons[@]}"; do
+		if [[ -n $active && $c == "$active" ]]; then
+			lines+=("* $c")
+		else
+			lines+=("  $c")
+		fi
+	done
+	lines+=("  [+] new wifi")
+	lines+=("  [-] delete")
+
+	choice=$(pick 'nm: ' "${lines[@]}")
+	[[ -n $choice ]] || exit 0
+	choice=${choice#\* }
+	choice=${choice#  }
+
+	case "$choice" in
+	'[+] new wifi')
+		new_wifi
+		;;
+	'[-] delete')
+		delete_con
+		;;
+	*)
+		name=$choice
+		if [[ -n $active && $name == "$active" ]]; then
+			nmcli connection down "$name" && notify "down: $name"
+		else
+			nmcli connection up "$name" && notify "up: $name"
+		fi
+		;;
+	esac
+}
+
+main "$@"

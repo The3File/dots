@@ -1,0 +1,700 @@
+#!/usr/bin/env bash
+# Bluetooth manager menu (fuzzel).
+# Features: saved-device list, connect/disconnect, trust/untrust, pair by scan, forget one/all.
+#
+# BlueZ only lists a device under "devices Paired" while the bond exists, and it
+# drops unbonded devices from its cache entirely. So the menu is backed by a small
+# on-disk list of every device we have had a relationship with (paired, trusted or
+# connected). Devices BlueZ no longer knows show up as "saved" and can be woken by
+# a short scan.
+
+set -euo pipefail
+
+conf_dir="${XDG_CONFIG_HOME:-$HOME/.config}/fuzzel"
+mkdir -p "$conf_dir"
+
+state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/btcon"
+device_db="$state_dir/devices.tsv"
+mkdir -p "$state_dir"
+
+notify() {
+	notify-send -a btcon -t "${3:-2500}" "$1" "$2" 2>/dev/null || true
+}
+
+# bluetoothctl is a REPL: without this it swallows stdin and eats the rest of any
+# `while read` loop it is called from.
+btctl() {
+	bluetoothctl "$@" </dev/null
+}
+
+refresh_waybar_vol() {
+	pkill -RTMIN+1 waybar >/dev/null 2>&1 || true
+}
+
+normalize_mac_sink_token() {
+	printf '%s' "$1" | tr '[:lower:]' '[:upper:]' | tr ':' '_'
+}
+
+set_default_sink_for_mac() {
+	local mac=$1 token sink sinks
+	token=$(normalize_mac_sink_token "$mac")
+	sinks=$(pactl list short sinks 2>/dev/null || true)
+	sink=$(printf '%s\n' "$sinks" | awk -v t="bluez_output." -v m="$token" '!seen && $2 ~ t m { print $2; seen = 1 }')
+	[[ -n ${sink:-} ]] || return 1
+	pactl set-default-sink "$sink" >/dev/null 2>&1 || return 1
+	refresh_waybar_vol
+	return 0
+}
+
+set_default_sink_non_bt() {
+	local sink sinks
+	sinks=$(pactl list short sinks 2>/dev/null || true)
+	sink=$(printf '%s\n' "$sinks" | awk '!seen && $2 != "" && $2 !~ /^bluez_output\./ { print $2; seen = 1 }')
+	[[ -n ${sink:-} ]] || return 1
+	pactl set-default-sink "$sink" >/dev/null 2>&1 || return 1
+	refresh_waybar_vol
+	return 0
+}
+
+maybe_fallback_from_disconnected_bt() {
+	local current
+	current=$(pactl get-default-sink 2>/dev/null || true)
+	[[ $current == bluez_output.* ]] || return 0
+	set_default_sink_non_bt || true
+}
+
+write_fuzzel_ini() {
+	local color4="#5ca7a5" color5="#c3a170" color7="#c5c5c5" color8="#525353"
+	if [[ -f $HOME/.cache/wal/colors.sh ]]; then
+		# shellcheck disable=SC1090
+		eval "$(grep -E '^color[0-9]+=' "$HOME/.cache/wal/colors.sh")"
+	fi
+	hex() {
+		local c="${1#\#}"
+		printf '%s%s' "$c" "${2:-ff}"
+	}
+	cat >"$conf_dir/fuzzel.ini" <<EOF
+font=Terminus:size=14
+dpi-aware=no
+prompt="bt: "
+icons-enabled=no
+layer=overlay
+anchor=bottom-left
+x-margin=24
+y-margin=24
+lines=14
+width=54
+horizontal-pad=20
+vertical-pad=16
+inner-pad=10
+keyboard-focus=exclusive
+exit-on-keyboard-focus-loss=no
+
+[colors]
+background=$(hex "#000000")
+text=$(hex "$color7")
+prompt=$(hex "$color5")
+input=$(hex "$color7")
+match=$(hex "$color4")
+selection=$(hex "$color4")
+selection-text=$(hex "#000000")
+selection-match=$(hex "#000000")
+border=$(hex "$color4")
+counter=$(hex "$color8")
+
+[border]
+width=2
+radius=0
+selection-radius=0
+EOF
+}
+
+bt_power_state() {
+	local out
+	out=$(btctl show 2>/dev/null || true)
+	printf '%s\n' "$out" | awk -F': ' '!seen && /Powered:/ { print tolower($2); seen = 1 }'
+}
+
+device_info_field() {
+	local mac=$1 key=$2 out
+	out=$(btctl info "$mac" 2>/dev/null || true)
+	printf '%s\n' "$out" | awk -F': ' -v k="$key" '!seen && $1 ~ k { print tolower($2); seen = 1 }'
+}
+
+is_mac() {
+	[[ $1 =~ ^([[:xdigit:]]{2}:){5}[[:xdigit:]]{2}$ ]]
+}
+
+# --- saved device list -------------------------------------------------------
+# One record per line: MAC<TAB>name<TAB>last_seen_epoch
+
+db_read() {
+	[[ -f $device_db ]] || return 0
+	cat "$device_db"
+}
+
+db_name_for() {
+	db_read | awk -F'\t' -v m="$1" '!seen && $1 == m { print $2; seen = 1 }'
+}
+
+db_remember() {
+	local mac=$1 name=${2:-} tmp
+	is_mac "$mac" || return 0
+	[[ -n $name && $name != "(unknown)" ]] || name=$(db_name_for "$mac")
+	[[ -n $name ]] || name=$mac
+	tmp=$(mktemp "$device_db.XXXXXX")
+	{
+		db_read | awk -F'\t' -v m="$mac" '$1 != m'
+		printf '%s\t%s\t%s\n' "$mac" "$name" "$(date +%s)"
+	} >"$tmp"
+	mv "$tmp" "$device_db"
+}
+
+db_forget() {
+	local mac=$1 tmp
+	[[ -f $device_db ]] || return 0
+	tmp=$(mktemp "$device_db.XXXXXX")
+	db_read | awk -F'\t' -v m="$mac" '$1 != m' >"$tmp"
+	mv "$tmp" "$device_db"
+}
+
+db_forget_all() {
+	: >"$device_db"
+}
+
+device_is_known() {
+	btctl info "$1" >/dev/null 2>&1
+}
+
+# Fold anything BlueZ currently has a relationship with into the saved list.
+# Plain scan results are deliberately left out so the list stays ours, not the
+# neighbourhood's.
+sync_db_from_bluez() {
+	local line mac name
+	while IFS= read -r line; do
+		[[ -n $line ]] || continue
+		mac=${line%% *}
+		name=${line#* }
+		db_remember "$mac" "$name"
+	done < <(
+		{
+			btctl devices Paired 2>/dev/null || true
+			btctl devices Trusted 2>/dev/null || true
+			btctl devices Connected 2>/dev/null || true
+		} | sed 's/^Device //' | sort -u
+	)
+}
+
+# A saved device BlueZ has forgotten needs to be rediscovered before we can talk
+# to it at all.
+ensure_device_available() {
+	local mac=$1
+	device_is_known "$mac" && return 0
+	notify "bt" "looking for device…" 2500
+	btctl --timeout 12 scan on >/dev/null 2>&1 || true
+	device_is_known "$mac"
+}
+
+connect_or_pair() {
+	local mac=$1 name=$2
+	if btctl connect "$mac" >/dev/null 2>&1; then
+		btctl trust "$mac" >/dev/null 2>&1 || true
+		set_default_sink_for_mac "$mac" || true
+		db_remember "$mac" "$name"
+		notify "bt" "connected: $name"
+		return 0
+	fi
+	if btctl pair "$mac" >/dev/null 2>&1; then
+		btctl trust "$mac" >/dev/null 2>&1 || true
+		btctl connect "$mac" >/dev/null 2>&1 || true
+		set_default_sink_for_mac "$mac" || true
+		db_remember "$mac" "$name"
+		notify "bt" "paired: $name"
+		return 0
+	fi
+	notify "bt" "could not connect: $name" 5000
+	return 1
+}
+
+paired_devices_raw() {
+	btctl devices Paired 2>/dev/null | sed 's/^Device //'
+}
+
+known_devices_raw() {
+	btctl devices 2>/dev/null | sed 's/^Device //'
+}
+
+connected_macs() {
+	btctl devices Connected 2>/dev/null | awk '{print $2}'
+}
+
+resolve_known_target() {
+	local target=$1 mac
+	if is_mac "$target"; then
+		printf '%s\n' "$target"
+		return 0
+	fi
+	mac=$(known_devices_raw | awk -v t="$target" '
+		BEGIN { tl=tolower(t) }
+		!seen {
+			mac=$1
+			$1=""
+			name=substr($0,2)
+			if (index(tolower(name), tl) > 0) {
+				print mac
+				seen=1
+			}
+		}
+	')
+	[[ -n ${mac:-} ]] || mac=$(db_read | awk -F'\t' -v t="$target" '
+		BEGIN { tl=tolower(t) }
+		!seen && index(tolower($2), tl) > 0 { print $1; seen=1 }
+	')
+	[[ -n ${mac:-} ]] || return 1
+	printf '%s\n' "$mac"
+}
+
+# Connected first, then paired, then known-but-unpaired, then saved-only.
+build_device_entries() {
+	local line mac name connected trusted paired blocked rank
+	sync_db_from_bluez
+	{
+		while IFS= read -r line; do
+			[[ -n $line ]] || continue
+			mac=${line%%$'\t'*}
+			name=${line#*$'\t'}
+			name=${name%%$'\t'*}
+			if device_is_known "$mac"; then
+				connected=$(device_info_field "$mac" "Connected")
+				trusted=$(device_info_field "$mac" "Trusted")
+				paired=$(device_info_field "$mac" "Paired")
+				blocked=$(device_info_field "$mac" "Blocked")
+				[[ $connected == "yes" ]] && connected="on" || connected="off"
+				[[ $trusted == "yes" ]] && trusted="trusted" || trusted="untrusted"
+				[[ $paired == "yes" ]] && paired="paired" || paired="unpaired"
+				[[ $blocked == "yes" ]] && blocked="blocked" || blocked="ok"
+				if [[ $connected == "on" ]]; then
+					rank=0
+				elif [[ $paired == "paired" ]]; then
+					rank=1
+				else
+					rank=2
+				fi
+			else
+				connected="off"
+				trusted="-"
+				paired="saved"
+				blocked="-"
+				rank=3
+			fi
+			printf '%s\tdev: %s [%s|%s|%s|%s]  %s\n' \
+				"$rank" "$name" "$connected" "$trusted" "$paired" "$blocked" "$mac"
+		done < <(db_read)
+	} | sort -t$'\t' -k1,1 -k2,2 | cut -f2-
+}
+
+manage_paired_devices_menu() {
+	local choice entry mac name
+	while true; do
+		choice=$(
+			{
+				printf 'back\n'
+				build_device_entries
+			} | /usr/bin/fuzzel --dmenu --prompt='bt devices: ' || true
+		)
+		[[ -n $choice && $choice != "back" ]] || return 0
+		case "$choice" in
+		dev:*)
+			entry=${choice#dev: }
+			mac=${entry##* }
+			name=${entry%  "$mac"}
+			name=${name%% \[*}
+			device_action_menu "$mac" "$name"
+			;;
+		esac
+	done
+}
+
+device_action_menu() {
+	local mac=$1 name=$2 action connected trusted blocked paired choice
+	while true; do
+		if ! device_is_known "$mac"; then
+			choice=$(
+				printf '%s\n' \
+					"reconnect $name" \
+					"forget $name" \
+					"back" | /usr/bin/fuzzel --dmenu --prompt="bt saved: " || true
+			)
+			[[ -n $choice ]] || return 0
+			case "$choice" in
+			"reconnect $name")
+				if ensure_device_available "$mac"; then
+					connect_or_pair "$mac" "$name" || true
+				else
+					notify "bt" "not in range: $name" 4500
+				fi
+				;;
+			"forget $name")
+				db_forget "$mac"
+				notify "bt" "forgot: $name"
+				return 0
+				;;
+			back) return 0 ;;
+			esac
+			continue
+		fi
+
+		connected=$(device_info_field "$mac" "Connected")
+		trusted=$(device_info_field "$mac" "Trusted")
+		blocked=$(device_info_field "$mac" "Blocked")
+		paired=$(device_info_field "$mac" "Paired")
+		[[ $connected == "yes" ]] && action="disconnect" || action="connect"
+		[[ $trusted == "yes" ]] && trusted="untrust" || trusted="trust"
+		[[ $blocked == "yes" ]] && blocked="unblock" || blocked="block"
+
+		if [[ $paired == "yes" ]]; then
+			choice=$(
+				printf '%s\n' \
+					"$action $name" \
+					"$trusted $name" \
+					"$blocked $name" \
+					"unpair $name" \
+					"forget $name" \
+					"back" | /usr/bin/fuzzel --dmenu --prompt="bt dev: " || true
+			)
+		else
+			choice=$(
+				printf '%s\n' \
+					"$action $name" \
+					"pair $name" \
+					"$trusted $name" \
+					"forget $name" \
+					"back" | /usr/bin/fuzzel --dmenu --prompt="bt dev: " || true
+			)
+		fi
+		[[ -n $choice ]] || return 0
+
+		case "$choice" in
+		"pair $name")
+			if btctl pair "$mac" >/dev/null 2>&1; then
+				btctl trust "$mac" >/dev/null 2>&1 || true
+				btctl connect "$mac" >/dev/null 2>&1 || true
+				set_default_sink_for_mac "$mac" || true
+				db_remember "$mac" "$name"
+				notify "bt" "paired: $name"
+			else
+				notify "bt" "pair failed: $name" 5000
+			fi
+			;;
+		"connect $name")
+			connect_or_pair "$mac" "$name" || true
+			;;
+		"disconnect $name")
+			btctl disconnect "$mac" >/dev/null 2>&1 || true
+			maybe_fallback_from_disconnected_bt
+			notify "bt" "disconnected: $name"
+			;;
+		"trust $name")
+			btctl trust "$mac" >/dev/null 2>&1 || true
+			db_remember "$mac" "$name"
+			notify "bt" "trusted: $name"
+			;;
+		"untrust $name")
+			btctl untrust "$mac" >/dev/null 2>&1 || true
+			notify "bt" "untrusted: $name"
+			;;
+		"block $name")
+			btctl block "$mac" >/dev/null 2>&1 || true
+			notify "bt" "blocked: $name"
+			;;
+		"unblock $name")
+			btctl unblock "$mac" >/dev/null 2>&1 || true
+			notify "bt" "unblocked: $name"
+			;;
+		"unpair $name")
+			db_remember "$mac" "$name"
+			btctl remove "$mac" >/dev/null 2>&1 || true
+			maybe_fallback_from_disconnected_bt
+			notify "bt" "unpaired (still saved): $name"
+			return 0
+			;;
+		"forget $name")
+			btctl remove "$mac" >/dev/null 2>&1 || true
+			maybe_fallback_from_disconnected_bt
+			db_forget "$mac"
+			notify "bt" "forgot: $name"
+			return 0
+			;;
+		back) return 0 ;;
+		esac
+	done
+}
+
+scan_lines() {
+	{
+		btctl devices 2>/dev/null || true
+		btctl --timeout 12 scan on 2>/dev/null || true
+	} | awk '
+		{
+			if (match($0, /Device ([0-9A-F:]{17})(.*)$/, m)) {
+				mac=m[1]
+				rest=m[2]
+				gsub(/^[[:space:]]+/, "", rest)
+
+				# Ignore scan metadata pseudo-names.
+				if (rest ~ /^(RSSI:|TxPower:|Alias:|Name:|UUIDs:|ManufacturerData)/) {
+					rest=""
+				}
+
+				# Keep first useful name; otherwise fall back to unknown placeholder.
+				if (rest != "" && rest !~ /^\[.*\]$/) {
+					if (!(mac in name) || name[mac] == "(unknown)") name[mac]=rest
+				} else if (!(mac in name)) {
+					name[mac]="(unknown)"
+				}
+			}
+		}
+		END {
+			for (mac in name) print mac "  " name[mac]
+		}
+	' | sort
+}
+
+pair_from_scan_menu() {
+	local choice mac name
+	notify "bt" "scanning for bluetooth devices…" 1500
+	choice=$(
+		{
+			printf 'back\n'
+			scan_lines
+		} | /usr/bin/fuzzel --dmenu --prompt='bt pair: ' || true
+	)
+	[[ -n $choice && $choice != "back" ]] || return 0
+	mac=${choice%% *}
+	name=${choice#*  }
+	notify "bt" "pairing: $name" 2000
+	if btctl pair "$mac" >/dev/null 2>&1; then
+		btctl trust "$mac" >/dev/null 2>&1 || true
+		btctl connect "$mac" >/dev/null 2>&1 || true
+		set_default_sink_for_mac "$mac" || true
+		db_remember "$mac" "$name"
+		notify "bt" "paired: $name"
+	else
+		notify "bt" "pair failed: $name" 5000
+	fi
+}
+
+pair_by_mac_prompt() {
+	local mac
+	mac=$(printf '\n' | /usr/bin/fuzzel --dmenu --prompt='bt mac: ' || true)
+	[[ -n $mac ]] || return 0
+	if ! is_mac "$mac"; then
+		notify "bt" "invalid MAC format" 3500
+		return 1
+	fi
+	notify "bt" "pairing: $mac" 2000
+	if btctl pair "$mac" >/dev/null 2>&1; then
+		btctl trust "$mac" >/dev/null 2>&1 || true
+		btctl connect "$mac" >/dev/null 2>&1 || true
+		set_default_sink_for_mac "$mac" || true
+		db_remember "$mac" "$(device_info_field "$mac" "Name")"
+		notify "bt" "paired: $mac"
+	else
+		notify "bt" "pair failed: $mac" 5000
+		return 1
+	fi
+}
+
+disconnect_all() {
+	local mac any=0
+	for mac in $(connected_macs); do
+		any=1
+		btctl disconnect "$mac" >/dev/null 2>&1 || true
+	done
+	maybe_fallback_from_disconnected_bt
+	[[ $any -eq 1 ]] && notify "bt" "all devices disconnected" || notify "bt" "no connected devices" 1800
+}
+
+remove_all_paired() {
+	local line mac any=0
+	sync_db_from_bluez
+	while IFS= read -r line; do
+		[[ -n $line ]] || continue
+		any=1
+		mac=${line%% *}
+		btctl remove "$mac" >/dev/null 2>&1 || true
+	done < <(paired_devices_raw)
+	[[ $any -eq 1 ]] && notify "bt" "all paired devices unpaired (still saved)" || notify "bt" "no paired devices" 1800
+}
+
+forget_target() {
+	local target=$1 mac
+	if [[ $target == "all" ]]; then
+		while IFS= read -r mac; do
+			[[ -n $mac ]] || continue
+			btctl remove "$mac" >/dev/null 2>&1 || true
+		done < <(db_read | cut -f1)
+		db_forget_all
+		notify "bt" "saved list cleared"
+		return 0
+	fi
+	mac=$(resolve_known_target "$target" || true)
+	[[ -n ${mac:-} ]] || {
+		printf 'No known or saved device matches: %s\n' "$target" >&2
+		return 1
+	}
+	btctl remove "$mac" >/dev/null 2>&1 || true
+	db_forget "$mac"
+	notify "bt" "forgot: $target"
+}
+
+toggle_power() {
+	local state
+	state=$(bt_power_state)
+	if [[ $state == "yes" ]]; then
+		btctl power off >/dev/null 2>&1 || true
+		notify "bt" "power off"
+	else
+		btctl power on >/dev/null 2>&1 || true
+		notify "bt" "power on"
+	fi
+}
+
+print_status() {
+	build_device_entries | sed 's/^dev: //'
+}
+
+print_saved() {
+	sync_db_from_bluez
+	db_read | awk -F'\t' '{ printf "%s  %s\n", $1, $2 }' | sort -k2
+}
+
+connect_target() {
+	local target=$1 mac name
+	mac=$(resolve_known_target "$target" || true)
+	[[ -n ${mac:-} ]] || {
+		printf 'No known or saved device matches: %s\n' "$target" >&2
+		return 1
+	}
+	name=$(db_name_for "$mac")
+	[[ -n ${name:-} ]] || name=$mac
+	ensure_device_available "$mac" || {
+		printf 'Device not in range: %s\n' "$name" >&2
+		return 1
+	}
+	connect_or_pair "$mac" "$name" || return 1
+	refresh_waybar_vol
+}
+
+disconnect_target() {
+	local target=$1 mac
+	if [[ $target == "all" ]]; then
+		disconnect_all
+		return 0
+	fi
+	mac=$(resolve_known_target "$target" || true)
+	[[ -n ${mac:-} ]] || {
+		printf 'No known device matches: %s\n' "$target" >&2
+		return 1
+	}
+	btctl disconnect "$mac"
+	maybe_fallback_from_disconnected_bt
+	refresh_waybar_vol
+}
+
+remove_target() {
+	local target=$1 mac
+	if [[ $target == "all" ]]; then
+		remove_all_paired
+		return 0
+	fi
+	mac=$(resolve_known_target "$target" || true)
+	[[ -n ${mac:-} ]] || {
+		printf 'No known device matches: %s\n' "$target" >&2
+		return 1
+	}
+	db_remember "$mac"
+	btctl remove "$mac"
+}
+
+main_menu() {
+	local choice state
+	write_fuzzel_ini
+	while true; do
+		state=$(bt_power_state)
+		choice=$(
+			{
+				printf 'saved devices\n'
+				printf 'scan + pair new device\n'
+				printf 'pair by MAC address\n'
+				printf 'disconnect all connected\n'
+				printf 'power: %s\n' "${state:-unknown}"
+			} | /usr/bin/fuzzel --dmenu --prompt='bt: ' || true
+		)
+		[[ -n $choice ]] || exit 0
+
+		case "$choice" in
+		'saved devices')
+			manage_paired_devices_menu
+			;;
+		'scan + pair new device')
+			pair_from_scan_menu
+			;;
+		'pair by MAC address')
+			pair_by_mac_prompt || true
+			;;
+		'disconnect all connected')
+			disconnect_all
+			;;
+		'power: '*)
+			toggle_power
+			;;
+		esac
+	done
+}
+
+usage() {
+	printf 'usage: %s [menu|list|saved|scan|connect <target>|disconnect <target|all>|remove <target|all>|forget <target|all>|power]\n' "${0##*/}" >&2
+}
+
+case "${1:-menu}" in
+menu | '') main_menu ;;
+list) print_status ;;
+saved) print_saved ;;
+scan) scan_lines ;;
+connect)
+	[[ -n ${2:-} ]] || {
+		usage
+		exit 2
+	}
+	connect_target "$2"
+	;;
+disconnect)
+	[[ -n ${2:-} ]] || {
+		usage
+		exit 2
+	}
+	disconnect_target "$2"
+	;;
+remove)
+	[[ -n ${2:-} ]] || {
+		usage
+		exit 2
+	}
+	remove_target "$2"
+	;;
+forget)
+	[[ -n ${2:-} ]] || {
+		usage
+		exit 2
+	}
+	forget_target "$2"
+	;;
+power)
+	printf '%s\n' "$(bt_power_state)"
+	;;
+*)
+	usage
+	exit 2
+	;;
+esac
