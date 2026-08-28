@@ -41,18 +41,21 @@ Singleton {
     // Gaa direkte ind i en af siderne. Tastebindene og afvigelses-pillen
     // bruger den her, saa Super+Shift+W lander samme sted som et klik.
     function enter(name: string): void {
+        // Beskeder er output. De folder sig ud i pillen ved siden af kroppen,
+        // saa vejen ind i dem aabner ikke menuen -- uanset om det er et klik,
+        // et tastebind eller Claude der kalder.
+        if (name === "notifs") { Notifs.openList(); return; }
         root.opened = true;
         root.peeking = false;
         if (name === "wifi") Menu.open2(Pages.rootPage(), Pages.wifiPage());
         else if (name === "bt") Menu.open2(Pages.rootPage(), Pages.btPage());
-        else if (name === "notifs") Menu.open2(Pages.rootPage(), Pages.notifsPage());
         else if (name === "udklip") Menu.open2(Pages.rootPage(), Pages.clipPage());
         else if (name === "ydelse") Menu.open2(Pages.rootPage(), Pages.perfPage());
         else if (name === "sluk") Menu.open2(Pages.rootPage(), Pages.slukPage());
         else Menu.open(Pages.rootPage());
     }
 
-    function notifs(): void { root.enter("notifs"); }
+    function notifs(): bool { return Notifs.openList(); }
 
     // En side der bliver rejst udefra, ikke navigeret til -- fx spoergsmaalet
     // om lov til at koere noget som root. Den faar ingen rod bagved: der er
@@ -110,7 +113,9 @@ Singleton {
         function afbryd(): string { return root.afbryd(); }
         function wifi(): void { root.enter("wifi"); }
         function bluetooth(): void { root.enter("bt"); }
-        function beskeder(): void { root.enter("notifs"); }
+        function beskeder(): string {
+            return root.notifs() ? "aabnede listen" : "ingen beskeder";
+        }
         function udklip(): void { root.enter("udklip"); }
         function ydelse(): void { root.enter("ydelse"); }
         function sluk(): void { root.enter("sluk"); }

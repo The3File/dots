@@ -107,7 +107,9 @@ Item {
 
     // ---- afvigelses-pillen ------------------------------------------------
     // Den lille pille ved siden af kroppen. Her staar det der afviger -- og
-    // her kommer beskederne ind.
+    // her kommer beskederne ind. Baade boblen og listen: klikker han paa
+    // "N beskeder", folder listen sig ud i den her form. Den aabner ikke
+    // kroppen, for saa ville det maskinen siger, skubbe det han selv laver.
     //
     // Beskeder laa foerst i kroppen, men kroppen er det Filip *goer*: stemmen,
     // menuen, aabneren. En besked er noget der sker for ham, ikke noget han er
@@ -127,8 +129,13 @@ Item {
         // der selv bliver bygget -- og en singleton ingen naevner, bygger
         // Quickshell aldrig. Fjernes den, findes IPC-indgangen `sudo` ikke.
         readonly property bool asking: Sudo.showing
-        readonly property bool noting: !alertShape.asking && Notifs.popup
-        readonly property bool wide: alertShape.asking || alertShape.noting
+        // Listen vinder over boblen: den staar aaben fordi han bad om det, og
+        // en ny besked er allerede med i den.
+        readonly property bool listing: !alertShape.asking && Notifs.listing
+        readonly property bool noting:
+            !alertShape.asking && !alertShape.listing && Notifs.popup
+        readonly property bool wide:
+            alertShape.asking || alertShape.listing || alertShape.noting
         // Tale vokser, men kun lidt, og den taber til baade root-adgang og en
         // besked: de venter paa ham, tale gaar over af sig selv.
         readonly property bool talking: !alertShape.wide && Tale.talking
@@ -142,6 +149,7 @@ Item {
         }
         height: {
             if (alertShape.asking) return sudo.implicitHeight + 2 * Config.activePadding;
+            if (alertShape.listing) return liste.implicitHeight + 2 * Config.activePadding;
             if (alertShape.noting) return notify.implicitHeight + 2 * Config.activePadding;
             return alertShape.talking ? Config.taleHeight : Config.restHeight;
         }
@@ -155,6 +163,7 @@ Item {
                 return Sudo.accepted ? Theme.stateGood : Theme.stateBad;
             if (alertShape.noting)
                 return Notifs.critical ? Theme.stateBad : Theme.color5;
+            if (alertShape.listing) return Theme.color5;
             return Theme.color8;
         }
         clip: true
@@ -178,6 +187,14 @@ Item {
             id: alerts
             anchors.centerIn: parent
             opacity: alertShape.wide ? 0 : 1
+            visible: opacity > 0
+            Behavior on opacity { NumberAnimation { duration: Config.morphDuration / 2 } }
+        }
+
+        NotifyList {
+            id: liste
+            anchors.centerIn: parent
+            opacity: alertShape.listing ? 1 : 0
             visible: opacity > 0
             Behavior on opacity { NumberAnimation { duration: Config.morphDuration / 2 } }
         }

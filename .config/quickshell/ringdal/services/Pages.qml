@@ -47,9 +47,16 @@ Singleton {
                     run: () => Menu.push(root.btPage())
                 },
                 {
+                    // Listen ligger IKKE her i kroppen. Den folder sig ud i
+                    // output-pillen ved siden af, hvor beskederne kommer ind --
+                    // saa der kun er ét sted at laese dem, og menuen ikke
+                    // staar aaben oven i det.
                     label: "beskeder",
                     hint: () => Notifs.count === 0 ? "ingen" : `${Notifs.count}`,
-                    run: () => Menu.push(root.notifsPage())
+                    run: () => {
+                        if (Notifs.openList()) { Menu.close(); return; }
+                        Menu.status = "ingen beskeder";
+                    }
                 },
                 {
                     label: "udklip",
@@ -393,28 +400,6 @@ Singleton {
                 { label: "ja", color: Theme.stateBad, run: () => sys.run([handling], null) },
                 { label: "nej", run: () => Menu.back() }
             ])
-        };
-    }
-
-    // ---- beskeder --------------------------------------------------------
-    function notifsPage(): var {
-        return {
-            title: "beskeder",
-            load: () => {
-                // Nyeste oeverst. Listen er en historik man laeser oppefra.
-                const rows = Notifs.list.slice().reverse().map(n => ({
-                    label: Markup.strip(n.summary),
-                    hint: n.appName,
-                    run: () => { Notifs.act(n); Menu.refresh(); },
-                    alt: () => { Notifs.dismiss(n); Menu.refresh(); }
-                }));
-                if (rows.length > 0) rows.push({
-                    label: "ryd alle",
-                    color: Theme.color8,
-                    run: () => { Notifs.clear(); Menu.back(); }
-                });
-                Menu.fill(rows);
-            }
         };
     }
 

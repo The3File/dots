@@ -97,6 +97,10 @@ Singleton {
     readonly property int notifyWidth: _body.notifyWidth ?? 340
     readonly property int notifyLinger: _body.notifyLinger ?? 6000
     readonly property int notifyMax: _body.notifyMax ?? 20
+    // Hvor mange linjer listen viser ad gangen. Faerre end menuen: den ligger i
+    // output-pillen, og en historik man skal rulle i, er ikke laengere et
+    // overblik.
+    readonly property int notifyLines: _body.notifyLines ?? 6
     // Hvor laenge der ventes foer grebet om musen tages paa aabneren. Se
     // Body.qml -- Hyprland melder grebet ryddet med det samme, hvis vinduet
     // ikke har faaet tastaturet endnu.

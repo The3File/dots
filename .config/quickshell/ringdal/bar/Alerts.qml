@@ -167,6 +167,10 @@ Item {
             visible: root.awake
         }
 
+        // Klikkes der her, folder listen sig ud i DEN HER pille -- ikke i
+        // kroppen. Beskederne er noget maskinen giver ham; de skal ikke lande
+        // oven i det han selv er i gang med. Klik igen paa overskriften i
+        // listen lukker den.
         Label {
             text: root.waiting === 1 ? "1 besked" : `${root.waiting} beskeder`
             color: Theme.color5
@@ -174,7 +178,7 @@ Item {
 
             MouseArea {
                 anchors.fill: parent
-                onClicked: Pill.notifs()
+                onClicked: Notifs.toggleList()
             }
         }
     }

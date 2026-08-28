@@ -27,6 +27,10 @@ Singleton {
 
     property var latest: null
     property bool popup: false
+    // Listen staar aaben. Den bor i output-pillen ved siden af kroppen, saa
+    // det han selv er i gang med, ikke bliver skubbet vaek af noget han bare
+    // ville kigge paa.
+    property bool listing: false
     // Musen paa beskeden holder den. Man skal kunne naa at laese noget man
     // er i gang med at laese.
     property bool held: false
@@ -39,6 +43,33 @@ Singleton {
         linger.stop();
         root.popup = false;
     }
+
+    // Boblen viger for listen: er der ingenting at vise, aabnes der ingenting
+    // -- en tom flade er vaerre end ingen flade. Svaret siger hvad der skete,
+    // saa den der kaldte, kan sige det videre.
+    function openList(): bool {
+        if (root.count === 0) return false;
+        root.hide();
+        root.listing = true;
+        return true;
+    }
+
+    function closeList(): void {
+        // Musen kan naa at forlade listen ved at listen forsvinder under den,
+        // og saa kommer der ingen exited. Uden det her blev `held` haengende
+        // og holdt den naeste boble staaende for evigt.
+        root.held = false;
+        root.listing = false;
+    }
+
+    function toggleList(): bool {
+        if (root.listing) { root.closeList(); return false; }
+        return root.openList();
+    }
+
+    // Sidste besked lukket = ingenting tilbage at staa og se paa. Listen
+    // lukker sig selv i stedet for at blive haengende som en tom pille.
+    onCountChanged: if (root.count === 0) root.closeList();
 
     function dismiss(n): void {
         if (!n) return;
@@ -66,6 +97,9 @@ Singleton {
 
     function _show(n): void {
         root.latest = n;
+        // Ligger listen aaben, staar beskeden der allerede. En boble oven paa
+        // ville daekke det han sidder og laeser.
+        if (root.listing) return;
         root.popup = true;
         if (n.urgency === NotificationUrgency.Critical) linger.stop();
         else linger.restart();
@@ -118,6 +152,16 @@ Singleton {
         function count(): string { return `${root.count}`; }
         function hide(): void { root.hide(); }
         function clear(): void { root.clear(); }
+
+        // Listen skal kunne aabnes og lukkes udefra som alt andet i pillen.
+        function open(): string {
+            return root.openList() ? "aabnede listen" : "ingen beskeder";
+        }
+        function close(): void { root.closeList(); }
+        function toggle(): string {
+            return root.toggleList() ? "aabnede listen"
+                : (root.count === 0 ? "ingen beskeder" : "lukkede listen");
+        }
 
         // Saa Claude kan se hvad der ligger og venter uden at Filip skal
         // laese det op.
