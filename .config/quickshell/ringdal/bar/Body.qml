@@ -199,10 +199,15 @@ Item {
             return rest.implicitWidth + 2 * Config.restPadding;
         }
         height: {
-            if (root.voicing) return Config.bodyVoiceHeight;
+            // Uret og batteriet bliver liggende naar kroppen bliver til en
+            // boelge -- den vokser opad og lader linjen staa hvor den stod.
+            if (root.voicing) return Config.bodyVoiceHeight + Config.restHeight;
             if (root.launching) return launch.implicitHeight + 2 * Config.activePadding;
             if (root.showingPanel) return panel.implicitHeight + 2 * Config.activePadding;
-            if (root.levelling || root.peeking ) return Config.activeHeight;
+            // Kigget stabler sine linjer lodret som menuen, saa det er
+            // indholdet der bestemmer hoejden. Niveauet er stadig én linje.
+            if (root.peeking) return peek.implicitHeight + 2 * Config.activePadding;
+            if (root.levelling) return Config.activeHeight;
             return Config.restHeight;
         }
         // Vokser den op til en menu, holder hjoernerne op med at vaere en
@@ -253,11 +258,24 @@ Item {
             }
         }
 
+        // Uret og batteriet forsvandt foer, i det oejeblik han begyndte at
+        // tale. Det er de to ting han kigger paa uden at taenke over det, og
+        // dikteringen er ikke en grund til at holde dem skjult. De bliver
+        // liggende praecis hvor de laa -- kroppen folder sig ud opad omkring
+        // dem i stedet for at skubbe dem ud.
         RestContent {
             id: rest
-            anchors.centerIn: parent
+            //
+            // ÉT anker, ikke to der skiftes imellem: linjen haenger fast i
+            // bunden med praecis den luft der centrerer den i en pille i
+            // hvile. Saa ligger den samme sted i begge tilstande af sig selv.
+            // (To ankre der byttes strides -- bunden og midten kan ikke begge
+            // gaelde, og saa satte den sig i toppen.)
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: (Config.restHeight - rest.implicitHeight) / 2
             bodyScreen: root.bodyScreen
-            opacity: root.resting ? 1 : 0
+            opacity: (root.resting || root.voicing) ? 1 : 0
             visible: opacity > 0
             Behavior on opacity { NumberAnimation { duration: Config.morphDuration / 2 } }
         }
@@ -297,6 +315,9 @@ Item {
         Item {
             anchors.fill: parent
             anchors.margins: Config.voicePadding
+            // Plads til hvilelinjen nedenunder, plus den samme luft som over
+            // boelgen. Saa beholder boelgen selv den hoejde den havde.
+            anchors.bottomMargin: Config.restHeight + Config.voicePadding
             opacity: root.voicing ? 1 : 0
             visible: opacity > 0
             Behavior on opacity { NumberAnimation { duration: Config.morphDuration / 2 } }

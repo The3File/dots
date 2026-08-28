@@ -31,8 +31,12 @@ Singleton {
     readonly property bool waiting: root.state === "venter"
     readonly property bool active: root.working || root.waiting
 
-    // Gaaet i staa? Prikken holder op med at aande, men bliver staaende --
+    // Tavs, men i live. Prikken holder op med at aande og bliver graa --
     // "der er noget der ikke er lukket ned" er ogsaa information.
+    //
+    // Er sessionen derimod vaek, forsvinder fladen helt. En lukket Claude Code
+    // staar ikke og venter paa noget; den er ingenting. Derfor gaettes der ikke
+    // paa det -- naar der er gaaet laenge nok uden livstegn, spoerges der.
     property bool stale: false
 
     readonly property color color: root.waiting ? Theme.stateBad
@@ -48,7 +52,24 @@ Singleton {
         id: staleTimer
         interval: Config.agentStale
         repeat: false
-        onTriggered: root.stale = true
+        onTriggered: if (!liveness.running) liveness.running = true
+    }
+
+    // Logikken bor i tale, ikke her: hvad der taeller som en levende session er
+    // en systemting, og den slags skal kunne proeves fra en terminal.
+    Process {
+        id: liveness
+        command: [`${Config.home}/.local/bin/tale`, "__lever"]
+        onExited: (code, status) => {
+            if (code === 0) {
+                // Lever, men siger ikke noget. Bliv staaende, og spoerg igen.
+                root.stale = true;
+                staleTimer.restart();
+            } else {
+                root.state = "ledig";
+                root.stale = false;
+            }
+        }
     }
 
     IpcHandler {
@@ -60,6 +81,7 @@ Singleton {
             root.state = "ledig";
             root.stale = false;
             staleTimer.stop();
+            liveness.running = false;
         }
         function state(): string { return root.stale ? `${root.state} (stille)` : root.state; }
     }
