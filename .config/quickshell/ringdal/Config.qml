@@ -92,6 +92,9 @@ Singleton {
     // Body.qml -- Hyprland melder grebet ryddet med det samme, hvis vinduet
     // ikke har faaet tastaturet endnu.
     readonly property int grabDelay: _body.grabDelay ?? 200
+    // Hvor bred agentlinjen maa blive foer den afkortes. Den skal kunne
+    // laeses paa afstand, ikke rumme hele saetningen.
+    readonly property int agentWidth: _body.agentWidth ?? 320
     // Hoejden paa den gennemsigtige flade pillen tegnes paa.
     readonly property int overlayHeight: _body.overlayHeight ?? 640
     // Alle formskift bruger den samme varighed. Ét tal, ét formsprog.

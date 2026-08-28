@@ -105,6 +105,10 @@ Singleton {
         onTriggered: {
             if (root.held) { linger.restart(); return; }
             root.popup = false;
+            // "transient" betyder at afsenderen selv siger at beskeden ikke er
+            // vaerd at gemme (statuslinjer, fremdrift). Den skal ikke ligge og
+            // fylde i listen bagefter.
+            if (root.latest && root.latest.transient) root.latest.dismiss();
         }
     }
 

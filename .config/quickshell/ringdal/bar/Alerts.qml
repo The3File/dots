@@ -18,8 +18,11 @@ Item {
     // Beskeder der stadig ligger. De hoerer til her og ikke i hvilen: er der
     // ingen, skal der ikke staa "0 beskeder" og fylde.
     readonly property int waiting: Notifs.count
+    // Claude har brug for ham. Staar her og ikke i kroppen, saa den ikke kan
+    // skjules af en aaben menu eller af at han dikterer.
+    readonly property bool asking: Agent.waiting
 
-    readonly property bool any: locked || offline || awake || waiting > 0
+    readonly property bool any: locked || offline || awake || asking || waiting > 0
 
     implicitWidth: any ? row.implicitWidth : 0
     implicitHeight: row.implicitHeight
@@ -40,6 +43,12 @@ Item {
             text: "intet net"
             color: Theme.stateBad
             visible: root.offline
+        }
+
+        Label {
+            text: "venter"
+            color: Theme.stateWarn
+            visible: root.asking
         }
 
         Label {

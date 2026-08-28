@@ -49,6 +49,7 @@
     "notifyWidth": 340,
     "notifyLinger": 6000,
     "notifyMax": 20,
-    "menuLines": 10
+    "menuLines": 10,
+    "agentWidth": 320
   }
 }
