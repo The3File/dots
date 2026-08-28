@@ -2,6 +2,44 @@
 
 is_wayland() { [[ -n "$WAYLAND_DISPLAY" || "$XDG_SESSION_TYPE" == "wayland" ]]; }
 
+# --- herdr ------------------------------------------------------------------
+# herdr replaces tmux here. It is a background server: the panes live inside it,
+# so closing the scratch window never kills what is running. `herdr --session X`
+# launches-or-attaches in one go, so the old has-session/attach/new dance is gone.
+#
+# What herdr has no flag for is "start this session running CMD". So the first
+# time a session is needed we start its server headless, create the workspace
+# ourselves (which gives us a known pane id back) and push the command into that
+# root pane. After that the session simply exists and we only ever attach.
+
+herdr_ensure() {
+	local name="$1" dir="$2" cmd="${3:-}"
+	export HERDR_SESSION="$name"
+
+	# server already up => session exists, nothing to bootstrap
+	herdr status server 2>/dev/null | grep -q '^status: running' && return
+
+	setsid herdr server >/dev/null 2>&1 </dev/null &
+
+	local i
+	for i in $(seq 1 50); do
+		herdr status server 2>/dev/null | grep -q '^status: running' && break
+		sleep 0.1
+	done
+
+	# a restored server may already carry its workspaces — don't add a second one
+	local n
+	n="$(herdr workspace list 2>/dev/null | jq -r '.result.workspaces | length' 2>/dev/null)"
+	[[ "${n:-0}" -gt 0 ]] && return
+
+	local pane
+	pane="$(herdr workspace create --cwd "$dir" --label "$name" --focus |
+		jq -r '.result.root_pane.pane_id')"
+
+	[[ -n "$cmd" && -n "$pane" && "$pane" != null ]] &&
+		herdr pane run "$pane" "$cmd" >/dev/null
+}
+
 # --- Hyprland / Wayland -------------------------------------------------------
 
 hypr_addr() {
@@ -24,21 +62,14 @@ hypr_toggle() {
 
 hypr_aios() {
 	cls="scratchaios"
-	local aios_dir="${HOME}/AIOS"
-	if tmux has-session -t '=AIOS' 2>/dev/null; then
-		hypr_toggle $TERMINAL --class $cls,$cls -e tmux a -t '=AIOS'
-	else
-		hypr_toggle $TERMINAL --class $cls,$cls -e tmux new -s 'AIOS' -c "$aios_dir" "${HOME}/AIOS/aios"
-	fi
+	herdr_ensure 'AIOS' "${HOME}/AIOS" "${HOME}/AIOS/aios"
+	hypr_toggle $TERMINAL --class $cls,$cls -e herdr --session 'AIOS'
 }
 
 hypr_term() {
 	cls="scratchterm"
-	if tmux has-session -t scratch 2>/dev/null; then
-		hypr_toggle $TERMINAL --class $cls,$cls -e tmux a -t '=scratch'
-	else
-		hypr_toggle $TERMINAL --class $cls,$cls -e tmux new -s 'scratch'
-	fi
+	herdr_ensure 'scratch' "$HOME"
+	hypr_toggle $TERMINAL --class $cls,$cls -e herdr --session 'scratch'
 }
 
 # --- bspwm / X11 (original) ---------------------------------------------------
@@ -52,10 +83,8 @@ aios(){
 	cls="scratchaios"; get_id
 	[[ -z "$id" ]] || toggle
 
-	local aios_dir="${HOME}/AIOS"
-	tmux has-session -t '=AIOS' 2>/dev/null &&
-		{ $TERMINAL --class $cls,$cls -e tmux a -t '=AIOS'; } ||
-		{ $TERMINAL --class $cls,$cls -e tmux new -s 'AIOS' -c "$aios_dir" "${HOME}/AIOS/aios"; }
+	herdr_ensure 'AIOS' "${HOME}/AIOS" "${HOME}/AIOS/aios"
+	$TERMINAL --class $cls,$cls -e herdr --session 'AIOS'
 }
 
 term(){
@@ -64,9 +93,8 @@ term(){
 	cls="scratchterm"; get_id
 	[[ -z "$id" ]] || toggle
 
-	tmux has-session -t scratch &&
-		{ $TERMINAL --class $cls,$cls -e tmux a -t '=scratch'; } ||
-		{ $TERMINAL --class $cls,$cls -e tmux new -s 'scratch'; }
+	herdr_ensure 'scratch' "$HOME"
+	$TERMINAL --class $cls,$cls -e herdr --session 'scratch'
 }
 
 eval $1
