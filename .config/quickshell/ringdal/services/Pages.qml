@@ -375,14 +375,17 @@ Singleton {
         return {
             title: "sudo",
             load: () => {
-                // Ved kode er der ikke noget at vaelge imellem; feltet er
-                // svaret. fill() rydder status, saa kommandoen skal saettes
-                // bagefter.
-                Menu.fill(Sudo.kind === "kode" ? [] : [
+                // Ved finger og kode er der ikke noget at vaelge imellem:
+                // fingeren eller koden ER svaret. fill() rydder status, saa
+                // kommandoen skal saettes bagefter.
+                Menu.fill(Sudo.kind === "valg" ? [
                     { label: "ja", color: Theme.stateBad, run: () => Sudo.besvar("ja") },
                     { label: "nej", run: () => Sudo.besvar("nej") }
-                ]);
-                Menu.status = Sudo.cmd;
+                ] : []);
+                Menu.field = Sudo.kind !== "finger";
+                Menu.status = Sudo.kind === "finger"
+                    ? `${Sudo.cmd}\n\nroer laeseren`
+                    : Sudo.cmd;
             }
         };
     }

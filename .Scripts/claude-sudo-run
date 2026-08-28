@@ -1,7 +1,15 @@
 #!/usr/bin/env bash
 # Privileged-command gate for agents (Claude Code + Cursor).
-# 1) The pill shows the EXACT argv that will run as root, and asks
-# 2) Then sudo -A -k on a real PTY (fingerprint → password back in the pill)
+#
+#   1) The pill shows the EXACT argv that is about to run as root, and asks for
+#      a fingerprint.
+#   2) The finger IS the answer. PAM takes it on a real PTY, the pill confirms
+#      it on screen, and the command runs.
+#
+# There used to be a yes/no dialog first and a fingerprint after. That is the
+# same question twice, and the first one is the one you learn to click away
+# without reading. Now there is one gesture, and it is the one that cannot be
+# given by accident.
 #
 # Usage: claude-sudo-run <command> [args...]
 # Do not call bare `sudo -A` from agents — askpass never receives the command.
@@ -10,22 +18,23 @@
 # the question must survive the shell being down. pill-sudo exits 2 when it
 # cannot ask, and everything below then works exactly as it did before.
 
-set -euo pipefail
+set -uo pipefail
+
+SCRIPTS=/home/ringdal/.Scripts
 
 if [[ $# -eq 0 ]]; then
 	echo "claude-sudo-run: command required" >&2
 	exit 1
 fi
 
-# Faithful shell-escaped form of the argv that sudo will exec after --.
+# Faithful shell-escaped form of the argv that will be exec'd after --.
 display=$(printf '%q ' "$@")
 display=${display%% }
 
-ask_in_pill=1
-if answer=$(/home/ringdal/.Scripts/pill-sudo valg "$display"); then
-	[[ $answer == ja ]] || exit 1
+if "$SCRIPTS/pill-sudo" rejs finger "$display"; then
+	i_pillen=1
 else
-	ask_in_pill=0
+	i_pillen=0
 	if ! zenity-rice --question --title="sudo" --width=640 \
 		--ok-label="Tillad" --cancel-label="Annuller" \
 		--text="Tillad denne sudo-kommando?
@@ -40,15 +49,36 @@ fi
 # Password askpass fallback must show the same argv (sudo does not set
 # SUDO_COMMAND for askpass — verified empty under -A).
 export SUDO_DISPLAY_CMD=$display
-if ((ask_in_pill)); then
-	export SUDO_ASKPASS=/home/ringdal/.Scripts/pill-askpass
+if ((i_pillen)); then
+	export SUDO_ASKPASS=$SCRIPTS/pill-askpass
+	export SUDO_PILL=1
 else
-	export SUDO_ASKPASS=/home/ringdal/.Scripts/zenity-askpass
+	export SUDO_ASKPASS=$SCRIPTS/zenity-askpass
 fi
 
-# Real PTY → PAM_TTY=/dev/pts/* → fingerprint enabled in pam.d/sudo
-exec python3 - "$@" <<'PY'
-import os, sys, pty
-cmd = ["/usr/bin/sudo", "-A", "-k", "--", *sys.argv[1:]]
-sys.exit(pty.spawn(cmd))
-PY
+"$SCRIPTS/sudo-pty" "$@" &
+kok=$!
+
+# Dismissing the question is a refusal — otherwise the only way out would be to
+# sit and wait for PAM to give up. Only an explicit "nej" kills: once the finger
+# is accepted the question is cleared, and a cleared question answers
+# "ingenting", which must never be mistaken for a refusal of a command that is
+# already running.
+if ((i_pillen)); then
+	(
+		while kill -0 "$kok" 2>/dev/null; do
+			[[ $("$SCRIPTS/pill-sudo" hent 2>/dev/null) == nej ]] && {
+				kill "$kok" 2>/dev/null
+				break
+			}
+			sleep 0.2
+		done
+	) &
+	vagt=$!
+fi
+
+wait "$kok"
+status=$?
+[[ -n ${vagt:-} ]] && kill "$vagt" 2>/dev/null
+"$SCRIPTS/pill-sudo" afbryd 2>/dev/null
+exit "$status"

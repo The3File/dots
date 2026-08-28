@@ -22,8 +22,17 @@ Singleton {
 
     // Kommandoen der ligger til godkendelse. Tom = ingen forespoergsel.
     property string cmd: ""
-    // "valg" = tillad/afvis. "kode" = fingeraftrykket gav op, skriv koden.
+    // "finger" = laeg fingeren, og det er svaret. "kode" = fingeraftrykket gav
+    // op, skriv koden. "valg" = tillad/afvis med to linjer; den bruges ikke
+    // laengere til root-adgang, men motoren kan den, og den koster ingenting.
+    //
+    // Fingeren ER samtykket. Et ja foerst og en finger bagefter er at spoerge
+    // om det samme to gange -- og det andet spoergsmaal laerer man at klikke
+    // vaek uden at laese det.
     property string kind: ""
+    // Fingeren blev godkendt. Staar kort paa fladen, saa han kan se at det
+    // lykkedes, i stedet for at gaette ud fra at der ikke skete noget.
+    property bool accepted: false
     // Staar tom indtil der er svaret. done skiller "intet svar endnu" fra
     // "svarede med en tom kode".
     property string result: ""
@@ -39,6 +48,30 @@ Singleton {
         root._rejs("valg", command);
     }
 
+    function finger(command: string): void {
+        root._rejs("finger", command);
+    }
+
+    // PAM tog imod fingeren. Kvitter paa fladen, og lad den staa et oejeblik --
+    // lukkede den med det samme, ville bekraeftelsen vaere et glimt man ikke
+    // naaede at se, og saa var den ikke en bekraeftelse.
+    function godkendt(): void {
+        if (root.kind !== "finger" || root.done) return;
+        root.accepted = true;
+        root.result = "ja";
+        root.done = true;
+        Menu.status = "godkendt";
+        Menu.statusColor = Theme.stateGood;
+        kvittering.restart();
+    }
+
+    Timer {
+        id: kvittering
+        interval: Config.sudoKvittering
+        repeat: false
+        onTriggered: if (Menu.active) Menu.close();
+    }
+
     function kode(command: string): void {
         root._rejs("kode", command);
         Menu.ask("adgangskode", true, text => root.besvar("ja:" + text));
@@ -49,14 +82,17 @@ Singleton {
     function afbryd(): void {
         root.kind = "";
         root.cmd = "";
+        root.accepted = false;
         root.done = false;
         root.result = "";
+        kvittering.stop();
         if (Menu.active) Menu.close();
     }
 
     function _rejs(k: string, command: string): void {
         root.cmd = command;
         root.kind = k;
+        root.accepted = false;
         root._asked = false;
         root.result = "";
         root.done = false;
@@ -113,11 +149,26 @@ Singleton {
             root.kode(command);
             return "spurgt";
         }
+        function finger(command: string): string {
+            if (root.pending) return "optaget";
+            root.finger(command);
+            return "spurgt";
+        }
+
+        // Kaldes af sudo-pty i det oejeblik PAM tog imod fingeren.
+        function godkendt(): string {
+            root.godkendt();
+            return "kvitteret";
+        }
 
         // "venter" | "ja" | "nej" | "ja:<kode>". Svaret hentes én gang og
         // ryddes, saa det naeste spoergsmaal starter forfra.
+        // "ingenting" og ikke "nej" naar der ikke staar noget: vagten i
+        // claude-sudo-run bliver ved med at spoerge, mens kommandoen koerer,
+        // og et "nej" der bare betoed "der er ikke noget spoergsmaal" ville
+        // faa den til at draebe en kommando han lige havde godkendt.
         function svar(): string {
-            if (root.kind === "") return "nej";
+            if (root.kind === "") return "ingenting";
             if (!root.done) return "venter";
             const ud = root.result;
             root.kind = "";

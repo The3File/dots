@@ -99,6 +99,9 @@ Singleton {
     // Hvor laenge der maa gaa uden livstegn foer prikken holder op med at
     // aande. Jeg siger noget ved hvert faseskift, saa der er langt imellem.
     readonly property int agentStale: _body.agentStale ?? 240000
+    // Hvor laenge "godkendt" bliver staaende, naar fingeraftrykket gik igennem.
+    // Kort nok til ikke at vaere i vejen, langt nok til at blive set.
+    readonly property int sudoKvittering: _body.sudoKvittering ?? 900
     // Hoejden paa den gennemsigtige flade pillen tegnes paa.
     readonly property int overlayHeight: _body.overlayHeight ?? 640
     // Alle formskift bruger den samme varighed. Ét tal, ét formsprog.

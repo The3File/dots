@@ -24,6 +24,10 @@ Singleton {
     property int index: 0
     // Bliver sat mens noget koerer, saa fladen kan sige hvorfor den er tom.
     property string status: ""
+    property color statusColor: Theme.color8
+    // Nogle sider skal man ikke skrive i -- fingeraftrykket er svaret, ikke
+    // noget man taster. Saa forsvinder feltet; det ville kun vaere stoej.
+    property bool field: true
 
     // Et svar der skal skrives, fx en wifi-adgangskode:
     // { title, masked, submit(text) }. Er den sat, viser fladen et felt i
@@ -71,6 +75,8 @@ Singleton {
         root.query = "";
         root.index = 0;
         root.status = "";
+        root.statusColor = Theme.color8;
+        root.field = true;
         root.prompt = null;
         root.closed();
     }
@@ -137,6 +143,8 @@ Singleton {
         root.items = [];
         root.prompt = null;
         root.status = "henter...";
+        root.statusColor = Theme.color8;
+        root.field = true;
         root.stack[root.stack.length - 1].load();
     }
 
