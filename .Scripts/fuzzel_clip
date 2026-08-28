@@ -62,6 +62,28 @@ radius=0
 selection-radius=0
 EOF
 
+# Pillen (quickshell: services/Pages.qml) bruger de samme to kald som menuen
+# herunder -- listen og afkodningen. Menuen staar uroert som fallback.
+case "${1:-menu}" in
+list)
+	cliphist list
+	exit 0
+	;;
+pick)
+	[[ -n ${2:-} ]] || {
+		printf 'usage: %s pick <linje fra list>\n' "${0##*/}" >&2
+		exit 2
+	}
+	printf '%s\n' "$2" | cliphist decode | wl-copy
+	exit 0
+	;;
+menu | '') ;;
+*)
+	printf 'usage: %s [menu|list|pick <linje>]\n' "${0##*/}" >&2
+	exit 2
+	;;
+esac
+
 sel=$(cliphist list | /usr/bin/fuzzel --dmenu --prompt='clipboard: ') || exit 0
 [[ -n $sel ]] || exit 0
 printf '%s\n' "$sel" | cliphist decode | wl-copy

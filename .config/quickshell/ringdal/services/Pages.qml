@@ -25,6 +25,9 @@ Singleton {
 
     readonly property string nmScript: `${Config.scripts}/fuzzel_nm`
     readonly property string btScript: `${Config.scripts}/btcon`
+    readonly property string perfScript: `${Config.scripts}/perf-mode`
+    readonly property string clipScript: `${Config.scripts}/fuzzel_clip`
+    readonly property string sysScript: `${Config.scripts}/bye`
 
     // ---- roden -----------------------------------------------------------
     function rootPage(): var {
@@ -47,6 +50,21 @@ Singleton {
                     label: "beskeder",
                     hint: () => Notifs.count === 0 ? "ingen" : `${Notifs.count}`,
                     run: () => Menu.push(root.notifsPage())
+                },
+                {
+                    label: "udklip",
+                    run: () => Menu.push(root.clipPage())
+                },
+                {
+                    label: "ydelse",
+                    hint: () => root.perfNavn(Perf.mode),
+                    hintColor: Perf.color,
+                    run: () => Menu.push(root.perfPage())
+                },
+                {
+                    label: "sluk",
+                    color: Theme.color8,
+                    run: () => Menu.push(root.slukPage())
                 }
             ])
         };
@@ -274,6 +292,91 @@ Singleton {
         };
     }
 
+    // ---- udklipsholder ---------------------------------------------------
+    // cliphist gennem fuzzel_clip, samme to kald som dens egen menu bruger.
+    // Filterfeltet goer her det samme som fuzzels gjorde: skriv, og listen
+    // bliver kortere.
+    function clipPage(): var {
+        return {
+            title: "udklip",
+            load: () => clip.run(["list"], text => {
+                Menu.fill(clip.lines(text).map(line => {
+                    // "id<TAB>tekst" -- id'et skal med tilbage, teksten vises.
+                    const tab = line.indexOf("\t");
+                    return {
+                        label: tab >= 0 ? line.slice(tab + 1) : line,
+                        run: () => clip.run(["pick", line], () => Menu.close())
+                    };
+                }));
+            })
+        };
+    }
+
+    // ---- ydelse ----------------------------------------------------------
+    // perf-mode mistede sin klikflade da modulet blev taget ud af baren. Her
+    // er den tilbage, med de samme fire valg som dens fuzzel-menu.
+    readonly property var perfValg: [
+        { navn: "low-power", vist: "spar" },
+        { navn: "balanced", vist: "balanceret" },
+        { navn: "performance", vist: "fuld" },
+        { navn: "auto", vist: "automatisk" }
+    ]
+
+    function perfNavn(mode: string): string {
+        const hit = root.perfValg.find(v => v.navn === mode);
+        if (hit) return hit.vist;
+        return mode === "boost" ? "boost" : "automatisk";
+    }
+
+    function perfPage(): var {
+        return {
+            title: "ydelse",
+            // Tilstanden kommer fra Perf, som allerede poller. Ingen grund til
+            // at spoerge scriptet en gang til.
+            load: () => Menu.fill(root.perfValg.map(v => ({
+                label: v.vist,
+                hint: v.navn,
+                mark: Perf.mode === v.navn ? "●" : "○",
+                color: Perf.mode === v.navn ? Perf.color : Theme.foreground,
+                run: () => perf.run(["set", v.navn], () => Menu.refresh())
+            })))
+        };
+    }
+
+    // ---- sluk ------------------------------------------------------------
+    // Handlingerne ligger i `bye`, saa de staar ét sted. Alle tre spoerger
+    // igen foerst -- et fejlklik i et hjoerne maa ikke slukke maskinen.
+    function slukPage(): var {
+        return {
+            title: "sluk",
+            load: () => Menu.fill([
+                {
+                    label: "laas skaermen",
+                    run: () => Menu.push(root.bekraeftPage("laas skaermen", "lock"))
+                },
+                {
+                    label: "genstart",
+                    run: () => Menu.push(root.bekraeftPage("genstart", "reboot"))
+                },
+                {
+                    label: "sluk maskinen",
+                    color: Theme.stateBad,
+                    run: () => Menu.push(root.bekraeftPage("sluk maskinen", "poweroff"))
+                }
+            ])
+        };
+    }
+
+    function bekraeftPage(hvad: string, handling: string): var {
+        return {
+            title: hvad + "?",
+            load: () => Menu.fill([
+                { label: "ja", color: Theme.stateBad, run: () => sys.run([handling], null) },
+                { label: "nej", run: () => Menu.back() }
+            ])
+        };
+    }
+
     // ---- beskeder --------------------------------------------------------
     function notifsPage(): var {
         return {
@@ -298,4 +401,7 @@ Singleton {
 
     Sh { id: nm; script: root.nmScript }
     Sh { id: bt; script: root.btScript }
+    Sh { id: perf; script: root.perfScript }
+    Sh { id: clip; script: root.clipScript }
+    Sh { id: sys; script: root.sysScript }
 }

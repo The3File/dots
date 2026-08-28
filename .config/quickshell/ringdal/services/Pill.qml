@@ -46,6 +46,9 @@ Singleton {
         if (name === "wifi") Menu.open2(Pages.rootPage(), Pages.wifiPage());
         else if (name === "bt") Menu.open2(Pages.rootPage(), Pages.btPage());
         else if (name === "notifs") Menu.open2(Pages.rootPage(), Pages.notifsPage());
+        else if (name === "udklip") Menu.open2(Pages.rootPage(), Pages.clipPage());
+        else if (name === "ydelse") Menu.open2(Pages.rootPage(), Pages.perfPage());
+        else if (name === "sluk") Menu.open2(Pages.rootPage(), Pages.slukPage());
         else Menu.open(Pages.rootPage());
     }
 
@@ -73,6 +76,9 @@ Singleton {
         function wifi(): void { root.enter("wifi"); }
         function bluetooth(): void { root.enter("bt"); }
         function beskeder(): void { root.enter("notifs"); }
+        function udklip(): void { root.enter("udklip"); }
+        function ydelse(): void { root.enter("ydelse"); }
+        function sluk(): void { root.enter("sluk"); }
         // Menuen udefra: se hvad der staar, og tryk paa en linje.
         function items(): string {
             if (!Menu.active) return "menuen er lukket";

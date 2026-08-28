@@ -187,8 +187,9 @@ hl.bind(mod .. " + E", hl.dsp.exec_cmd(fileManager))
 -- Applikationsaabner: pillen, ikke fuzzel. Samme tast, ny flade.
 -- fuzzel_drun ligger stadig i ~/.Scripts som fallback.
 hl.bind(mod .. " + D", hl.dsp.exec_cmd("qs -c ringdal ipc call launcher toggle"))
--- Clipboard history (bspwm: super + Insert → clipmenu)
-hl.bind(mod .. " + Insert", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scripts/fuzzel_clip"))
+-- Clipboard history (bspwm: super + Insert → clipmenu). Aabner pillen; den
+-- kalder cliphist gennem fuzzel_clip, som stadig virker fra en terminal.
+hl.bind(mod .. " + Insert", hl.dsp.exec_cmd("qs -c ringdal ipc call pill udklip"))
 
 -- Voice dictation (hyprwhspr): press to start, press again to paste
 hl.bind(mod .. " + Space", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scripts/hyprwhspr-record-toggle"))
@@ -206,8 +207,9 @@ hl.bind(mod .. " + SHIFT + Q", hl.dsp.window.kill())
 -- Reload / exit
 hl.bind(mod .. " + SHIFT + R", hl.dsp.exec_cmd("hyprctl reload"))
 hl.bind(mod .. " + SHIFT + Escape", hl.dsp.exit())
--- Power menu (bspwm: super + alt + shift + q → alacritty_bye)
-hl.bind(mod .. " + ALT + SHIFT + Q", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scripts/alacritty_bye"))
+-- Power menu (bspwm: super + alt + shift + q → alacritty_bye). Nu i pillen,
+-- med et ekstra "er du sikker" — handlingerne ligger stadig i `bye`.
+hl.bind(mod .. " + ALT + SHIFT + Q", hl.dsp.exec_cmd("qs -c ringdal ipc call pill sluk"))
 -- Next wallpaper / wal palette
 hl.bind(mod .. " + ALT + SHIFT + W", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scripts/chwal"))
 -- Hold maskinen vaagen, ogsaa med lukket laag (waybar viser "koffein" naar den er taendt)

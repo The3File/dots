@@ -38,7 +38,7 @@
     "align": "right",
     "levelLinger": 1600,
     "levelWidth": 210,
-    "peekDelay": 300,
+    "peekDelay": 0,
     "openWidth": 360,
     "overlayHeight": 640,
     "activePadding": 34,
@@ -50,6 +50,7 @@
     "notifyLinger": 6000,
     "notifyMax": 20,
     "menuLines": 10,
-    "agentStale": 240000
+    "agentStale": 240000,
+    "peekWidth": 240
   }
 }

@@ -1,5 +1,20 @@
 #!/usr/bin/env bash
 # i need to go to bed
+#
+# Uden argumenter: den lille TUI som altid (via `alacritty_bye`).
+# Med et argument: samme handling, uden menu -- det er den vej pillen gaar ind
+# (quickshell: services/Pages.qml). Handlingerne staar ét sted, her.
+
+case "${1:-}" in
+poweroff) exec poweroff ;;
+reboot)   exec reboot ;;
+lock)     exec lockscreen ;;
+"")       ;;
+*)
+	printf 'usage: %s [poweroff|reboot|lock]\n' "${0##*/}" >&2
+	exit 2
+	;;
+esac
 
 reset(){ printf '\e[?25l\e[2J\e[H'; }
 

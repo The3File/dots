@@ -71,8 +71,12 @@ Singleton {
     readonly property int levelWidth: _body.levelWidth ?? 210
     // Naadeperiode efter opstart, hvor niveau-aendringer ikke vises.
     readonly property int levelSettle: _body.levelSettle ?? 2000
-    // Hvor laenge musen skal blive haengende foer pillen kigger ud.
-    readonly property int peekDelay: _body.peekDelay ?? 300
+    // Hvor laenge musen skal blive haengende foer pillen kigger ud. 0 = med
+    // det samme. Forsinkelsen fandtes fordi pillen ligger i det hjoerne musen
+    // kommer forbi -- men Filip vil hellere have at den svarer straks.
+    readonly property int peekDelay: _body.peekDelay ?? 0
+    // Kigget folder sig ud lodret, ikke sidelaens.
+    readonly property int peekWidth: _body.peekWidth ?? 240
     readonly property int openWidth: _body.openWidth ?? 360
     // Hvor mange linjer menuen viser ad gangen. Fuzzel viste 12; her er der
     // faerre, fordi pillen ligger i et hjoerne og ikke midt paa skaermen.
