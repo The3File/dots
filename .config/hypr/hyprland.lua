@@ -70,7 +70,7 @@ hl.config({
     general = {
         gaps_in  = 7,
         gaps_out = 14,
-        border_size = 1,
+        border_size = 2,
         col = {
             active_border   = colors.active_border,
             inactive_border = colors.inactive_border,
@@ -138,6 +138,17 @@ hl.config({
             clickfinger_behavior = true,
         },
     },
+})
+
+-- Blur bag pillen. Quickshell-fladen er én stor gennemsigtig flade (1920x640),
+-- så uden ignore_alpha ville hele bunden af skærmen blive sløret -- ikke kun
+-- pillen. Tærsklen skal ligge under pillens egen alpha (Theme.barBackground,
+-- #90000000 = 0.56), så selve pillen bliver sløret og resten af fladen ikke.
+hl.layer_rule({
+    name        = "blur-pillen",
+    match       = { namespace = "^quickshell$" },
+    blur        = true,
+    ignore_alpha = 0.5,
 })
 
 hl.gesture({
