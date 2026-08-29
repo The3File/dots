@@ -70,7 +70,7 @@ hl.config({
     general = {
         gaps_in  = 7,
         gaps_out = 14,
-        border_size = 2,
+        border_size = 1,
         col = {
             active_border   = colors.active_border,
             inactive_border = colors.inactive_border,
@@ -90,6 +90,7 @@ hl.config({
 
     decoration = {
         rounding         = 15,
+        dim_special      = 0.0,
 		  --active_opacity   = 1.0,
 		  --inactive_opacity = 0.7,
         --dim_inactive     = true,
