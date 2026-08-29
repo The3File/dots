@@ -142,13 +142,15 @@ hl.config({
 
 -- Blur bag pillen. Quickshell-fladen er én stor gennemsigtig flade (1920x640),
 -- så uden ignore_alpha ville hele bunden af skærmen blive sløret -- ikke kun
--- pillen. Tærsklen skal ligge under pillens egen alpha (Theme.barBackground,
--- #90000000 = 0.56), så selve pillen bliver sløret og resten af fladen ikke.
+-- pillen. Tærsklen skal ligge under pillens egen alpha, som er skruen
+-- `body.opacity` i ~/.config/quickshell/ringdal/config.json. Den ligger lavt
+-- med vilje, så den skrue kan drejes helt ned til ca. 0,25 uden at sløringen
+-- falder væk. Alt uden om pillen er alpha 0 og bliver derfor aldrig sløret.
 hl.layer_rule({
     name        = "blur-pillen",
     match       = { namespace = "^quickshell$" },
     blur        = true,
-    ignore_alpha = 0.5,
+    ignore_alpha = 0.2,
 })
 
 hl.gesture({

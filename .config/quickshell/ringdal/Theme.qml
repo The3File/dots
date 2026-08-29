@@ -31,8 +31,11 @@ Singleton {
     readonly property color color7: _colors.color7 ?? "#a5a79c"
     readonly property color color8: _colors.color8 ?? "#4b503a"
 
-    // Baren er ugennemsigtig sort som alacritty/fuzzel — ikke wal-baggrunden.
-    readonly property color barBackground: "#c0000000"
+    // Pillen er sort som alacritty/fuzzel — ikke wal-baggrunden. Hvor taet
+    // den er, er nu en skrue i config.json (body.opacity), saa den kan proeves
+    // af mens pillen koerer i stedet for at rette en hex-vaerdi her.
+    // Sloeringen bagved kommer fra hyprland.lua, ikke herfra.
+    readonly property color barBackground: Qt.rgba(0, 0, 0, Config.bodyOpacity)
 
     // Kanten om pillerne. Den foelger tapetet — men daempet.
     //

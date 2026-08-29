@@ -1,11 +1,30 @@
 {
+  "_": "Pillens skruer. bar.font.size traekker al luft og alle bredder med sig - se afsnittet 'Pillen' i ~/AGENTS.md. Slettede tal falder tilbage paa Config.qml; skriv et tal her for at laase det.",
   "bar": {
-    "height": 26,
-    "screens": [],
     "font": {
       "family": "Terminus",
       "size": 18
-    }
+    },
+    "screens": []
+  },
+  "body": {
+    "opacity": 0.75,
+    "margin": 8,
+    "align": "right",
+    "borderWidth": 1,
+    "borderTone": 0.7,
+    "morphDuration": 320,
+    "overlayHeight": 640,
+    "menuLines": 10,
+    "launchLines": 8,
+    "notifyLines": 6,
+    "notifyPeekLines": 3,
+    "notifyMax": 20,
+    "notifyLinger": 6000,
+    "levelLinger": 1600,
+    "workspaceLinger": 1200,
+    "peekDelay": 0,
+    "agentStale": 240000
   },
   "intervals": {
     "whspr": 1000,
@@ -15,49 +34,5 @@
     "backlight": 0,
     "koffein": 30000,
     "clock": 30000
-  },
-  "voice": {
-    "enabled": true,
-    "width": 320,
-    "height": 52,
-    "marginLeft": 16,
-    "marginBottom": 50,
-    "levelInterval": 100,
-    "stateInterval": 250
-  },
-  "body": {
-    "margin": 8,
-    "voiceHeight": 77,
-    "maxRadius": 26,
-    "borderWidth": 1,
-    "borderTone": 0.7,
-    "morphDuration": 320,
-    "workspaceLinger": 1200,
-    "voiceWidth": 300,
-    "restPadding": 31,
-    "restSpacing": 26,
-    "restHeight": 44,
-    "align": "right",
-    "levelLinger": 1600,
-    "levelWidth": 263,
-    "peekDelay": 0,
-    "openWidth": 450,
-    "overlayHeight": 640,
-    "activePadding": 44,
-    "activeHeight": 54,
-    "voicePadding": 21,
-    "launchWidth": 525,
-    "launchLines": 8,
-    "notifyWidth": 425,
-    "notifyLinger": 6000,
-    "notifyMax": 20,
-    "notifyLines": 6,
-    "notifyPeekWidth": 375,
-    "notifyPeekLines": 3,
-    "menuLines": 10,
-    "agentStale": 240000,
-    "peekWidth": 300,
-    "talePadding": 37,
-    "taleHeight": 51
   }
 }
