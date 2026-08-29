@@ -49,6 +49,9 @@ Singleton {
         root.peeking = false;
         if (name === "wifi") Menu.open2(Pages.rootPage(), Pages.wifiPage());
         else if (name === "bt") Menu.open2(Pages.rootPage(), Pages.btPage());
+        else if (name === "lyd") Menu.open2(Pages.rootPage(), Pages.lydPage());
+        else if (name === "udgang") Menu.open2(Pages.lydPage(), Pages.udgangPage());
+        else if (name === "indgang") Menu.open2(Pages.lydPage(), Pages.indgangPage());
         else if (name === "udklip") Menu.open2(Pages.rootPage(), Pages.clipPage());
         else if (name === "ydelse") Menu.open2(Pages.rootPage(), Pages.perfPage());
         else if (name === "sluk") Menu.open2(Pages.rootPage(), Pages.slukPage());
@@ -116,6 +119,9 @@ Singleton {
         function beskeder(): string {
             return root.notifs() ? "aabnede listen" : "ingen beskeder";
         }
+        function lyd(): void { root.enter("lyd"); }
+        function udgang(): void { root.enter("udgang"); }
+        function indgang(): void { root.enter("indgang"); }
         function udklip(): void { root.enter("udklip"); }
         function ydelse(): void { root.enter("ydelse"); }
         function sluk(): void { root.enter("sluk"); }

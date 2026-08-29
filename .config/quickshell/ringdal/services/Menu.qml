@@ -122,6 +122,13 @@ Singleton {
         return true;
     }
 
+    // En linjes felter maa vaere funktioner i stedet for faste vaerdier. Saa
+    // foelger de med af sig selv -- en kugle der viser hvad der er valgt, skal
+    // ikke fryse paa det, der var valgt da siden blev bygget.
+    function live(v: var): var {
+        return (v instanceof Function) ? v() : v;
+    }
+
     function labels(): var {
         return root.items.map(i => i.label ?? "");
     }

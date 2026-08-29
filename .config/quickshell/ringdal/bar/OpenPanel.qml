@@ -175,9 +175,9 @@ Item {
                 RowLabel {
                     id: mark
                     anchors.left: parent.left
-                    width: (line.modelData.mark ?? "") === "" ? 0 : Config.fontSize
-                    text: line.modelData.mark ?? ""
-                    color: line.modelData.color ?? Theme.foreground
+                    width: (Menu.live(line.modelData.mark) ?? "") === "" ? 0 : Config.fontSize
+                    text: Menu.live(line.modelData.mark) ?? ""
+                    color: Menu.live(line.modelData.color) ?? Theme.foreground
                 }
 
                 RowLabel {
@@ -186,7 +186,7 @@ Item {
                     anchors.right: hint.left
                     anchors.rightMargin: Config.restSpacing
                     text: line.modelData.label ?? ""
-                    color: line.modelData.color
+                    color: Menu.live(line.modelData.color)
                         ?? (line.picked ? Theme.color4 : Theme.foreground)
                 }
 
@@ -195,15 +195,9 @@ Item {
                     anchors.right: parent.right
                     width: Math.min(implicitWidth, line.width * 0.45)
                     horizontalAlignment: Text.AlignRight
-                    // En hint maa vaere en funktion. Saa foelger den med af sig
-                    // selv, i stedet for at fryse paa det den var da siden blev
-                    // bygget.
-                    text: {
-                        const h = line.modelData.hint;
-                        if (h === undefined || h === null) return "";
-                        return (h instanceof Function) ? h() : h;
-                    }
-                    color: line.modelData.hintColor ?? Theme.color8
+                    // Enhver af dem maa vaere en funktion -- se Menu.live().
+                    text: Menu.live(line.modelData.hint) ?? ""
+                    color: Menu.live(line.modelData.hintColor) ?? Theme.color8
                 }
 
                 MouseArea {

@@ -47,6 +47,11 @@ Singleton {
                     run: () => Menu.push(root.btPage())
                 },
                 {
+                    label: "lyd",
+                    hint: () => Lyd.navn(Lyd.sink),
+                    run: () => Menu.push(root.lydPage())
+                },
+                {
                     // Listen ligger IKKE her i kroppen. Den folder sig ud i
                     // output-pillen ved siden af, hvor beskederne kommer ind --
                     // saa der kun er ét sted at laese dem, og menuen ikke
@@ -299,6 +304,58 @@ Singleton {
         };
     }
 
+    // ---- lyd ------------------------------------------------------------
+    // Hvor lyden kommer ud, og hvor den kommer ind. To linjer og ikke mere:
+    // styrken sidder allerede paa tasterne, og en enhed vaelger man sjaeldent.
+    //
+    // Listerne kommer fra Pipewire selv gennem Lyd, saa der er ingenting at
+    // hente og ingen "henter..." -- de er der i det oejeblik siden aabner.
+    function lydPage(): var {
+        return {
+            title: "lyd",
+            load: () => Menu.fill([
+                {
+                    label: "udgang",
+                    hint: () => Lyd.navn(Lyd.sink),
+                    run: () => Menu.push(root.udgangPage())
+                },
+                {
+                    label: "indgang",
+                    hint: () => Lyd.navn(Lyd.source),
+                    run: () => Menu.push(root.indgangPage())
+                }
+            ])
+        };
+    }
+
+    // Samme form som wifi-listen: kuglen viser hvad der er valgt nu. Her er
+    // kuglen en funktion, saa den flytter sig i samme oejeblik lyden goer --
+    // uden at siden skal hentes forfra (se Menu.live).
+    function _enhedsListe(liste: var, valgt: var, vaelg: var): var {
+        return liste.map(node => ({
+            label: Lyd.navn(node),
+            mark: () => valgt() === node ? "●" : "○",
+            color: () => valgt() === node ? Theme.color4 : Theme.foreground,
+            run: () => vaelg(node)
+        }));
+    }
+
+    function udgangPage(): var {
+        return {
+            title: "udgang",
+            load: () => Menu.fill(root._enhedsListe(
+                Lyd.sinks, () => Lyd.sink, node => Lyd.saetUdgang(node)))
+        };
+    }
+
+    function indgangPage(): var {
+        return {
+            title: "indgang",
+            load: () => Menu.fill(root._enhedsListe(
+                Lyd.sources, () => Lyd.source, node => Lyd.saetIndgang(node)))
+        };
+    }
+
     // ---- udklipsholder ---------------------------------------------------
     // cliphist gennem fuzzel_clip, samme to kald som dens egen menu bruger.
     // Filterfeltet goer her det samme som fuzzels gjorde: skriv, og listen
@@ -401,6 +458,13 @@ Singleton {
                 { label: "nej", run: () => Menu.back() }
             ])
         };
+    }
+
+    Connections {
+        target: Lyd
+        function onAfvist(navn: string): void {
+            Menu.status = `${navn} kan ikke vælges lige nu`;
+        }
     }
 
     Sh { id: nm; script: root.nmScript }
