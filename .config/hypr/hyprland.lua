@@ -211,8 +211,8 @@ hl.bind(mod .. " + D", hl.dsp.exec_cmd("qs -c ringdal ipc call launcher toggle")
 -- virke som modifier) og pill-super-tap regner differencen ud ved slip.
 local pillNed = hl.dsp.exec_cmd("~/.Scripts/pill-super-tap ned")
 local pillOp  = hl.dsp.exec_cmd("~/.Scripts/pill-super-tap op")
-hl.bind(mod .. " + SUPER_L", pillNed, { non_consuming = true })
-hl.bind(mod .. " + SUPER_R", pillNed, { non_consuming = true })
+hl.bind("SUPER_L", pillNed, { non_consuming = true })
+hl.bind("SUPER_R", pillNed, { non_consuming = true })
 hl.bind(mod .. " + SUPER_L", pillOp, { release = true })
 hl.bind(mod .. " + SUPER_R", pillOp, { release = true })
 -- Clipboard history (bspwm: super + Insert → clipmenu). Aabner pillen; den

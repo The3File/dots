@@ -7,6 +7,7 @@ set -u
 graense=${PILL_SUPER_MS:-500}
 f="${XDG_RUNTIME_DIR:-/tmp}/pill-super-down"
 
+echo "$(date +%T.%3N) $*" >> /tmp/pst.log
 case "${1:-}" in
   ned) date +%s%3N > "$f" ;;
   op)
