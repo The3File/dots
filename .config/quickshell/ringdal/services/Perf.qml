@@ -29,6 +29,15 @@ Singleton {
 
     function openMenu(): void { svc.run([`${Config.scripts}/perf-mode`, "menu"]); }
 
+    // Ydelsen staar KUN i menuen. Derfor poller den ikke: siderne kalder
+    // refresh() naar de aabner, og perf-mode kalder selv `ipc call perf refresh`
+    // naar den skifter tilstand.
+    //
+    // Det var maskinens dyreste vane. `perf-mode status` tager 58 ms og blev
+    // koert hvert andet sekund doegnet rundt -- 2,9% af en kerne for én linje,
+    // der var synlig nogle sekunder om dagen.
+    function refresh(): void { svc.refresh(); }
+
     ScriptService {
         id: svc
         command: [`${Config.scripts}/perf-mode`, "status"]

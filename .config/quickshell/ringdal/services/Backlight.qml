@@ -6,10 +6,13 @@ import Quickshell.Io
 import qs
 import qs.services
 
-// Sysfs sender ikke paalidelige aendringsbeskeder, saa lysstyrken hentes med
-// et lille poll -- men lystasterne i hyprland.lua kalder ogsaa
-// `qs ipc call backlight refresh`, saa den foelger med med det samme naar det
-// er dig der skruer. Pollet er kun sikkerhedsnettet.
+// Sysfs sender ikke paalidelige aendringsbeskeder, saa lysstyrken maa hentes.
+// Men den bliver ikke hentet i baggrunden: lystasterne i hyprland.lua kalder
+// `qs ipc call backlight refresh`, og kigget kalder refresh() naar det folder
+// sig ud. Det er de eneste to steder tallet nogensinde ses.
+//
+// Config.backlightInterval staar paa 0 = intet poll. Saet den til et tal igen,
+// hvis der nogensinde kommer en flade, der viser lysstyrken hele tiden.
 Singleton {
     id: root
 
@@ -41,9 +44,12 @@ Singleton {
         }
     }
 
+    // Gotcha: en QML-Timer med interval 0 fyrer i ét vaek. Derfor skal
+    // running haenge paa tallet, ikke staa paa true -- ellers bliver "sluk
+    // pollet" til "poll saa hurtigt maskinen kan".
     Timer {
         interval: Config.backlightInterval
-        running: true
+        running: Config.backlightInterval > 0
         repeat: true
         onTriggered: root.refresh()
     }

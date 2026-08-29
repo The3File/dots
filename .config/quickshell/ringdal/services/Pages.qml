@@ -33,7 +33,12 @@ Singleton {
     function rootPage(): var {
         return {
             title: "",
-            load: () => Menu.fill([
+            // Ydelsen poller ikke laengere -- den hentes her, hvor den skal
+            // vises. Linjen er der med det samme og retter sig selv 58 ms
+            // efter; hint er en funktion, saa den foelger med af sig selv.
+            load: () => {
+                Perf.refresh();
+                Menu.fill([
                 {
                     label: "wifi",
                     hint: () => Wifi.connected ? Wifi.ssid
@@ -78,7 +83,8 @@ Singleton {
                     color: Theme.color8,
                     run: () => Menu.push(root.slukPage())
                 }
-            ])
+                ]);
+            }
         };
     }
 
@@ -395,15 +401,19 @@ Singleton {
     function perfPage(): var {
         return {
             title: "ydelse",
-            // Tilstanden kommer fra Perf, som allerede poller. Ingen grund til
-            // at spoerge scriptet en gang til.
-            load: () => Menu.fill(root.perfValg.map(v => ({
-                label: v.vist,
-                hint: v.navn,
-                mark: Perf.mode === v.navn ? "●" : "○",
-                color: Perf.mode === v.navn ? Perf.color : Theme.foreground,
-                run: () => perf.run(["set", v.navn], () => Menu.refresh())
-            })))
+            // Kuglerne er funktioner, ikke faste vaerdier. Saa flytter mærket
+            // sig af sig selv naar Perf svarer -- baade ved aabning og efter et
+            // skift -- i stedet for at siden skal bygges op paa ny.
+            load: () => {
+                Perf.refresh();
+                Menu.fill(root.perfValg.map(v => ({
+                    label: v.vist,
+                    hint: v.navn,
+                    mark: () => Perf.mode === v.navn ? "●" : "○",
+                    color: () => Perf.mode === v.navn ? Perf.color : Theme.foreground,
+                    run: () => perf.run(["set", v.navn], () => Perf.refresh())
+                })));
+            }
         };
     }
 

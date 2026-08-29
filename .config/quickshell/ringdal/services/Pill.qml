@@ -23,6 +23,11 @@ Singleton {
     // "kigge" udefra, for kigget handler netop om hvor musen er.
     property bool peeking: false
 
+    // Lysstyrken staar kun i kigget, saa den hentes naar kigget folder sig ud
+    // -- ikke hvert femte sekund doegnet rundt. Samme regel som ydelsen:
+    // poll kun det, der er synligt.
+    onPeekingChanged: if (root.peeking) Backlight.refresh();
+
     function open(): void {
         root.opened = true;
         root.peeking = false;

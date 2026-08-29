@@ -63,15 +63,44 @@ Item {
             visible: width > 0
 
             Rectangle {
+                id: prik
                 anchors.fill: parent
                 radius: width / 2
                 color: Agent.color
 
-                SequentialAnimation on opacity {
-                    running: Agent.working && !Agent.stale
-                    loops: Animation.Infinite
-                    NumberAnimation { to: 0.2; duration: 900; easing.type: Easing.InOutSine }
-                    NumberAnimation { to: 1.0; duration: 900; easing.type: Easing.InOutSine }
+                readonly property bool aander: Agent.working && !Agent.stale
+
+                // Aandedraettet gaar i TRIN, ikke glidende. Det er ikke en
+                // smagsting -- det er det dyreste sted i hele fladen.
+                //
+                // En glidende NumberAnimation tegner med skaermens 60 billeder i
+                // sekundet, og hvert billede tvinger baade shellen OG Hyprland
+                // til at saette hele fladen sammen igen. Maalt 29-08: 16,8% af en
+                // kerne mens den aandede glidende, mod 3,2% med prikken slukket.
+                // En prik paa syv pixels kostede altsaa fem gange mere end alt
+                // det andet tilsammen -- og den aander praecis naar Claude
+                // arbejder, altsaa det meste af dagen.
+                //
+                // Ti trin fordelt over to sekunder maaler 3,9%. Oejet ser stadig
+                // et aandedraet: det er kurven der giver fornemmelsen, ikke
+                // antallet af billeder.
+                readonly property int _trin: 10
+                property int fase: 0
+
+                // Cosinus, saa den er langsomst ved vendepunkterne -- ligesom
+                // et aandedraet, og ligesom InOutSine gjorde.
+                opacity: aander
+                    ? 0.2 + 0.8 * (0.5 + 0.5 * Math.cos(2 * Math.PI * fase / _trin))
+                    : 1
+
+                Timer {
+                    interval: 2000 / prik._trin
+                    running: prik.aander
+                    repeat: true
+                    onTriggered: prik.fase = (prik.fase + 1) % prik._trin
+                    // Naar den holder op med at aande, skal den staa fuldt
+                    // taendt -- ikke fryse halvvejs nede og ligne noget slukket.
+                    onRunningChanged: if (!running) prik.fase = 0
                 }
             }
         }

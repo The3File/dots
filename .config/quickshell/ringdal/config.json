@@ -9,10 +9,10 @@
   },
   "intervals": {
     "whspr": 1000,
-    "perf": 2000,
+    "perf": 0,
     "keylock": 5000,
-    "net": 5000,
-    "backlight": 5000,
+    "net": 15000,
+    "backlight": 0,
     "koffein": 30000,
     "clock": 30000
   },

@@ -23,10 +23,14 @@ Singleton {
     readonly property int fontSize: _font.size ?? 14
 
     readonly property int whsprInterval: _intervals.whspr ?? 1000
-    readonly property int perfInterval: _intervals.perf ?? 2000
+    // 0 = intet poll. Ydelsen og lysstyrken hentes, naar den flade der viser
+    // dem folder sig ud (se Perf.qml og Backlight.qml). Saet et tal ind igen,
+    // hvis de nogensinde skal staa fremme hele tiden.
+    readonly property int perfInterval: _intervals.perf ?? 0
+    // Bruges kun mens tastaturet ER laast -- ellers ser Keylock paa flagfilen.
     readonly property int keylockInterval: _intervals.keylock ?? 5000
-    readonly property int netInterval: _intervals.net ?? 5000
-    readonly property int backlightInterval: _intervals.backlight ?? 5000
+    readonly property int netInterval: _intervals.net ?? 15000
+    readonly property int backlightInterval: _intervals.backlight ?? 0
     readonly property int koffeinInterval: _intervals.koffein ?? 30000
     readonly property int clockInterval: _intervals.clock ?? 30000
 
