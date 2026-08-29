@@ -20,7 +20,7 @@ Singleton {
     readonly property var barScreens: _bar.screens ?? []
 
     readonly property string fontFamily: _font.family ?? "Terminus"
-    readonly property int fontSize: _font.size ?? 14
+    readonly property int fontSize: _font.size ?? 16
 
     readonly property int whsprInterval: _intervals.whspr ?? 1000
     // 0 = intet poll. Ydelsen og lysstyrken hentes, naar den flade der viser
