@@ -60,6 +60,19 @@ Singleton {
                        1);
     }
 
+    // ---- markeringen bag en raekke ----------------------------------------
+    // Den laa foer paa color0 -- og color0 ER baggrunden (#060701). Paa
+    // pillens sorte var markeringen derfor praktisk talt usynlig, og det
+    // eneste der viste hvor tastaturet stod, var at teksten skiftede farve --
+    // som forsvandt igen paa de linjer der har deres egen farve.
+    //
+    // De her er blandet OP fra pillens bund i stedet, saa de ikke afhaenger af
+    // hvor moerk paletten tilfaeldigvis er. To trin, fordi musen og
+    // tastaturet kan staa to forskellige steder: det svage er "musen er her",
+    // det tydelige er "det er DEN, der sker noget med, hvis du trykker".
+    readonly property color rowHover: root._toned(root.color7, 0.10)
+    readonly property color rowSelected: root._toned(root.color7, 0.20)
+
     // ---- tilstandsfarver (var style.css-klasser) --------------------------
     readonly property color stateGood: "#0c0"   // .enabled, perf low-power
     readonly property color stateWarn: "#f80"   // .on (koffein), perf balanced

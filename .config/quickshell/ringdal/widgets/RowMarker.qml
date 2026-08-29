@@ -9,8 +9,9 @@ Rectangle {
 
     anchors.fill: parent
     radius: 4
-    color: selected ? Theme.color0 : (hovered ? Theme.color0 : "transparent")
-    opacity: selected ? 1 : (hovered ? 0.6 : 0)
+    color: selected ? Theme.rowSelected : Theme.rowHover
+    opacity: (selected || hovered) ? 1 : 0
 
     Behavior on opacity { NumberAnimation { duration: 90 } }
+    Behavior on color { ColorAnimation { duration: 90 } }
 }

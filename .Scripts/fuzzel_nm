@@ -70,7 +70,12 @@ active_con() {
 }
 
 list_cons() {
-	nmcli -t -f NAME c show 2>/dev/null | sed '/^$/d'
+	# Loopback staar i NetworkManagers liste som enhver anden forbindelse,
+	# men den er ikke noget man vaelger: den kan hverken slaas fra eller
+	# slettes med mening. TYPE foerst, saa navnet faar resten af linjen --
+	# et navn maa gerne indeholde kolon, en type maa ikke.
+	nmcli -t -f TYPE,NAME c show 2>/dev/null |
+		awk -F: '$1 != "loopback" { sub(/^[^:]*:/, ""); if ($0 != "") print }'
 }
 
 notify() {
