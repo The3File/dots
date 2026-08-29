@@ -28,6 +28,9 @@ Singleton {
     readonly property string perfScript: `${Config.scripts}/perf-mode`
     readonly property string clipScript: `${Config.scripts}/fuzzel_clip`
     readonly property string sysScript: `${Config.scripts}/bye`
+    // tale ligger i ~/.local/bin, ikke i ~/.Scripts: kun wrapperen er
+    // device-lokal, selve logikken er i git i AIOS/tale/.
+    readonly property string taleScript: `${Config.home}/.local/bin/tale`
 
     // ---- roden -----------------------------------------------------------
     function rootPage(): var {
@@ -38,7 +41,7 @@ Singleton {
             // efter; hint er en funktion, saa den foelger med af sig selv.
             load: () => {
                 Perf.refresh();
-                Menu.fill([
+                const rows = [
                 {
                     label: "wifi",
                     hint: () => Wifi.connected ? Wifi.ssid
@@ -83,8 +86,44 @@ Singleton {
                     color: Theme.color8,
                     run: () => Menu.push(root.slukPage())
                 }
-                ]);
+                ];
+
+                // Claude står øverst, og kun når der er en session. Det er
+                // det ene sted i pillen der kan svare på "hvad laver den?"
+                // uden at give hele skærmen væk -- stigen gik før direkte fra
+                // en prik på syv pixels til et vindue på tusind.
+                //
+                // Rækken flytter de andre en plads ned, når den kommer og går.
+                // Det er i orden: markeringen huskes på NAVN og ikke på nummer
+                // (se Menu.push), netop fordi listerne her bygges forfra.
+                if (Agent.herdrStyrer || Agent.active) {
+                    rows.unshift({
+                        label: "Claude",
+                        hint: () => Agent.state,
+                        hintColor: Agent.color,
+                        run: () => Menu.push(root.claudePage())
+                    });
+                }
+
+                Menu.fill(rows);
             }
+        };
+    }
+
+    // ---- Claude ----------------------------------------------------------
+    // De sidste linjer fra sessionens terminal. Hentes FØRST når siden åbnes
+    // -- samme regel som ydelsen fik 29-08: poll kun det, der er synligt.
+    //
+    // Opslaget bor i `tale __kig` og ikke her: det er herdr der skal spørges,
+    // og den slags skal kunne prøves fra en terminal. QML er kun ruden.
+    function claudePage(): var {
+        return {
+            title: "Claude",
+            load: () => kig.run(["__kig", "14"], text => {
+                const rows = kig.lines(text).map(line => ({ label: line }));
+                Menu.fill(rows.length > 0 ? rows
+                                          : [{ label: "ingenting at vise" }]);
+            })
         };
     }
 
@@ -482,4 +521,5 @@ Singleton {
     Sh { id: perf; script: root.perfScript }
     Sh { id: clip; script: root.clipScript }
     Sh { id: sys; script: root.sysScript }
+    Sh { id: kig; script: root.taleScript }
 }
