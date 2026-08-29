@@ -60,10 +60,27 @@ Singleton {
         else if (name === "udklip") Menu.open2(Pages.rootPage(), Pages.clipPage());
         else if (name === "ydelse") Menu.open2(Pages.rootPage(), Pages.perfPage());
         else if (name === "sluk") Menu.open2(Pages.rootPage(), Pages.slukPage());
+        else if (name === "claude") Menu.open2(Pages.rootPage(), Pages.claudePage());
         else Menu.open(Pages.rootPage());
     }
 
     function notifs(): bool { return Notifs.openList(); }
+
+    // Den frie linje: ét tryk, og feltet står der.
+    //
+    // Det er hele pointen med trinnet -- at kunne sige noget til en kørende
+    // session uden at give skærmen væk. Siden bag feltet åbnes med, så escape
+    // lander på "hvad laver den?" i stedet for ingenting; det er den samme
+    // grund som open2 har alle andre steder.
+    //
+    // Rækkefølgen holder: Menu._enter() nulstiller feltet, men fill() rører
+    // det ikke, så spørgsmålet overlever at siden bliver hentet bagefter.
+    function linje(): void {
+        root.opened = true;
+        root.peeking = false;
+        Menu.open2(Pages.rootPage(), Pages.claudePage());
+        Pages.spoergClaude();
+    }
 
     // En side der bliver rejst udefra, ikke navigeret til -- fx spoergsmaalet
     // om lov til at koere noget som root. Den faar ingen rod bagved: der er
@@ -137,6 +154,8 @@ Singleton {
         function udklip(): void { root.enter("udklip"); }
         function ydelse(): void { root.enter("ydelse"); }
         function sluk(): void { root.enter("sluk"); }
+        function claude(): void { root.enter("claude"); }
+        function linje(): void { root.linje(); }
         // Menuen udefra: se hvad der staar, og tryk paa en linje.
         // Den linje tastaturet staar paa, er markeret. Den betyder noget nu,
         // hvor menuen navigeres med j og k i stedet for at man staver til
@@ -156,6 +175,25 @@ Singleton {
         // Skriv i feltet, naar der spoerges om noget -- en wifi-kode, en
         // adgangskode. Det var menuens sidste tilstand uden en vej udefra, og
         // saa var den ikke faerdig.
+        // Staar der et felt, og maa der tales ind i det?
+        //
+        // Dikteringen spoerger her, foer den indsaetter. En adgangskode skal
+        // IKKE kunne dikteres -- hverken teknisk (den er skjult, han kan ikke
+        // se om den blev rigtig) eller i praksis (man siger ikke sin kode
+        // hoejt). Derfor er svaret ikke "der er et felt", men "hvad slags".
+        function felt(): string {
+            if (Menu.prompt === null) return "nej";
+            return (Menu.prompt.masked ?? true) ? "kode" : "fri";
+        }
+
+        // Laeg tekst i feltet uden at sende. Se Menu.filled.
+        function udfyld(tekst: string): string {
+            if (Menu.prompt === null) return "der spoerges ikke om noget";
+            if (Menu.prompt.masked ?? true) return "feltet er en kode";
+            Menu.fyld(tekst);
+            return "lagt i feltet";
+        }
+
         function skriv(tekst: string): string {
             if (Menu.prompt === null) return "der spoerges ikke om noget";
             Menu.answer(tekst);

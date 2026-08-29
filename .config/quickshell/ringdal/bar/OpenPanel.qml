@@ -158,7 +158,10 @@ Item {
             Text {
                 id: prompt
                 anchors.verticalCenter: parent.verticalCenter
-                text: root.asking ? "kode " : "/ "
+                // Ordet foran markoeren kommer fra spoergsmaalet. En kode og
+                // en besked til Claude skal ikke se ens ud -- den ene skjules,
+                // den anden skal kunne laeses igennem.
+                text: root.asking ? (Menu.prompt.prefix ?? "kode ") : "/ "
                 color: Theme.color5
                 font.family: Config.fontFamily
                 font.pixelSize: Config.fontSize
@@ -173,7 +176,8 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
 
                 color: Theme.foreground
-                echoMode: root.asking ? TextInput.Password : TextInput.Normal
+                echoMode: (root.asking && (Menu.prompt.masked ?? true))
+                    ? TextInput.Password : TextInput.Normal
                 passwordCharacter: "•"
                 font.family: Config.fontFamily
                 font.pixelSize: Config.fontSize
@@ -196,6 +200,14 @@ Item {
                 Connections {
                     target: Menu
                     function onPromptChanged(): void { input.text = ""; }
+                    // Dikteringen lander her. Der LAEGGES til i stedet for at
+                    // overskrive, saa en besked kan bygges i flere omgange --
+                    // man kommer i tanke om resten, mens man taler.
+                    function onFilled(text) {
+                        input.text = input.text === "" ? text
+                                                       : input.text + " " + text;
+                        input.cursorPosition = input.text.length;
+                    }
                     function onQueryChanged(): void {
                         if (!root.asking && input.text !== Menu.query)
                             input.text = Menu.query;

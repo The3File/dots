@@ -286,6 +286,12 @@ hl.bind(mod .. " + ALT + SHIFT + K", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scr
 hl.bind(mod .. " + SHIFT + B", hl.dsp.exec_cmd("qs -c ringdal ipc call pill bluetooth"))
 hl.bind(mod .. " + SHIFT + W", hl.dsp.exec_cmd("qs -c ringdal ipc call pill wifi"))
 
+-- Den frie linje til Claude: ét tryk, og feltet staar der.
+-- Super+A aabner hele terminalen; Super+Shift+A er den lette udgave af samme
+-- gestus -- sig noget til sessionen uden at give skaermen vaek. Samme bogstav
+-- med vilje, saa de to hoerer sammen i fingrene.
+hl.bind(mod .. " + SHIFT + A", hl.dsp.exec_cmd("qs -c ringdal ipc call pill linje"))
+
 -- Focus
 hl.bind(mod .. " + H", hl.dsp.focus({ direction = "left" }))
 hl.bind(mod .. " + J", hl.dsp.focus({ direction = "down" }))

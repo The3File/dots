@@ -172,6 +172,40 @@ def til_udklip(text: str) -> bool:
     return True
 
 
+# ------------------------------------------------------------- pille-vejen
+
+def til_pillen(text: str) -> bool:
+    """Staar pillens frie linje aaben, hoerer teksten til DER."""
+    # Pillen kan aldrig vaere det gemte maalvindue -- den er en lag-flade, og
+    # `hyprctl activewindow` svarer kun paa rigtige vinduer. Uden det her ville
+    # en diktering, mens feltet staar aabent, altsaa lande i vinduet BAG
+    # pillen, eller i udklip. Og feltet er netop bygget til at kunne bruges
+    # uden at aabne et vindue.
+    #
+    # Der spoerges paa INDSAETNINGS-tidspunktet og ikke da optagelsen begyndte:
+    # det er nu, teksten findes, og han kan naa at lukke feltet imens.
+    rc, ud = _run(["qs", "-c", "ringdal", "ipc", "call", "pill", "felt"],
+                  timeout=2.0)
+    if rc != 0 or ud.strip() != "fri":
+        # "kode" er ogsaa et nej. En adgangskode siger man ikke hoejt, og den
+        # er skjult i feltet, saa han kunne ikke se om den blev rigtig.
+        return False
+
+    # `--`: uden den laeser qs en linje der starter med en bindestreg som sit
+    # eget flag, og kaldet falder lydloest paa gulvet.
+    rc, _ = _run(["qs", "-c", "ringdal", "ipc", "call", "pill", "udfyld",
+                  "--", text], timeout=2.0)
+    if rc != 0:
+        print("[FOKUS] Pillen tog ikke imod teksten", flush=True)
+        return False
+
+    # Der trykkes IKKE retur for ham. Teksten ligger i feltet, saa han kan se
+    # den og selv sende den -- en talt linje kan have et forkert ord i sig, og
+    # det her er den ene vej ind i en koerende session.
+    print("[FOKUS] Teksten lagt i pillens felt", flush=True)
+    return True
+
+
 # ------------------------------------------------------------------- greb
 
 def anvend(app_class) -> None:
@@ -197,6 +231,12 @@ def anvend(app_class) -> None:
                 return orig_inject(self, text)
         except Exception:
             pass
+
+        # Pillens felt vinder over alt andet. Det er den eneste modtager der
+        # ikke er et vindue, og det er ogsaa den eneste der er valgt bevidst:
+        # staar feltet der, har han lige selv aabnet det.
+        if til_pillen(text):
+            return
 
         target = _hent_vindue()
         if target is None:

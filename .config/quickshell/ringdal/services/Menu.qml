@@ -26,8 +26,13 @@ Singleton {
     property string status: ""
 
     // Et svar der skal skrives, fx en wifi-adgangskode:
-    // { title, masked, submit(text) }. Er den sat, viser fladen et felt i
-    // stedet for en liste.
+    // { title, masked, prefix, submit(text) }. Er den sat, viser fladen et
+    // felt i stedet for en liste.
+    //
+    // `prefix` er det der staar foran markoeren. Det stod foer haardt som
+    // "kode " i fladen, fordi alt der blev spurgt om, var en adgangskode. Den
+    // frie linje til Claude er ikke en kode, hverken i hvad den er eller i
+    // hvordan den skal se ud, saa ordet foelger nu med spoergsmaalet.
     property var prompt: null
 
     readonly property bool active: root.stack.length > 0
@@ -62,6 +67,13 @@ Singleton {
         root.index >= 0 && root.index < root.view.length ? root.view[root.index] : null
 
     signal closed()
+
+    // Tekst paa vej ind i feltet UDEFRA -- i praksis dikteringen. Den bliver
+    // lagt i feltet, ikke sendt: en talt linje kan indeholde et forkert ord,
+    // og han skal have lov at se den, foer den gaar videre. Det er ogsaa den
+    // samme opfoersel som alle andre steder paa maskinen -- diktering saetter
+    // tekst ind, den trykker ikke retur for én.
+    signal filled(string text)
 
     function open(page: var): void {
         root.stack = [page];
@@ -138,8 +150,23 @@ Singleton {
         }
     }
 
-    function ask(title: string, masked: bool, submit: var): void {
-        root.prompt = { title: title, masked: masked, submit: submit };
+    function ask(title: string, masked: bool, submit: var, prefix: string): void {
+        root.prompt = {
+            title: title,
+            masked: masked,
+            // Tomt prefix er et gyldigt valg, saa der skelnes paa undefined og
+            // ikke paa tomhed. Kaldere fra foer det her felt fandtes spoerger
+            // alle sammen om en kode.
+            prefix: prefix === undefined ? "kode " : prefix,
+            submit: submit
+        };
+    }
+
+    // Skriv i feltet uden at sende. Tomt er ikke en fejl -- det er bare
+    // ingenting at laegge ind.
+    function fyld(text: string): void {
+        const t = (text ?? "").trim();
+        if (t !== "") root.filled(t);
     }
 
     function answer(text: string): void {

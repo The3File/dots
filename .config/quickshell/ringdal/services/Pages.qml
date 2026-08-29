@@ -120,11 +120,42 @@ Singleton {
         return {
             title: "Claude",
             load: () => kig.run(["__kig", "14"], text => {
-                const rows = kig.lines(text).map(line => ({ label: line }));
-                Menu.fill(rows.length > 0 ? rows
-                                          : [{ label: "ingenting at vise" }]);
+                // Skrivelinjen staar ØVERST, modsat wifi og bluetooth der har
+                // deres handlinger nederst. Dér er linjerne ovenover selv
+                // noget man trykker på; her er de ren tekst, og en handling
+                // under fjorten uklikbare linjer ville koste fjorten tryk at
+                // nå. Markøren står på den, når siden åbner, så retur sender.
+                const rows = [{
+                    label: "skriv en besked",
+                    color: Theme.color5,
+                    mark: "›",
+                    run: () => root.spoergClaude()
+                }];
+                for (const line of kig.lines(text)) rows.push({ label: line });
+                if (rows.length === 1) rows.push({ label: "ingenting at vise" });
+                Menu.fill(rows);
             })
         };
+    }
+
+    // Den frie linje. Feltet er det samme som wifi-koden skrives i -- kun
+    // ordet foran markøren og at tegnene kan ses, er anderledes.
+    //
+    // Sendes den, lukker pillen. Der er ikke noget at kigge på bagefter, og
+    // en kvittering på noget der lykkedes, er den slags larm fladen er bygget
+    // for at slippe af med. Går det galt, bliver den derimod stående med
+    // grunden -- dét ændrer hvad han gør nu.
+    function spoergClaude(): void {
+        Menu.ask("til Claude", false, tekst => {
+            const t = (tekst ?? "").trim();
+            if (t === "") { Menu.close(); return; }
+            Menu.status = "sender...";
+            send.run(["__send", t], svar => {
+                const linje = (svar ?? "").trim();
+                if (linje === "sendt") Menu.close();
+                else Menu.status = linje !== "" ? linje : "kunne ikke sende";
+            });
+        }, "til Claude ");
     }
 
     // ---- wifi ------------------------------------------------------------
@@ -522,4 +553,7 @@ Singleton {
     Sh { id: clip; script: root.clipScript }
     Sh { id: sys; script: root.sysScript }
     Sh { id: kig; script: root.taleScript }
+    // Egen Sh: at hente linjerne og at sende en besked må ikke kunne afbryde
+    // hinanden -- Sh tager ét kald ad gangen.
+    Sh { id: send; script: root.taleScript }
 }
