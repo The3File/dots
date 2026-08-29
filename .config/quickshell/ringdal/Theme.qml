@@ -32,7 +32,7 @@ Singleton {
     readonly property color color8: _colors.color8 ?? "#4b503a"
 
     // Baren er ugennemsigtig sort som alacritty/fuzzel — ikke wal-baggrunden.
-    readonly property color barBackground: "#000000"
+    readonly property color barBackground: "#90000000"
 
     // Kanten om pillerne. Den foelger tapetet — men daempet.
     //
