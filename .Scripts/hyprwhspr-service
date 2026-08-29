@@ -229,6 +229,10 @@ def _patch() -> None:
 
     import main as hypr_main
 
+    import hyprwhspr_fokus
+
+    hyprwhspr_fokus.anvend(hypr_main.hyprwhsprApp)
+
     orig_init = hypr_main.hyprwhsprApp.__init__
 
     def patched_init(self, *args, **kwargs):
