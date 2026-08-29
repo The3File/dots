@@ -205,9 +205,16 @@ hl.bind(mod .. " + D", hl.dsp.exec_cmd("qs -c ringdal ipc call launcher toggle")
 -- Baade venstre og hoejre: tasten til hoejre for hoejre alt er remappet fra
 -- print screen til hoejre Super (se hwdb'en 90-prtsc-super), saa den er
 -- tommelfingerens vej ind i menuen.
-local pillTap = hl.dsp.exec_cmd("qs -c ringdal ipc call pill toggle")
-hl.bind(mod .. " + SUPER_L", pillTap, { release = true })
-hl.bind(mod .. " + SUPER_R", pillTap, { release = true })
+-- Og kun et KORT tryk: holder han Super inde et oejeblik uden at trykke
+-- andet, skal menuen ikke komme. Hyprland kan ikke selv maale hold-tiden, saa
+-- nedtrykket stempler tiden (non_consuming, ellers holder bindet Super fra at
+-- virke som modifier) og pill-super-tap regner differencen ud ved slip.
+local pillNed = hl.dsp.exec_cmd("~/.Scripts/pill-super-tap ned")
+local pillOp  = hl.dsp.exec_cmd("~/.Scripts/pill-super-tap op")
+hl.bind(mod .. " + SUPER_L", pillNed, { non_consuming = true })
+hl.bind(mod .. " + SUPER_R", pillNed, { non_consuming = true })
+hl.bind(mod .. " + SUPER_L", pillOp, { release = true })
+hl.bind(mod .. " + SUPER_R", pillOp, { release = true })
 -- Clipboard history (bspwm: super + Insert → clipmenu). Aabner pillen; den
 -- kalder cliphist gennem fuzzel_clip, som stadig virker fra en terminal.
 hl.bind(mod .. " + Insert", hl.dsp.exec_cmd("qs -c ringdal ipc call pill udklip"))

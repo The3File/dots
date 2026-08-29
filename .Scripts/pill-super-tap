@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Super alene aabner pillens menu -- men kun ved et KORT tryk.
+# Hyprland kan ikke selv maale hvor laenge en tast holdes, saa vi stempler
+# tidspunktet ved nedtryk (non_consuming bind, saa Super stadig virker som
+# modifier) og lader release-bindet regne differencen ud.
+set -u
+graense=${PILL_SUPER_MS:-500}
+f="${XDG_RUNTIME_DIR:-/tmp}/pill-super-down"
+
+case "${1:-}" in
+  ned) date +%s%3N > "$f" ;;
+  op)
+    t=$(cat "$f" 2>/dev/null) || exit 0
+    rm -f "$f"
+    [ -n "$t" ] || exit 0
+    (( $(date +%s%3N) - t < graense )) && exec qs -c ringdal ipc call pill toggle
+    ;;
+esac
+exit 0
