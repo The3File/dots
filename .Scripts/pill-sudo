@@ -24,6 +24,12 @@
 set -uo pipefail
 
 QS=(qs -c ringdal ipc call sudo)
+
+# `--` før hvert argument, altid. Uden det læser qs et argument, der starter med
+# en bindestreg, som sit eget flag: `sudo -n true` blev til "The following
+# argument was not expected: -n true", rejsningen fejlede, og gaten meldte at
+# pillen ikke kunne spørge om root-adgang. Fejlen så ud som om fladen var nede,
+# men den var bare kommandolinjen, der spiste kommandoen.
 kode_timeout=${PILL_SUDO_TIMEOUT:-120}
 tick=0.15
 
@@ -40,7 +46,7 @@ poll() { # <nr> <deadline|""> <vente-tilstand>
 		if [[ -n $deadline ]] && ((SECONDS >= deadline)); then
 			return 3
 		fi
-		svar=$("${QS[@]}" svar "$nr" 2>/dev/null) || return 2
+		svar=$("${QS[@]}" svar -- "$nr" 2>/dev/null) || return 2
 		if [[ $svar != "$vente" ]]; then
 			printf '%s\n' "$svar"
 			return 0
@@ -54,7 +60,7 @@ poll() { # <nr> <deadline|""> <vente-tilstand>
 case $1 in
 rejs)
 	[[ $# -eq 2 ]] || brug
-	nr=$("${QS[@]}" rejs "$2" 2>/dev/null) || exit 2
+	nr=$("${QS[@]}" rejs -- "$2" 2>/dev/null) || exit 2
 	[[ -n $nr ]] || exit 2
 	printf '%s\n' "$nr"
 	;;
@@ -65,21 +71,21 @@ vent)
 	;;
 vagt)
 	[[ $# -eq 2 ]] || brug
-	"${QS[@]}" vagt "$2" 2>/dev/null || exit 2
+	"${QS[@]}" vagt -- "$2" 2>/dev/null || exit 2
 	;;
 afbryd)
 	[[ $# -eq 2 ]] || brug
-	"${QS[@]}" afbryd "$2" >/dev/null 2>&1 || exit 2
+	"${QS[@]}" afbryd -- "$2" >/dev/null 2>&1 || exit 2
 	;;
 kode)
 	[[ $# -eq 3 ]] || brug
-	raised=$("${QS[@]}" kode "$2" "$3" 2>/dev/null) || exit 2
+	raised=$("${QS[@]}" kode -- "$2" "$3" 2>/dev/null) || exit 2
 	[[ $raised == spurgt ]] || exit 2
 	# Her staar han allerede ved maskinen -- fingeren blev proevet foerst.
 	# Derfor er en graense i orden paa koden: et felt der staar for evigt, er
 	# bare et felt der er glemt.
 	if ! poll "$2" $((SECONDS + kode_timeout)) klar; then
-		"${QS[@]}" afbryd "$2" >/dev/null 2>&1 || true
+		"${QS[@]}" afbryd -- "$2" >/dev/null 2>&1 || true
 		echo nej
 	fi
 	;;

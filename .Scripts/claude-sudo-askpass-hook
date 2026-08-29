@@ -49,8 +49,16 @@ def rewrite_command(command: str) -> str | None:
         return f"{match.group(1)}{HELPER}"
 
     rewritten = re.sub(COMMAND_POSITION, repl, command)
+    # Sudos egne adgangskode-flag skal væk. Wrapperen tager argv som en ren
+    # kommando, så et flag der bliver stående, bliver læst som PROGRAMNAVNET:
+    # `sudo -n true` endte som "sudo: -n: command not found", efter at Filip
+    # havde lagt fingeren på læseren. De her flag handler alle sammen om,
+    # hvordan adgangskoden skaffes — og det er præcis det, porten har overtaget,
+    # så der er ingenting at bevare.
     rewritten = re.sub(
-        rf"({re.escape(HELPER)})(?:\s+(?:-A|--askpass|-k|--reset-timestamp))+",
+        rf"({re.escape(HELPER)})"
+        r"(?:\s+(?:-A|--askpass|-k|--reset-timestamp"
+        r"|-n|--non-interactive|-S|--stdin))+",
         r"\1",
         rewritten,
     )
