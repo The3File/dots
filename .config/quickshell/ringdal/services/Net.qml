@@ -5,13 +5,19 @@ import Quickshell
 import qs
 import qs.services
 
-// runbar-color.sh laver iw/ip-parsingen; den er ikke vaerd at skrive om i QML.
-// Men dens pango bliver oversat her, saa ingen widget nogensinde ser markup
-// fra et script.
+// ~/.Scripts/netstatus laver iw/ip-parsingen; den er ikke vaerd at skrive om i
+// QML. Men dens pango bliver oversat her, saa ingen widget nogensinde ser
+// markup fra et script.
 //
-// Senere: Quickshell.Networking har en rigtig NetworkManager-service. Den
-// giver signalstyrke i procent, ikke dBm, saa den venter til vi alligevel
-// bygger netvaerksmenuen -- indtil da ville den aendre det baren viser.
+// Den ENESTE ting svaret bruges til er "intet net" i afvigelses-pillen. Derfor
+// spoerges der hvert 15. sekund og ikke hvert 5.: det er en afvigelse, ikke en
+// aflaesning, og et kvarter-minut er hurtigt nok til at opdage at nettet er
+// vaek.
+//
+// Senere: Quickshell.Networking (som Wifi bruger) har ogsaa et svar. Men den
+// ser kun wifi, og netstatus ser ogsaa kablet. Skiftet kraever at
+// Networking.connectivity er proevet af med kablet i -- indtil da bliver den
+// her.
 Singleton {
     id: root
 
@@ -28,7 +34,7 @@ Singleton {
 
     ScriptService {
         id: svc
-        command: [`${Config.home}/.config/waybar/runbar-color.sh`, "net"]
+        command: [`${Config.scripts}/netstatus`]
         interval: Config.netInterval
     }
 }

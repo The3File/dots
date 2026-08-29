@@ -8,7 +8,6 @@ set -u
 RUNTIME="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
 FLAG="$RUNTIME/hyprwhspr-perf.boosted"
 APPLY=/usr/local/libexec/ringdal-perf-apply
-WAYBAR_SIGNAL=3
 
 warn() { printf '[hyprwhspr-perf] WARN: %s\n' "$*" >&2; }
 
@@ -25,11 +24,8 @@ on_battery() {
 	[[ $st == Discharging ]]
 }
 
-signal_waybar() {
-	# Baren er quickshell; waybar-signalet bliver staaende, saa den gamle bar
-	# stadig virker hvis man starter den som fallback.
+signal_pillen() {
 	qs -c ringdal ipc call perf refresh &>/dev/null || true
-	pkill -RTMIN+"$WAYBAR_SIGNAL" waybar 2>/dev/null || true
 }
 
 apply() {
@@ -47,12 +43,12 @@ apply() {
 
 cmd_boost() {
 	if [[ -f $FLAG ]]; then
-		signal_waybar
+		signal_pillen
 		return 0
 	fi
 	if apply performance; then
 		: >"$FLAG" 2>/dev/null || warn "could not write $FLAG"
-		signal_waybar
+		signal_pillen
 	fi
 	return 0
 }
@@ -60,7 +56,7 @@ cmd_boost() {
 cmd_restore() {
 	local manual="$RUNTIME/perf-mode.manual" pinned
 	if [[ ! -f $FLAG ]]; then
-		signal_waybar
+		signal_pillen
 		return 0
 	fi
 	# Prefer pinned menu mode; otherwise TLP AC/BAT defaults.
@@ -84,7 +80,7 @@ cmd_restore() {
 		apply tlp-ac || true
 	fi
 	rm -f "$FLAG" 2>/dev/null || true
-	signal_waybar
+	signal_pillen
 	return 0
 }
 

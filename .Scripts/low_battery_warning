@@ -13,10 +13,6 @@ INTERVAL=30
 # Floor while speaking; previous volume/mute restored after.
 WARN_VOL=100
 
-refresh_waybar_vol() {
-	pkill -RTMIN+1 waybar 2>/dev/null || true
-}
-
 with_loud_volume() {
 	local saved_vol saved_mute
 	saved_vol=$(pamixer --get-volume 2>/dev/null || echo 50)
@@ -24,7 +20,6 @@ with_loud_volume() {
 	pamixer -u 2>/dev/null || true
 	if ((saved_vol < WARN_VOL)); then
 		pamixer --set-volume "$WARN_VOL" 2>/dev/null || true
-		refresh_waybar_vol
 	fi
 	echo "battery-warn: volume $(pamixer --get-volume)% (floor ${WARN_VOL})" >&2
 	"$@"
@@ -32,7 +27,6 @@ with_loud_volume() {
 	if [[ $saved_mute == true ]]; then
 		pamixer -m 2>/dev/null || true
 	fi
-	refresh_waybar_vol
 }
 
 speak() {
@@ -52,13 +46,11 @@ if [[ ${1:-} == test ]]; then
 	ORIG_MUTE=$(pamixer --get-mute)
 	pamixer -u
 	pamixer --set-volume 20
-	refresh_waybar_vol
 	for t in 20 10 5; do
 		speak "$t"
 	done
 	pamixer --set-volume "$ORIG"
 	[[ $ORIG_MUTE == true ]] && pamixer -m || pamixer -u
-	refresh_waybar_vol
 	exit 0
 fi
 

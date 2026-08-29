@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+# Er der net? Wifi foerst, ellers kabel, ellers ingenting.
+#
+# Hed foer ~/.config/waybar/runbar-color.sh og kunne ogsaa lyd, lys og batteri.
+# De tre kan pillen selv nu (Audio, Backlight, Battery -- direkte fra Pipewire,
+# sysfs og upower), saa der er kun nettet tilbage. Waybar er vaek; navnet
+# "runbar-color" pegede paa en bar der er to generationer doed.
+#
+# Hvorfor den her stadig findes, naar Quickshell har sin egen NetworkManager:
+# den ser ogsaa kablet, og den ene ting pillen bruger svaret til er at sige
+# "intet net". Det skal vaere rigtigt.
+#
+# Svaret er waybars JSON -- {"text","tooltip"} -- fordi det er det format
+# services/ScriptService.qml laeser. Formatet blev, motoren gik.
+#
+# Usage: netstatus
+
+set -euo pipefail
+
+WIFI="wlp3s0"
+ETH="enp2s0f0"
+
+json_text() {
+	python3 -c 'import json,sys; print(json.dumps({"text": sys.argv[1], "tooltip": False}))' "$1"
+}
+
+span() { printf '<span foreground="%s">%s</span>' "$1" "$2"; }
+
+wifi_color() {
+	# Typisk wifi: bedre end -60 er godt; -85 og daarligere er roedt.
+	local s="$1" color="#0c0"
+	[[ $s -le -60 ]] && color="#5b0"
+	[[ $s -le -65 ]] && color="#9b0"
+	[[ $s -le -70 ]] && color="#ba0"
+	[[ $s -le -75 ]] && color="#c80"
+	[[ $s -le -80 ]] && color="#d50"
+	[[ $s -le -85 ]] && color="#f00"
+	printf '%s' "$color"
+}
+
+net() {
+	local ssid signal_val signal_unit ip color out
+
+	if ! iw "$WIFI" link 2>/dev/null | grep -q 'Connected\|SSID'; then
+		if ip -br link show "$ETH" 2>/dev/null | grep -q UP \
+			&& ip -4 -br addr show "$ETH" 2>/dev/null | grep -q -v 'DOWN'; then
+			ip="$(ip -4 -br addr show "$ETH" | awk '{print $3}' | cut -d/ -f1)"
+			[[ -n $ip ]] && { json_text "eth: [${ip}]"; return; }
+		fi
+		json_text "$(span "#f00" "no connection")"
+		return
+	fi
+
+	read -ra ssid_arr < <(iw "$WIFI" link | grep SSID)
+	ssid="${ssid_arr[1],,}"
+	read -ra sig_arr < <(iw "$WIFI" link | grep 'signal')
+	signal_val="${sig_arr[1]}"
+	signal_unit="${sig_arr[2]}"
+	color="$(wifi_color "$signal_val")"
+	read -ra ip_arr < <(ip a s "$WIFI" | grep 'inet ')
+	ip="${ip_arr[1]%%/*}"
+	out="${ssid}: $(span "$color" "${signal_val} ${signal_unit}") [${ip}]"
+	json_text "$out"
+}
+
+net

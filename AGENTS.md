@@ -9,7 +9,7 @@ Living notes for agents working on this PC. **Update this file** when you learn 
 - Config format: **Lua** (legacy hyprlang `.conf` retired)
 - Terminal: **alacritty**
 - Login: no display manager — TTY VT1 → `~/.profile` → `start-hyprland`
-- **X11/bspwm packages removed** (2026-08); configs kept for reference: `~/.xinitrc`, `~/.config/bspwm`, `~/.config/sxhkd`. Obsolete bspwm/dmenu/lemonbar scripts removed from `~/.Scripts/` (2026-08-17). Keep `xorg-xwayland`. Session lock: **hyprlock** via `~/.Scripts/lockscreen` / `lock_keys` (`~/.config/hypr/hyprlock.conf`). Do **not** use xsecurelock — it refuses Wayland (`Will not lock`, exit 1) and broke the keylock ACPI escape hatch.
+- **X11/bspwm packages removed** (2026-08); their leftover configs (`~/.xinitrc`, `~/.config/bspwm`, `~/.config/sxhkd`) removed 2026-08-29 — recoverable from `dot log`. Obsolete bspwm/dmenu/lemonbar scripts removed from `~/.Scripts/` (2026-08-17). Keep `xorg-xwayland`. Session lock: **hyprlock** via `~/.Scripts/lockscreen` / `lock_keys` (`~/.config/hypr/hyprlock.conf`). Do **not** use xsecurelock — it refuses Wayland (`Will not lock`, exit 1) and broke the keylock ACPI escape hatch.
 - No **snapd** / Waydroid / Android SDK / VirtualBox / libvirt-qemu / Wine / Firefox / Chromium / GDLauncher on this machine (removed 2026-08). Cura via Flatpak `com.ultimaker.cura`. XDG default browser: **brave** (Super+O still qutebrowser, Super+W brave).
 
 ## Important paths
@@ -21,8 +21,6 @@ Living notes for agents working on this PC. **Update this file** when you learn 
 | Hyprlock | `~/.config/hypr/hyprlock.conf` |
 | Baggrund (awww) | ingen configfil — daemonen husker selv; start via `~/.Scripts/wallpaper-start` |
 | Pillen (Quickshell) | `~/.config/quickshell/ringdal/` (+ `config.json`) |
-| Waybar (fallback) | `~/.config/waybar/` (config + style.css) |
-| Config backups | `~/.config/hypr/*.bak` (e.g. `hyprland.conf.bak`, `colors.conf.bak`) |
 | User scripts | `~/.Scripts/` |
 | Dotfiles git wrapper | `~/.Scripts/dot` (bare repo `~/.dotfiles` → `The3File/dots`) |
 | Bootstrap kit | `~/.dotfiles/install-pkgs`, `pkgs/`, `etc/` (git path `bootstrap/`; never left in `$HOME`) |
@@ -45,7 +43,7 @@ hyprctl eval 'hl.dispatch(hl.dsp.workspace.toggle_special("scratchterm"))'
 
 - Reload config without killing the session: `hyprctl reload` (when that is enough).
 - App launcher: **the pill** — Super+D → `qs -c ringdal ipc call launcher toggle` (`services/Launcher.qml`, `bar/LaunchContent.qml`). Substring match like fuzzel, but ordered by what he opens most (`~/.cache/quickshell-launcher.json`). `~/.Scripts/fuzzel_drun` is kept untouched as fallback.
-- Fuzzel rice: **bottom-left**, equal air left & above waybar (`x-margin=y-margin=24`; exclusive zone already clears the bar), **radius 0** / border color4; **opaque black bg** like Alacritty/Waybar (Hyprland `rounding = 0`). Regenerates `~/.config/fuzzel/fuzzel.ini` each launch (`fuzzel_drun` + `fuzzel_clip`).
+- Fuzzel rice: **bottom-left**, equal air left & above the pill (`x-margin=y-margin=24`), **radius 0** / border color4; **opaque black bg** like Alacritty (Hyprland `rounding = 0`). Regenerates `~/.config/fuzzel/fuzzel.ini` each launch (`fuzzel_drun` + `fuzzel_clip`).
 - Gotcha: don’t `source` full `~/.cache/wal/colors.sh` under `set -u` — it expands unset `FZF_DEFAULT_OPTS` and aborts. `fuzzel_drun` greps `colorN=` only. Also `exit-on-keyboard-focus-loss=no` so Super release doesn’t kill the launcher.
 
 ## Baggrund (awww)
@@ -84,12 +82,13 @@ hyprctl eval 'hl.dispatch(hl.dsp.workspace.toggle_special("scratchterm"))'
 - The window is transparent and taller than the pill (`body.overlayHeight`, 640) so the shape can grow without a new surface; `mask` is bound to the shape's live geometry, so clicks outside the pill fall through to the window behind. **Gotcha:** because of the mask, clicks outside never reach the window — closing on click-outside needs `HyprlandFocusGrab`.
 - **Gotcha (cost me an evening):** a focus grab taken in the same instant the surface asks for keyboard focus is reported `cleared` immediately, and the flade closes itself the second it opens. `bar/Body.qml` arms the grab after `body.grabDelay` (200 ms).
 - Keyboard: the launcher and the menu take `WlrKeyboardFocus.Exclusive` (they have a field you type in). Escape, click-outside, dictation starting, and `qs -c ringdal ipc call launcher close` all release it — that is the only state that can hold the keyboard hostage, so keep those four exits working.
-- Knobs (height, font, poll intervals, screen filter) live in `~/.config/quickshell/ringdal/config.json` — plain JSON, hot-reloaded, no QML needed. Empty `bar.screens` = bar on every screen (waybar was pinned to `eDP-1`).
-- Architecture: `services/` own state and expose typed properties; `bar/` and `widgets/` are only views. Add a new module by writing a service, not by touching the bar. `Theme.qml` owns every colour (wal palette + the runbar threshold ramp ported from `runbar-color.sh`) so bar/popup/OSD can't drift.
+- Knobs (height, font, poll intervals, screen filter) live in `~/.config/quickshell/ringdal/config.json` — plain JSON, hot-reloaded, no QML needed. Empty `bar.screens` = pill on every screen.
+- Architecture: `services/` own state and expose typed properties; `bar/` and `widgets/` are only views. Add a new module by writing a service, not by touching the bar. `Theme.qml` owns every colour (wal palette + the runbar threshold ramp, ported from the old `runbar-color.sh`) so bar/popup/OSD can't drift.
 - **Kanten.** Pillerne bruger `Theme.pillBorder` (paletten's lyse tone `color7` **blandet ned mod pillens sorte** med `Config.borderTone`, 0.7 — ren er den for haard, og et fast hvidt hoerte ikke til tapetet; blandet, ikke alpha, saa et lyst sted i billedet ikke slaar igennem og goer kanten uens) og `Config.borderWidth` (1 px). **Hverken farve eller tykkelse matcher vinduerne, og det er valgt:** Hyprland tegner 2 px i wal `color4` (`chwal` saar den ind i `~/.config/hypr/colors.lua` ved hvert tapetskift — ret aldrig den fil i haanden, ret `apply_hyprland()` i `chwal`). 2 px hele vejen rundt om en lav form i et hjoerne blev en streg man kiggede paa i stedet for igennem; pillen holder 1. Kun afvigelser faar en anden kantfarve: stemmen, root-spoergsmaalet, en besked. Aabneren og menuen har ikke laengere deres egen.
 - **Markeringen bag en raekke** (`widgets/RowMarker.qml` + `Theme.rowHover`/`rowSelected`, rettet 29-08). Den laa foer paa `Theme.color0` — og color0 *er* baggrunden, saa markeringen var praktisk talt usynlig paa pillens sorte; det eneste der viste hvor tastaturet stod, var at teksten skiftede farve, og det forsvandt igen paa linjer med deres egen farve (et aktivt wifi, den valgte lydenhed). Farverne blandes nu **op** fra pillens bund med `Theme._toned()`, saa de ikke afhaenger af hvor moerk paletten tilfaeldigvis er: `rowHover` 0.10 = "musen er her", `rowSelected` 0.20 = "det er DEN, der sker noget med". Ét sted for alle menuer — aabner, menu og beskedliste bruger samme widget.
 - `fuzzel_nm list` filtrerer **loopback** fra (29-08). `lo` staar i NetworkManagers liste som enhver anden forbindelse, men kan hverken slaas fra eller slettes med mening. Filtreret i `list_cons()`, saa den ogsaa er vaek i scriptets egen fuzzel-menu og i slet-listen.
-- **Waybar is kept as fallback**, untouched: `~/.config/waybar/config` + `style.css`. Roll back with `pkill qs; waybar &`. The `pkill -RTMIN+N waybar` lines in the scripts below are left in place for exactly that reason.
+- **Waybar and dunst are gone** (removed 2026-08-29, packages and configs). There is no fallback bar any more, and that is deliberate: two bars that could both be standing there were two places to fix. The `pkill -RTMIN+N waybar` lines are out of the scripts and out of `hyprland.lua`; `signal_waybar()` is now `signal_pillen()` and only does the `qs ipc call` (see `koffein`, `lock_keys`, `perf-mode`, `hyprwhspr-perf`). Rolling back means `pacman -S waybar dunst` and pulling the config out of `dot log`.
+- The scripts still answer in **waybar's JSON** (`{"text","class","tooltip"}`) because that is what `services/ScriptService.qml` parses. The format stayed; the bar that invented it went.
 - Refresh is **push over IPC**, not signals: `qs -c ringdal ipc call <target> refresh` with targets `perf`, `keylock`, `koffein`, `whspr`, `backlight`, plus `theme reload` and `config reload`. `qs -c ringdal ipc show` lists them. Vol/battery/workspaces need no refresh at all — they come from Pipewire / UPower / Hyprland IPC and are event-driven.
 - **Rule for this shell: no flade without an IPC entrance. If Claude can't call it, it isn't finished.** The shell is agent-*driven*, not agent-*like* — it grows IPC, not natural language.
   - `pill open|close|toggle|back|wifi|bluetooth|beskeder|state` — plus `pill items` (read the current menu), `pill pick <label>` (press a line) and `pill skriv <text>` (answer a field that is asking — wifi key, password). Those three are how Claude drives the menu.
@@ -104,7 +103,7 @@ hyprctl eval 'hl.dispatch(hl.dsp.workspace.toggle_special("scratchterm"))'
 - Gotcha: hot-reload picks up changed *code*, but a **new or renamed IPC function is only registered on a real restart** (`pkill -x qs; setsid qs -c ringdal &`). Half an hour went into debugging a function that was in the file and simply not registered yet.
 - Gotcha: `Menu.answer()` clears the field **before** it calls `submit`, so in that instant an answer is indistinguishable from a cancel. Anything watching `prompt` for a cancel must wait one tick (`Qt.callLater`) — see `services/Sudo.qml`.
 - Scripts still own their own state and stay usable from a terminal — `lock_keys`, `perf-mode`, `koffein` are not absorbed into the shell (keylock must work when the bar is down). Quickshell only calls them.
-- Threshold colors (vol/scrn/net/bat): originally `~/.config/waybar/runbar-color.sh` — same ramp as old runbar `get_color`. Still used for `net` (iw parsing); the rest is `Theme.rampColor()`.
+- Threshold colors (vol/scrn/net/bat): the ramp came from the old runbar `get_color`, now `Theme.rampColor()`. Only the `net` half of that script survives, as **`~/.Scripts/netstatus`** (iw/ip parsing, wifi then ethernet) — renamed and stripped 2026-08-29 when waybar went.
 - Keylock: `~/.Scripts/lock_keys status` (poll 5s + IPC `keylock refresh`). Green `enabled` / red `disabled`. Bar click toggles; **no Super+Shift+K** for keylock (that bind is window swap up). Flag `~/.keylock`; `lock_keys ensure` on Hyprland start.
 - Keylock **disable** is silent (no locker; screen stays on). **Enable** runs **hyprlock** (PAM password or fingerprint; kb temporarily on for the prompt). Config: `~/.config/hypr/hyprlock.conf`. Debounce after either transition absorbs double ACPI events.
 - Sole hardware toggle: `~/.Scripts/acpid_events` — ThinkPad `ibm/hotkey` `00001317` → `lock_keys toggle`. Unlock still requires hyprlock. Do not delete this; laptop kb cannot type Super binds while locked.
@@ -113,7 +112,7 @@ hyprctl eval 'hl.dispatch(hl.dsp.workspace.toggle_special("scratchterm"))'
 - WiFi/bluetooth: **in the pill** — Super+Shift+W / Super+Shift+B now call `pill wifi` / `pill bluetooth` (repointed 28-08); driven by `fuzzel_nm` / `btcon`, whose fuzzel menus still work from a terminal. ThinkPad LEDs: `pwrbtnlght` (fuzzel menu / CLI; video group, no sudo). Micmute LED inverted via `pwrbtnlght sync|watch` (muted=on); power LED forced off. One-shot: `/home/ringdal/.Scripts/claude-sudo-run ~/.Scripts/thinkpad-leds-apply` (udev `trigger=none`).
 - Performance mode: `~/.Scripts/perf-mode status` (poll 2s + IPC `perf refresh`). Shows `perf: low|bal|max` from `platform_profile` (or `perf: boost` while hyprwhspr-perf is active). When the profile follows AC/BAT (TLP / no manual pin), appends `(chg)` or `(bat)`; hidden during boost and while a menu pin is active. Manual low/bal/max pins until AC plug/unplug (status poll clears pin + `tlp ac|bat`); flags `$XDG_RUNTIME_DIR/perf-mode.manual` + `perf-mode.power`. Colors: **green** low / **orange** bal / **red** max|boost. Click → fuzzel menu (`low-power` / `balanced` / `performance` / `auto` = `tlp bat|ac`). Apply via `/usr/local/libexec/ringdal-perf-apply` (`sudo -n`; install once with `/home/ringdal/.Scripts/claude-sudo-run ~/.Scripts/perf-apply-install`).
 - Reload after editing QML: nothing — Quickshell hot-reloads its own config dir. Colors: `chwal` pushes `theme reload`. Never restart Hyprland for either.
-- **Notifications: the pill replaced dunst 2026-08-28** (`services/Notifs.qml`, `NotificationServer`). dunst is out of `hyprland.lua`'s autostart — only one process can own `org.freedesktop.Notifications`, and whoever gets there first wins. Roll back: `pkill qs; dunst &`.
+- **Notifications: the pill replaced dunst 2026-08-28** (`services/Notifs.qml`, `NotificationServer`). dunst is out of `hyprland.lua`'s autostart — only one process can own `org.freedesktop.Notifications`, and whoever gets there first wins. dunst was uninstalled 2026-08-29; rolling back means `pacman -S dunst`.
   - **The popup lives in the alert pill, not in the body** (moved 2026-08-28 on Filip's call). The body is what *he* is doing — voice, menu, launcher; a notification is something that happens *to* him and must not shove that aside. Same form as `låst` and `koffein`.
   - Two things, deliberately not one: the **popup** (retracts after `body.notifyLinger`, held while the mouse is on it, critical ones never retract) and the **list** (stays until dismissed; surfaces as `N beskeder` on the same alert pill). dunst conflated them, so a bubble you missed was simply gone.
   - Left-click = first action if the notification has one, else dismiss. Right-click = dismiss. Same deal in the popup and in the list.
@@ -151,12 +150,60 @@ hyprctl eval 'hl.dispatch(hl.dsp.workspace.toggle_special("scratchterm"))'
 - **The pill folds out downward-up, never sideways** (28-08). The hover state used to stretch into a longer bar; it now stacks its rows vertically, same shape as the menu. Filip: *"vi vil gerne væk fra ideen om, at det er den her bar, og hen til, at det faktisk er en pille, som kan udvide sig til, hvad end det er, vi har brug for."* Keep new surfaces vertical. Hover is also immediate now (`body.peekDelay: 0`).
 - **The bar-era files are gone** (28-08, with Filip's go-ahead): `bar/items/`, `widgets/BarItem|InfoPanel|Popup|Sep`, `services/Whspr`. Nothing referenced them after the pill rewrite; `services/Voice.qml` replaced Whspr. They are in the dots history if ever needed.
 - Not done yet: nothing outstanding from the original plan. Clock-click for a calendar was dropped on purpose — Filip: *"det betyder ikke noget."* Next steps live in `~/.claude/plans/hele-shellen-til-quickshell.md`.
-- Cost vs waybar: same CPU (~1%, dominated by the 1 s hyprwhspr poll both had), ~100 MB more RSS — that is Qt.
+- **Cost: ~3% of one core idle** (qs ~1,4 + Hyprland ~1,6), ~370 MB RSS — the RSS is Qt. Measured 2026-08-29 with the agent dot breathing.
+- It used to be **16,8%**. Two things did it, and both are fixed — read the next section before adding anything that moves or polls.
+
+### To regler, betalt for med maalinger (29-08)
+
+Begge kom ud af en gennemgang hvor pillen kostede **16,8% af en kerne** og
+maskinen startede **318 processer i minuttet** mens den stod stille. Bagefter:
+**3,0%** og **202**. Hverken formen eller funktionerne blev mindre.
+
+**1. Bevaegelse koster billeder, og billeder koster hele fladen.**
+Agentprikken aandede med en `SequentialAnimation on opacity`. Den tegner med
+skaermens 60 billeder i sekundet, og hvert billede tvinger baade qs OG Hyprland
+til at saette fladen sammen igen. Maalt:
+
+| aandedraet | qs + Hyprland |
+|---|---|
+| slukket | 3,2% |
+| 6 trin/sek | 3,9% |
+| 10 trin/sek | 8,1% |
+| 20 trin/sek | 9,1% |
+| glidende (60) | **16,8%** |
+
+Vinduets bredde betoed intet (proevet: 560 px mod fuld skaerm gav samme tal).
+Det er antallet af billeder, intet andet. Loesningen staar i `bar/Alerts.qml`:
+en `Timer` paa 10 trin over 2 sekunder og en cosinus-binding paa `opacity`.
+Oejet ser stadig et aandedraet — det er kurven der giver fornemmelsen, ikke
+billedfrekvensen. **Ny bevaegelse i fladen: byg den som trin, ikke som
+`NumberAnimation`, medmindre den varer under et sekund.**
+(Boelgen i taleindikatoren er stadig glidende. Den koerer kun mens der tales, og
+den er ikke maalt separat — se paa den, hvis oplaesning nogensinde foeles dyr.)
+
+**2. Poll kun det, der er synligt.**
+`perf-mode status` tog 58 ms og blev koert hvert andet sekund doegnet rundt —
+2,9% af en kerne — for en linje, der kun staar i menuen. Nu:
+
+| service | foer | nu |
+|---|---|---|
+| `Perf` | hvert 2. sek | `Perf.refresh()` naar rod- eller ydelsessiden aabner (`config.json: perf = 0`) |
+| `Backlight` | hvert 5. sek | `Backlight.refresh()` naar kigget folder sig ud (`Pill.onPeekingChanged`) + lystasterne (`ipc call backlight refresh`) |
+| `Keylock` | `lock_keys status` hvert 5. sek | `TextFile` paa `~/.keylock` (gratis). Scriptet koerer kun mens der ER laast — `status` har en sideeffekt, den saetter enhederne fra igen efter en hyprctl-reload, og den reparation er kun noget vaerd i den ene tilstand |
+| `Net` | hvert 5. sek | hvert 15. — det er en afvigelse, ikke en aflaesning |
+
+**Gotcha:** en QML-`Timer` med `interval: 0` fyrer i ét vaek. `running` skal
+haenge paa tallet (`running: Config.xInterval > 0`), ellers bliver "sluk pollet"
+til "poll saa hurtigt maskinen kan".
+
+**Gotcha:** en omskrevet singleton (fx `Keylock.qml`) slaar ikke igennem paa
+hot-reload. Genstart rigtigt: `pkill -x qs; setsid qs -c ringdal &`. Samme regel
+som for nye IPC-funktioner.
 
 ## Colors / wal
 
 - `~/.Scripts/chwal` applies palette and writes **`colors.lua`** (not `colors.conf`).
-- Quickshell reads `~/.cache/wal/colors.json`; `chwal` pushes `qs -c ringdal ipc call theme reload`. Waybar-fallback still picks up `colors-waybar.css` via `USR2`.
+- Quickshell reads `~/.cache/wal/colors.json`; `chwal` pushes `qs -c ringdal ipc call theme reload`. 
 - Hyprland **inactive_border** uses wal `color0` (near-bg, high contrast vs focus); active uses `color4`.
 
 ## Projects / workstreams
@@ -200,7 +247,7 @@ Bare-repo git wrapper for tracked configs under `$HOME` (not a normal repo in `~
 - Only sync when the user asks (same rule as normal commits). Summarize what will be included first if unclear.
 - New paths (e.g. new `~/.Scripts/…`) must be `dot add`’ed once; afterwards `dot up`’s `commit -am` picks up modifications to tracked files.
 - `~/AGENTS.md` **is** tracked in the dots repo — keep it updated and include it in syncs when the user asks.
-- Repo tracks selected files only (~180); includes `.Scripts/`, Hyprland/alacritty/waybar, etc. Do not bulk-add secrets (keys, tokens, full browser profiles). Skip large local model blobs (Whisper/Piper voices under `~/.local/share/`).
+- Repo tracks selected files only (~180); includes `.Scripts/`, Hyprland/alacritty/quickshell, etc. Do not bulk-add secrets (keys, tokens, full browser profiles). Skip large local model blobs (Whisper/Piper voices under `~/.local/share/`).
 
 Install from scratch: `curl` of `.install.bash` from the `dots` repo — interview first. Run **after** Arch wiki user+sudo+network; script installs **git** in pacman foundation before any clone. Bootstrap kit extracts to `~/.dotfiles/` (`install-pkgs`, `pkgs/`, `etc/`) from tracked `bootstrap/`. AIOS clone includes nested `Noter`, `IndreArbejde_bog`, `filipringdal.dk`. See `~/.dotfiles/README.md`.
 
@@ -222,7 +269,7 @@ Install from scratch: `curl` of `.install.bash` from the `dots` repo — intervi
 - btcon husker enheder selv: menupunktet hedder **saved devices** og bygger på `~/.local/state/btcon/devices.tsv` (MAC⇥navn⇥sidst set). BlueZ viser kun en enhed under `devices Paired` så længe bindingen findes og smider ubundne enheder helt ud af cachen — derfor forsvandt tidligere enheder fra listen. Enheder BlueZ ikke længere kender står som `saved` og vækkes med et kort scan (`reconnect`). `remove`/`unpair` bryder kun bindingen og beholder enheden på listen; `forget` fjerner den også fra listen.
 - Bluetooth gotcha (Buds3 Pro): two paired MAC entries can exist (`C4:77:64:B5:B4:C6` and `C4:77:64:A8:CF:E0`). Keep both trusted (`bluetoothctl trust <mac>`) or connects may fail with `br-connection-key-missing`.
 - WiFi / NM: **fuzzel_nm** — Super+Shift+W (fuzzel-menuen; pillen kalder `fuzzel_nm list|ssids|up|down|connect <ssid> [pass]|delete`)
-- Keylock: **lock_keys** — ThinkPad ACPI hotkey `00001317` (toggle) or waybar `kbd:` click; unlock asks hyprlock
+- Keylock: **lock_keys** — ThinkPad ACPI hotkey `00001317` (toggle); unlock asks hyprlock
 - Hold maskinen vågen (også med lukket låg): **koffein** — **Super+Alt+Shift+K** (toggle) eller `koffein on` / `koffein 2h` / `koffein off` (`-v` holder også skærmen tændt). Erstatter `caffeine`/`caffeinate`, som kun tager en idle-lås og ikke rører låget
 - ThinkPad LEDs: **pwrbtnlght** — CLI / fuzzel (`power` / `micmute` / `mute`); `sync`/`watch` keep micmute LED = muted-on / live-off and power LED off. Mic key: XF86AudioMicMute → `pwrbtnlght mic-toggle`.
 
@@ -234,7 +281,7 @@ ThinkPad T14s Gen 2a (AMD 5650U). Stack: **TLP** + **hypridle**. Do not install 
 |-------|----------------|
 | TLP service | `systemctl enable --now tlp` |
 | TLP drop-in | `/etc/tlp.d/01-ringdal.conf` — AC: EPP `balance_performance` + platform `balanced`; BAT: EPP `balance_power` + platform `low-power` |
-| hyprwhspr busy boost | During dictation, `hyprwhspr-perf` temporarily forces EPP/`platform_profile`=`performance` via `ringdal-perf-apply`, then `tlp-bat`/`tlp-ac`; refreshes the bar (`perf` IPC + waybar `RTMIN+3` fallback) |
+| hyprwhspr busy boost | During dictation, `hyprwhspr-perf` temporarily forces EPP/`platform_profile`=`performance` via `ringdal-perf-apply`, then `tlp-bat`/`tlp-ac`; refreshes the pill (`perf` IPC) |
 | Bar perf picker | `~/.Scripts/perf-mode` — status/menu/set; `(chg)`/`(bat)` when following power; manual pin until plug/unplug; helper `/usr/local/libexec/ringdal-perf-apply` + `/etc/sudoers.d/ringdal-perf` (reinstall: `sudo ~/.Scripts/perf-apply-install`) |
 | Mic-OSD style | `mic_osd_style` in `~/.config/hyprwhspr/config.json` (`waveform` / `vu_meter` / `pill`). Within waveform: `OSD_WAVEFORM_RENDER` in `~/.Scripts/hyprwhspr_osd_patches.py` — `sine` (default) or `bars` |
 | hypridle | `~/.config/hypr/hypridle.conf`; autostart in `hyprland.lua` (`hyprland.start`) |
@@ -242,7 +289,7 @@ ThinkPad T14s Gen 2a (AMD 5650U). Stack: **TLP** + **hypridle**. Do not install 
 | Suspend gate | `~/.Scripts/idle-suspend-ok` — unused (was hypridle `condition_cmd`; kept for reference) |
 | Battery TTS | `~/.Scripts/low_battery_warning` — Danish Piper at **20 / 10 / 5%** while discharging (autostart in `hyprland.lua`); unmutes + raises to ≥70% for the line, then restores; also `notify-send` |
 | Lid (logind) | BAT → suspend; **AC → ignore** (`HandleLidSwitchExternalPower=ignore` in `/etc/systemd/logind.conf`) |
-| Hold vågen | `~/.Scripts/koffein` — `koffein [-v] {on|off|toggle|status|<varighed>}`. Tager en **block**-lock via `systemd-inhibit`: default `handle-lid-switch` (låget ignoreres, hypridle slår stadig skærmen fra), `-v` tilføjer `idle` (hypridle springer over, `ignore_systemd_inhibit=false`). Låsen = processen, så `off` dræber den; varighed kører bare `sleep N`. Blokerer **ikke** `sleep` — bevidst suspend virker stadig. State: `$XDG_RUNTIME_DIR/koffein.state`. Skal startes fra sessionen (ikke som user-unit): polkit `inhibit-handle-lid-switch` er `implicit any: no`. Waybar `custom/koffein` (signal RTMIN+5, klik = sluk, skjult når slukket). Genvej **Super+Alt+Shift+K** → `koffein toggle` (samme Super+Alt+Shift-familie som bye/chwal) |
+| Hold vågen | `~/.Scripts/koffein` — `koffein [-v] {on|off|toggle|status|<varighed>}`. Tager en **block**-lock via `systemd-inhibit`: default `handle-lid-switch` (låget ignoreres, hypridle slår stadig skærmen fra), `-v` tilføjer `idle` (hypridle springer over, `ignore_systemd_inhibit=false`). Låsen = processen, så `off` dræber den; varighed kører bare `sleep N`. Blokerer **ikke** `sleep` — bevidst suspend virker stadig. State: `$XDG_RUNTIME_DIR/koffein.state`. Skal startes fra sessionen (ikke som user-unit): polkit `inhibit-handle-lid-switch` er `implicit any: no`. Pillen viser `koffein` når den er tændt (skjult når slukket). Genvej **Super+Alt+Shift+K** → `koffein toggle` (samme Super+Alt+Shift-familie som bye/chwal) |
 | thinkfan | AUR `thinkfan` 2.x; config `/etc/thinkfan.conf` (k10temp/amdgpu/thinkpad/nvme → tpacpi fan). Quiet-first curve: level 0 until 55°C (idle ~40–50 stays off); bootstrap copy `~/.dotfiles/etc/thinkfan.conf`. Backup: `/etc/thinkfan.conf.bak.*`. Modprobe: `fan_control=1` (`/etc/modprobe.d/99-thinkfan.conf` + pkg). Rebuild after `yaml-cpp` soname bumps (`yay -S thinkfan`). Do not leave stale units under `/usr/local/lib/systemd/system/thinkfan*` |
 | thinkfan sleep/wakeup | Drop-ins `/etc/systemd/system/thinkfan-{sleep,wakeup}.service.d/success-exit.conf` → `SuccessExitStatus=1` (pkill exit 1 must not fail the unit) |
 
@@ -333,12 +380,12 @@ Resten af det gamle system. Claude Code bruger det ikke længere.
 - Models: `~/.local/share/pywhispercpp/models/` — **`large-v3-turbo`** + Silero VAD only (rollback models removed 2026-08). Backend pywhispercpp/Vulkan on AMD iGPU.
 - Paste goes to focused app (Claude Code / nvim / Obsidian under `~/AIOS`, etc.)
 - **Perf boost while busy:** `~/.Scripts/hyprwhspr-perf` — on `recording`/`processing`/`paused`, sets EPP + `platform_profile` to `performance`; on idle/cancel restores pinned menu mode if `$XDG_RUNTIME_DIR/perf-mode.manual` exists, else `tlp bat`/`tlp ac`. Wired via presenter wrap in `hyprwhspr-service`. Flag: `$XDG_RUNTIME_DIR/hyprwhspr-perf.boosted`. Manual: `hyprwhspr-perf status|boost|restore`.
-- Recording indicator: Waybar `custom/hyprwhspr` shows `mic` / `rec` (`#f00`) / `wait` (`#fa0`). Script: `~/.config/waybar/hyprwhspr-status.sh` — tooltip lists binds (dictation Super+Space / Super+Escape + Claude/Cursor TTS Super+Shift+V, with speak on/off). Left-click toggles record; **right-click toggles Mic-OSD overlay**.
+- Recording indicator: the pill's voice surface (`services/Voice.qml` + `bar/Body.qml`), fed by `visualizer_state`. The old waybar module and `hyprwhspr-status.sh` were removed 2026-08-29.
 - **The GTK Mic-OSD is off since 2026-08-28** (`~/.config/hyprwhspr/config.json`: `mic_osd_enabled: false`, backup `config.json.bak.pre-quickshell`). The pill draws the dictation state itself (`services/Voice.qml` reads `$XDG_RUNTIME_DIR/hyprwhspr/visualizer_state` + `audio_level` directly — no polling script). Waveform constants ported 1:1 from `hyprwhspr_osd_patches.py`; gain is 7.5 not 75, because `audio_level` on disk is already ×10.
-- **Gotcha:** `mic_osd_enabled: false` alone would also stop `visualizer_state` being written (`_set_visualizer_state` only writes when a runner exists). It keeps working because `~/.Scripts/hyprwhspr-service` installs `WaybarStatePresenter` when `_mic_osd_runner is None`. Don't remove that fallback.
+- **Gotcha:** `mic_osd_enabled: false` alone would also stop `visualizer_state` being written (`_set_visualizer_state` only writes when a runner exists). It keeps working because `~/.Scripts/hyprwhspr-service` installs `WaybarStatePresenter` when `_mic_osd_runner is None` (the class name is upstream's; the pill is what reads the file now). Don't remove that fallback.
 - **The pill does not show a live transcript, and cannot.** That needs `set_realtime_partial_callback`, implemented only by the cloud `realtime-ws` backend; the local pywhispercpp backend transcribes in one pass. Do not offer it again.
-- Overlay switch: `hyprwhspr-ui overlay on|off|toggle` (`~/.Scripts/hyprwhspr-ui`). Waybar stays either way. Service launcher `~/.Scripts/hyprwhspr-service` keeps `wait` working when overlay is off (drop-in `hyprwhspr.service.d/waybar-state.conf`).
-- Mic-OSD rice: `~/.config/hyprwhspr/theme/mic-osd.css` from wal via `hyprwhspr-theme-from-wal` (also run by `chwal` + `hyprwhspr-ui overlay on`). Rounded radius 10 / border 2 + transparent corners via `hyprwhspr_osd_patches.py` injected into the Mic-OSD **daemon**. Position: bottom-left (margin L=16, B=50 above waybar). Waveform gain bumped in the same patches (`OSD_WAVEFORM_GAIN=75`, gamma 0.78) — raw level-feed RMS is tiny on this mic; upstream amp=4 looked almost flat. Noise gate: `OSD_WAVEFORM_NOISE_GATE` (0.24 post-gamma; raise if room noise still wiggles). Render: `OSD_WAVEFORM_RENDER` in that file — `"sine"` (scene wave) or `"bars"` (upstream equalizer); sine look via `OSD_SINE_CYCLES` (2), `OSD_SINE_SOFT` (one envelope amp + dense samples), `OSD_SINE_PIN_ENDS` (fixed midline nodes). Restart Mic-OSD after change (`hyprwhspr-ui overlay off && on`, or `systemctl --user restart hyprwhspr`).
+- Overlay switch: `hyprwhspr-ui overlay on|off|toggle` (`~/.Scripts/hyprwhspr-ui`). Service launcher `~/.Scripts/hyprwhspr-service` keeps `wait` working when overlay is off (drop-in `hyprwhspr.service.d/pill-state.conf` — renamed from `waybar-state.conf` 2026-08-29; the `ExecStart` is unchanged).
+- Mic-OSD rice: `~/.config/hyprwhspr/theme/mic-osd.css` from wal via `hyprwhspr-theme-from-wal` (also run by `chwal` + `hyprwhspr-ui overlay on`). Rounded radius 10 / border 2 + transparent corners via `hyprwhspr_osd_patches.py` injected into the Mic-OSD **daemon**. Position: bottom-left (margin L=16, B=50). Waveform gain bumped in the same patches (`OSD_WAVEFORM_GAIN=75`, gamma 0.78) — raw level-feed RMS is tiny on this mic; upstream amp=4 looked almost flat. Noise gate: `OSD_WAVEFORM_NOISE_GATE` (0.24 post-gamma; raise if room noise still wiggles). Render: `OSD_WAVEFORM_RENDER` in that file — `"sine"` (scene wave) or `"bars"` (upstream equalizer); sine look via `OSD_SINE_CYCLES` (2), `OSD_SINE_SOFT` (one envelope amp + dense samples), `OSD_SINE_PIN_ENDS` (fixed midline nodes). Restart Mic-OSD after change (`hyprwhspr-ui overlay off && on`, or `systemctl --user restart hyprwhspr`).
 - Gotcha: upstream Mic-OSD MM:SS drifts after cancel — hide clears the state file but leaves `_recording_start_time` / `_last_visualizer_state='recording'`, so the next take never restarts the clock. Fixed in `hyprwhspr_osd_patches.apply_osd_elapsed_fix` (reset on hide; freeze on `processing`; re-apply state when show early-returns while still visible).
 - **Oeretelefonen som diktafon (29-08-2026):** ét tryk paa Buds3 Pro starter/stopper dikteringen. Bind: `XF86AudioPlay` -> `~/.Scripts/buds-tryk` i `hyprland.lua`. Proppen sender **KEY_PLAYCD** (= keysym `XF86AudioPlay`, keycode 208) paa ét tryk og **KEY_NEXTSONG** (= `XF86AudioNext`) paa to; det **lange tryk naar aldrig maskinen** — Samsung bruger det til stoejdaempning inde i proppen, saa ét tryk er det eneste brugbare sted. `buds-tryk` afgoer selv hvad trykket betyder, i rangordenen input-foer-output (samme som `pill afbryd`): dikterer han -> stop og indsaet; spiller der noget (`playerctl status` = `Playing`) -> pause; ellers -> start diktering. **Kun `Playing` tager trykket** — en *pauset* MPRIS-afspiller goer det ikke, fordi browsere lader tomme afspillere staa registreret laenge efter videoen er slut, og dikteringen ville saa holde op med at virke uden synlig grund. Under `processing` goer trykket ingenting (ellers startede det en ny optagelse oven i den forrige).
 - **To tryk kasserer optagelsen:** `XF86AudioNext` -> `~/.Scripts/buds-dobbelttryk`. Dikterer han -> `hyprwhspr record cancel`; ellers -> `playerctl next`. Den springer med vilje **ikke** den oplaeste linje over, som `pill afbryd` (Super+Escape) goer: taler stemmen mens der spiller musik, ville to tryk kunne betyde to ting paa én gang.

@@ -27,10 +27,6 @@ btctl() {
 	bluetoothctl "$@" </dev/null
 }
 
-refresh_waybar_vol() {
-	pkill -RTMIN+1 waybar >/dev/null 2>&1 || true
-}
-
 normalize_mac_sink_token() {
 	printf '%s' "$1" | tr '[:lower:]' '[:upper:]' | tr ':' '_'
 }
@@ -42,7 +38,6 @@ set_default_sink_for_mac() {
 	sink=$(printf '%s\n' "$sinks" | awk -v t="bluez_output." -v m="$token" '!seen && $2 ~ t m { print $2; seen = 1 }')
 	[[ -n ${sink:-} ]] || return 1
 	pactl set-default-sink "$sink" >/dev/null 2>&1 || return 1
-	refresh_waybar_vol
 	return 0
 }
 
@@ -52,7 +47,6 @@ set_default_sink_non_bt() {
 	sink=$(printf '%s\n' "$sinks" | awk '!seen && $2 != "" && $2 !~ /^bluez_output\./ { print $2; seen = 1 }')
 	[[ -n ${sink:-} ]] || return 1
 	pactl set-default-sink "$sink" >/dev/null 2>&1 || return 1
-	refresh_waybar_vol
 	return 0
 }
 
@@ -640,7 +634,6 @@ connect_target() {
 		return 1
 	}
 	connect_or_pair "$mac" "$name" || return 1
-	refresh_waybar_vol
 }
 
 disconnect_target() {
@@ -656,7 +649,6 @@ disconnect_target() {
 	}
 	btctl disconnect "$mac"
 	maybe_fallback_from_disconnected_bt
-	refresh_waybar_vol
 }
 
 remove_target() {

@@ -6,7 +6,7 @@
 #   koffein 2h         → tænd, sluk selv om 2 timer (2h / 45m / 30s / 90 = minutter)
 #   koffein -v on      → hold også skærmen tændt (fuld caffeine)
 #   koffein off        → slut
-#   koffein status     → menneske-linje i terminal, waybar-JSON når stdout ikke er tty
+#   koffein status     → menneske-linje i terminal, JSON når stdout ikke er tty
 #
 # Standard blokerer logind's låg-håndtering (HandleLidSwitch=suspend på batteri),
 # men lader hypridle slukke skærmen efter 5 min. -v tager også en idle-lås, som
@@ -23,7 +23,6 @@ set -euo pipefail
 
 RUNTIME="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
 STATE="$RUNTIME/koffein.state"
-WAYBAR_SIGNAL=5
 
 PID=""
 MODE=""
@@ -50,11 +49,8 @@ running() {
 	return 1
 }
 
-signal_waybar() {
-	# Baren er quickshell; waybar-signalet bliver staaende, saa den gamle bar
-	# stadig virker hvis man starter den som fallback.
+signal_pillen() {
 	qs -c ringdal ipc call koffein refresh &>/dev/null || true
-	pkill -RTMIN+"$WAYBAR_SIGNAL" waybar 2>/dev/null || true
 }
 
 # "2h" / "45m" / "30s" / "90" (bare tal = minutter) → sekunder
@@ -91,7 +87,7 @@ stop() {
 		kill "$PID" 2>/dev/null || true
 	fi
 	rm -f "$STATE"
-	signal_waybar
+	signal_pillen
 }
 
 start() {
@@ -126,7 +122,7 @@ start() {
 	fi
 
 	printf 'PID=%s\nMODE=%s\nUNTIL=%s\n' "$pid" "$mode" "$until_" >"$STATE"
-	signal_waybar
+	signal_pillen
 }
 
 human_status() {
@@ -171,7 +167,7 @@ json_status() {
 	fi
 }
 
-# Kun støj i terminalen, ikke når waybar kalder.
+# Kun støj i terminalen, ikke når pillen kalder.
 say_off() {
 	if [[ -t 1 ]]; then
 		printf 'koffein: slukket\n'
@@ -204,7 +200,7 @@ main() {
 		if [[ -t 1 ]]; then human_status; else json_status; fi
 		;;
 	signal)
-		signal_waybar
+		signal_pillen
 		;;
 	off)
 		stop

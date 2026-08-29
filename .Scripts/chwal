@@ -98,8 +98,6 @@ EOF
    hyprctl reload &>/dev/null
    # quickshell laeser ~/.cache/wal/colors.json; sig til med det samme
    qs -c ringdal ipc call theme reload &>/dev/null || true
-   # waybar picks up ~/.cache/wal/colors-waybar.css (fallback-baren)
-   pkill -USR2 waybar 2>/dev/null || true
    # hyprwhspr Mic-OSD theme (if present)
    if [[ -x $HOME/.Scripts/hyprwhspr-theme-from-wal ]]; then
       "$HOME/.Scripts/hyprwhspr-theme-from-wal" &>/dev/null || true

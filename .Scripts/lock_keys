@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Disable/enable laptop keyboard, trackpoint, and touchpad (Hyprland).
-# Wayland stand-in for the old xinput lock_keys + runbar "kbd: enabled/disabled".
+# Wayland stand-in for the old xinput lock_keys.
 #
 # Usage: lock_keys {toggle|enable|disable|status|ensure|signal}
-# Flag file ~/.keylock holds "enable" or "disable" (same as runbar).
-# Waybar: custom/keylock (signal RTMIN+4). Click → toggle.
+# Flag file ~/.keylock holds "enable" or "disable". Pillen ser paa filen selv
+# (services/Keylock.qml) og faar desuden besked via `ipc call keylock refresh`.
 # Toggle from ThinkPad ACPI hotkey (acpid_events) — not Super+Shift+K.
 # Disable = devices off, screen stays on (no locker).
 # Enable = hyprlock auth (password / fingerprint) so unlock is not free.
@@ -13,7 +13,6 @@
 set -euo pipefail
 
 FLAG="${HOME}/.keylock"
-WAYBAR_SIGNAL=4
 RUNTIME="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
 AUTHING="${RUNTIME}/lock_keys.authing"
 BUSY="${RUNTIME}/lock_keys.busy"
@@ -56,11 +55,8 @@ ensure_session_env() {
 
 ensure_session_env
 
-signal_waybar() {
-	# Baren er quickshell; waybar-signalet bliver staaende, saa den gamle bar
-	# stadig virker hvis man starter den som fallback.
+signal_pillen() {
 	qs -c ringdal ipc call keylock refresh &>/dev/null || true
-	pkill -RTMIN+"$WAYBAR_SIGNAL" waybar 2>/dev/null || true
 }
 
 current_state() {
@@ -103,7 +99,7 @@ in_debounce() {
 }
 
 # Keyboard temporarily on for password; fingerprint works either way.
-# AUTHING is held for the whole enable/disable command so waybar status
+# AUTHING is held for the whole enable/disable command so `status`
 # cannot yank devices back to disabled between auth and apply_state.
 screen_auth() {
 	ensure_session_env
@@ -157,7 +153,7 @@ cmd_disable() {
 
 	# No locker on disable — screen stays on; only input devices go off.
 	apply_state disable
-	signal_waybar
+	signal_pillen
 	notify-send -a lock_keys -t 2000 "kbd" "disabled" 2>/dev/null || true
 	mark_debounce
 
@@ -176,7 +172,7 @@ cmd_enable() {
 
 	if [[ $(current_state) == enable ]]; then
 		apply_state enable
-		signal_waybar
+		signal_pillen
 		release_busy
 		trap - EXIT
 		return 0
@@ -184,13 +180,13 @@ cmd_enable() {
 
 	if ! screen_auth; then
 		apply_state disable
-		signal_waybar
+		signal_pillen
 		release_busy
 		trap - EXIT
 		return 1
 	fi
 	apply_state enable
-	signal_waybar
+	signal_pillen
 	notify-send -a lock_keys -t 2000 "kbd" "enabled" 2>/dev/null || true
 	mark_debounce
 
@@ -243,7 +239,7 @@ enable) cmd_enable ;;
 disable) cmd_disable ;;
 status) cmd_status ;;
 ensure) cmd_ensure ;;
-signal) signal_waybar ;;
+signal) signal_pillen ;;
 *)
 	printf 'usage: %s {toggle|enable|disable|status|ensure|signal}\n' "${0##*/}" >&2
 	exit 2

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Platform performance mode for waybar + fuzzel.
+# Platform performance mode. Pillen kalder `status` naar ydelses-siden aabner.
 # Usage: perf-mode {status|menu|set <mode>|signal}
 #
 # Modes map to ACPI platform_profile (+ matching amd-pstate EPP):
@@ -19,7 +19,6 @@ MANUAL_FLAG="$RUNTIME/perf-mode.manual"
 POWER_FLAG="$RUNTIME/perf-mode.power"
 APPLY=/usr/local/libexec/ringdal-perf-apply
 ASKPASS=/home/ringdal/.Scripts/zenity-askpass-password
-WAYBAR_SIGNAL=3
 
 on_battery() {
 	local online ac st
@@ -78,11 +77,8 @@ label_for() {
 	esac
 }
 
-signal_waybar() {
-	# Baren er quickshell; waybar-signalet bliver staaende, saa den gamle bar
-	# stadig virker hvis man starter den som fallback.
+signal_pillen() {
 	qs -c ringdal ipc call perf refresh &>/dev/null || true
-	pkill -RTMIN+"$WAYBAR_SIGNAL" waybar 2>/dev/null || true
 }
 
 # Prefer root helper (NOPASSWD); fall back to askpass+PTY for one-shot.
@@ -211,7 +207,7 @@ cmd_set() {
 	esac
 	printf '%s\n' "$(power_src)" >"$POWER_FLAG"
 	sudo_apply "$apply_arg"
-	signal_waybar
+	signal_pillen
 	notify-send -a perf-mode -t 2000 "perf" "mode → $(current_platform) (epp $(current_epp))" 2>/dev/null || true
 }
 
@@ -301,7 +297,7 @@ case "${1:-}" in
 status) cmd_status ;;
 menu) cmd_menu ;;
 set) cmd_set "${2:-}" ;;
-signal) signal_waybar ;;
+signal) signal_pillen ;;
 *)
 	printf 'usage: %s {status|menu|set <mode>|signal}\n' "${0##*/}" >&2
 	exit 2

@@ -36,12 +36,12 @@ hl.monitor({
 -------------------
 
 hl.on("hyprland.start", function()
-    -- Baren: quickshell (~/.config/quickshell/ringdal). Waybar-configen
-    -- ligger stadig som fallback: pkill qs && waybar &
+    -- Fladen: pillen (~/.config/quickshell/ringdal). Waybar og dunst er vaek
+    -- (afinstalleret 29-08) -- der er ingen fallback laengere, og det er med
+    -- vilje: to bare der begge kunne staa der var to steder at rette.
+    -- Beskederne kommer fra pillen selv (services/Notifs.qml); der kan kun
+    -- vaere én paa org.freedesktop.Notifications.
     hl.exec_cmd("qs -c ringdal")
-    -- Beskeder kommer fra pillen nu (services/Notifs.qml). dunst maa ikke
-    -- starte: der kan kun vaere én paa org.freedesktop.Notifications, og den
-    -- der naar det foerst vinder. Vil du tilbage: `dunst &` efter `pkill qs`.
     -- Baggrunden: awww (afloeste hyprpaper 28-08). Gaar gennem et script, fordi
     -- awww holder tilstanden i daemonen og ikke i en configfil -- den skal
     -- spoerges om det sidste billede, og den skal vaere oppe foerst.
@@ -97,7 +97,11 @@ hl.config({
         --dim_strength     = 0.3,
 
         blur = {
-            enabled = false,
+            enabled = true,
+				size = 5,
+				passes = 4,
+				ignore_opacity = false,
+				new_optimizations = true,
         },
 
         shadow = {
@@ -189,7 +193,8 @@ hl.bind(mod .. " + O", hl.dsp.exec_cmd(browser))
 hl.bind(mod .. " + W", hl.dsp.exec_cmd(browserAlt))
 hl.bind(mod .. " + E", hl.dsp.exec_cmd(fileManager))
 -- Applikationsaabner: pillen, ikke fuzzel. Samme tast, ny flade.
--- fuzzel_drun ligger stadig i ~/.Scripts som fallback.
+-- fuzzel_drun ligger stadig i ~/.Scripts; fuzzel bruges ogsaa af fuzzel_nm
+-- naar der skal skrives en wifi-kode, saa den bliver.
 hl.bind(mod .. " + D", hl.dsp.exec_cmd("qs -c ringdal ipc call launcher toggle"))
 -- Clipboard history (bspwm: super + Insert → clipmenu). Aabner pillen; den
 -- kalder cliphist gennem fuzzel_clip, som stadig virker fra en terminal.
@@ -237,7 +242,7 @@ hl.bind(mod .. " + SHIFT + Escape", hl.dsp.exit())
 hl.bind(mod .. " + ALT + SHIFT + Q", hl.dsp.exec_cmd("qs -c ringdal ipc call pill sluk"))
 -- Next wallpaper / wal palette
 hl.bind(mod .. " + ALT + SHIFT + W", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scripts/chwal"))
--- Hold maskinen vaagen, ogsaa med lukket laag (waybar viser "koffein" naar den er taendt)
+-- Hold maskinen vaagen, ogsaa med lukket laag (pillen viser "koffein" naar den er taendt)
 hl.bind(mod .. " + ALT + SHIFT + K", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scripts/koffein toggle"))
 
 -- Bluetooth / WiFi (old sxhkd: Super+Shift+B / Super+Shift+W)
@@ -300,17 +305,18 @@ hl.bind("ALT + SHIFT + L", hl.dsp.window.move({ x = 20, y = 0, relative = true }
 hl.bind(mod .. " + mouse:272", hl.dsp.window.drag(), { mouse = true })
 hl.bind(mod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
 
--- Volume (RTMIN+1 refreshes waybar custom/vol)
-hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("pamixer -i 5; pkill -RTMIN+1 waybar"), { locked = true, repeating = true })
-hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("pamixer -d 5; pkill -RTMIN+1 waybar"), { locked = true, repeating = true })
-hl.bind("XF86AudioMute", hl.dsp.exec_cmd("pamixer -t; pkill -RTMIN+1 waybar"), { locked = true })
+-- Volume. Ingen besked til fladen: pillen laeser Pipewire direkte og ser det selv.
+hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("pamixer -i 5"), { locked = true, repeating = true })
+hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("pamixer -d 5"), { locked = true, repeating = true })
+hl.bind("XF86AudioMute", hl.dsp.exec_cmd("pamixer -t"), { locked = true })
 hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scripts/pwrbtnlght mic-toggle"), { locked = true })
-hl.bind(mod .. " + XF86AudioRaiseVolume", hl.dsp.exec_cmd("pamixer --allow-boost -i 5; pkill -RTMIN+1 waybar"), { locked = true })
-hl.bind(mod .. " + XF86AudioLowerVolume", hl.dsp.exec_cmd("pamixer --allow-boost -d 5; pkill -RTMIN+1 waybar"), { locked = true })
+hl.bind(mod .. " + XF86AudioRaiseVolume", hl.dsp.exec_cmd("pamixer --allow-boost -i 5"), { locked = true })
+hl.bind(mod .. " + XF86AudioLowerVolume", hl.dsp.exec_cmd("pamixer --allow-boost -d 5"), { locked = true })
 
--- Brightness (sysfs siger ikke selv til, saa baren skal vaekkes; RTMIN+2 er waybar-fallback)
-hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("light -A 5; qs -c ringdal ipc call backlight refresh; pkill -RTMIN+2 waybar"), { locked = true, repeating = true })
-hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("light -U 5; qs -c ringdal ipc call backlight refresh; pkill -RTMIN+2 waybar"), { locked = true, repeating = true })
+-- Brightness. Sysfs siger ikke selv til, saa pillen SKAL vaekkes her -- den
+-- poller ikke laengere (Config.backlightInterval = 0).
+hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("light -A 5; qs -c ringdal ipc call backlight refresh"), { locked = true, repeating = true })
+hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("light -U 5; qs -c ringdal ipc call backlight refresh"), { locked = true, repeating = true })
 
 ----------------------
 ---- WINDOW RULES ----
