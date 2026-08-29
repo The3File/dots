@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Rewrite agent shell sudo → claude-sudo-run so zenity shows the real argv.
+"""Rewrite agent shell sudo → claude-sudo-run so the pill shows the real argv.
 
 Used by:
   - Claude Code: PreToolUse Bash (~/.claude/settings.json)
@@ -20,13 +20,22 @@ HELPER = "/home/ringdal/.Scripts/claude-sudo-run"
 # Only where a command can actually START: string start, after a separator,
 # or on a fresh line. Matching after *any* whitespace was wrong — it also hit
 # the word inside heredoc bodies and quoted strings, so writing a file that
-# merely mentioned sudo rewrote the prose, and `ipc call sudo state` became a
-# call to a target that does not exist. Both cost an evening.
+# merely mentioned sudo rewrote the prose, and a call to the shell's own sudo
+# target silently became a call to something that does not exist. Both cost an
+# evening.
+#
+# The backtick used to be in this class too, for legacy command substitution.
+# That was the same bug wearing a different hat: a backtick immediately before
+# the word is far more often a markdown code span than a subshell, so every
+# note written ABOUT this system got rewritten while it was being written —
+# including the line in AGENTS.md that documents it. Backtick substitution is
+# obsolete anyway; $() is what anything written today uses, and it is covered
+# by the "(" branch.
 #
 # Trade-off: `time sudo x` and `env A=1 sudo x` are no longer rewritten. They
 # then hit the terminal without an askpass and fail loudly, which is the safe
 # way to be wrong. Still open: a heredoc line that begins with sudo.
-COMMAND_POSITION = r"(^|[;|&`(\n]\s*)sudo\b"
+COMMAND_POSITION = r"(^|[;|&(\n]\s*)sudo\b"
 
 
 def rewrite_command(command: str) -> str | None:

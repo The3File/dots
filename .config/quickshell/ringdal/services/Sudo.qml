@@ -10,21 +10,40 @@ import qs
 // Det bor to steder, og delingen er den samme som i resten af fladen: kroppen
 // er det Filip GOER, output-pillen er det der SKER for ham.
 //
-//   finger  maskinen spoerger. Den lander i output-pillen ved siden af
-//           kroppen, som en besked -- for det er ikke noget han er i gang
-//           med, og det maa ikke skubbe det han laver til side. Ingen menu,
-//           intet tastatur, ingen knap at trykke ja paa: fingeren ER svaret.
+//   vent    spoergsmaalet staar og venter paa at han er der. Ingen laeser er
+//           taendt, ingen tid loeber. Det maa staa saa laenge det skal.
+//   finger  han har trykket paa stroemknappen, og laeseren er aaben. Begge
+//           dele ligger i output-pillen ved siden af kroppen, som en besked --
+//           for det er ikke noget han er i gang med, og det maa ikke skubbe
+//           det han laver til side.
 //   kode    fingeraftrykket gav op, og der skal tastes noget. Det er input,
 //           og saa hoerer det hjemme i kroppen -- samme felt som wifi-koden.
 //
-// Fingeren er samtykket. Der var foer et ja/nej og et fingeraftryk bagefter;
-// det er den samme sikkerhed spurgt to gange, og det foerste spoergsmaal er
-// praecis det man laerer at klikke vaek uden at laese.
+// Hvorfor der er et tryk FOER laeseren: fingeraftryk kan ikke vente. PAM
+// aabner laeseren i faa sekunder og giver op, og staar Filip ude i koekkenet,
+// er spoergsmaalet doedt inden han naar tilbage. Trykket er ikke et samtykke
+// -- det giver ingenting, og det kan ikke give root -- det siger kun "jeg er
+// her, aabn den nu". Fingeren er stadig svaret.
+//
+// Trykket er stroemknappen, fordi laeseren SIDDER i stroemknappen paa den her
+// maskine. Saa er det ét sted at roere: han trykker, og fingeren ligger
+// allerede hvor den skal.
 //
 // Spoergsmaalet kommer udefra (~/.Scripts/claude-sudo-run) og svaret skal
 // tilbage til et bash-script. Derfor to IPC-kald: rejs vender tilbage med det
-// samme, og svaret hentes indtil der staar andet end "venter". Et kald der
-// blev haengende, mens Filip taenkte sig om, ville fryse hele shellen imens.
+// samme, og svaret hentes indtil der staar andet end "vent". Et kald der blev
+// haengende, mens Filip taenkte sig om, ville fryse hele shellen imens.
+//
+// Hvert spoergsmaal har et nummer, og et nyt spoergsmaal overskriver altid det
+// gamle. Foer sagde pillen "optaget" og lod kalderen falde tilbage til en
+// zenity-dialog -- og saa var ét haengende spoergsmaal (en agent der blev
+// draebt, foer den naaede at rydde op) nok til at hver eneste sudo resten af
+// dagen aabnede en anden flade end pillen. Nu kan et gammelt spoergsmaal ikke
+// spaerre for et nyt: den gamle ejer faar "vaek" og lukker sig selv.
+//
+// Der er ingen fallback laengere. Kan pillen ikke spoerge, koerer kommandoen
+// ikke. Et root-spoergsmaal, der pludselig staar et andet sted end der hvor
+// han kigger, er vaerre end et der ikke bliver stillet.
 //
 // Tre udfald, ikke to: ja, nej, og "han svarede aldrig". Det sidste skal
 // betyde nej -- en privilegeret kommando maa aldrig slippe igennem, fordi et
@@ -35,6 +54,12 @@ Singleton {
     // Kommandoen der ligger til godkendelse. Tom = ingen forespoergsel.
     property string cmd: ""
     property string kind: ""
+    // Nummeret paa det spoergsmaal der staar nu. Tomt = ingen. Kalderen faar
+    // det udleveret naar den rejser, og skal vise det frem hver gang den
+    // spoerger til svaret -- ellers kan den ikke vide, om den taler om sit
+    // eget spoergsmaal eller om et der har afloest det.
+    property string nr: ""
+    property int _seq: 0
     // Staar tom indtil der er svaret. done skiller "intet svar endnu" fra
     // "svarede med en tom kode".
     property string result: ""
@@ -44,21 +69,49 @@ Singleton {
     property bool accepted: false
 
     readonly property bool pending: root.kind !== "" && !root.done
-    // Det output-pillen gaar efter: spoergsmaalet mens det staar, og
+    // Ventende og aaben laeser ser ens ud udefra: begge er spoergsmaalet, mens
+    // det staar. Det output-pillen gaar efter -- spoergsmaalet, og
     // kvitteringen lige efter.
-    readonly property bool showing: root.kind === "finger" && (root.pending || root.accepted)
+    readonly property bool showing:
+        (root.kind === "vent" || root.kind === "finger")
+        && (root.pending || root.accepted)
 
     // Foerst sandt naar kode-feltet faktisk staar der. Uden det ville
     // Menu.open()'s egen nulstilling af feltet blive laest som "fortrudt",
     // og spoergsmaalet lukke sig selv i samme oejeblik det blev rejst.
     property bool _asked: false
 
-    function finger(command: string): void {
-        root._rejs("finger", command);
+    // Rejs. Overskriver altid -- se noten oeverst.
+    function rejs(command: string): string {
+        root._seq += 1;
+        root.nr = String(root._seq);
+        root.cmd = command;
+        root.kind = "vent";
+        root.result = "";
+        root.done = false;
+        root.accepted = false;
+        root._asked = false;
+        kvittering.stop();
+        if (Menu.active && Menu.title === "sudo") Menu.close();
+        return root.nr;
+    }
+
+    // "Jeg er her." Aabner laeseren, og ikke en tomme mere: det er ikke et ja,
+    // og et tryk ved en fejl koster ingenting -- fingeren mangler stadig.
+    function klar(): bool {
+        if (root.kind !== "vent" || root.done) return false;
+        root.kind = "finger";
+        return true;
     }
 
     function kode(command: string): void {
-        root._rejs("kode", command);
+        root.cmd = command;
+        root.kind = "kode";
+        root.result = "";
+        root.done = false;
+        root.accepted = false;
+        root._asked = false;
+        kvittering.stop();
         Launcher.close();
         Pill.modal(Pages.sudoPage());
         Menu.ask("adgangskode", true, text => root.besvar("ja:" + text));
@@ -87,6 +140,7 @@ Singleton {
     function afbryd(): void {
         root.kind = "";
         root.cmd = "";
+        root.nr = "";
         root.result = "";
         root.done = false;
         root.accepted = false;
@@ -100,16 +154,6 @@ Singleton {
     function fortrudt(): void {
         if (root.pending && root.kind === "kode" && Menu.prompt === null)
             Menu.close();
-    }
-
-    function _rejs(k: string, command: string): void {
-        root.cmd = command;
-        root.kind = k;
-        root.result = "";
-        root.done = false;
-        root.accepted = false;
-        root._asked = false;
-        kvittering.stop();
     }
 
     Timer {
@@ -142,61 +186,79 @@ Singleton {
     IpcHandler {
         target: "sudo"
 
-        // Rejser et spoergsmaal og vender tilbage med det samme. "optaget"
-        // hvis der allerede ligger et ubesvaret -- saa falder kalderen tilbage
-        // til zenity i stedet for at overskrive noget Filip staar og laeser.
-        function finger(command: string): string {
-            if (root.pending) return "optaget";
-            root.finger(command);
-            return "spurgt";
+        // Rejser et spoergsmaal og vender tilbage med nummeret paa det.
+        function rejs(command: string): string {
+            return root.rejs(command);
         }
-        // Et fingeraftryk der staar og venter, maa gerne vige for koden: det
-        // er ikke et konkurrerende spoergsmaal, det er det SAMME spoergsmaal
-        // der er gaaet videre til naeste led, fordi laeseren gav op. Sagde vi
-        // "optaget" her, endte det med "no password was provided" — sudo
-        // spurgte om en kode, som pillen naegtede at vise.
-        function kode(command: string): string {
-            if (root.pending && root.kind !== "finger") return "optaget";
+
+        // Stroemknappen. Svarer "ja" hvis der var noget at aabne, saa den der
+        // trykkede kan afgoere om trykket betoed noget -- én knap, én mening,
+        // og pillen ved selv hvad der er i gang. Samme moenster som
+        // `pill afbryd`.
+        function klar(): string {
+            return root.klar() ? "ja" : "ingenting";
+        }
+
+        // Fingeraftrykket gav op, og der skal tastes. Samme spoergsmaal, der
+        // gaar videre til naeste led -- derfor kraever den kun at nummeret
+        // stadig passer, ikke at der er ryddet op foerst. Sagde vi nej her,
+        // endte det med "sudo: no password was provided": sudo spurgte om en
+        // kode, som pillen naegtede at vise.
+        function kode(nr: string, command: string): string {
+            if (nr !== root.nr || root.nr === "") return "vaek";
             root.kode(command);
             return "spurgt";
         }
 
         // Kaldes af sudo-pty i det oejeblik PAM tog imod fingeren.
-        function godkendt(): string {
+        function godkendt(nr: string): string {
+            if (nr !== root.nr || root.nr === "") return "vaek";
             root.godkendt();
             return "kvitteret";
         }
 
-        // "ingenting" og ikke "nej" naar der ikke staar noget: vagten i
-        // claude-sudo-run bliver ved med at spoerge, mens kommandoen koerer,
-        // og et "nej" der bare betoed "der er ikke noget spoergsmaal" ville
-        // faa den til at draebe en kommando han lige havde godkendt.
+        // Svaret paa ét bestemt spoergsmaal. "vaek" betyder at et nyt har
+        // afloest det -- saa er der ingen der venter paa det her laengere.
         //
         // Svaret bliver STAAENDE. Det plejede at blive ryddet ved foerste
         // hentning, og det var en fejl med taender i: naar fingeraftrykket
-        // fejler, staar der to og spoerger paa én gang — vagten og askpass —
-        // og saa vandt den ene kapløbet om adgangskoden, mens den anden fik
-        // "ingenting" og meldte afbud. Nu ser de det samme, og et nyt
-        // spoergsmaal nulstiller alligevel selv.
-        function svar(): string {
-            if (root.kind === "") return "ingenting";
+        // fejler, staar der to og spoerger paa én gang -- vagten og askpass --
+        // og saa vandt den ene kaploebet om adgangskoden, mens den anden fik
+        // ingenting og meldte afbud. Nu ser de det samme.
+        function svar(nr: string): string {
+            if (nr !== root.nr || root.nr === "") return "vaek";
+            if (root.done) return root.result;
+            return root.kind === "vent" ? "vent" : "klar";
+        }
+
+        // Vagtens vej ind. Den koerer i baggrunden hele vejen igennem og skal
+        // kun vide én ting: blev der sagt nej? Derfor gaar adgangskoden ALDRIG
+        // gennem den her -- den har ikke brug for den til noget, og en kode
+        // der ligger i en baggrundsproces er en kode for meget.
+        //
+        // "slut" betyder hold op med at holde oeje: enten er der svaret ja, og
+        // saa koerer kommandoen nu og maa ikke draebes, eller ogsaa er
+        // spoergsmaalet vaek.
+        function vagt(nr: string): string {
+            if (nr !== root.nr || root.nr === "") return "slut";
             if (!root.done) return "venter";
-            return root.result;
+            return root.result === "nej" ? "nej" : "slut";
         }
 
-        // Blev der sagt nej? Det eneste vagten i claude-sudo-run har brug for
-        // at vide — og saa slipper en adgangskode for at gaa gennem en
-        // baggrundsproces, der ikke skal bruge den til noget.
-        function afvist(): string {
-            return (root.done && root.result === "nej") ? "ja" : "nej";
+        // Ryd op -- men kun sit eget. Uden nummeret kunne en oprydning fra et
+        // forloeb, der forlaengst var afloest, taske et spoergsmaal Filip lige
+        // havde faaet stillet.
+        function afbryd(nr: string): string {
+            if (nr !== root.nr || root.nr === "") return "vaek";
+            root.afbryd();
+            return "ryddet";
         }
-
-        function afbryd(): void { root.afbryd(); }
 
         function state(): string {
-            if (root.kind === "") return "ingenting";
-            if (root.accepted) return "godkendt";
-            return root.done ? "svaret" : `venter (${root.kind})`;
+            if (root.nr === "") return "ingenting";
+            if (root.accepted) return `godkendt (${root.nr})`;
+            if (root.done) return `svaret (${root.nr})`;
+            return `venter (${root.kind}, ${root.nr})`;
         }
     }
 }

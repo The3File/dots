@@ -1,84 +1,87 @@
 #!/usr/bin/env bash
 # Stil et root-spoergsmaal i pillen.
 #
-# Blokerende (rejser og venter paa svaret):
-#   pill-sudo kode "<kommando>"        -> "ja:<adgangskode>" | "nej"
+#   pill-sudo rejs "<kommando>"    -> <nummer>        rejser, vender straks tilbage
+#   pill-sudo vent <nr>            -> klar|nej|vaek   venter UDEN tidsgraense
+#   pill-sudo kode <nr> "<kmd>"    -> ja:<kode>|nej   aabner kodefeltet og venter
+#   pill-sudo vagt <nr>            -> venter|nej|slut ét opslag, aldrig en kode
+#   pill-sudo afbryd <nr>
 #
-# Raa (til den der selv styrer forloebet — fingeraftrykket):
-#   pill-sudo rejs finger|kode "<kommando>"
-#   pill-sudo hent                     -> "venter" | "ja" | "nej" | "ingenting"
-#   pill-sudo afvist                   -> "ja" hvis der blev sagt nej
-#   pill-sudo afbryd
-#
-# Exit 2 = pillen kunne ikke spoerge (den koerer ikke, eller den staar allerede
-# med et ubesvaret spoergsmaal). Kalderen skal saa falde tilbage til zenity --
-# et root-spoergsmaal maa aldrig forsvinde bare fordi shellen er nede.
+# Exit 2 = pillen kunne ikke spoerge. Der er INGEN fallback: falder vi tilbage
+# til en zenity-dialog, staar root-spoergsmaalet et andet sted end der hvor han
+# kigger, og det er vaerre end at kommandoen ikke koerer. Kalderen skal fejle.
 #
 # Hvorfor rejsning og svar er to kald og ikke ét: et IPC-kald der ventede paa et
 # menneske, ville blokere hele Quickshells traad imens. Derfor rejser vi
 # spoergsmaalet, vender tilbage med det samme, og henter svaret indtil der staar
-# andet end "venter".
+# andet end "vent".
+#
+# `vent` har med vilje ingen deadline. Det er hele pointen: spoergsmaalet skal
+# kunne staa til han kommer tilbage til maskinen. Foer laa der 120 sekunder her,
+# og saa var svaret "nej", hvis han var ude i koekkenet. Den der kalder, har sin
+# egen graense, og den er den rigtige at have.
 
 set -uo pipefail
 
 QS=(qs -c ringdal ipc call sudo)
-timeout=${PILL_SUDO_TIMEOUT:-120}
+kode_timeout=${PILL_SUDO_TIMEOUT:-120}
 tick=0.15
 
 brug() {
-	echo "brug: pill-sudo kode <kommando> | rejs finger|kode <kommando> | hent | afvist | afbryd" >&2
+	echo "brug: pill-sudo rejs <kmd> | vent <nr> | kode <nr> <kmd> | vagt <nr> | afbryd <nr>" >&2
 	exit 2
 }
 
-rejs() { # <slags> <kommando>
-	local slags=$1 cmd=$2 raise raised
-	case $slags in
-	kode) raise=kode ;;
-	finger) raise=finger ;;
-	*) echo "ukendt: $slags" >&2; return 2 ;;
-	esac
-	raised=$("${QS[@]}" "$raise" "$cmd" 2>/dev/null) || return 2
-	[[ $raised == spurgt ]] || return 2
+# Bloker indtil svaret paa <nr> er noget andet end <vente-tilstand>.
+# deadline tom = vent for evigt. Exit 3 = tiden loeb ud.
+poll() { # <nr> <deadline|""> <vente-tilstand>
+	local nr=$1 deadline=$2 vente=$3 svar
+	while :; do
+		if [[ -n $deadline ]] && ((SECONDS >= deadline)); then
+			return 3
+		fi
+		svar=$("${QS[@]}" svar "$nr" 2>/dev/null) || return 2
+		if [[ $svar != "$vente" ]]; then
+			printf '%s\n' "$svar"
+			return 0
+		fi
+		sleep "$tick"
+	done
 }
 
 [[ $# -ge 1 ]] || brug
 
 case $1 in
 rejs)
-	[[ $# -eq 3 ]] || brug
-	rejs "$2" "$3"
+	[[ $# -eq 2 ]] || brug
+	nr=$("${QS[@]}" rejs "$2" 2>/dev/null) || exit 2
+	[[ -n $nr ]] || exit 2
+	printf '%s\n' "$nr"
+	;;
+vent)
+	[[ $# -eq 2 ]] || brug
+	poll "$2" "" vent
 	exit $?
 	;;
-hent)
-	"${QS[@]}" svar 2>/dev/null || exit 2
-	exit 0
-	;;
-afvist)
-	"${QS[@]}" afvist 2>/dev/null || exit 2
-	exit 0
+vagt)
+	[[ $# -eq 2 ]] || brug
+	"${QS[@]}" vagt "$2" 2>/dev/null || exit 2
 	;;
 afbryd)
-	"${QS[@]}" afbryd >/dev/null 2>&1 || exit 2
-	exit 0
+	[[ $# -eq 2 ]] || brug
+	"${QS[@]}" afbryd "$2" >/dev/null 2>&1 || exit 2
 	;;
 kode)
-	[[ $# -eq 2 ]] || brug
-	rejs "$1" "$2" || exit 2
+	[[ $# -eq 3 ]] || brug
+	raised=$("${QS[@]}" kode "$2" "$3" 2>/dev/null) || exit 2
+	[[ $raised == spurgt ]] || exit 2
+	# Her staar han allerede ved maskinen -- fingeren blev proevet foerst.
+	# Derfor er en graense i orden paa koden: et felt der staar for evigt, er
+	# bare et felt der er glemt.
+	if ! poll "$2" $((SECONDS + kode_timeout)) klar; then
+		"${QS[@]}" afbryd "$2" >/dev/null 2>&1 || true
+		echo nej
+	fi
 	;;
 *) brug ;;
 esac
-
-deadline=$((SECONDS + timeout))
-while ((SECONDS < deadline)); do
-	answer=$("${QS[@]}" svar 2>/dev/null) || exit 2
-	if [[ $answer != venter ]]; then
-		printf '%s\n' "$answer"
-		exit 0
-	fi
-	sleep "$tick"
-done
-
-# Han svarede ikke. Ryd spoergsmaalet vaek, saa pillen ikke staar tilbage med
-# noget ingen venter paa laengere.
-"${QS[@]}" afbryd >/dev/null 2>&1 || true
-echo nej

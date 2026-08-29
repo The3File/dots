@@ -11,6 +11,11 @@ import qs.services
 // root -- man kan kun sige nej her. Hoejreklik afviser, praecis som paa en
 // besked; venstreklik goer med vilje ingenting.
 //
+// Nederste linje siger hvad der mangler, og kun det: foerst ham, saa fingeren,
+// saa kvitteringen. "Tryk paa stroemknappen" staar der, saa laenge der skal
+// vaere staaet -- det er dét skridt, der goer at spoergsmaalet kan vente paa
+// en der ikke er i rummet.
+//
 // Kommandoen staar ordret. Det er hele grunden til at spoerge, saa den maa
 // hverken forkortes eller skrives om.
 Item {
@@ -37,7 +42,11 @@ Item {
         }
 
         Line {
-            text: Sudo.accepted ? "godkendt" : "roer laeseren"
+            text: {
+                if (Sudo.accepted) return "godkendt";
+                if (Sudo.kind === "vent") return "tryk på strømknappen";
+                return "rør læseren";
+            }
             color: Sudo.accepted ? Theme.stateGood : Theme.color8
         }
     }

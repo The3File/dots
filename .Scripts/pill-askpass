@@ -5,28 +5,29 @@
 # askpass: print the password on stdout, or exit non-zero to cancel.
 #
 # The command is shown above the field for the same reason it is shown in the
-# first question — the fingerprint prompt is where people stop reading, so the
+# first question -- the fingerprint prompt is where people stop reading, so the
 # argv has to still be on screen when the password is typed.
 #
-# Falls back to zenity-askpass if the pill cannot ask. A password prompt that
-# silently fails to appear is the worst outcome here: sudo would just sit and
-# wait on a terminal nobody is looking at.
+# No zenity fallback. Kan pillen ikke spoerge, siger vi nej: sudo fejler
+# tydeligt i stedet for at kaste et kodefelt op paa en flade, han ikke kigger
+# paa.
 
 set -uo pipefail
 
 cmd=${SUDO_DISPLAY_CMD:-${SUDO_COMMAND:-}}
 cmd=$(printf '%s' "$cmd" | tr -s '[:space:]' ' ' | sed 's/^ //;s/ $//')
 
-if answer=$(/home/ringdal/.Scripts/pill-sudo kode "$cmd"); then
-	case $answer in
-	ja:*)
-		printf '%s\n' "${answer#ja:}"
-		exit 0
-		;;
-	*)
-		exit 1
-		;;
-	esac
-fi
+nr=${SUDO_PILL_NR:-}
+[[ -n $nr ]] || exit 1
 
-exec /home/ringdal/.Scripts/zenity-askpass "$@"
+answer=$(/home/ringdal/.Scripts/pill-sudo kode "$nr" "$cmd") || exit 1
+
+case $answer in
+ja:*)
+	printf '%s\n' "${answer#ja:}"
+	exit 0
+	;;
+*)
+	exit 1
+	;;
+esac

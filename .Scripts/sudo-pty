@@ -54,6 +54,12 @@ def main() -> int:
         return 1
 
     qs = shutil.which("qs") if os.environ.get("SUDO_PILL") == "1" else None
+    # The receipt has to name the question it is confirming. Without it a slow
+    # "godkendt" could land on a question that had already been replaced, and
+    # turn someone else's standing question green.
+    nr = os.environ.get("SUDO_PILL_NR", "")
+    if not nr:
+        qs = None
 
     # Keep the caller's real stdio before pty.fork() replaces it in the child.
     saved = [os.dup(0), os.dup(1), os.dup(2)]
@@ -124,7 +130,7 @@ def main() -> int:
                     # Fire and forget: the pill saying "godkendt" must never be
                     # able to hold up the command it is confirming.
                     subprocess.Popen(
-                        [qs, "-c", "ringdal", "ipc", "call", "sudo", "godkendt"],
+                        [qs, "-c", "ringdal", "ipc", "call", "sudo", "godkendt", nr],
                         stdout=subprocess.DEVNULL,
                         stderr=subprocess.DEVNULL,
                         start_new_session=True,

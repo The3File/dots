@@ -4,12 +4,16 @@
 #
 # ThinkPad ibm/hotkey 00001317 is the sole lock/unlock toggle for keylock
 # (no Super+Shift+K). Unlock still goes through hyprlock auth.
+#
+# button/power er "jeg er her" til pillens root-spoergsmaal og ellers
+# ingenting -- se handleren nedenfor. logind rager ikke ved tasten
+# (HandlePowerKey=ignore), saa det her er det eneste sted den betyder noget.
+#
 # Autostart: hyprland.lua hyprland.start
 
 set -euo pipefail
 
 LOCK_KEYS="${HOME}/.Scripts/lock_keys"
-BYE="${HOME}/.Scripts/alacritty_bye"
 LOCKSCREEN="${HOME}/.Scripts/lockscreen"
 RUNTIME="${XDG_RUNTIME_DIR:-/tmp}"
 LOCKFILE="${RUNTIME}/acpid_events.lock"
@@ -33,7 +37,20 @@ trap 'kill "${ACPI_PID}" 2>/dev/null || true' EXIT
 handler() {
 	case "$1" in
 	button/power)
-		"$BYE" &
+		# Stroemknappen ER fingerlaeseren paa den her maskine, og det er den
+		# eneste mening den har: staar der et root-spoergsmaal og venter i
+		# pillen, siger trykket "jeg er her" og aabner laeseren -- og fingeren
+		# ligger allerede hvor den skal. Trykket giver ingen adgang; det
+		# aabner kun vinduet, mens han staar der.
+		#
+		# Er der ikke noget spoergsmaal, sker der ingenting. Med vilje: knappen
+		# aabnede foer en sluk-menu, som han aldrig brugte, og en knap der kan
+		# slukke maskinen ved et uheld, er en knap der er i vejen. Sluk-menuen
+		# bor i pillen (Super+Alt+Shift+Q).
+		#
+		# Én knap, én mening -- hvad den betyder, afgoer pillen, praecis som
+		# `pill afbryd` paa Super+Escape.
+		qs -c ringdal ipc call sudo klar >/dev/null 2>&1 || true
 		;;
 	ibm/hotkey)
 		# ThinkPad firmware hotkey (survives lock_keys): lock + unlock.
