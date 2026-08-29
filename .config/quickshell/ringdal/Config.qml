@@ -115,10 +115,10 @@ Singleton {
     // output-pillen, og en historik man skal rulle i, er ikke laengere et
     // overblik.
     readonly property int notifyLines: _body.notifyLines ?? 6
-    // Hvor laenge der ventes foer grebet om musen tages paa aabneren. Se
-    // Body.qml -- Hyprland melder grebet ryddet med det samme, hvis vinduet
-    // ikke har faaet tastaturet endnu.
-    readonly property int grabDelay: _body.grabDelay ?? 200
+    // Kigget paa output-pillen: smallere og kortere end listen. Det er et kig,
+    // ikke en historik -- er der mere, staar der "+N mere", og saa klikker han.
+    readonly property int notifyPeekWidth: _body.notifyPeekWidth ?? 300
+    readonly property int notifyPeekLines: _body.notifyPeekLines ?? 3
     // Hvor laenge der maa gaa uden livstegn foer prikken holder op med at
     // aande. Jeg siger noget ved hvert faseskift, saa der er langt imellem.
     readonly property int agentStale: _body.agentStale ?? 240000

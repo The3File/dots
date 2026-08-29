@@ -75,10 +75,16 @@ Singleton {
         Menu.open(page);
     }
 
-    // Esc gaar ét lag tilbage foer den lukker -- man skal ikke miste hele
-    // menuen fordi man fortroed at gaa ind i wifi.
+    // Ét lag tilbage. Er der ikke flere lag, lukker den.
     function back(): void {
         if (Menu.active) Menu.back(); else root.close();
+    }
+
+    // Escape. Gaar ét lag tilbage, hvis han selv er gaaet et lag laengere ind
+    // end der hvor han kom ind -- ellers lukker den hele menuen. Se Menu.entry:
+    // en genvej aabner én ting, og escape skal lukke den samme ting igen.
+    function esc(): void {
+        if (Menu.active) Menu.esc(); else root.close();
     }
 
     // Afbryd det, der koerer lige nu. Én tast, én mening -- HVAD der bliver
@@ -118,6 +124,7 @@ Singleton {
         function close(): void { root.close(); }
         function toggle(): void { root.toggle(); }
         function back(): void { root.back(); }
+        function esc(): void { root.esc(); }
         function afbryd(): string { return root.afbryd(); }
         function wifi(): void { root.enter("wifi"); }
         function bluetooth(): void { root.enter("bt"); }

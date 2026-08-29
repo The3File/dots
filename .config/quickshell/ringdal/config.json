@@ -52,6 +52,8 @@
     "notifyLinger": 6000,
     "notifyMax": 20,
     "notifyLines": 6,
+    "notifyPeekWidth": 300,
+    "notifyPeekLines": 3,
     "menuLines": 10,
     "agentStale": 240000,
     "peekWidth": 240

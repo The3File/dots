@@ -63,8 +63,14 @@ Item {
         Launcher.close();
     }
 
-    function close(): void {
-        if (Launcher.active) Launcher.close(); else Pill.back();
+    // Escape. Rangordenen er den samme som resten af pillen bygger paa:
+    // aabneren foerst, saa menuen, og til sidst beskedlisten -- input foer
+    // output. Menuen afgoer selv om escape betyder ét lag tilbage eller helt
+    // ud; se Menu.entry.
+    function esc(): void {
+        if (Launcher.active) { Launcher.close(); return; }
+        if (Pill.opened) { Pill.esc(); return; }
+        if (Notifs.listing) Notifs.closeList();
     }
 
     Timer {
@@ -76,28 +82,23 @@ Item {
 
     // Hyprland fortaeller naar der klikkes udenfor. Uden det ville en aaben
     // menu ikke kunne lukkes med musen -- masken goer at klik udenfor pillen
-    // slet ikke naar frem til os.
-    // Aabneren beder om tastaturet i samme oejeblik den kommer frem, og
-    // Hyprland melder grebet "ryddet" med det samme hvis vinduet endnu ikke
-    // har faaet det. Uden ventetiden lukkede aabneren sig selv i samme sekund
-    // den blev aabnet.
+    // slet ikke naar frem til os, og at klikke sig ud er den foerste ting man
+    // proever.
+    //
+    // Grebet tager ogsaa tastaturet, saa laget behoever ikke bede om det med
+    // Exclusive -- og maa ikke: Exclusive laaser tastaturet fast paa laget, og
+    // saa rydder Hyprland aldrig grebet. Se kommentaren i Bar.qml.
+    //
+    // Der laa foer en ventetid (grabDelay) foran, fordi Hyprland meldte grebet
+    // ryddet med det samme, naar vinduet endnu ikke havde faaet tastaturet.
+    // Den er vaek sammen med Exclusive: nu er det grebet selv der giver
+    // tastaturet, saa der er ikke noget at vente paa -- og ventetiden var
+    // dyr, for i de millisekunder gik hans foerste tastetryk til vinduet
+    // bagved i stedet for ned i aabneren.
     readonly property bool wantGrab: root.opened || Launcher.active
-    property bool grabReady: false
-
-    onWantGrabChanged: {
-        root.grabReady = false;
-        if (root.wantGrab) grabArm.restart(); else grabArm.stop();
-    }
-
-    Timer {
-        id: grabArm
-        interval: Config.grabDelay
-        repeat: false
-        onTriggered: root.grabReady = true
-    }
 
     HyprlandFocusGrab {
-        active: root.wantGrab && root.grabReady
+        active: root.wantGrab
         windows: [root.hostWindow]
         onCleared: {
             Pill.close();
@@ -134,13 +135,27 @@ Item {
         readonly property bool listing: !alertShape.asking && Notifs.listing
         readonly property bool noting:
             !alertShape.asking && !alertShape.listing && Notifs.popup
+        // Musen blev haengende paa output-pillen. Den folder sig en smule ud
+        // og viser hvad der ligger -- passivt, som kroppens kig. "3 beskeder"
+        // siger hvor mange, ikke hvad, og det eneste man kunne goere ved
+        // tallet var at klikke og se efter.
+        //
+        // Kigget vinder over talestregerne: at holde musen dér er noget han
+        // GOER, boelgen ligger bare og koerer. Den linje der laeses op, kan
+        // stadig springes over med Super+Escape.
+        readonly property bool peeking:
+            !alertShape.asking && !alertShape.listing && !alertShape.noting
+            && alertHover.hovered && Notifs.count > 0
         readonly property bool wide:
             alertShape.asking || alertShape.listing || alertShape.noting
+            || alertShape.peeking
         // Tale vokser, men kun lidt, og den taber til baade root-adgang og en
         // besked: de venter paa ham, tale gaar over af sig selv.
         readonly property bool talking: !alertShape.wide && Tale.talking
 
         width: {
+            if (alertShape.peeking)
+                return Config.notifyPeekWidth + 2 * Config.activePadding;
             if (alertShape.wide)
                 return Config.notifyWidth + 2 * Config.activePadding;
             if (!alerts.any) return 0;
@@ -151,6 +166,7 @@ Item {
             if (alertShape.asking) return sudo.implicitHeight + 2 * Config.activePadding;
             if (alertShape.listing) return liste.implicitHeight + 2 * Config.activePadding;
             if (alertShape.noting) return notify.implicitHeight + 2 * Config.activePadding;
+            if (alertShape.peeking) return kig.implicitHeight + 2 * Config.activePadding;
             return alertShape.talking ? Config.taleHeight : Config.restHeight;
         }
         radius: Math.min(height / 2, Config.bodyMaxRadius)
@@ -183,12 +199,39 @@ Item {
             ColorAnimation { duration: Config.morphDuration }
         }
 
+        // Hover paa HELE output-pillen. HoverHandler og ikke en MouseArea:
+        // indholdet har sine egne museflader (boelgen, den aabne besked), og
+        // en MouseArea ovenover ville tage deres hover fra dem.
+        HoverHandler { id: alertHover }
+
+        // Klik paa formen, dér hvor indholdet ikke selv tager det: folder
+        // listen ud, eller lukker den igen. Ligger under indholdet, saa
+        // boelgen stadig faar sit eget klik (spring linjen over).
+        //
+        // Slaaet fra mens der spoerges om root-adgang eller mens listen staar
+        // aaben: dér har fladen sine egne linjer at ramme, og et klik i
+        // luften omkring dem maa ikke betyde noget andet.
+        MouseArea {
+            anchors.fill: parent
+            z: -1
+            enabled: !alertShape.asking && !alertShape.listing
+            onClicked: Notifs.openList()
+        }
+
         // Midt i formen. Uden det saetter indholdet sig oppe i venstre
         // hjoerne og ser ud til at ligge uden for pillen.
         Alerts {
             id: alerts
             anchors.centerIn: parent
             opacity: alertShape.wide ? 0 : 1
+            visible: opacity > 0
+            Behavior on opacity { NumberAnimation { duration: Config.morphDuration / 2 } }
+        }
+
+        NotifyPeek {
+            id: kig
+            anchors.centerIn: parent
+            opacity: alertShape.peeking ? 1 : 0
             visible: opacity > 0
             Behavior on opacity { NumberAnimation { duration: Config.morphDuration / 2 } }
         }

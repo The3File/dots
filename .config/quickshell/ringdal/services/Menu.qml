@@ -32,6 +32,17 @@ Singleton {
 
     readonly property bool active: root.stack.length > 0
     readonly property bool nested: root.stack.length > 1
+
+    // Hvor dybt han KOM IND. Escape lukker hele menuen, naar han staar dér --
+    // og gaar kun ét lag tilbage, hvis han selv er gaaet laengere ind bagefter.
+    //
+    // Uden det betoed Super+Shift+W to tryk for at komme ud igen: ét der
+    // landede paa rodmenuen han aldrig havde bedt om, og ét mere for at lukke
+    // den. En genvej aabner én ting; escape lukker den samme ting.
+    //
+    // Vejen tilbage findes stadig -- overskriften "‹ wifi" og venstrepil gaar
+    // op i roden. Det er kun escape der har den anden mening.
+    property int entry: 1
     readonly property string title: root.active ? root.stack[root.stack.length - 1].title : ""
 
     readonly property var view: root._filter(root.items, root.query)
@@ -42,6 +53,7 @@ Singleton {
 
     function open(page: var): void {
         root.stack = [page];
+        root.entry = 1;
         root._enter();
     }
 
@@ -49,6 +61,7 @@ Singleton {
     // ogsaa naar man kom ind udefra i stedet for gennem roden.
     function open2(base: var, page: var): void {
         root.stack = [base, page];
+        root.entry = 2;
         root._enter();
     }
 
@@ -65,8 +78,17 @@ Singleton {
         root._enter();
     }
 
+    // Escape. Ikke det samme som "tilbage": staar han der, hvor han kom ind,
+    // er der ikke noget at gaa tilbage TIL, og saa lukker den.
+    function esc(): void {
+        if (root.prompt !== null) { root.prompt = null; return; }
+        if (root.stack.length <= root.entry) { root.close(); return; }
+        root.back();
+    }
+
     function close(): void {
         root.stack = [];
+        root.entry = 1;
         root.items = [];
         root.query = "";
         root.index = 0;

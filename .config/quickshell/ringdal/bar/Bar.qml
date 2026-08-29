@@ -65,8 +65,16 @@ PanelWindow {
     //
     // Menuen har ogsaa et felt man skriver i nu (samme soegning som fuzzel
     // havde), saa den skal ogsaa have tastaturet -- ikke kun aabneren.
+    //
+    // **OnDemand og ikke Exclusive** (maalt 29-08, kostede en runde at finde).
+    // Med Exclusive holder Hyprland tastaturet paa laget uanset hvad, og saa
+    // rydder den ALDRIG fokusgrebet -- klik uden for pillen kunne ikke lukke
+    // en aaben menu, selv om grebet stod og var aktivt. Med OnDemand faar
+    // laget alligevel tastaturet, fordi HyprlandFocusGrab i Body.qml selv
+    // tager det saa laenge grebet holder. Skift den ikke tilbage uden at
+    // proeve et klik udenfor bagefter.
     WlrLayershell.keyboardFocus: (Launcher.active || body.opened)
-        ? WlrKeyboardFocus.Exclusive
+        ? WlrKeyboardFocus.OnDemand
         : WlrKeyboardFocus.None
 
     Body {
@@ -76,6 +84,6 @@ PanelWindow {
         hostWindow: root
 
         focus: true
-        Keys.onEscapePressed: body.close()
+        Keys.onEscapePressed: body.esc()
     }
 }

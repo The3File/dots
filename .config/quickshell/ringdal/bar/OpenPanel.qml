@@ -8,8 +8,9 @@ import qs.widgets
 // den viser -- den spoerger Menu, og Menu faar sit indhold fra Pages.
 //
 // Det er med vilje den samme form som fuzzel havde: skriv for at soege, pil op
-// og ned, retur for at vaelge, escape for at gaa tilbage. Det eneste der er
-// skiftet er, at det foregaar i pillen i stedet for i et fremmed vindue.
+// og ned, retur for at vaelge. Det eneste der er skiftet er, at det foregaar i
+// pillen i stedet for i et fremmed vindue -- og at escape lukker det han
+// aabnede, i stedet for at pille ét lag af (se Menu.entry).
 Item {
     id: root
 
@@ -124,7 +125,9 @@ Item {
                 Keys.onLeftPressed: event => {
                     if (input.text === "") Menu.back(); else event.accepted = false;
                 }
-                Keys.onEscapePressed: Menu.back()
+                // Escape lukker det, han aabnede -- ikke ét lag ad gangen.
+                // Venstrepil og overskriften er vejen tilbage. Se Menu.entry.
+                Keys.onEscapePressed: Menu.esc()
                 Keys.onReturnPressed: root._enter()
                 Keys.onEnterPressed: root._enter()
 
