@@ -4,13 +4,20 @@ import qs
 import qs.services
 import qs.widgets
 
-// Den aabne tilstand: én liste, ét filter, piletaster. Fladen ved ikke hvad
-// den viser -- den spoerger Menu, og Menu faar sit indhold fra Pages.
+// Den aabne tilstand: én liste man navigerer i. Fladen ved ikke hvad den
+// viser -- den spoerger Menu, og Menu faar sit indhold fra Pages.
 //
-// Det er med vilje den samme form som fuzzel havde: skriv for at soege, pil op
-// og ned, retur for at vaelge. Det eneste der er skiftet er, at det foregaar i
-// pillen i stedet for i et fremmed vindue -- og at escape lukker det han
-// aabnede, i stedet for at pille ét lag af (se Menu.entry).
+// **Tastaturet er vim'sk (29-08).** h j k l flytter og gaar ind og ud; der er
+// ikke noget felt at skrive i. Foer laa der en soegelinje der altid havde
+// tastaturet, og saa var den eneste vej gennem menuen at STAVE til det man
+// ville -- man skulle kende navnet paa forhaand for at kunne pege paa det.
+// En liste med ti linjer er noget man peger paa, ikke noget man beskriver.
+//
+// Feltet findes stadig, men kun naar der SKAL skrives: en adgangskode, eller
+// en soegning han selv aabner med "/" i en lang liste. Det er den samme regel
+// som resten af pillen: en flade skal fortjene sin plads.
+//
+// Aabneren (Super+D) er uaendret -- dér ER det at skrive hele pointen.
 Item {
     id: root
 
@@ -22,7 +29,35 @@ Item {
     // Rullevinduet. Listen kan vaere lang; pillen maa ikke blive det.
     property int first: 0
 
-    onVisibleChanged: if (visible) Qt.callLater(input.forceActiveFocus)
+    // Bliver der spurgt om noget (wifi-noegle, kode), skal der skrives.
+    readonly property bool asking: Menu.prompt !== null
+    // "/" -- han bad selv om at soege. Gaar vaek igen naar soegningen slipper.
+    property bool searching: false
+    readonly property bool typing: root.asking || root.searching
+
+    focus: true
+
+    // Tastaturet skal derhen hvor det hoerer til: ned i feltet naar der er et,
+    // ellers op i listen. Bindingen alene er ikke nok -- elementet er skjult i
+    // det oejeblik tilstanden skifter.
+    onVisibleChanged: {
+        if (visible) Qt.callLater(root._focus);
+        else root.searching = false;
+    }
+    onTypingChanged: Qt.callLater(root._focus)
+
+    function _focus(): void {
+        if (!root.visible) return;
+        if (root.typing) input.forceActiveFocus();
+        else root.forceActiveFocus();
+    }
+
+    // Slut soegningen. Escape kaster ordet vaek, retur beholder det -- saa kan
+    // han skrive tre bogstaver, trykke retur og pege med j og k bagefter.
+    function _drop(keep: bool): void {
+        if (!keep) Menu.query = "";
+        root.searching = false;
+    }
 
     // Hold det valgte inde i vinduet.
     function _follow(): void {
@@ -37,6 +72,50 @@ Item {
         target: Menu
         function onIndexChanged(): void { root._follow(); }
         function onViewChanged(): void { root.first = 0; root._follow(); }
+        // Ny side = ny liste. En soegning fra den forrige side maa ikke
+        // haenge ved og filtrere noget han lige er kommet ind i.
+        function onTitleChanged(): void { root.searching = false; }
+    }
+
+    // ---- vim ---------------------------------------------------------------
+    // h ud, l ind, j ned, k op. Piletasterne goer det samme, saa man ikke skal
+    // vaelge side. g og G springer til enderne af en lang liste.
+    Keys.onPressed: event => {
+        if (root.typing) return;
+        switch (event.key) {
+        case Qt.Key_J:
+        case Qt.Key_Down:
+        case Qt.Key_Tab:
+            Menu.move(1); break;
+        case Qt.Key_K:
+        case Qt.Key_Up:
+        case Qt.Key_Backtab:
+            Menu.move(-1); break;
+        case Qt.Key_L:
+        case Qt.Key_Right:
+        case Qt.Key_Return:
+        case Qt.Key_Enter:
+        case Qt.Key_Space:
+            Menu.activate(null); break;
+        case Qt.Key_H:
+        case Qt.Key_Left:
+        case Qt.Key_Backspace:
+            Menu.back(); break;
+        case Qt.Key_G:
+            // G i bunden, g i toppen -- som i vim.
+            Menu.index = (event.modifiers & Qt.ShiftModifier)
+                ? Math.max(0, root.view.length - 1) : 0;
+            break;
+        case Qt.Key_Slash:
+            root.searching = true; break;
+        // Escape lukker det, han aabnede -- ikke ét lag ad gangen.
+        // Se Menu.entry.
+        case Qt.Key_Escape:
+            Menu.esc(); break;
+        default:
+            return;
+        }
+        event.accepted = true;
     }
 
     Column {
@@ -48,14 +127,14 @@ Item {
         Item {
             width: parent.width
             height: Config.fontSize + 12
-            visible: Menu.nested || Menu.prompt !== null
+            visible: Menu.nested || root.asking
 
             RowMarker { hovered: backHover.containsMouse }
 
             RowLabel {
                 anchors.left: parent.left
                 anchors.right: parent.right
-                text: "‹ " + (Menu.prompt !== null ? Menu.prompt.title : Menu.title)
+                text: "‹ " + (root.asking ? Menu.prompt.title : Menu.title)
                 color: Theme.color5
             }
 
@@ -68,16 +147,18 @@ Item {
         }
 
         // ---- linjen man skriver i ----------------------------------------
-        // Samme felt uanset om man soeger i en liste eller svarer paa noget.
-        // Det er kun tegnene der skjules, og hvad retur betyder.
+        // Findes kun naar der ER noget at skrive. Samme felt uanset om han
+        // soeger i listen eller svarer paa noget; det er kun tegnene der
+        // skjules, og hvad retur betyder.
         Item {
             width: parent.width
             height: Config.fontSize + 10
+            visible: root.typing
 
             Text {
                 id: prompt
                 anchors.verticalCenter: parent.verticalCenter
-                text: Menu.prompt !== null ? "kode " : "› "
+                text: root.asking ? "kode " : "/ "
                 color: Theme.color5
                 font.family: Config.fontFamily
                 font.pixelSize: Config.fontSize
@@ -91,43 +172,46 @@ Item {
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
 
-                focus: true
                 color: Theme.foreground
-                echoMode: Menu.prompt !== null ? TextInput.Password : TextInput.Normal
+                echoMode: root.asking ? TextInput.Password : TextInput.Normal
                 passwordCharacter: "•"
                 font.family: Config.fontFamily
                 font.pixelSize: Config.fontSize
                 renderType: Text.NativeRendering
                 cursorVisible: true
 
-                onTextChanged: if (Menu.prompt === null) {
+                onTextChanged: if (!root.asking) {
                     Menu.query = text;
                     Menu.index = 0;
                 }
 
-                // Feltet toemmes naar man skifter side eller bliver spurgt om
-                // noget -- ellers staar det gamle soegeord og filtrerer en
-                // liste man lige er kommet ind i.
+                // Feltet toemmes naar det aabner sig paa ny, saa et gammelt
+                // soegeord ikke staar og filtrerer.
+                Connections {
+                    target: root
+                    function onTypingChanged(): void {
+                        if (root.typing) input.text = "";
+                    }
+                }
                 Connections {
                     target: Menu
-                    function onTitleChanged(): void { input.text = ""; }
                     function onPromptChanged(): void { input.text = ""; }
                     function onQueryChanged(): void {
-                        if (Menu.prompt === null && input.text !== Menu.query)
+                        if (!root.asking && input.text !== Menu.query)
                             input.text = Menu.query;
                     }
                 }
 
+                // Man kan pege videre mens man soeger, uden at forlade feltet.
                 Keys.onUpPressed: Menu.move(-1)
                 Keys.onDownPressed: Menu.move(1)
                 Keys.onTabPressed: Menu.move(1)
                 Keys.onBacktabPressed: Menu.move(-1)
-                Keys.onLeftPressed: event => {
-                    if (input.text === "") Menu.back(); else event.accepted = false;
+                Keys.onEscapePressed: {
+                    // Escape slipper foerst soegningen, ikke menuen. Ellers
+                    // ville et fortrudt soegeord koste hele fladen.
+                    if (root.searching) root._drop(false); else Menu.esc();
                 }
-                // Escape lukker det, han aabnede -- ikke ét lag ad gangen.
-                // Venstrepil og overskriften er vejen tilbage. Se Menu.entry.
-                Keys.onEscapePressed: Menu.esc()
                 Keys.onReturnPressed: root._enter()
                 Keys.onEnterPressed: root._enter()
 
@@ -147,7 +231,7 @@ Item {
             // skriver kommandoen der, og den skal blive staaende mens koden
             // tastes.
             text: Menu.status !== "" ? Menu.status
-                : (Menu.prompt !== null ? ""
+                : (root.asking ? ""
                    : (root.view.length === 0 ? "ingenting" : ""))
             wrapMode: Text.Wrap
             color: Theme.color8
@@ -159,7 +243,7 @@ Item {
 
         // ---- listen ------------------------------------------------------
         Repeater {
-            model: Menu.prompt !== null ? []
+            model: root.asking ? []
                 : root.view.slice(root.first, root.first + Config.menuLines)
 
             Item {
@@ -235,7 +319,9 @@ Item {
     }
 
     function _enter(): void {
-        if (Menu.prompt !== null) { Menu.answer(input.text); return; }
-        Menu.activate(null);
+        if (root.asking) { Menu.answer(input.text); return; }
+        // Retur i en soegning vaelger ikke -- den slipper feltet med ordet i
+        // behold, saa han kan pege videre med j og k.
+        root._drop(true);
     }
 }

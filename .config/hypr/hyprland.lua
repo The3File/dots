@@ -98,7 +98,7 @@ hl.config({
 
         blur = {
             enabled = true,
-				size = 5,
+				size = 6,
 				passes = 4,
 				ignore_opacity = false,
 				new_optimizations = true,
@@ -196,6 +196,18 @@ hl.bind(mod .. " + E", hl.dsp.exec_cmd(fileManager))
 -- fuzzel_drun ligger stadig i ~/.Scripts; fuzzel bruges ogsaa af fuzzel_nm
 -- naar der skal skrives en wifi-kode, saa den bliver.
 hl.bind(mod .. " + D", hl.dsp.exec_cmd("qs -c ringdal ipc call launcher toggle"))
+
+-- Et TRYK paa Super alene aabner pillens menu (release = true, saa den foerst
+-- falder naar tasten slippes). Holder han den nede og trykker noget andet,
+-- er det en genvej, og menuen kommer ikke -- Hyprland lader kun bindet falde,
+-- naar modifieren ikke blev brugt til noget.
+--
+-- Baade venstre og hoejre: tasten til hoejre for hoejre alt er remappet fra
+-- print screen til hoejre Super (se hwdb'en 90-prtsc-super), saa den er
+-- tommelfingerens vej ind i menuen.
+local pillTap = hl.dsp.exec_cmd("qs -c ringdal ipc call pill toggle")
+hl.bind(mod .. " + SUPER_L", pillTap, { release = true })
+hl.bind(mod .. " + SUPER_R", pillTap, { release = true })
 -- Clipboard history (bspwm: super + Insert → clipmenu). Aabner pillen; den
 -- kalder cliphist gennem fuzzel_clip, som stadig virker fra en terminal.
 hl.bind(mod .. " + Insert", hl.dsp.exec_cmd("qs -c ringdal ipc call pill udklip"))

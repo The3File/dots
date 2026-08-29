@@ -138,9 +138,16 @@ Singleton {
         function ydelse(): void { root.enter("ydelse"); }
         function sluk(): void { root.enter("sluk"); }
         // Menuen udefra: se hvad der staar, og tryk paa en linje.
+        // Den linje tastaturet staar paa, er markeret. Den betyder noget nu,
+        // hvor menuen navigeres med j og k i stedet for at man staver til
+        // det, man vil have -- ellers kan Claude se listen uden at kunne se,
+        // hvad et tryk ville ramme.
         function items(): string {
             if (!Menu.active) return "menuen er lukket";
-            return Menu.labels().join("\n");
+            const cur = Menu.current;
+            return Menu.labels()
+                .map(l => (cur && l === (cur.label ?? "") ? "› " : "  ") + l)
+                .join("\n");
         }
         function pick(label: string): string {
             if (!Menu.active) return "menuen er lukket";

@@ -95,7 +95,16 @@ Item {
     // tastaturet, saa der er ikke noget at vente paa -- og ventetiden var
     // dyr, for i de millisekunder gik hans foerste tastetryk til vinduet
     // bagved i stedet for ned i aabneren.
-    readonly property bool wantGrab: root.opened || Launcher.active
+    // Beskedlisten er med i grebet (29-08). Den bor i output-pillen og har
+    // ingen tastaturfokus, men den staar aaben fordi han selv foldede den ud
+    // -- og saa skal den kunne lukkes paa den samme maade som menuen: ved at
+    // klikke et andet sted. Uden grebet naar det klik aldrig frem, fordi
+    // masken lader alt uden for pillerne falde igennem.
+    //
+    // Boblen og root-spoergsmaalet er IKKE med: de er noget maskinen rejser,
+    // ikke noget han aabnede. Boblen gaar over af sig selv, og et spoergsmaal
+    // skal besvares, ikke klikkes vaek ved et uheld.
+    readonly property bool wantGrab: root.opened || Launcher.active || Notifs.listing
 
     HyprlandFocusGrab {
         active: root.wantGrab
@@ -103,6 +112,7 @@ Item {
         onCleared: {
             Pill.close();
             Launcher.close();
+            Notifs.closeList();
         }
     }
 

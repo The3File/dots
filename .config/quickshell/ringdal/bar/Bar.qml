@@ -85,5 +85,19 @@ PanelWindow {
 
         focus: true
         Keys.onEscapePressed: body.esc()
+
+        // Fokusgrebet tager tastaturet, ogsaa naar det kun er beskedlisten der
+        // staar aaben (Hyprland giver laget tastaturet saa laenge grebet
+        // holder -- det kan ikke slaas fra og stadig faa klik-udenfor). Saa
+        // ville hans foerste anslag forsvinde ned i en liste der ikke skal
+        // laese noget. Et hvilket som helst tryk lukker den i stedet, saa
+        // resten af saetningen lander hvor den skulle.
+        //
+        // Kun naar det ER listen der staar alene: menuen og aabneren har
+        // felter man skriver i, og deres taster naar aldrig herned.
+        Keys.onPressed: event => {
+            if (!body.opened && !Launcher.active && Notifs.listing)
+                Notifs.closeList();
+        }
     }
 }

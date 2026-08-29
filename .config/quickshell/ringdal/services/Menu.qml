@@ -43,6 +43,18 @@ Singleton {
     // Vejen tilbage findes stadig -- overskriften "‹ wifi" og venstrepil gaar
     // op i roden. Det er kun escape der har den anden mening.
     property int entry: 1
+
+    // Hvor markeringen stod i hvert lag, man er gaaet forbi. Gaar man tilbage
+    // fra en undermenu, lander man paa den linje, man kom ind ad -- ikke i
+    // toppen. At skulle finde "bluetooth" igen, hver gang man har kigget ind
+    // og fortrudt, er den slags smaating der goer en flade traettende.
+    //
+    // Der gemmes NAVNET og ikke nummeret: listerne bygges forfra hver gang, og
+    // et scan kan have byttet om paa raekkerne imens. Nummeret ville pege paa
+    // en tilfaeldig linje; navnet peger paa den samme.
+    property var marks: []
+    // Navnet vi leder efter i den liste, der er paa vej ind.
+    property string want: ""
     readonly property string title: root.active ? root.stack[root.stack.length - 1].title : ""
 
     readonly property var view: root._filter(root.items, root.query)
@@ -54,6 +66,7 @@ Singleton {
     function open(page: var): void {
         root.stack = [page];
         root.entry = 1;
+        root.marks = [];
         root._enter();
     }
 
@@ -62,10 +75,14 @@ Singleton {
     function open2(base: var, page: var): void {
         root.stack = [base, page];
         root.entry = 2;
+        root.marks = [];
         root._enter();
     }
 
     function push(page: var): void {
+        const m = root.marks.slice(0, root.stack.length - 1);
+        m[root.stack.length - 1] = root.current ? (root.current.label ?? "") : "";
+        root.marks = m;
         root.stack = root.stack.concat([page]);
         root._enter();
     }
@@ -75,6 +92,8 @@ Singleton {
         if (root.prompt !== null) { root.prompt = null; return; }
         if (root.stack.length <= 1) { root.close(); return; }
         root.stack = root.stack.slice(0, -1);
+        root.want = root.marks[root.stack.length - 1] ?? "";
+        root.marks = root.marks.slice(0, root.stack.length - 1);
         root._enter();
     }
 
@@ -89,6 +108,8 @@ Singleton {
     function close(): void {
         root.stack = [];
         root.entry = 1;
+        root.marks = [];
+        root.want = "";
         root.items = [];
         root.query = "";
         root.index = 0;
@@ -109,6 +130,12 @@ Singleton {
         root.items = list ?? [];
         root.status = "";
         if (root.index >= root.view.length) root.index = 0;
+        // En side kan fylde ad flere omgange (et scan giver foerst en tom
+        // liste). Derfor bliver oensket staaende, til linjen dukker op.
+        if (root.want !== "") {
+            const i = root.view.findIndex(it => (it.label ?? "") === root.want);
+            if (i >= 0) { root.index = i; root.want = ""; }
+        }
     }
 
     function ask(title: string, masked: bool, submit: var): void {
@@ -122,12 +149,15 @@ Singleton {
     }
 
     function move(delta: int): void {
+        // Roerer han selv ved listen, er der ikke laengere noget at huske paa.
+        root.want = "";
         const n = root.view.length;
         if (n === 0) return;
         root.index = (root.index + delta + n) % n;
     }
 
     function select(item: var): void {
+        root.want = "";
         const i = root.view.indexOf(item);
         if (i >= 0) root.index = i;
     }
@@ -140,6 +170,10 @@ Singleton {
         const hit = root.items.find(i =>
             (i.label ?? "").toLowerCase().indexOf(needle) >= 0);
         if (!hit) return false;
+        // Flyt ogsaa markeringen derhen. Ellers staar den et andet sted end
+        // det, der bliver trykket paa -- og saa husker menuen den forkerte
+        // linje, naar man gaar ind i et lag herfra.
+        root.select(hit);
         root.activate(hit);
         return true;
     }
@@ -151,8 +185,10 @@ Singleton {
         return (v instanceof Function) ? v() : v;
     }
 
+    // Det der STAAR paa listen -- altsaa efter et eventuelt filter. Ellers
+    // ville Claude laese en anden liste end den, der er paa skaermen.
     function labels(): var {
-        return root.items.map(i => i.label ?? "");
+        return root.view.map(i => i.label ?? "");
     }
 
     function activate(item: var): void {
@@ -174,6 +210,9 @@ Singleton {
         if (needle === "") return items ?? [];
         return (items ?? []).filter(i =>
             (i.label ?? "").toLowerCase().indexOf(needle) >= 0
-            || (i.hint ?? "").toLowerCase().indexOf(needle) >= 0);
+            // hint maa vaere en funktion (se live()) -- uden den her stod
+            // loggen fuld af toLowerCase-fejl, hver gang der blev soegt paa
+            // en side hvor et hint retter sig selv.
+            || (root.live(i.hint) ?? "").toLowerCase().indexOf(needle) >= 0);
     }
 }

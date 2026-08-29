@@ -1,0 +1,16 @@
+# Tasten til hoejre for hoejre alt (print screen) bliver hoejre Super.
+#
+# Hvorfor en hwdb og ikke et bind i Hyprland: Filip skal kunne BRUGE den som
+# modifier -- holde den nede og trykke noget andet -- og en genvej kan kun
+# reagere paa et tryk, ikke selv vaere en modifier. Omkodningen skal derfor
+# ske i kernen, foer nogen ser tasten. Til gengaeld gaelder den ogsaa i en TTY
+# og i alt andet end Hyprland.
+#
+# Tasten sender scancode b7 (KEY_SYSRQ) paa det indbyggede ThinkPad-tastatur
+# -- maalt med evtest paa "AT Translated Set 2 keyboard", ikke gaettet.
+# Intet var bundet til print screen i forvejen, saa der gaar ingenting tabt.
+#
+# Installer: ~/.Scripts/hwdb-apply  (gennem claude-sudo-run)
+
+evdev:atkbd:dmi:bvn*:bvr*:bd*:svnLENOVO*:pn*:*
+ KEYBOARD_KEY_b7=rightmeta

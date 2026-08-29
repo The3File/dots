@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# Laeg alle hwdb-omkodninger fra dotfiles paa plads og traek dem ind i kernen.
+#
+# Ét script til dem alle, i stedet for ét pr. fil: filerne i mappen ER listen,
+# og saa kan der ikke opstaa en omkodning der ligger i git uden nogensinde at
+# blive installeret. (rfkill-no-airplane-apply goer det samme for én enkelt
+# fil og er nu overfloedig -- den er ikke fjernet.)
+#
+# Brug: ~/.Scripts/claude-sudo-run ~/.Scripts/hwdb-apply
+set -euo pipefail
+
+# Under sudo er $HOME /root -- brug den bruger der kaldte.
+if [[ -n ${SUDO_USER:-} ]]; then
+	user_home=$(getent passwd "$SUDO_USER" | cut -d: -f6)
+else
+	user_home=$HOME
+fi
+
+src_dir="${user_home}/.dotfiles/etc/udev/hwdb.d"
+[[ -d $src_dir ]] || { printf 'mangler %s\n' "$src_dir" >&2; exit 1; }
+
+shopt -s nullglob
+files=("$src_dir"/*.hwdb)
+((${#files[@]})) || { printf 'ingen hwdb-filer i %s\n' "$src_dir" >&2; exit 1; }
+
+for f in "${files[@]}"; do
+	install -D -m 644 "$f" "/etc/udev/hwdb.d/$(basename "$f")"
+	printf 'lagt: /etc/udev/hwdb.d/%s\n' "$(basename "$f")"
+done
+
+systemd-hwdb update
+udevadm trigger -s input --action=change
+printf 'hwdb opdateret og input-enheder genlaest.\n'
