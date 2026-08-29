@@ -166,6 +166,71 @@ Singleton {
         }
     }
 
+    // --- kigget: "hvad laver den?" ----------------------------------------
+    //
+    // Det her er OUTPUT og bor derfor i pillen ved siden af kroppen, ikke i
+    // menuen. Foerste udgave lagde fjorten linjer raa terminaltekst som
+    // menuraekker; raekkerne er én linje der klippes af, saa alt af laengde
+    // blev ulaeseligt -- og menuen er det Filip PUTTER IND. Filips ord
+    // 30-08: "det ligner, at det er hele terminalens output, der staar der."
+    //
+    // Der hentes FOERST naar fladen foldes ud, og der opfriskes KUN mens den
+    // staar aaben. Samme regel som ydelsen og lysstyrken foelger.
+    property bool showing: false
+    property var lines: []
+
+    function show(): void {
+        // De to flader deler den samme form og kan ikke staa samtidig. Den
+        // han lige har bedt om, vinder -- ellers ville et klik paa prikken
+        // se ud som om der ikke skete noget.
+        Notifs.closeList();
+        root.showing = true;
+        root._hent();
+    }
+
+    function hide(): void { root.showing = false; }
+
+    function toggle(): bool {
+        if (root.showing) { root.hide(); return false; }
+        root.show();
+        return true;
+    }
+
+    function _hent(): void { if (!kigProc.running) kigProc.running = true; }
+
+    Process {
+        id: kigProc
+        command: [`${Config.home}/.local/bin/tale`, "__kig", `${Config.agentLines}`]
+
+        stdout: StdioCollector {
+            id: kigUd
+            // Laeses her og ikke i onExited: teksten er foerst hel naar
+            // stroemmen er lukket. Samme grund som i Sh.
+            onStreamFinished: root.lines = String(kigUd.text ?? "")
+                .split("\n").map(l => l.trim()).filter(l => l !== "");
+        }
+    }
+
+    // Tiden i "i gang: 3m 26s" er selve beviset paa liv -- staar den stille,
+    // haenger den. Derfor opfriskes der, mens fladen er fremme.
+    Timer {
+        id: kigOpfrisk
+        interval: Config.agentRefresh
+        repeat: true
+        running: root.showing
+        onTriggered: root._hent()
+    }
+
+    // Sessionen forsvandt, mens fladen stod aaben. Saa er der ikke noget at
+    // kigge paa laengere.
+    onActiveChanged: if (!root.active && !root.herdrStyrer) root.hide();
+
+    // Og den anden vej: aabner han beskedlisten, viger kigget.
+    Connections {
+        target: Notifs
+        function onListingChanged(): void { if (Notifs.listing) root.showing = false; }
+    }
+
     IpcHandler {
         target: "agent"
 
@@ -186,6 +251,13 @@ Singleton {
             root.stale = false;
             staleTimer.stop();
             liveness.running = false;
+        }
+        // Ingen flade uden en IPC-indgang.
+        function kig(): string {
+            return root.toggle() ? "foldede kigget ud" : "lukkede kigget";
+        }
+        function hvad(): string {
+            return root.lines.length > 0 ? root.lines.join("\n") : "ingenting at vise";
         }
         function state(): string {
             const kilde = root.herdrStyrer ? "herdr" : "hooks";

@@ -98,6 +98,8 @@ PanelWindow {
         Keys.onPressed: event => {
             if (!body.opened && !Launcher.active && Notifs.listing)
                 Notifs.closeList();
+            if (!body.opened && !Launcher.active && Agent.showing)
+                Agent.hide();
         }
     }
 }

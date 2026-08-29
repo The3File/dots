@@ -58,7 +58,22 @@ Item {
 
     // Dikteringen lukker en aaben menu. Man skal ikke sidde med en liste
     // aabenstaaende og tale ud i den.
+    //
+    // MED ÉN UNDTAGELSE: staar der et frit felt, er det netop DÉR de talte ord
+    // skal hen. Reglen blev skrevet foer feltet fandtes, og den slog den frie
+    // linje ihjel -- Filip trykkede paa dikteringen, menuen lukkede, og naar
+    // teksten var faerdig, var der ikke noget felt at lande i. Saa spurgte
+    // hyprwhspr `pill felt`, fik "nej", og linjen endte i udklip i stedet
+    // (fanget 30-08 i loggen: "Vindue ikke fundet -- teksten lagt i udklip").
+    //
+    // Et KODE-felt taeller ikke: en adgangskode dikteres ikke, og saa gaelder
+    // den oprindelige regel igen.
+    //
+    // Kroppen morfer alligevel til boelgen imens -- én krop, én form ad
+    // gangen -- og folder sig tilbage til feltet med ordene i, naar han er
+    // faerdig med at tale.
     onVoicingChanged: if (voicing) {
+        if (Menu.prompt !== null && !(Menu.prompt.masked ?? true)) return;
         Pill.close();
         Launcher.close();
     }
@@ -70,6 +85,7 @@ Item {
     function esc(): void {
         if (Launcher.active) { Launcher.close(); return; }
         if (Pill.opened) { Pill.esc(); return; }
+        if (Agent.showing) { Agent.hide(); return; }
         if (Notifs.listing) Notifs.closeList();
     }
 
@@ -104,7 +120,10 @@ Item {
     // Boblen og root-spoergsmaalet er IKKE med: de er noget maskinen rejser,
     // ikke noget han aabnede. Boblen gaar over af sig selv, og et spoergsmaal
     // skal besvares, ikke klikkes vaek ved et uheld.
-    readonly property bool wantGrab: root.opened || Launcher.active || Notifs.listing
+    // Kigget paa Claude er med af samme grund som beskedlisten: han foldede
+    // den selv ud, og saa skal et klik ved siden af kunne lukke den igen.
+    readonly property bool wantGrab:
+        root.opened || Launcher.active || Notifs.listing || Agent.showing
 
     HyprlandFocusGrab {
         active: root.wantGrab
@@ -113,6 +132,7 @@ Item {
             Pill.close();
             Launcher.close();
             Notifs.closeList();
+            Agent.hide();
         }
     }
 
@@ -153,8 +173,14 @@ Item {
         // Listen vinder over boblen: den staar aaben fordi han bad om det, og
         // en ny besked er allerede med i den.
         readonly property bool listing: !alertShape.asking && Notifs.listing
+        // Kigget paa Claude staar i samme raekke som beskedlisten: begge er
+        // noget han selv foldede ud. De to kan ikke staa samtidig -- den ene
+        // lukker den anden, se Notifs.openList og Agent.show.
+        readonly property bool claude:
+            !alertShape.asking && !alertShape.listing && Agent.showing
         readonly property bool noting:
-            !alertShape.asking && !alertShape.listing && Notifs.popup
+            !alertShape.asking && !alertShape.listing && !alertShape.claude
+            && Notifs.popup
         // Musen blev haengende paa output-pillen. Den folder sig en smule ud
         // og viser hvad der ligger -- passivt, som kroppens kig. "3 beskeder"
         // siger hvor mange, ikke hvad, og det eneste man kunne goere ved
@@ -165,10 +191,10 @@ Item {
         // stadig springes over med Super+Escape.
         readonly property bool peeking:
             !alertShape.asking && !alertShape.listing && !alertShape.noting
-            && alertHover.hovered && Notifs.count > 0
+            && !alertShape.claude && alertHover.hovered && Notifs.count > 0
         readonly property bool wide:
             alertShape.asking || alertShape.listing || alertShape.noting
-            || alertShape.peeking
+            || alertShape.claude || alertShape.peeking
         // Tale vokser, men kun lidt, og den taber til baade root-adgang og en
         // besked: de venter paa ham, tale gaar over af sig selv.
         readonly property bool talking: !alertShape.wide && Tale.talking
@@ -185,6 +211,7 @@ Item {
         height: {
             if (alertShape.asking) return sudo.implicitHeight + 2 * Config.activePadding;
             if (alertShape.listing) return liste.implicitHeight + 2 * Config.activePadding;
+            if (alertShape.claude) return claude.implicitHeight + 2 * Config.activePadding;
             if (alertShape.noting) return notify.implicitHeight + 2 * Config.activePadding;
             if (alertShape.peeking) return kig.implicitHeight + 2 * Config.activePadding;
             return alertShape.talking ? Config.taleHeight : Config.restHeight;
@@ -202,6 +229,9 @@ Item {
             if (alertShape.noting)
                 return Notifs.critical ? Theme.stateBad : Theme.color5;
             if (alertShape.listing) return Theme.color5;
+            // Kanten laaner prikkens farve: venter den paa ham, er den roed
+            // ogsaa naar fladen er foldet ud og prikken selv er skjult bag den.
+            if (alertShape.claude) return Agent.color;
             return Theme.pillBorder;
         }
         clip: true
@@ -234,7 +264,7 @@ Item {
         MouseArea {
             anchors.fill: parent
             z: -1
-            enabled: !alertShape.asking && !alertShape.listing
+            enabled: !alertShape.asking && !alertShape.listing && !alertShape.claude
             onClicked: Notifs.openList()
         }
 
@@ -252,6 +282,14 @@ Item {
             id: kig
             anchors.centerIn: parent
             opacity: alertShape.peeking ? 1 : 0
+            visible: opacity > 0
+            Behavior on opacity { NumberAnimation { duration: Config.morphDuration / 2 } }
+        }
+
+        ClaudeContent {
+            id: claude
+            anchors.centerIn: parent
+            opacity: alertShape.claude ? 1 : 0
             visible: opacity > 0
             Behavior on opacity { NumberAnimation { duration: Config.morphDuration / 2 } }
         }

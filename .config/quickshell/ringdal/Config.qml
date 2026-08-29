@@ -150,6 +150,12 @@ Singleton {
     // Hvor laenge der maa gaa uden livstegn foer prikken holder op med at
     // aande. Jeg siger noget ved hvert faseskift, saa der er langt imellem.
     readonly property int agentStale: _body.agentStale ?? 240000
+    // Hvor mange overskrifter kigget paa Claude viser, og hvor tit det
+    // opfriskes mens det staar aabent. Faa linjer med vilje: fladen svarer paa
+    // "hvad laver den, og haenger den?" -- resten staar i terminalen, ét
+    // tastetryk vaek. Opfriskningen koerer KUN mens fladen er synlig.
+    readonly property int agentLines: _body.agentLines ?? 3
+    readonly property int agentRefresh: _body.agentRefresh ?? 3000
     // Samme slags vagthund for talen. Kortere, fordi en enkelt talt linje er
     // kort: gaar der saa lang tid uden et nyt push, er afspilleren doed.
     readonly property int taleStale: _body.taleStale ?? 90000

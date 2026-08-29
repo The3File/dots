@@ -50,6 +50,12 @@ Singleton {
         // saa vejen ind i dem aabner ikke menuen -- uanset om det er et klik,
         // et tastebind eller Claude der kalder.
         if (name === "notifs") { Notifs.openList(); return; }
+        // Det samme gaelder kigget paa Claude: det er noget maskinen giver
+        // ham, og det folder sig ud i pillen ved siden af kroppen.
+        if (name === "kig") { Agent.show(); return; }
+        // "claude" er ikke en side laengere -- det er den frie linje. Siden med
+        // terminaltekst er vaek; hvad sessionen laver, staar i output-pillen.
+        if (name === "claude") { root.linje(); return; }
         root.opened = true;
         root.peeking = false;
         if (name === "wifi") Menu.open2(Pages.rootPage(), Pages.wifiPage());
@@ -60,7 +66,6 @@ Singleton {
         else if (name === "udklip") Menu.open2(Pages.rootPage(), Pages.clipPage());
         else if (name === "ydelse") Menu.open2(Pages.rootPage(), Pages.perfPage());
         else if (name === "sluk") Menu.open2(Pages.rootPage(), Pages.slukPage());
-        else if (name === "claude") Menu.open2(Pages.rootPage(), Pages.claudePage());
         else Menu.open(Pages.rootPage());
     }
 
@@ -69,16 +74,18 @@ Singleton {
     // Den frie linje: ét tryk, og feltet står der.
     //
     // Det er hele pointen med trinnet -- at kunne sige noget til en kørende
-    // session uden at give skærmen væk. Siden bag feltet åbnes med, så escape
-    // lander på "hvad laver den?" i stedet for ingenting; det er den samme
-    // grund som open2 har alle andre steder.
+    // session uden at give skærmen væk.
+    //
+    // Rodmenuen ligger bagved, så escape lander ét sted man kan bruge. Den var
+    // før lagt bag "hvad laver den?"-siden; den side findes ikke længere, fordi
+    // terminalens tekst hører i output-pillen og ikke i menuen.
     //
     // Rækkefølgen holder: Menu._enter() nulstiller feltet, men fill() rører
     // det ikke, så spørgsmålet overlever at siden bliver hentet bagefter.
     function linje(): void {
         root.opened = true;
         root.peeking = false;
-        Menu.open2(Pages.rootPage(), Pages.claudePage());
+        Menu.open(Pages.rootPage());
         Pages.spoergClaude();
     }
 
@@ -154,8 +161,13 @@ Singleton {
         function udklip(): void { root.enter("udklip"); }
         function ydelse(): void { root.enter("ydelse"); }
         function sluk(): void { root.enter("sluk"); }
-        function claude(): void { root.enter("claude"); }
+        function claude(): void { root.linje(); }
         function linje(): void { root.linje(); }
+        // Kigget: hvad laver sessionen lige nu. Folder sig ud i output-pillen.
+        function kig(): string { return Agent.toggle() ? "foldede kigget ud" : "lukkede kigget"; }
+        function hvad(): string {
+            return Agent.lines.length > 0 ? Agent.lines.join("\n") : "ingenting at vise";
+        }
         // Menuen udefra: se hvad der staar, og tryk paa en linje.
         // Den linje tastaturet staar paa, er markeret. Den betyder noget nu,
         // hvor menuen navigeres med j og k i stedet for at man staver til

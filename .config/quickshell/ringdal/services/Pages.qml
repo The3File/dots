@@ -88,10 +88,14 @@ Singleton {
                 }
                 ];
 
-                // Claude står øverst, og kun når der er en session. Det er
-                // det ene sted i pillen der kan svare på "hvad laver den?"
-                // uden at give hele skærmen væk -- stigen gik før direkte fra
-                // en prik på syv pixels til et vindue på tusind.
+                // Claude står øverst, og kun når der er en session. Her er
+                // HANDLINGEN -- sig noget til den, uden at åbne vinduet.
+                //
+                // Rækken førte før ind på en side med den sidste terminaltekst
+                // som rækker. Det var forkert: menuen er kroppen, altså det han
+                // putter IND, og en menurække er én linje der klippes af. Hvad
+                // sessionen laver, er output og bor nu i pillen ved siden af
+                // (bar/ClaudeContent.qml) -- et klik på prikken folder det ud.
                 //
                 // Rækken flytter de andre en plads ned, når den kommer og går.
                 // Det er i orden: markeringen huskes på NAVN og ikke på nummer
@@ -101,7 +105,7 @@ Singleton {
                         label: "Claude",
                         hint: () => Agent.state,
                         hintColor: Agent.color,
-                        run: () => Menu.push(root.claudePage())
+                        run: () => root.spoergClaude()
                     });
                 }
 
@@ -111,32 +115,6 @@ Singleton {
     }
 
     // ---- Claude ----------------------------------------------------------
-    // De sidste linjer fra sessionens terminal. Hentes FØRST når siden åbnes
-    // -- samme regel som ydelsen fik 29-08: poll kun det, der er synligt.
-    //
-    // Opslaget bor i `tale __kig` og ikke her: det er herdr der skal spørges,
-    // og den slags skal kunne prøves fra en terminal. QML er kun ruden.
-    function claudePage(): var {
-        return {
-            title: "Claude",
-            load: () => kig.run(["__kig", "14"], text => {
-                // Skrivelinjen staar ØVERST, modsat wifi og bluetooth der har
-                // deres handlinger nederst. Dér er linjerne ovenover selv
-                // noget man trykker på; her er de ren tekst, og en handling
-                // under fjorten uklikbare linjer ville koste fjorten tryk at
-                // nå. Markøren står på den, når siden åbner, så retur sender.
-                const rows = [{
-                    label: "skriv en besked",
-                    color: Theme.color5,
-                    mark: "›",
-                    run: () => root.spoergClaude()
-                }];
-                for (const line of kig.lines(text)) rows.push({ label: line });
-                if (rows.length === 1) rows.push({ label: "ingenting at vise" });
-                Menu.fill(rows);
-            })
-        };
-    }
 
     // Den frie linje. Feltet er det samme som wifi-koden skrives i -- kun
     // ordet foran markøren og at tegnene kan ses, er anderledes.
@@ -552,8 +530,5 @@ Singleton {
     Sh { id: perf; script: root.perfScript }
     Sh { id: clip; script: root.clipScript }
     Sh { id: sys; script: root.sysScript }
-    Sh { id: kig; script: root.taleScript }
-    // Egen Sh: at hente linjerne og at sende en besked må ikke kunne afbryde
-    // hinanden -- Sh tager ét kald ad gangen.
     Sh { id: send; script: root.taleScript }
 }

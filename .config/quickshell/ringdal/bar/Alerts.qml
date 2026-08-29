@@ -56,11 +56,23 @@ Item {
         // Prikken. Ingen ord -- ordene gaar gennem beskedfladen, og en linje
         // der staar stille kan alligevel ikke skelnes fra en der er gaaet i
         // staa. Det er aandedraettet der er beviset.
+        //
+        // Den er ogsaa vejen ind til det mellemste trin: et klik folder ud,
+        // hvad sessionen er i gang med (ClaudeContent). Stigen gik foer fra de
+        // her syv pixels direkte til hele terminalen.
         Item {
             anchors.verticalCenter: parent.verticalCenter
             width: Agent.active ? 7 : 0
             height: 7
             visible: width > 0
+
+            // Klikmaalet er stoerre end prikken. Syv pixels kan ses, men ikke
+            // rammes -- og en flade man skal sigte efter, bruger man ikke.
+            MouseArea {
+                anchors.fill: parent
+                anchors.margins: -7
+                onClicked: Agent.toggle()
+            }
 
             Rectangle {
                 id: prik
