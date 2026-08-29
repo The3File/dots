@@ -1,12 +1,12 @@
 -- Seeded from ~/.cache/wal/colors.sh (color0 inactive, color4 active)
 
 return {
-    background      = "rgb(0e1210)",
-    foreground      = "rgb(b0b9b8)",
-    color0          = "rgb(0e1210)",
-    color4          = "rgb(A84C2D)",
-    color7          = "rgb(b0b9b8)",
-    color8          = "rgb(7b8180)",
-    active_border   = "rgb(A84C2D)",
-    inactive_border = "rgb(0e1210)",
+    background      = "rgb(0b0e10)",
+    foreground      = "rgb(ebe6e3)",
+    color0          = "rgb(0b0e10)",
+    color4          = "rgb(A3BCC3)",
+    color7          = "rgb(ebe6e3)",
+    color8          = "rgb(a4a19e)",
+    active_border   = "rgb(A3BCC3)",
+    inactive_border = "rgb(0b0e10)",
 }

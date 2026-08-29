@@ -84,7 +84,7 @@ Item {
                 // Ti trin fordelt over to sekunder maaler 3,9%. Oejet ser stadig
                 // et aandedraet: det er kurven der giver fornemmelsen, ikke
                 // antallet af billeder.
-                readonly property int _trin: 10
+                readonly property int _trin: 30
                 property int fase: 0
 
                 // Cosinus, saa den er langsomst ved vendepunkterne -- ligesom
