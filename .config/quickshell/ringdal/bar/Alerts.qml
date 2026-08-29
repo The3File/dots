@@ -67,7 +67,12 @@ Item {
                 radius: width / 2
                 color: Agent.color
 
-
+                SequentialAnimation on opacity {
+                    running: Agent.working && !Agent.stale
+                    loops: Animation.Infinite
+                    NumberAnimation { to: 0.2; duration: 900; easing.type: Easing.InOutSine }
+                    NumberAnimation { to: 1.0; duration: 900; easing.type: Easing.InOutSine }
+                }
             }
         }
 

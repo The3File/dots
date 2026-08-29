@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# To tryk paa oeretelefonen: kasser det han er ved at sige.
+#
+#   1. Dikterer han?  -> kasser optagelsen. Intet bliver indsat.
+#   2. Ellers         -> naeste nummer, som knappen ellers betyder.
+#
+# Buds3 Pro sender KEY_NEXTSONG (XF86AudioNext) paa to tryk. Se `buds-tryk`
+# for ét tryk og for hvorfor det lange tryk ikke kan bruges.
+#
+# Den springer med vilje IKKE den oplaeste linje over, som Super+Escape goer.
+# Naar stemmen taler MENS der spiller musik, ville to tryk kunne betyde to
+# ting paa én gang, og saa kan han ikke laengere vide hvad knappen goer.
+# Én knap, én mening: enten er der en optagelse at kassere, eller ogsaa
+# hoerer trykket til musikken.
+
+state_file="${XDG_RUNTIME_DIR}/hyprwhspr/visualizer_state"
+state="$(cat "$state_file" 2>/dev/null)"
+
+case "$state" in
+  recording|processing|paused)
+    exec hyprwhspr record cancel
+    ;;
+esac
+
+exec playerctl next

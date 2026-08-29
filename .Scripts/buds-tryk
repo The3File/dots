@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# Ét tryk paa oeretelefonen. ÉN knap, ÉN mening -- hvad trykket betyder
+# afgoeres af hvad der er i gang, ikke af et fast valg mellem musik og
+# diktering. Samme rangorden som `pill afbryd`: input vinder over output.
+#
+#   1. Dikterer han allerede?  -> luk optagelsen og indsaet teksten.
+#   2. Spiller der noget?      -> pause. Saa mister han ikke play-knappen.
+#   3. Ellers                  -> start dikteringen. Det er det tomme tryk
+#                                 skal bruges til.
+#
+# Hvorfor ét tryk, og ikke to: Buds3 Pro sender KEY_PLAYCD (XF86AudioPlay) paa
+# ét tryk og KEY_NEXTSONG paa to. Det lange tryk naar aldrig frem til maskinen
+# -- Samsung bruger det til stoejdaempning inde i selve proppen. Ét tryk er
+# altsaa det eneste sted, dikteringen kan bo uden en klodset dobbeltgestus.
+#
+# Kun "Playing" tager trykket. En pauset afspiller goer det ikke: browsere
+# lader en tom MPRIS-afspiller staa registreret laenge efter videoen er slut,
+# og saa ville dikteringen stille og roligt holde op med at virke uden nogen
+# synlig grund.
+
+state_file="${XDG_RUNTIME_DIR}/hyprwhspr/visualizer_state"
+state="$(cat "$state_file" 2>/dev/null)"
+
+case "$state" in
+  recording|paused)
+    exec "$HOME/.Scripts/hyprwhspr-record-toggle"
+    ;;
+  processing)
+    # Den skriver stadig. Et nyt tryk her ville starte en optagelse oven i
+    # den, han lige har afsluttet -- gaa hellere tavs ud.
+    exit 0
+    ;;
+esac
+
+if [ "$(playerctl status 2>/dev/null)" = "Playing" ]; then
+  exec playerctl play-pause
+fi
+
+exec "$HOME/.Scripts/hyprwhspr-record-toggle"
