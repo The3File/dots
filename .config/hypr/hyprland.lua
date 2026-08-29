@@ -212,6 +212,19 @@ hl.bind(mod .. " + Escape", hl.dsp.exec_cmd("qs -c ringdal ipc call pill afbryd 
 -- den stemme Filip faktisk hoerer kommer fra `tale`. Genvejen var doed.
 hl.bind(mod .. " + SHIFT + V", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.local/bin/tale skru"))
 
+-- Oeretelefonen som diktafon: ét tryk paa Buds3 Pro starter og slutter
+-- dikteringen, saa han kan tale uden at have haenderne paa maskinen.
+-- Proppen sender KEY_PLAYCD (XF86AudioPlay) paa ét tryk; det lange tryk naar
+-- aldrig hertil, fordi Samsung bruger det til stoejdaempning inde i proppen.
+-- Derfor ligger dikteringen paa play-tasten -- og derfor afgoer `buds-tryk`,
+-- om trykket hoerer til musikken eller til mikrofonen, i stedet for at vi
+-- vaelger én af dem én gang for alle.
+hl.bind("XF86AudioPlay", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scripts/buds-tryk"))
+-- To tryk kasserer det, han er ved at sige. Proppen sender KEY_NEXTSONG, saa
+-- den mening laegger sig oven paa naeste-nummer -- og `buds-dobbelttryk`
+-- afgoer hvilken af de to der gaelder lige nu.
+hl.bind("XF86AudioNext", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scripts/buds-dobbelttryk"))
+
 -- Kill / force kill
 hl.bind(mod .. " + Q", hl.dsp.window.close())
 hl.bind(mod .. " + SHIFT + Q", hl.dsp.window.kill())
