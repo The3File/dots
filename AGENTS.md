@@ -2,6 +2,37 @@
 
 Living notes for agents working on this PC. **Update this file** when you learn durable facts (paths, gotchas, preferences). Do not rely on chat memory alone.
 
+<!-- INDEKS:START -->
+## Slå op her først
+
+**Regel: skal du røre ved noget herunder, så læs afsnittet FØR du åbner et
+script.** Systemerne her er små og velkommenterede, og det frister til at læse
+dem forfra hver gang — men det koster en hel session at genopfinde noget, der
+allerede står skrevet. Læs afsnittet; åbn først koden, når den ikke svarer.
+
+| Skal du røre ved … | Læs afsnittet |
+|---|---|
+| root-adgang, `sudo`, fingeraftryk, adgangskodefelt | **Security** |
+| pillen, Quickshell, IPC-kald, bobler, prikken | **Pillen (Quickshell)** |
+| oplæsning, stemmen, `tale` | **Oplæsning** (+ `AIOS/tale/CLAUDE.md`) |
+| diktering, mikrofon, hyprwhspr | **hyprwhspr** |
+| vinduer, genveje, Hyprland-config | **Hyprland Lua gotchas**, **Key apps / binds** |
+| scratchpad-terminaler | **Scratchpads** |
+| batteri, strøm, suspend, ydelsesprofiler | **Power / battery** |
+| dotfiles, `~/.Scripts`, hvad der er tracket | **Dotfiles sync** |
+| baggrund, farver, wal | **Baggrund**, **Colors / wal** |
+| pacman, kerne, initramfs, oprydning | **Maintenance notes** |
+| grafik, Mesa, spil | **GPU / Mesa** |
+
+Står svaret ikke i afsnittet, så **skriv det ind, når du har fundet det** — det
+er sådan filen bliver ved med at være hurtigere end at læse koden. Tilføjer du
+et nyt afsnit, så giv det en række i tabellen ovenfor; den bliver skudt ind i
+hver session, og et afsnit uden en række findes i praksis ikke.
+
+Ny fejl, der har kostet tid to gange, hører i `AIOS/Problemer.md` i stedet.
+Fremgangsmåder hører i den relevante `CLAUDE.md`. Her står **maskinen**.
+<!-- INDEKS:SLUT -->
+
 ## Session / OS
 
 - Arch Linux
@@ -107,6 +138,7 @@ hyprctl eval 'hl.dispatch(hl.dsp.workspace.toggle_special("scratchterm"))'
 - Gotcha: `UPowerDevice.percentage` is **0-1**, not 0-100.
 - Gotcha: a singleton **nothing references is never built** — and then its `IpcHandler` does not exist either, so `ipc call` answers `Target not found` while the file looks perfectly fine and the log is clean. `Sudo` is reached from `bar/Body.qml` (`readonly property bool asking: Sudo.pending`) for exactly that reason. Don't remove the line because it looks unused.
 - Gotcha: hot-reload picks up changed *code*, but a **new or renamed IPC function is only registered on a real restart** (`pkill -x qs; setsid qs -c ringdal &`). Half an hour went into debugging a function that was in the file and simply not registered yet.
+- Gotcha, 29-08: `qs ipc call` parser selv sine argumenter, så et argument der **begynder med en bindestreg** bliver læst som et ukendt flag — `... call sudo rejs "-n true"` gav *The following argument was not expected*, og kaldet fejlede før det nåede QML. **Sæt altid `--` efter funktionsnavnet**, også når teksten ser harmløs ud; den kommer tit fra en variabel. Rettet i `pill-sudo` og i `AIOS/tale/tale`. Værst i `tale`, hvor kaldet er fire-and-forget med output smidt væk: der fejler det lydløst, og linjen mangler bare i pillen. Fejlen så i øvrigt ud som om hele fladen var nede — porten meldte *pillen kunne ikke spørge om root-adgang* — så se efter den her, før du går på jagt i Quickshell. `sudo -n`/`-S` bliver nu også strippet af omskriveren, ligesom `-A` og `-k`: wrapperen tager argv som en ren kommando, så et flag der bliver stående, bliver læst som programnavnet.
 - Gotcha: `Menu.answer()` clears the field **before** it calls `submit`, so in that instant an answer is indistinguishable from a cancel. Anything watching `prompt` for a cancel must wait one tick (`Qt.callLater`) — see `services/Sudo.qml`.
 - Scripts still own their own state and stay usable from a terminal — `lock_keys`, `perf-mode`, `koffein` are not absorbed into the shell (keylock must work when the bar is down). Quickshell only calls them.
 - Threshold colors (vol/scrn/net/bat): the ramp came from the old runbar `get_color`, now `Theme.rampColor()`. Only the `net` half of that script survives, as **`~/.Scripts/netstatus`** (iw/ip parsing, wifi then ethernet) — renamed and stripped 2026-08-29 when waybar went.
