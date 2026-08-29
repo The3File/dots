@@ -129,8 +129,18 @@ Item {
     Rectangle {
         id: alertShape
 
-        anchors.right: shape.left
+        // Output-pillen ligger paa den side af kroppen, der vender VAEK fra
+        // skaermkanten -- ellers ville den vokse ud af skaermen, naar en
+        // besked folder sig ud. Med kroppen i hoejre hjoerne betyder det til
+        // venstre; staar `align` paa "left", vender det om. "center" beholder
+        // venstre, for der er plads til begge sider, og kroppens
+        // horizontalCenterOffset regner allerede med at parret ligger sådan.
+        readonly property bool paaHoejre: Config.bodyAlign === "left"
+
+        anchors.right: alertShape.paaHoejre ? undefined : shape.left
         anchors.rightMargin: Config.bodyMargin
+        anchors.left: alertShape.paaHoejre ? shape.right : undefined
+        anchors.leftMargin: Config.bodyMargin
         anchors.bottom: shape.bottom
 
         // Root-adgang vinder over en besked: den venter paa ham, og den er
