@@ -3,14 +3,14 @@
   "bar": {
     "font": {
       "family": "Terminus",
-      "size": 18
+      "size": 16
     },
     "screens": []
   },
   "body": {
-    "opacity": 0.75,
-    "margin": 8,
-    "align": "right",
+    "opacity": 0.70,
+    "margin": 7,
+    "align": "left",
     "borderWidth": 1,
     "borderTone": 0.7,
     "morphDuration": 320,
