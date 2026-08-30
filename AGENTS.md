@@ -307,6 +307,8 @@ Bare-repo git wrapper for tracked configs under `$HOME` (not a normal repo in `~
 
 **Equivalent:** `git --git-dir="$HOME/.dotfiles" --work-tree="$HOME" …`
 
+**Der findes ingen `origin/master`.** Det bare repo har ingen fetch-refspec, saa `dot log origin/master..master` svarer `unknown revision` — ikke fordi noget mangler at blive skubbet. Vil du vide, om alt er ude: `dot rev-parse master` mod `dot ls-remote origin master`; er de ens, er der ikke mere.
+
 **Commands (via `dot …`):**
 - `dot status` / `dot diff` / `dot log` — inspect (any git subcommand works)
 - `dot add <paths>` — stage; **required for new files** (`status.showUntrackedFiles = no`, so untracked stay invisible until added)
