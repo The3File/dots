@@ -8,9 +8,9 @@
     "screens": []
   },
   "body": {
-    "opacity": 0.70,
+    "opacity": 1.00,
     "margin": 7,
-    "align": "left",
+    "align": "right",
     "borderWidth": 1,
     "borderTone": 0.7,
     "morphDuration": 320,

@@ -97,7 +97,7 @@ hl.config({
         --dim_strength     = 0.3,
 
         blur = {
-            enabled = true,
+            enabled = false,
 				size = 5,
 				passes = 3,
 				ignore_opacity = true,
@@ -272,8 +272,9 @@ hl.bind(mod .. " + SHIFT + Escape", hl.dsp.exit())
 -- Power menu (bspwm: super + alt + shift + q → alacritty_bye). Nu i pillen,
 -- med et ekstra "er du sikker" — handlingerne ligger stadig i `bye`.
 hl.bind(mod .. " + ALT + SHIFT + Q", hl.dsp.exec_cmd("qs -c ringdal ipc call pill sluk"))
--- Next wallpaper / wal palette
+-- Next / previous wallpaper / wal palette
 hl.bind(mod .. " + ALT + SHIFT + W", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scripts/chwal"))
+hl.bind(mod .. " + ALT + SHIFT + B", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scripts/chwal -p"))
 -- Hold maskinen vaagen, ogsaa med lukket laag (pillen viser "koffein" naar den er taendt)
 hl.bind(mod .. " + ALT + SHIFT + K", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.Scripts/koffein toggle"))
 

@@ -26,8 +26,12 @@ Singleton {
     property string status: ""
 
     // Et svar der skal skrives, fx en wifi-adgangskode:
-    // { title, masked, prefix, submit(text) }. Er den sat, viser fladen et
-    // felt i stedet for en liste.
+    // { title, masked, prefix, submit(text), skift, note }. Er den sat, viser
+    // fladen et felt i stedet for en liste.
+    //
+    // `note` er den valgfrie kontekst OVER feltet -- hvad der sidst skete i
+    // det, man svarer paa. En adgangskode har ingen; den frie linje til Claude
+    // har sessionens seneste linjer, saa han kan se hvad han taler ind i.
     //
     // `prefix` er det der staar foran markoeren. Det stod foer haardt som
     // "kode " i fladen, fordi alt der blev spurgt om, var en adgangskode. Den
@@ -55,6 +59,17 @@ Singleton {
     // Vejen tilbage findes stadig -- overskriften "‹ wifi" og venstrepil gaar
     // op i roden. Det er kun escape der har den anden mening.
     property int entry: 1
+
+    // Det samme, ét lag hoejere oppe: kom han ind PAA selve spoergsmaalet.
+    // Den frie linje (Super+Shift+A) aabner feltet med det samme, og rodmenuen
+    // bagved er kun en flade at lande paa -- den har han ikke bedt om. Saa
+    // lukker escape det hele, praecis som Super+Shift+W og Super+Shift+B gaar
+    // helt ud. Et spoergsmaal han selv gik ind i (wifi-noeglen, raekken
+    // "Claude" i menuen) lukker kun sig selv, for dér ER der noget bagved.
+    //
+    // Nulstilles i open(), open2() og ask(), saa den kun staar, hvor nogen
+    // udtrykkeligt saetter den bagefter -- se Pill.linje().
+    property bool promptEntry: false
 
     // Hvor markeringen stod i hvert lag, man er gaaet forbi. Gaar man tilbage
     // fra en undermenu, lander man paa den linje, man kom ind ad -- ikke i
@@ -90,6 +105,7 @@ Singleton {
     function open(page: var): void {
         root.stack = [page];
         root.entry = 1;
+        root.promptEntry = false;
         root.marks = [];
         root._enter();
     }
@@ -99,6 +115,7 @@ Singleton {
     function open2(base: var, page: var): void {
         root.stack = [base, page];
         root.entry = 2;
+        root.promptEntry = false;
         root.marks = [];
         root._enter();
     }
@@ -124,7 +141,13 @@ Singleton {
     // Escape. Ikke det samme som "tilbage": staar han der, hvor han kom ind,
     // er der ikke noget at gaa tilbage TIL, og saa lukker den.
     function esc(): void {
-        if (root.prompt !== null) { root.prompt = null; return; }
+        if (root.prompt !== null) {
+            // Var spoergsmaalet selv vejen ind, er der ikke noget bagved at gaa
+            // tilbage til -- kun en menu han aldrig aabnede. Saa ud med det hele.
+            if (root.promptEntry) { root.close(); return; }
+            root.prompt = null;
+            return;
+        }
         if (root.stack.length <= root.entry) { root.close(); return; }
         root.back();
     }
@@ -132,6 +155,7 @@ Singleton {
     function close(): void {
         root.stack = [];
         root.entry = 1;
+        root.promptEntry = false;
         root.marks = [];
         root.want = "";
         root.items = [];
@@ -178,23 +202,42 @@ Singleton {
             submit: submit,
             // Tab, mens der spoerges. Er den ikke sat, laver tab ingenting --
             // der er ikke noget at skifte imellem i en adgangskode.
-            skift: skift
+            skift: skift,
+            // Fyldes bagefter med noter(), hvis spoergsmaalet har en kontekst.
+            note: ""
         };
         root.spoergNr = root.spoergNr + 1;
+        // Standard er, at der er noget bagved. Den ene kalder, der aabner
+        // feltet UDEFRA, saetter flaget selv bagefter.
+        root.promptEntry = false;
     }
 
     // Ny overskrift paa det spoergsmaal der allerede staar. Teksten i feltet
     // bliver, hvor den er -- se spoergNr.
-    function retitle(title: string): void {
+    function retitle(title: string): void { root._ret("title", title); }
+
+    // Konteksten over feltet: hvad der sidst skete i den session, der tales
+    // til. Den kommer ind ad samme vej som overskriften og af samme grund --
+    // den frie linje aabner sig FOER svaret er hentet, og maa ikke vente paa
+    // det. Se Pages.spoergClaude.
+    function noter(note: string): void { root._ret("note", note); }
+
+    // Skift ét felt paa det spoergsmaal, der staar. Objektet bygges om og
+    // saettes helt: aendrer man en noegle i det, der allerede ligger, opdager
+    // QML det ikke, og fladen bliver staaende med det gamle.
+    function _ret(felt: string, vaerdi: var): void {
         if (root.prompt === null) return;
         const p = root.prompt;
-        root.prompt = {
-            title: title,
+        const n = {
+            title: p.title,
             masked: p.masked,
             prefix: p.prefix,
             submit: p.submit,
-            skift: p.skift
+            skift: p.skift,
+            note: p.note ?? ""
         };
+        n[felt] = vaerdi;
+        root.prompt = n;
     }
 
     // Skriv i feltet uden at sende. Tomt er ikke en fejl -- det er bare

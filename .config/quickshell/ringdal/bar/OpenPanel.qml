@@ -172,6 +172,28 @@ Item {
             }
         }
 
+        // ---- kontekst: hvad der sidst skete dér, man taler ind i ---------
+        // Kun den frie linje har en. Den staar OVER feltet, fordi den er det,
+        // hans egen saetning svarer paa -- laesningen gaar hvem, hvad, og saa
+        // hans eget.
+        //
+        // To linjer, daempet, ombrudt. Det er med vilje faa: hele terminalens
+        // tekst i menuen var forkert to gange (se Pages.spoergClaude), og
+        // graensen mellem "kontekst" og "output smidt ind i inputfladen" er
+        // netop maengden. Vil han se mere, er kigget paa prikken naeste trin.
+        Text {
+            width: parent.width
+            visible: root.asking && text !== ""
+            text: (Menu.prompt && Menu.prompt.note) ? Menu.prompt.note : ""
+            wrapMode: Text.Wrap
+            color: Theme.color8
+            font.family: Config.fontFamily
+            font.pixelSize: Config.fontSize
+            renderType: Text.NativeRendering
+            leftPadding: 14
+            bottomPadding: 2
+        }
+
         // ---- linjen man skriver i ----------------------------------------
         // Findes kun naar der ER noget at skrive. To felter, ikke ét: en kode
         // er én linje, hvor tegnene skjules -- en besked til Claude er en

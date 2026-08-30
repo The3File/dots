@@ -157,6 +157,43 @@ Singleton {
         if (n < 2) return;
         root.claudeValgt = (root.claudeValgt + delta + n) % n;
         Menu.retitle(root._claudeTitel());
+        // Konteksten hoerer til sessionen, ikke til feltet. Skifter han, skal
+        // den skifte med -- ellers staar der noget fra en samtale, han ikke
+        // laengere taler til, og saa er den vaerre end tom.
+        root._claudeKontekst();
+    }
+
+    // Hvad der sidst skete dér, han taler ind i. Samme destillation som
+    // kigget paa prikken bruger (`tale __kig`), bare kortere: to linjer.
+    //
+    // HVORFOR DEN ER SAA KORT. Terminalens tekst i menuen har vaeret forkert
+    // to gange -- menuen er kroppen, altsaa det han putter IND, og output
+    // hoerer i pillen ved siden af. Det her er ikke en tilbagerulning af det:
+    // to daempede linjer er den kontekst, en saetning bliver skrevet OVEN PAA,
+    // og de staar der kun mens feltet staar. Bliver det til flere, er det
+    // igen terminalen smidt ind i inputfladen.
+    //
+    // Der hentes én gang, ikke paa en timer. Feltet er et oejeblik langt: han
+    // aabner, siger én saetning, og den er sendt. Et ur der tikker bag et
+    // felt, han alligevel forlader om fem sekunder, er praecis den slags
+    // bevaegelse, fladen er bygget for at undgaa.
+    function _claudeKontekst(): void {
+        Menu.noter("");
+        const valgt = root.claudeSessioner[root.claudeValgt];
+        // "sagt": vaerktoejslinjerne kastes vaek. Feltet spoerger hvad det
+        // handler om, ikke hvilke vaerktoejer der koerer -- og "i gang: 4m"
+        // siger allerede AT der arbejdes. Kigget paa prikken beder ikke om
+        // det; dér er vaerktoejet netop svaret paa spoergsmaalet.
+        kig.run(["__kig", "2", valgt ? valgt.id : "", "sagt"], text => {
+            const linjer = kig.lines(text)
+                // Fejlbeskederne fra `tale` er saetninger om at der ikke er
+                // noget at se. Der ER ikke noget at se, og saa siger fladen
+                // ingenting -- den skal ikke sige det med ord.
+                .filter(l => l.indexOf("koerer ingen session") < 0
+                          && l.indexOf("kan ikke se ind") < 0)
+                .map(l => root._kort(l, 90));
+            if (linjer.length > 0) Menu.noter(linjer.join("\n"));
+        });
     }
 
     function spoergClaude(): void {
@@ -198,6 +235,11 @@ Singleton {
             const i = rows.findIndex(r => r.fokus);
             root.claudeValgt = i >= 0 ? i : 0;
             Menu.retitle(root._claudeTitel());
+            // Foerst her vides det, HVEM der tales til. Kigget venter derfor
+            // paa listen i stedet for at gaa i gang med det samme paa den i
+            // fokus -- de to er som regel den samme, men "som regel" er ikke
+            // godt nok, naar linjen skal fortaelle ham hvad han svarer paa.
+            root._claudeKontekst();
         });
     }
 
@@ -597,4 +639,7 @@ Singleton {
     Sh { id: sys; script: root.sysScript }
     Sh { id: send; script: root.taleScript }
     Sh { id: sess; script: root.taleScript }
+    // Egen Sh: kigget maa hverken staa i vejen for afsendelsen eller for
+    // optaellingen af sessioner. Sh tager ét kald ad gangen.
+    Sh { id: kig; script: root.taleScript }
 }

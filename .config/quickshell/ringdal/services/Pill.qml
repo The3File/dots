@@ -87,6 +87,10 @@ Singleton {
         root.peeking = false;
         Menu.open(Pages.rootPage());
         Pages.spoergClaude();
+        // Feltet ER det, han aabnede -- rodmenuen bagved er kun en flade at
+        // lande paa. Derfor lukker escape hele pillen herfra, ligesom
+        // Super+Shift+W og Super+Shift+B goer. Se Menu.promptEntry.
+        Menu.promptEntry = true;
     }
 
     // En side der bliver rejst udefra, ikke navigeret til -- fx spoergsmaalet

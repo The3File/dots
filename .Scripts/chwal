@@ -5,8 +5,9 @@ dir="$HOME/Pictures/favoritter"
 current="${_##*/}"
 
 usage(){ printf '%s\n' "$1."\
-	"chwal [-rl] [-f FILE] [-i FILE] [-w FILE] [-b backend]"\
+	"chwal [-rlp] [-f FILE] [-i FILE] [-w FILE] [-b backend]"\
 	"-r: reload current" "-l: light theme"\
+	"-p: previous image in rotation"\
 	"-f: add image to rotation"\
 	"-i: apply image (wal + hyprland), no favorites"\
 	"-w: wallpaper only (awww, no palette)"\
@@ -28,7 +29,7 @@ get_next_fav(){
 
 	for ((i=0;i<=${#files[@]};i++));{
 		[[ "${files[$i]}" = "$current" ]] || continue
-		sel_next_or_first
+		if [[ $p = "1" ]]; then sel_prev_or_last; else sel_next_or_first; fi
 	}
 }
 
@@ -41,6 +42,13 @@ sel_next_or_first(){
 	if [[ ${files[$i]} = ${files[$num_files]} ]]
 	then next="$dir/${files[0]}"
 	else next="$dir/${files[$((i+1))]}"; fi
+}
+
+# Baglaens: samme runde den anden vej, saa foerste billede lander paa det sidste.
+sel_prev_or_last(){
+	if (( i == 0 ))
+	then next="$dir/${files[$num_files]}"
+	else next="$dir/${files[$((i-1))]}"; fi
 }
 
 change_wal(){
@@ -142,13 +150,14 @@ save_new_fav(){
 
 main(){
 	local fav="" img_apply="" wall_only=""
-	while getopts "rlf:i:w:b:" o; do case $o in
+	while getopts "rlpf:i:w:b:" o; do case $o in
 		f) fav=$OPTARG ;;
 		i) img_apply=$OPTARG ;;
 		w) wall_only=$OPTARG ;;
 		b) backend=$OPTARG ;;
 		l) l="-l" ;;
 		r) r="1" ;;
+		p) p="1" ;;
 		*) usage; exit 1
 	esac
 	done
