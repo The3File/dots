@@ -199,10 +199,11 @@ def til_pillen(text: str) -> bool:
         print("[FOKUS] Pillen tog ikke imod teksten", flush=True)
         return False
 
-    # Der trykkes IKKE retur for ham. Teksten ligger i feltet, saa han kan se
-    # den og selv sende den -- en talt linje kan have et forkert ord i sig, og
-    # det her er den ene vej ind i en koerende session.
-    print("[FOKUS] Teksten lagt i pillens felt", flush=True)
+    # Pillen sender selv. Han skal ikke trykke retur efter at have talt --
+    # feltet findes netop for at slippe for at kigge paa skaermen, og saa var
+    # returen det ene greb tilbage ved tastaturet. Beslutningen ligger i
+    # `pill udfyld`, ikke her.
+    print("[FOKUS] Teksten sendt gennem pillens felt", flush=True)
     return True
 
 

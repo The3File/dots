@@ -35,6 +35,12 @@ Item {
     property bool searching: false
     readonly property bool typing: root.asking || root.searching
 
+    // Skjules tegnene? Kun en kode goer det. Se de to felter nedenfor.
+    readonly property bool masking: root.asking && (Menu.prompt.masked ?? true)
+    // Det felt der staar fremme. Resten af fladen kender kun det her -- den
+    // skal ikke vide, at der er to former.
+    readonly property var field: root.masking ? kode : fri
+
     focus: true
 
     // Tastaturet skal derhen hvor det hoerer til: ned i feltet naar der er et,
@@ -45,11 +51,31 @@ Item {
         else root.searching = false;
     }
     onTypingChanged: Qt.callLater(root._focus)
+    onMaskingChanged: Qt.callLater(root._focus)
 
     function _focus(): void {
         if (!root.visible) return;
-        if (root.typing) input.forceActiveFocus();
+        if (root.typing) root.field.forceActiveFocus();
         else root.forceActiveFocus();
+    }
+
+    // Toem begge felter. Hvilket der staar fremme kan naa at skifte imellem,
+    // og et gammelt ord maa ikke ligge og vente i det andet.
+    function _clear(): void { kode.text = ""; fri.text = ""; }
+
+    // Dikteringen lander her. Der LAEGGES til i stedet for at overskrive, saa
+    // en besked kan bygges i flere omgange -- man kommer i tanke om resten,
+    // mens man taler.
+    function _add(text: string): void {
+        const f = root.field;
+        f.text = f.text === "" ? text : f.text + " " + text;
+        f.cursorPosition = f.text.length;
+    }
+
+    // Escape slipper foerst soegningen, ikke menuen. Ellers ville et fortrudt
+    // soegeord koste hele fladen.
+    function _esc(): void {
+        if (root.searching) root._drop(false); else Menu.esc();
     }
 
     // Slut soegningen. Escape kaster ordet vaek, retur beholder det -- saa kan
@@ -147,17 +173,23 @@ Item {
         }
 
         // ---- linjen man skriver i ----------------------------------------
-        // Findes kun naar der ER noget at skrive. Samme felt uanset om han
-        // soeger i listen eller svarer paa noget; det er kun tegnene der
-        // skjules, og hvad retur betyder.
+        // Findes kun naar der ER noget at skrive. To felter, ikke ét: en kode
+        // er én linje, hvor tegnene skjules -- en besked til Claude er en
+        // saetning, der skal kunne laeses hele vejen igennem, ogsaa naar den
+        // er laengere end pillen er bred. `TextInput` kan skjule tegn men ikke
+        // ombryde; `TextEdit` kan ombryde men ikke skjule. Der findes ikke en
+        // form der kan begge dele, saa der staar to, og `root.field` peger paa
+        // den der er fremme.
         Item {
             width: parent.width
-            height: Config.fontSize + 10
+            // Hoejden foelger teksten, saa pillen vokser med saetningen.
+            height: Math.max(Config.fontSize + 10, root.field.implicitHeight + 8)
             visible: root.typing
 
             Text {
                 id: prompt
-                anchors.verticalCenter: parent.verticalCenter
+                anchors.top: parent.top
+                anchors.topMargin: 4
                 // Ordet foran markoeren kommer fra spoergsmaalet. En kode og
                 // en besked til Claude skal ikke se ens ud -- den ene skjules,
                 // den anden skal kunne laeses igennem.
@@ -168,17 +200,54 @@ Item {
                 renderType: Text.NativeRendering
             }
 
+            // Koden: én linje, tegnene skjult.
             TextInput {
-                id: input
+                id: kode
 
                 anchors.left: prompt.right
                 anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
+                anchors.top: parent.top
+                anchors.topMargin: 4
+
+                visible: root.masking
+                enabled: visible
 
                 color: Theme.foreground
-                echoMode: (root.asking && (Menu.prompt.masked ?? true))
-                    ? TextInput.Password : TextInput.Normal
+                echoMode: TextInput.Password
                 passwordCharacter: "•"
+                font.family: Config.fontFamily
+                font.pixelSize: Config.fontSize
+                renderType: Text.NativeRendering
+                cursorVisible: true
+
+                Keys.onEscapePressed: root._esc()
+                Keys.onReturnPressed: root._enter()
+                Keys.onEnterPressed: root._enter()
+
+                cursorDelegate: Rectangle {
+                    width: 2
+                    color: Theme.color4
+                    visible: kode.cursorVisible
+                }
+            }
+
+            // Den frie linje og soegningen: ombryder.
+            TextEdit {
+                id: fri
+
+                anchors.left: prompt.right
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.topMargin: 4
+
+                visible: !root.masking
+                enabled: visible
+
+                color: Theme.foreground
+                // Der brydes paa ord, og hvor et ord er laengere end linjen,
+                // brydes der alligevel -- en adresse maa ikke kunne skubbe
+                // teksten ud af pillen.
+                wrapMode: TextEdit.Wrap
                 font.family: Config.fontFamily
                 font.pixelSize: Config.fontSize
                 renderType: Text.NativeRendering
@@ -189,48 +258,63 @@ Item {
                     Menu.index = 0;
                 }
 
-                // Feltet toemmes naar det aabner sig paa ny, saa et gammelt
-                // soegeord ikke staar og filtrerer.
-                Connections {
-                    target: root
-                    function onTypingChanged(): void {
-                        if (root.typing) input.text = "";
-                    }
-                }
-                Connections {
-                    target: Menu
-                    function onPromptChanged(): void { input.text = ""; }
-                    // Dikteringen lander her. Der LAEGGES til i stedet for at
-                    // overskrive, saa en besked kan bygges i flere omgange --
-                    // man kommer i tanke om resten, mens man taler.
-                    function onFilled(text) {
-                        input.text = input.text === "" ? text
-                                                       : input.text + " " + text;
-                        input.cursorPosition = input.text.length;
-                    }
-                    function onQueryChanged(): void {
-                        if (!root.asking && input.text !== Menu.query)
-                            input.text = Menu.query;
-                    }
-                }
-
                 // Man kan pege videre mens man soeger, uden at forlade feltet.
-                Keys.onUpPressed: Menu.move(-1)
-                Keys.onDownPressed: Menu.move(1)
-                Keys.onTabPressed: Menu.move(1)
-                Keys.onBacktabPressed: Menu.move(-1)
-                Keys.onEscapePressed: {
-                    // Escape slipper foerst soegningen, ikke menuen. Ellers
-                    // ville et fortrudt soegeord koste hele fladen.
-                    if (root.searching) root._drop(false); else Menu.esc();
+                // Skriver han en besked, er der ingen liste at pege i, og saa
+                // faar op og ned lov at flytte markoeren mellem linjerne.
+                Keys.onUpPressed: event => {
+                    if (root.asking) event.accepted = false; else Menu.move(-1);
                 }
-                Keys.onReturnPressed: root._enter()
-                Keys.onEnterPressed: root._enter()
+                Keys.onDownPressed: event => {
+                    if (root.asking) event.accepted = false; else Menu.move(1);
+                }
+                // Tab peger videre i listen, naar der soeges. Spoerges der om
+                // noget, er der ingen liste -- saa skifter tab i stedet det,
+                // spoergsmaalet selv siger, den kan skifte (den frie linje:
+                // hvilken session der tales til).
+                Keys.onTabPressed: event => {
+                    if (root.asking) { if (Menu.prompt.skift) Menu.prompt.skift(1); }
+                    else Menu.move(1);
+                    event.accepted = true;
+                }
+                Keys.onBacktabPressed: event => {
+                    if (root.asking) { if (Menu.prompt.skift) Menu.prompt.skift(-1); }
+                    else Menu.move(-1);
+                    event.accepted = true;
+                }
+                Keys.onEscapePressed: root._esc()
+                // Retur sender. Uden det accepterede feltet tasten selv og
+                // lagde et linjeskift i teksten, fordi det her er et TextEdit.
+                Keys.onReturnPressed: event => { root._enter(); event.accepted = true; }
+                Keys.onEnterPressed: event => { root._enter(); event.accepted = true; }
 
                 cursorDelegate: Rectangle {
                     width: 2
                     color: Theme.color4
-                    visible: input.cursorVisible
+                    visible: fri.cursorVisible
+                }
+            }
+
+            // Feltet toemmes naar det aabner sig paa ny, saa et gammelt
+            // soegeord ikke staar og filtrerer.
+            Connections {
+                target: root
+                function onTypingChanged(): void {
+                    if (root.typing) root._clear();
+                }
+            }
+            Connections {
+                target: Menu
+                // Toemmes paa et NYT spoergsmaal, ikke paa enhver aendring
+                // af `prompt` -- den frie linje skifter overskrift, mens han
+                // skriver, og saetningen skal blive staaende.
+                function onSpoergNrChanged(): void { root._clear(); }
+                function onFilled(text) { root._add(text); }
+                // "Send det der staar." Dikteringen bruger den -- se
+                // Pill.udfyld.
+                function onSender(): void { root._enter(); }
+                function onQueryChanged(): void {
+                    if (!root.asking && fri.text !== Menu.query)
+                        fri.text = Menu.query;
                 }
             }
         }
@@ -319,7 +403,9 @@ Item {
         // Der er mere end der er plads til. Én linje, ikke en rullebjaelke.
         Text {
             width: parent.width
-            visible: root.view.length > Config.menuLines
+            // Ikke mens der spoerges om noget -- saa er der ingen liste at
+            // have mere af, kun listen bagved der stadig staar i Menu.view.
+            visible: !root.asking && root.view.length > Config.menuLines
             text: `+${Math.max(0, root.view.length - Config.menuLines)} mere`
             color: Theme.color8
             font.family: Config.fontFamily
@@ -331,7 +417,7 @@ Item {
     }
 
     function _enter(): void {
-        if (root.asking) { Menu.answer(input.text); return; }
+        if (root.asking) { Menu.answer(root.field.text); return; }
         // Retur i en soegning vaelger ikke -- den slipper feltet med ordet i
         // behold, saa han kan pege videre med j og k.
         root._drop(true);

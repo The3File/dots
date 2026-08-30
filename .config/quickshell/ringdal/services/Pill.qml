@@ -198,12 +198,24 @@ Singleton {
             return (Menu.prompt.masked ?? true) ? "kode" : "fri";
         }
 
-        // Laeg tekst i feltet uden at sende. Se Menu.filled.
+        // Dikteringen skriver i feltet -- og sender.
+        //
+        // Han trykkede foer retur selv, saa en talt linje med et forkert ord i
+        // kunne rettes foerst. Det viste sig at vaere den forkerte handel: han
+        // aabner feltet, siger én saetning og er faerdig, og saa var returen
+        // et ekstra greb ved tastaturet i en flade, der findes netop for at
+        // slippe for at kigge paa skaermen. Fortryder han, staar sessionen ét
+        // tryk vaek (Super+A). En kode kan stadig ikke dikteres.
+        //
+        // Der sendes ved at bede fladen om det, ikke ved at give teksten med:
+        // feltet kan have noget i forvejen -- baade tastet og fra en tidligere
+        // omgang tale -- og det skal med.
         function udfyld(tekst: string): string {
             if (Menu.prompt === null) return "der spoerges ikke om noget";
             if (Menu.prompt.masked ?? true) return "feltet er en kode";
             Menu.fyld(tekst);
-            return "lagt i feltet";
+            Menu.send();
+            return "sendt";
         }
 
         function skriv(tekst: string): string {

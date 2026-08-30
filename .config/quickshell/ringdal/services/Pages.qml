@@ -123,17 +123,82 @@ Singleton {
     // en kvittering på noget der lykkedes, er den slags larm fladen er bygget
     // for at slippe af med. Går det galt, bliver den derimod stående med
     // grunden -- dét ændrer hvad han gør nu.
+    // Hvem tales der til. Der kan koere flere sessioner, og foer stod der bare
+    // "til Claude" -- baade i overskriften og foran markoeren, altsaa to gange
+    // det samme, og ingen af stederne sagde HVEM. Nu siger overskriften
+    // navnet, og foran markoeren staar der kun et maerke.
+    property var claudeSessioner: []
+    property int claudeValgt: 0
+
+    // Navnet er samtalens egen titel og kan vaere hvad som helst langt.
+    // Overskriften er 45 tegn med "‹ " foran, saa der klippes -- og der klippes
+    // i NAVNET, ikke i tallet bagved: tallet er det eneste, der siger, at der
+    // er mere end én at vaelge imellem.
+    function _kort(tekst: string, plads: int): string {
+        const t = (tekst ?? "").trim();
+        return t.length <= plads ? t : t.slice(0, Math.max(1, plads - 1)) + "…";
+    }
+
+    function _claudeTitel(): string {
+        const n = root.claudeSessioner.length;
+        if (n === 0) return "til Claude";
+        const navn = root.claudeSessioner[root.claudeValgt].navn || "Claude";
+        // Tallet og ordet "tab" staar der kun, naar der ER noget at skifte
+        // imellem. Med én session ville de vaere en instruktion i noget, der
+        // ikke kan lade sig goere.
+        if (n === 1) return "til " + root._kort(navn, 39);
+        const hale = ` (${root.claudeValgt + 1}/${n} · tab)`;
+        return "til " + root._kort(navn, 39 - hale.length) + hale;
+    }
+
+    // Tab i feltet. Rundt i ring, saa der kun er én tast at kende.
+    function _claudeSkift(delta: int): void {
+        const n = root.claudeSessioner.length;
+        if (n < 2) return;
+        root.claudeValgt = (root.claudeValgt + delta + n) % n;
+        Menu.retitle(root._claudeTitel());
+    }
+
     function spoergClaude(): void {
+        root.claudeSessioner = [];
+        root.claudeValgt = 0;
+
+        // Feltet aabner sig med det SAMME. Listen er ikke noget at vente paa,
+        // naar hele pointen med trinnet er ét tryk -- overskriften siger foerst
+        // bare "til Claude" og bliver rettet, saa snart svaret er der. Er han
+        // hurtigere end herdr, gaar linjen til den i fokus, som den altid har
+        // gjort.
         Menu.ask("til Claude", false, tekst => {
             const t = (tekst ?? "").trim();
             if (t === "") { Menu.close(); return; }
             Menu.status = "sender...";
-            send.run(["__send", t], svar => {
+            const valgt = root.claudeSessioner[root.claudeValgt];
+            send.run(["__send", t].concat(valgt ? [valgt.id] : []), svar => {
                 const linje = (svar ?? "").trim();
                 if (linje === "sendt") Menu.close();
                 else Menu.status = linje !== "" ? linje : "kunne ikke sende";
             });
-        }, "til Claude ");
+        }, "› ", d => root._claudeSkift(d));
+
+        // Egen Sh, saa en langsom optaelling ikke staar i vejen for selve
+        // afsendelsen.
+        sess.run(["__sessioner"], text => {
+            const rows = sess.lines(text).map(l => {
+                const f = l.split("\t");
+                return {
+                    id: f[0] ?? "",
+                    navn: (f[1] ?? "").trim(),
+                    tilstand: (f[2] ?? "").trim(),
+                    fokus: (f[3] ?? "").trim() === "1"
+                };
+            }).filter(r => r.id !== "");
+            root.claudeSessioner = rows;
+            // Den i fokus er den han sidst har vaeret i, og dermed den han
+            // mener, naar han ikke siger andet.
+            const i = rows.findIndex(r => r.fokus);
+            root.claudeValgt = i >= 0 ? i : 0;
+            Menu.retitle(root._claudeTitel());
+        });
     }
 
     // ---- wifi ------------------------------------------------------------
@@ -531,4 +596,5 @@ Singleton {
     Sh { id: clip; script: root.clipScript }
     Sh { id: sys; script: root.sysScript }
     Sh { id: send; script: root.taleScript }
+    Sh { id: sess; script: root.taleScript }
 }

@@ -35,6 +35,13 @@ Singleton {
     // hvordan den skal se ud, saa ordet foelger nu med spoergsmaalet.
     property var prompt: null
 
+    // Hvor mange gange der er blevet SPURGT. Feltet toemmes paa den her og
+    // ikke paa `prompt`, fordi et spoergsmaal kan skifte overskrift midt i --
+    // den frie linje skriver hvilken session den peger paa, og han kan skifte
+    // den, mens han skriver. Toemtes der paa `prompt`, ville hans halve
+    // saetning forsvinde i samme oejeblik.
+    property int spoergNr: 0
+
     readonly property bool active: root.stack.length > 0
     readonly property bool nested: root.stack.length > 1
 
@@ -74,6 +81,11 @@ Singleton {
     // samme opfoersel som alle andre steder paa maskinen -- diktering saetter
     // tekst ind, den trykker ikke retur for én.
     signal filled(string text)
+
+    // "Send det der staar i feltet nu." Teksten bor i fladen (OpenPanel) og
+    // ikke her, saa der gaar et signal ud i stedet for et kald med tekst i --
+    // ellers ville det, han selv havde skrevet foerst, falde paa gulvet.
+    signal sender()
 
     function open(page: var): void {
         root.stack = [page];
@@ -150,7 +162,12 @@ Singleton {
         }
     }
 
-    function ask(title: string, masked: bool, submit: var, prefix: string): void {
+    // `prefix` er med vilje utypet. Med `: string` goer QML et manglende
+    // argument til STRENGEN "undefined", og saa stod der "undefined" foran
+    // markoeren i stedet for "kode" hver eneste gang en aeldre kalder spurgte
+    // om en adgangskode. Utypet bliver undefined ved med at vaere undefined,
+    // og linjen nedenfor kan se forskel.
+    function ask(title: string, masked: bool, submit: var, prefix: var, skift: var): void {
         root.prompt = {
             title: title,
             masked: masked,
@@ -158,7 +175,25 @@ Singleton {
             // ikke paa tomhed. Kaldere fra foer det her felt fandtes spoerger
             // alle sammen om en kode.
             prefix: prefix === undefined ? "kode " : prefix,
-            submit: submit
+            submit: submit,
+            // Tab, mens der spoerges. Er den ikke sat, laver tab ingenting --
+            // der er ikke noget at skifte imellem i en adgangskode.
+            skift: skift
+        };
+        root.spoergNr = root.spoergNr + 1;
+    }
+
+    // Ny overskrift paa det spoergsmaal der allerede staar. Teksten i feltet
+    // bliver, hvor den er -- se spoergNr.
+    function retitle(title: string): void {
+        if (root.prompt === null) return;
+        const p = root.prompt;
+        root.prompt = {
+            title: title,
+            masked: p.masked,
+            prefix: p.prefix,
+            submit: p.submit,
+            skift: p.skift
         };
     }
 
@@ -167,6 +202,12 @@ Singleton {
     function fyld(text: string): void {
         const t = (text ?? "").trim();
         if (t !== "") root.filled(t);
+    }
+
+    // Send feltet af sted uden at han roerer tastaturet. Kun naar der faktisk
+    // staar et spoergsmaal -- ellers er der ikke noget at svare paa.
+    function send(): void {
+        if (root.prompt !== null) root.sender();
     }
 
     function answer(text: string): void {
