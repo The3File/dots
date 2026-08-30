@@ -45,12 +45,19 @@ Item {
     }
 
     MouseArea {
+        id: hover
+
         anchors.fill: parent
         hoverEnabled: true
         acceptedButtons: Qt.LeftButton | Qt.RightButton
 
-        onEntered: Notifs.held = true
-        onExited: Notifs.held = false
+        // Bundet til om musen ER paa boblen -- ikke til at den kom ind én
+        // gang. Et enter uden et exit (formen skifter under en markoer der
+        // staar stille) lod ellers `held` staa tilbage som sand, og saa
+        // holdt den boblen aabnet uden at nogen holdt paa den.
+        onContainsMouseChanged: Notifs.held = hover.containsMouse
+        Component.onDestruction: Notifs.held = false
+
         onClicked: event => {
             Notifs.held = false;
             if (event.button === Qt.RightButton) Notifs.dismiss(root.n);

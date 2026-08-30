@@ -94,9 +94,12 @@ Item {
                     hoverEnabled: true
                     acceptedButtons: Qt.LeftButton | Qt.RightButton
                     // Musen paa listen holder den aabne besked i live paa samme
-                    // maade som paa boblen -- man skal kunne naa at laese.
-                    onEntered: Notifs.held = true
-                    onExited: Notifs.held = false
+                    // maade som paa boblen -- man skal kunne naa at laese. Og
+                    // paa samme maade bundet til om musen ER der, saa en
+                    // linje der forsvinder under markoeren ikke efterlader
+                    // `held` staaende som sand.
+                    onContainsMouseChanged: Notifs.held = lineHover.containsMouse
+                    Component.onDestruction: Notifs.held = false
                     onClicked: event => {
                         if (event.button === Qt.RightButton) {
                             Notifs.dismiss(line.modelData);

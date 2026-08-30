@@ -41,6 +41,11 @@ Singleton {
 
     function hide(): void {
         linger.stop();
+        // Musen slippes ogsaa her. Boblen kan forsvinde under markoeren uden
+        // at der kommer et exited, og saa blev `held` staaende som sand og
+        // holdt den naeste boble aabnet for evigt -- samme fejl som listen
+        // havde, se closeList.
+        root.held = false;
         root.popup = false;
     }
 
@@ -103,6 +108,21 @@ Singleton {
         root.popup = true;
         if (n.urgency === NotificationUrgency.Critical) linger.stop();
         else linger.restart();
+    }
+
+    // Boblen foelger sin besked. Afsenderen kan lukke den selv -- Brave goer
+    // det, naar en kalenderpaamindelse er overstaaet -- og saa stod formen
+    // tilbage uden tekst: en aaben pille om ingenting. Den gik ikke vaek af
+    // sig selv, for det eneste der lukker en boble, er linger-uret, og det
+    // staar stille baade paa en kritisk besked og saa laenge musen holder.
+    // Er beskeden vaek, er boblen ogsaa vaek.
+    Connections {
+        target: root.latest
+
+        function onClosed(reason: int): void {
+            root.hide();
+            root.latest = null;
+        }
     }
 
     NotificationServer {
