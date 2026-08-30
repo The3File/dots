@@ -11,6 +11,12 @@ import qs.widgets
 // en pille skal folde sig ud i skaermen, ikke straekke sig ud ad kanten.
 // Derfor staar linjerne nu oven paa hinanden, i samme form som menuen -- saa
 // kigget og det man kan klikke sig ind i ligner hinanden.
+//
+// Batteri og klokke staar IKKE her (fjernet 30-08). De laa nederst i listen og
+// sagde det samme som hvilelinjen, saa de to tal hoppede ned paa plads hver
+// gang musen kom forbi. Kroppen lader nu hvilelinjen blive liggende og folder
+// kigget ud OVER den -- samme greb som under boelgen. Det her er kun det, der
+// ikke staar der i forvejen.
 Item {
     id: root
 
@@ -50,18 +56,6 @@ Item {
             visible: Backlight.percent > 0
         }
 
-        Line {
-            label: "batteri"
-            value: (Battery.charging ? "+" : "") + Battery.shortText
-            color: Theme.rampColor(Battery.percent)
-            visible: Battery.ready
-        }
-
-        Line {
-            label: "klokken"
-            value: Clock.shortText
-            color: Theme.foreground
-        }
     }
 
     component Line: Item {

@@ -89,6 +89,18 @@ Item {
         if (Notifs.listing) Notifs.closeList();
     }
 
+    // Koerer i ét morph efter hvert faseskift. Saa laenge den loeber, er
+    // kroppens bredde-animation altid paa -- ellers kunne et arbejdsrums-blink,
+    // der stadig var i gang, naar musen forlod pillen, faa formen til at
+    // snappe fra kigget ned i hvile i stedet for at glide.
+    Timer {
+        id: skifter
+        interval: Config.morphDuration
+        repeat: false
+    }
+
+    onPhaseChanged: skifter.restart()
+
     Timer {
         id: peekDelay
         interval: Config.peekDelay
@@ -352,8 +364,11 @@ Item {
             if (root.launching) return launch.implicitHeight + 2 * Config.activePadding;
             if (root.showingPanel) return panel.implicitHeight + 2 * Config.activePadding;
             // Kigget stabler sine linjer lodret som menuen, saa det er
-            // indholdet der bestemmer hoejden. Niveauet er stadig én linje.
-            if (root.peeking) return peek.implicitHeight + 2 * Config.activePadding;
+            // indholdet der bestemmer hoejden -- plus hvilelinjen, der bliver
+            // liggende forneden ligesom under boelgen. Niveauet er én linje.
+            if (root.peeking)
+                return peek.implicitHeight + 2 * Config.activePadding
+                    + Config.restHeight;
             if (root.levelling) return Config.activeHeight;
             return Config.restHeight;
         }
@@ -375,7 +390,18 @@ Item {
         }
         clip: true
 
+        // Under arbejdsrums-blinket er bredden ALLEREDE animeret indefra:
+        // pladsen til tallet aabner sig i hvilelinjen, og kroppen er bundet
+        // til linjens bredde. Animeres den saa én gang til her, halter formen
+        // efter sit eget indhold -- og fordi linjen er centreret, blev uret og
+        // batteriet foerst hakket til hoejre og gled saa til venstre igen, mens
+        // kanten indhentede dem. Ét traek er nok: her staar linjen bomstille,
+        // og pladsen bliver til ude i venstre side.
+        //
+        // Kun mens den bevaegelse koerer. Ellers er animationen paa igen, saa
+        // vejen ind og ud af kigget stadig glider.
         Behavior on width {
+            enabled: skifter.running || !(root.resting && rest.wsMoving)
             NumberAnimation { duration: Config.morphDuration; easing.type: Easing.OutCubic }
         }
         Behavior on height {
@@ -427,14 +453,23 @@ Item {
             anchors.bottom: parent.bottom
             anchors.bottomMargin: (Config.restHeight - rest.implicitHeight) / 2
             bodyScreen: root.bodyScreen
-            opacity: (root.resting || root.voicing) ? 1 : 0
+            // Kigget er med af samme grund som boelgen: han holder musen paa
+            // pillen for at se MERE, ikke for at bytte klokken og batteriet ud
+            // med noget andet. De to laa foer nederst i kiggets egen liste og
+            // hoppede altsaa ned paa plads hver gang -- nu staar de stille, og
+            // resten folder sig ud ovenover.
+            opacity: (root.resting || root.voicing || root.peeking) ? 1 : 0
             visible: opacity > 0
             Behavior on opacity { NumberAnimation { duration: Config.morphDuration / 2 } }
         }
 
         PeekContent {
             id: peek
-            anchors.centerIn: parent
+            // Vokser opad fra hvilelinjen, praecis som boelgen: linjen bliver
+            // hvor den er, og pladsen bliver til over den.
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: Config.restHeight + Config.activePadding
             opacity: root.peeking ? 1 : 0
             visible: opacity > 0
             Behavior on opacity { NumberAnimation { duration: Config.morphDuration / 2 } }

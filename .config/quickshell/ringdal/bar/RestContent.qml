@@ -24,59 +24,135 @@ Item {
     readonly property HyprlandMonitor monitor: Hyprland.monitorFor(bodyScreen)
     readonly property int activeId: monitor?.activeWorkspace?.id ?? -1
 
-    property bool _showWorkspace: false
+    // Sandt mens pladsen aabner eller lukker sig. Kroppen slaar sin egen
+    // bredde-animation fra saa laenge -- se kommentaren i Body.qml.
+    readonly property bool wsMoving: visInd.running || visUd.running
 
     // Arbejdsrummet staar ikke fremme. Det bekraefter kort at du skiftede, og
     // gaar igen -- du har det alligevel i hovedet.
+    //
+    // To bevaegelser, aldrig samtidig: FORMEN foerst, TALLET bagefter. Foer
+    // fadede de sammen, og saa stod tallet og blev laesbart i en kant der
+    // endnu skubbede sig udad -- bevaegelsen kom fra to steder paa én gang.
+    // Pillen goer plads; saa lander tallet i pladsen. Ud gaar det modsat.
+    //
+    // Derfor eksplicitte animationer og ikke to Behaviors med en pause foran:
+    // pausens laengde skulle da laese det samme flag, som netop har udloest
+    // animationen, og raekkefoelgen paa de to bindinger bestemmer vi ikke.
     onActiveIdChanged: {
         if (activeId < 0) return;
-        root._showWorkspace = true;
-        hideWorkspace.restart();
+        hideWorkspace.stop();
+        visUd.stop();
+        visInd.restart();
+    }
+
+    SequentialAnimation {
+        id: visInd
+        NumberAnimation {
+            target: wsSlot
+            property: "plads"
+            to: 1
+            duration: Config.morphDuration
+            easing.type: Easing.OutCubic
+        }
+        NumberAnimation {
+            target: wsSlot
+            property: "tal"
+            to: 1
+            duration: Config.morphDuration
+        }
+        // Ventetiden begynder foerst naar tallet ER inde. Talte den fra
+        // skiftet, aad indfoldningen af den tid, tallet stod stille.
+        onFinished: hideWorkspace.restart()
+    }
+
+    // Ud gaar det IKKE i to trin. Raekkefoelgen betyder kun noget paa vejen
+    // ind, hvor pladsen skal vaere der, foer tallet kan lande i den -- paa
+    // vejen ud er der ingen, der laeser tallet. Fadede det foerst faerdigt,
+    // stod pillen 320 ms aaben og tom og lukkede saa i ét ryk: stilstand og
+    // derefter fuld fart er praecis det, oejet kalder et hak.
+    //
+    // Derfor samtidig, og med en kurve der starter i ro (InOutCubic i stedet
+    // for OutCubic, som er hurtigst i foerste oejeblik). Tallet er vaek foer
+    // pladsen naar at klippe det.
+    ParallelAnimation {
+        id: visUd
+        NumberAnimation {
+            target: wsSlot
+            property: "tal"
+            to: 0
+            duration: Config.morphDuration / 3
+        }
+        NumberAnimation {
+            target: wsSlot
+            property: "plads"
+            to: 0
+            duration: Config.morphDuration
+            easing.type: Easing.InOutCubic
+        }
     }
 
     Timer {
         id: hideWorkspace
         interval: Config.workspaceLinger
         repeat: false
-        onTriggered: root._showWorkspace = false
+        onTriggered: visUd.restart()
     }
 
     Row {
         id: row
         // IKKE centerIn: parent -- forældrens bredde kommer FRA raekken,
         // saa det ville vaere en rundkreds og begge dele blev nul.
-        spacing: Config.restSpacing
+        //
+        // INTET mellemrum her, og det er hele pointen: **en Row springer et
+        // barn med bredde 0 helt over -- ogsaa dets spacing.** Laa
+        // mellemrummet paa den her raekke, forsvandt det i ÉT spring i samme
+        // oejeblik pladsen til arbejdsrumstallet ramte nul, og linjen er
+        // centreret, saa ur og batteri hakkede en halv mellemrumsbredde til
+        // venstre og gled derefter langsomt tilbage, mens kroppen indhentede.
+        // (Vejen ind var fri af det: dér er bredde-animationen slaaet fra, saa
+        // formen fulgte springet med det samme.)
+        //
+        // Pladsen baerer derfor selv sit mellemrum, og saa gaar den jaevnt
+        // hele vejen til nul.
+        spacing: 0
 
-        // Bredden animeres, saa resten glider paa plads i stedet for at hoppe.
+        // `plads` og `tal` skrues af visInd/visUd ovenfor. De er bindinger paa
+        // width og opacity -- ingen animation staar direkte paa de to, for en
+        // animation som vaerdikilde slaar bindingen tavst ihjel.
         Item {
-            width: root._showWorkspace ? ws.implicitWidth : 0
-            height: row.height
+            id: wsSlot
+
+            property real plads: 0
+            property real tal: 0
+
+            width: wsSlot.plads * (ws.implicitWidth + Config.restSpacing)
+            height: linje.height
             clip: true
-            Behavior on width {
-                NumberAnimation { duration: Config.morphDuration; easing.type: Easing.OutCubic }
-            }
 
             Label {
                 id: ws
                 anchors.verticalCenter: parent.verticalCenter
                 text: root.activeId
                 color: Theme.color4
-                opacity: root._showWorkspace ? 1 : 0
-                Behavior on opacity {
-                    NumberAnimation { duration: Config.morphDuration }
-                }
+                opacity: wsSlot.tal
             }
         }
 
-        Label {
-            text: (Battery.charging ? "+" : "") + Battery.shortText
-            color: Theme.rampColor(Battery.percent)
-            visible: Battery.ready
-        }
+        Row {
+            id: linje
+            spacing: Config.restSpacing
 
-        Label {
-            text: Clock.shortText
-            color: Theme.foreground
+            Label {
+                text: (Battery.charging ? "+" : "") + Battery.shortText
+                color: Theme.rampColor(Battery.percent)
+                visible: Battery.ready
+            }
+
+            Label {
+                text: Clock.shortText
+                color: Theme.foreground
+            }
         }
     }
 
