@@ -68,8 +68,8 @@ end)
 
 hl.config({
     general = {
-        gaps_in  = 7,
-        gaps_out = 14,
+        gaps_in  = 10,
+        gaps_out = 20,
         border_size = 2,
         col = {
             active_border   = colors.active_border,
@@ -78,9 +78,8 @@ hl.config({
         resize_on_border = false,
         allow_tearing    = false,
         layout           = "dwindle",
-    },
-
-    -- Hardware cursor planes get confused by the Sunshine/Moonlight virtual
+	  },
+	  -- Hardware cursor planes get confused by the Sunshine/Moonlight virtual
     -- output topology and clamp the cursor to one monitor, blocking it from
     -- crossing into the other (known Hyprland multi-monitor cursor bug).
     -- Software cursor rendering avoids it; cost is negligible.
@@ -463,4 +462,19 @@ hl.window_rule({
 hl.window_rule({
     match = { class = "^(brave-browser)$" },
     scroll_touchpad = 0.2,
+})
+
+---------------------------
+---- SMART GAPS & WIDTH ---
+---------------------------
+
+-- Sæt ekstra padding i siderne (f.eks. 150px), når der kun er ét vindue
+hl.workspace_rule({
+    workspace = "w[tv1]",
+    gaps_out = {
+        top = 20,
+        bottom = 20,
+        left = 150,
+        right = 150,
+    },
 })
