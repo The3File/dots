@@ -66,10 +66,29 @@ end)
 ---- LOOK AND FEEL ----
 -----------------------
 
+---------------------------
+---- SMART GAPS & WIDTH ---
+---------------------------
+
+-- Sæt ekstra padding i siderne (f.eks. 150px), når der kun er ét vindue
+hl.workspace_rule({
+    workspace = "w[tv1]",
+    gaps_out = {
+        top = 20,
+        bottom = 20,
+        left = 150,
+        right = 150,
+    },
+})
+hl.workspace_rule({
+    workspace = "w[tv3]",
+    gaps_out = 5,
+})
+
 hl.config({
     general = {
-        gaps_in  = 10,
-        gaps_out = 20,
+        gaps_in  = 7,
+        gaps_out = 14,
         border_size = 2,
         col = {
             active_border   = colors.active_border,
@@ -464,17 +483,3 @@ hl.window_rule({
     scroll_touchpad = 0.2,
 })
 
----------------------------
----- SMART GAPS & WIDTH ---
----------------------------
-
--- Sæt ekstra padding i siderne (f.eks. 150px), når der kun er ét vindue
-hl.workspace_rule({
-    workspace = "w[tv1]",
-    gaps_out = {
-        top = 20,
-        bottom = 20,
-        left = 150,
-        right = 150,
-    },
-})
