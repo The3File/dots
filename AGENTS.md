@@ -23,14 +23,16 @@ allerede står skrevet. Læs afsnittet; åbn først koden, når den ikke svarer.
 | baggrund, farver, wal | **Baggrund**, **Colors / wal** |
 | pacman, kerne, initramfs, oprydning | **Maintenance notes** |
 | grafik, Mesa, spil | **GPU / Mesa** |
+| egne bash-scripts, `~/.Scripts`, mystiske fejl i en pipe | **Shell-fælder i egne scripts** |
 
 Står svaret ikke i afsnittet, så **skriv det ind, når du har fundet det** — det
 er sådan filen bliver ved med at være hurtigere end at læse koden. Tilføjer du
 et nyt afsnit, så giv det en række i tabellen ovenfor; den bliver skudt ind i
 hver session, og et afsnit uden en række findes i praksis ikke.
 
-Ny fejl, der har kostet tid to gange, hører i `AIOS/Problemer.md` i stedet.
-Fremgangsmåder hører i den relevante `CLAUDE.md`. Her står **maskinen**.
+En fejl, der har kostet tid og kan ramme igen, hører hjemme dér hvor den bliver
+læst: rammer den maskinen, så her — ellers i den relevante `CLAUDE.md` (fremgangsmåden)
+eller i en memory (begrundelsen). Her står **maskinen**.
 <!-- INDEKS:SLUT -->
 
 ## Session / OS
@@ -105,6 +107,7 @@ hyprctl eval 'hl.dispatch(hl.dsp.workspace.toggle_special("scratchterm"))'
 - **Fanerækken kan ikke: den viser tab-labels** (`1`, `2`), som sættes ved oprettelsen eller med `prefix+shift+T`, og der er ingen token-config til dem. Skal en fane hedde noget, skal den døbes.
 - **`~/.config/herdr/config.toml` er IKKE i dotfiles** (tjekket 30-08). Ændringer her lever kun på den maskine, de blev lavet på.
 - **`~/.claude/hooks/herdr-agent-state.sh` ejes af herdr** (`herdr integration install claude`). Ret den ikke i haanden; en opdatering skriver den over. Den melder session-id'et tilbage, saa herdr kan genoptage sessioner efter en genstart.
+- **Super+A åbner en bar shell-prompt i stedet for Claude (efter en genstart).** herdr gemmer sessionen på disk (`~/.config/herdr/sessions/AIOS/session.json`) og genskaber den, når serveren starter igen efter en genstart — men den genskaber kun **ruderne**, ikke det der kørte i dem. Serveren kører altså, og `herdr_ensure` i `~/.Scripts/scratch` sprang tidligere fra på netop det tjek ("serveren kører, så er sessionen jo i orden") og kørte aldrig `~/AIOS/aios`. Derfor virker det første gang efter en frisk opsætning, og fejler først næste genstart. Tjek på **arbejdet, ikke processen**: `HERDR_SESSION=AIOS herdr agent list` (tom liste = ingen Claude) mod `HERDR_SESSION=AIOS herdr workspace list` (workspacet findes godt nok). Tom agent-liste plus et workspace = præcis dette. `herdr_ensure` håndterer det nu selv: ingen agent → find en **tom** rude (forgrundsgruppen er shellen selv, så vi aldrig skriver ind i noget der kører), døb workspacet om til `AIOS` og kør `~/AIOS/aios` i den; findes der ingen tom rude, laves et nyt workspace som før. Princippet: en baggrundsserver der overlever en genstart er ikke det samme som en levende session.
 - Size/pos: AIOS `1060×960` centered; scratchterm `1065×612` @ `809,48` in `hyprland.lua`
 - **Super+Shift+A siger noget til AIOS-sessionen uden at aabne vinduet** (30-08-2026): pillens frie linje. Se **Pillen**. Samme bogstav med vilje — den tunge og den lette udgave af samme gestus.
 - 3-finger down opens AIOS, up closes it (Super+A still toggles)
@@ -339,6 +342,26 @@ Install from scratch: `curl` of `.install.bash` from the `dots` repo — intervi
 ## Tooling notes
 
 - **Claude Code CLI:** working install is user-local (`~/.local/…@anthropic-ai/claude-code`, binary via `~/.Scripts/claude` → `~/.local/bin/claude`). System `/usr/bin/claude` is a broken stub (postinstall never wrote the native binary). Prefer the user install; `npm` may need `allow-scripts=@anthropic-ai/claude-code` for upgrades. If `claude` prints “native binary not installed”, run: `node ~/.local/lib/node_modules/@anthropic-ai/claude-code/install.cjs`.
+
+## Shell-fælder i egne scripts
+
+**Linjer forsvinder tilfældigt ud af en liste** — et script laver en liste, og et
+element mangler, men ikke hver gang. Kør det tre gange, få tre resultater. Ofte følger
+exit-kode **141** med.
+
+Årsagen er `x=$(kommando | awk '... {print; exit}')`. Når awk stopper ved første match,
+får skriveren i venstre side SIGPIPE (141). Med `set -o pipefail` arver hele pipen den
+kode, og med `set -e` dør scriptet midt i løkken. Om det sker afhænger af, hvor meget
+skriveren stadig havde i bufferen — derfor det tilfældige. Lad awk læse hele input i
+stedet for at afbryde:
+
+    out=$(kommando 2>/dev/null || true)
+    printf '%s\n' "$out" | awk '!seen && /mønster/ { print; seen = 1 }'
+
+**`bluetoothctl` æder stdin.** Den er en REPL, og kaldes den inde i en `while read`-løkke,
+sluger den løkkens input. Pak den ind: `bluetoothctl "$@" </dev/null`.
+
+Begge dele ramte `~/.Scripts/btcon` 2026-08-27.
 
 ## Key apps / binds
 
