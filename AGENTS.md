@@ -22,6 +22,7 @@ allerede står skrevet. Læs afsnittet; åbn først koden, når den ikke svarer.
 | dotfiles, `~/.Scripts`, hvad der er tracket | **Dotfiles sync** |
 | baggrund, farver, wal | **Baggrund**, **Colors / wal** |
 | pacman, kerne, initramfs, oprydning | **Maintenance notes** |
+| fjernadgang fra telefonen, tailscale, ssh, skaermdeling | **Fjernadgang** |
 | grafik, Mesa, spil | **GPU / Mesa** |
 | egne bash-scripts, `~/.Scripts`, mystiske fejl i en pipe | **Shell-fælder i egne scripts** |
 
@@ -382,6 +383,25 @@ Begge dele ramte `~/.Scripts/btcon` 2026-08-27.
 - Keylock: **lock_keys** — ThinkPad ACPI hotkey `00001317` (toggle); unlock asks hyprlock
 - Hold maskinen vågen (også med lukket låg): **koffein** — **Super+Alt+Shift+K** (toggle) eller `koffein on` / `koffein 2h` / `koffein off` (`-v` holder også skærmen tændt). Erstatter `caffeine`/`caffeinate`, som kun tager en idle-lås og ikke rører låget
 - ThinkPad LEDs: **pwrbtnlght** — CLI / fuzzel (`power` / `micmute` / `mute`); `sync`/`watch` keep micmute LED = muted-on / live-off and power LED off. Mic key: XF86AudioMicMute → `pwrbtnlght mic-toggle`.
+
+## Fjernadgang (telefon → maskine)
+
+Sat op 3/9-2026. Tre lag, og de er ikke alternativer: **Tailscale er vejen**, SSH er
+det man bruger, Sunshine er skærmen når man undtagelsesvis skal se og klikke.
+
+| Piece | Detail |
+|-------|--------|
+| Tailscale | `tailscaled` enabled. Maskinen hedder **t14** (`100.126.117.110`), telefonen **galaxy-z-flip5** (`100.84.149.73`). Samme konto på begge. `tailscale status` viser nettet. Ingen porte åbnet i routeren — det er hele pointen |
+| SSH | `sshd` enabled. Drop-in `/etc/ssh/sshd_config.d/10-ringdal.conf`: **kun nøgler**, ingen root-login. Nøgler i `~/.ssh/authorized_keys` |
+| Termux-nøglen skifter | Android giver appen et **nyt bruger-id ved geninstallation**, så telefonens nøgle bliver ugyldig uden varsel (`u0_a411` → `u0_a371`, 3/9). Symptomet er `Connection closed by authenticating user ringdal [preauth]` i `journalctl -u sshd` — den ligner en netværksfejl, men er en nøglefejl. Fix: hent `~/.ssh/id_ed25519.pub` i Termux og læg linjen i `authorized_keys`. Gamle nøgler slettes ikke |
+| Sunshine + Moonlight | `systemctl --user {start,enable} app-dev.lizardbyte.app.Sunshine.service`. Config `~/.config/sunshine/sunshine.conf`: `capture = wlr`, `encoder = vaapi` (AMD, hardware), `output_name = eDP-1`. Web-UI kun lokalt på `https://localhost:47990` — parring kræver en PIN derfra. Moonlight **finder ikke maskinen selv** over Tailscale; tilføj den manuelt på IP'en |
+| `output_name` er en fælde | Stod på `HEADLESS-34` fra en tidligere opsætning mod en iPad på en virtuel skærm. Den skærm findes ikke længere, og Sunshine starter fint alligevel — den fejler først, når man streamer. Tjek `Selected monitor` i journalen; skal der streames en virtuel skærm igen, oprettes den med `hyprctl output create headless` og navnet skal matche |
+| **Koffein er en forudsætning** | `wlr`-optagelsen filmer den rigtige skærm, så en slukket skærm bliver et sort billede hos Moonlight. Det er derfor koffein blev lavet om 3/9, så den også holder skærmen tændt — se **Power / battery** |
+| `fs.protected_regular = 1` | Root må **ikke** skrive til en fil, en anden bruger ejer, når den ligger i en sticky mappe som `/tmp` — også selv om root har lavet filen med `install -o ringdal`. Det væltede opsætningsscriptet én gang. Læg den slags "root skriver, jeg læser"-filer et sted, der ikke er `/tmp`-roden |
+
+Auto-tilstandens sikkerhedsfilter **blokerer opsætning af fjernadgang** (skrive scriptet,
+`chmod`, køre det). Det er ikke en fejl, og det skal ikke omgås — det løsnes ved at Filip
+selv siger prøv igen, og så kører det gennem `claude-sudo-run` som alt andet root-arbejde.
 
 ## Power / battery
 
