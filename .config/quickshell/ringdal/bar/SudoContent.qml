@@ -3,9 +3,18 @@ import Quickshell
 import qs
 import qs.services
 
-// Spoergsmaalet om root-adgang, mens det staar. Samme form som en besked, og
-// af samme grund: det er noget der sker for Filip, ikke noget han er i gang
-// med, og det maa ikke skubbe kroppen til side.
+// Spoergsmaalet om root-adgang, mens det staar. Det bor i KROPPEN -- ikke i
+// output-pillen, hvor det laa indtil 03-09.
+//
+// Grunden er den fejl der flyttede det: en besked, der landede mens
+// spoergsmaalet stod, tog formen fra det. Output-pillen har én plads, og baade
+// boblen og listen vinder over det de deler den med -- saa forsvandt
+// spoergsmaalet for oejnene af ham, mens et script stod og ventede paa et svar,
+// der aldrig kom. Et spoergsmaal kan ikke komme igen; en besked kan.
+//
+// Og det ER input: det beder om noget fra ham. Det hoerer altsaa hjemme i
+// kroppen sammen med kodefeltet, som det alligevel gaar videre til, naar
+// fingeraftrykket giver op -- samme form, samme sted, ét skridt videre.
 //
 // Ingen ja-knap. Fingeren er svaret, og der findes ikke et klik der giver
 // root -- man kan kun sige nej her. Hoejreklik afviser, praecis som paa en
@@ -21,7 +30,9 @@ import qs.services
 Item {
     id: root
 
-    implicitWidth: Config.notifyWidth
+    // Samme bredde som resten af kroppens flader -- og som kodefeltet, det
+    // gaar videre til. Formen maa ikke skifte stoerrelse midt i ét forloeb.
+    implicitWidth: Config.openWidth
     implicitHeight: col.implicitHeight
 
     Column {

@@ -7,17 +7,20 @@ import qs
 
 // Spoergsmaalet om root-adgang.
 //
-// Det bor to steder, og delingen er den samme som i resten af fladen: kroppen
-// er det Filip GOER, output-pillen er det der SKER for ham.
+// Alle tre trin bor i KROPPEN (flyttet 03-09 -- de to foerste laa i
+// output-pillen indtil da):
 //
 //   vent    spoergsmaalet staar og venter paa at han er der. Ingen laeser er
 //           taendt, ingen tid loeber. Det maa staa saa laenge det skal.
-//   finger  han har trykket paa stroemknappen, og laeseren er aaben. Begge
-//           dele ligger i output-pillen ved siden af kroppen, som en besked --
-//           for det er ikke noget han er i gang med, og det maa ikke skubbe
-//           det han laver til side.
-//   kode    fingeraftrykket gav op, og der skal tastes noget. Det er input,
-//           og saa hoerer det hjemme i kroppen -- samme felt som wifi-koden.
+//   finger  han har trykket paa stroemknappen, og laeseren er aaben.
+//   kode    fingeraftrykket gav op, og der skal tastes noget -- samme felt
+//           som wifi-koden.
+//
+// Hvorfor kroppen og ikke output-pillen: det ER ganske vist maskinen der
+// spoerger, men den beder om noget fra HAM, og et svar er input. Output-pillen
+// har desuden kun én plads, og en besked der landede imens, tog den -- saa
+// forsvandt spoergsmaalet, mens et script stod og ventede paa et svar. En
+// besked kan komme igen; et spoergsmaal kan ikke. Se bar/SudoContent.qml.
 //
 // Hvorfor der er et tryk FOER laeseren: fingeraftryk kan ikke vente. PAM
 // aabner laeseren i faa sekunder og giver op, og staar Filip ude i koekkenet,

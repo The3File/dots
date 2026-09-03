@@ -14,6 +14,9 @@ import qs.widgets
 //   aabner   Super+D. Har tastaturet, saa den staar over alt andet du kunne
 //            komme til at ramme -- men ikke over stemmen.
 //   aaben    du klikkede. Bliver staaende til du gaar ud af den.
+//   sudo     der spoerges om root-adgang. Staar til der er svaret -- ingen
+//            timer, og ingen besked kan tage pladsen. Den taber kun til det,
+//            han selv har aabent med tastaturet i.
 //   niveau   du skruede paa lyd eller lys. Kort, og kun bredere.
 //   kig      musen blev haengende. Passiv -- viser mere, goer intet.
 //   hvile    klokken og batteriet.
@@ -21,6 +24,11 @@ import qs.widgets
 // Kroppen er INPUT: det Filip putter ind i maskinen -- stemmen, menuen,
 // aabneren. Output -- beskeder og agenten -- bor i pillen ved siden af. Uden
 // den opdeling bliver det uklart hvad der er hans, og hvad der er maskinens.
+//
+// Spoergsmaalet om root-adgang staar her (03-09). Det er maskinen der
+// spoerger, men den beder om noget fra HAM, og et svar er input. Det laa i
+// output-pillen og blev skubbet vaek af den foerste den bedste besked -- se
+// SudoContent.
 //
 // Kig og aaben er skilt ad med vilje: pillen ligger i det hjoerne musen kommer
 // forbi hele tiden, og en flade der aabner sig uopfordret er vaerre end ingen
@@ -41,6 +49,11 @@ Item {
         if (Voice.listening || Voice.paused) return "listening";
         if (Launcher.active) return "launch";
         if (root.opened) return "open";
+        // Under aabneren og menuen, over alt andet. De to har tastaturet i
+        // sig lige nu, og et felt der forsvinder under fingrene er vaerre end
+        // et spoergsmaal der venter et oejeblik -- spoergsmaalet HAR ingen
+        // timer. Alt nedenunder er noget der gaar over af sig selv.
+        if (Sudo.showing) return "sudo";
         if (Level.active) return "level";
         if (root._peeking) return "peek";
         return "rest";
@@ -51,6 +64,7 @@ Item {
     readonly property bool levelling: phase === "level"
     readonly property bool peeking: phase === "peek"
     readonly property bool showingPanel: phase === "open"
+    readonly property bool asking: phase === "sudo"
     readonly property bool launching: phase === "launch"
 
     readonly property alias shape: shape
@@ -129,9 +143,10 @@ Item {
     // klikke et andet sted. Uden grebet naar det klik aldrig frem, fordi
     // masken lader alt uden for pillerne falde igennem.
     //
-    // Boblen og root-spoergsmaalet er IKKE med: de er noget maskinen rejser,
-    // ikke noget han aabnede. Boblen gaar over af sig selv, og et spoergsmaal
-    // skal besvares, ikke klikkes vaek ved et uheld.
+    // Boblen er IKKE med: den er noget maskinen rejser, ikke noget han
+    // aabnede, og den gaar over af sig selv. Det samme gaelder
+    // root-spoergsmaalet ovre i kroppen -- det skal besvares, ikke klikkes
+    // vaek ved et uheld, saa kroppen tager heller ikke grebet for dets skyld.
     // Kigget paa Claude er med af samme grund som beskedlisten: han foldede
     // den selv ud, og saa skal et klik ved siden af kunne lukke den igen.
     readonly property bool wantGrab:
@@ -175,24 +190,23 @@ Item {
         anchors.leftMargin: Config.bodyMargin
         anchors.bottom: shape.bottom
 
-        // Root-adgang vinder over en besked: den venter paa ham, og den er
-        // kortvarig. En besked kan komme igen, det kan et spoergsmaal ikke.
+        // Root-adgang stod her indtil 03-09 og vandt over en besked. Det var
+        // ikke nok: boblen og listen tog formen alligevel, hver gang de kom
+        // FOERST -- og saa var spoergsmaalet vaek. Det bor i kroppen nu.
         //
-        // Gotcha: linjen er ogsaa det eneste sted Sudo bliver naevnt fra noget
-        // der selv bliver bygget -- og en singleton ingen naevner, bygger
-        // Quickshell aldrig. Fjernes den, findes IPC-indgangen `sudo` ikke.
-        readonly property bool asking: Sudo.showing
+        // Gotcha: Sudo bliver stadig naevnt fra `root.phase` ovenfor, og det
+        // skal den blive ved med. En singleton ingen naevner, bygger
+        // Quickshell aldrig, og saa findes IPC-indgangen `sudo` ikke.
+        //
         // Listen vinder over boblen: den staar aaben fordi han bad om det, og
         // en ny besked er allerede med i den.
-        readonly property bool listing: !alertShape.asking && Notifs.listing
+        readonly property bool listing: Notifs.listing
         // Kigget paa Claude staar i samme raekke som beskedlisten: begge er
         // noget han selv foldede ud. De to kan ikke staa samtidig -- den ene
         // lukker den anden, se Notifs.openList og Agent.show.
-        readonly property bool claude:
-            !alertShape.asking && !alertShape.listing && Agent.showing
+        readonly property bool claude: !alertShape.listing && Agent.showing
         readonly property bool noting:
-            !alertShape.asking && !alertShape.listing && !alertShape.claude
-            && Notifs.popup
+            !alertShape.listing && !alertShape.claude && Notifs.popup
         // Musen blev haengende paa output-pillen. Den folder sig en smule ud
         // og viser hvad der ligger -- passivt, som kroppens kig. "3 beskeder"
         // siger hvor mange, ikke hvad, og det eneste man kunne goere ved
@@ -202,13 +216,13 @@ Item {
         // GOER, boelgen ligger bare og koerer. Den linje der laeses op, kan
         // stadig springes over med Super+Escape.
         readonly property bool peeking:
-            !alertShape.asking && !alertShape.listing && !alertShape.noting
-            && !alertShape.claude && alertHover.hovered && Notifs.count > 0
+            !alertShape.listing && !alertShape.noting && !alertShape.claude
+            && alertHover.hovered && Notifs.count > 0
         readonly property bool wide:
-            alertShape.asking || alertShape.listing || alertShape.noting
-            || alertShape.claude || alertShape.peeking
-        // Tale vokser, men kun lidt, og den taber til baade root-adgang og en
-        // besked: de venter paa ham, tale gaar over af sig selv.
+            alertShape.listing || alertShape.noting || alertShape.claude
+            || alertShape.peeking
+        // Tale vokser, men kun lidt, og den taber til en besked: den venter
+        // paa ham, tale gaar over af sig selv.
         readonly property bool talking: !alertShape.wide && Tale.talking
 
         width: {
@@ -221,7 +235,6 @@ Item {
                 + 2 * (alertShape.talking ? Config.talePadding : Config.restPadding);
         }
         height: {
-            if (alertShape.asking) return sudo.implicitHeight + 2 * Config.activePadding;
             if (alertShape.listing) return liste.implicitHeight + 2 * Config.activePadding;
             if (alertShape.claude) return claude.implicitHeight + 2 * Config.activePadding;
             if (alertShape.noting) return notify.implicitHeight + 2 * Config.activePadding;
@@ -236,8 +249,6 @@ Item {
         // Kun det der afviger, faar en anden farve end grundkanten -- ellers
         // betyder farve ingenting.
         border.color: {
-            if (alertShape.asking)
-                return Sudo.accepted ? Theme.stateGood : Theme.stateBad;
             if (alertShape.noting)
                 return Notifs.critical ? Theme.stateBad : Theme.color5;
             if (alertShape.listing) return Theme.color5;
@@ -270,13 +281,13 @@ Item {
         // listen ud, eller lukker den igen. Ligger under indholdet, saa
         // boelgen stadig faar sit eget klik (spring linjen over).
         //
-        // Slaaet fra mens der spoerges om root-adgang eller mens listen staar
-        // aaben: dér har fladen sine egne linjer at ramme, og et klik i
-        // luften omkring dem maa ikke betyde noget andet.
+        // Slaaet fra mens listen staar aaben: dér har fladen sine egne linjer
+        // at ramme, og et klik i luften omkring dem maa ikke betyde noget
+        // andet.
         MouseArea {
             anchors.fill: parent
             z: -1
-            enabled: !alertShape.asking && !alertShape.listing && !alertShape.claude
+            enabled: !alertShape.listing && !alertShape.claude
             onClicked: Notifs.openList()
         }
 
@@ -322,13 +333,6 @@ Item {
             Behavior on opacity { NumberAnimation { duration: Config.morphDuration / 2 } }
         }
 
-        SudoContent {
-            id: sudo
-            anchors.centerIn: parent
-            opacity: alertShape.asking ? 1 : 0
-            visible: opacity > 0
-            Behavior on opacity { NumberAnimation { duration: Config.morphDuration / 2 } }
-        }
     }
 
     // ---- kroppen ----------------------------------------------------------
@@ -353,6 +357,7 @@ Item {
             if (root.voicing) return Config.bodyVoiceWidth;
             if (root.launching) return Config.launchWidth + 2 * Config.activePadding;
             if (root.showingPanel) return Config.openWidth + 2 * Config.activePadding;
+            if (root.asking) return Config.openWidth + 2 * Config.activePadding;
             if (root.levelling) return level.implicitWidth + 2 * Config.activePadding;
             if (root.peeking) return peek.implicitWidth + 2 * Config.activePadding;
             return rest.implicitWidth + 2 * Config.restPadding;
@@ -363,6 +368,7 @@ Item {
             if (root.voicing) return Config.bodyVoiceHeight + Config.restHeight;
             if (root.launching) return launch.implicitHeight + 2 * Config.activePadding;
             if (root.showingPanel) return panel.implicitHeight + 2 * Config.activePadding;
+            if (root.asking) return sudo.implicitHeight + 2 * Config.activePadding;
             // Kigget stabler sine linjer lodret som menuen, saa det er
             // indholdet der bestemmer hoejden -- plus hvilelinjen, der bliver
             // liggende forneden ligesom under boelgen. Niveauet er én linje.
@@ -386,6 +392,11 @@ Item {
         // samme én gang til.
         border.color: {
             if (root.voicing) return Voice.color;
+            // Root-adgang er det ene sted kanten skifter uden at formen goer
+            // det: spoergsmaal og kvittering ser ens ud, og forskellen paa
+            // dem er hele pointen.
+            if (root.asking)
+                return Sudo.accepted ? Theme.stateGood : Theme.stateBad;
             return Theme.pillBorder;
         }
         clip: true
@@ -423,7 +434,11 @@ Item {
             acceptedButtons: Qt.LeftButton
             z: -1
 
-            enabled: !root.launching
+            // Mens der spoerges om root-adgang har fladen sin egen museflade
+            // (hoejreklik = nej), og et venstreklik maa ikke aabne menuen
+            // ovenpaa spoergsmaalet. Kigget skal heller ikke staa og vente
+            // bagved og folde sig ud i samme oejeblik der er svaret.
+            enabled: !root.launching && !root.asking
             onEntered: if (!root.opened) peekDelay.restart()
             onExited: {
                 peekDelay.stop();
@@ -487,6 +502,16 @@ Item {
             id: launch
             anchors.centerIn: parent
             opacity: root.launching ? 1 : 0
+            visible: opacity > 0
+            Behavior on opacity { NumberAnimation { duration: Config.morphDuration / 2 } }
+        }
+
+        // Spoergsmaalet om root-adgang. Se SudoContent for hvorfor det staar
+        // i kroppen og ikke i output-pillen.
+        SudoContent {
+            id: sudo
+            anchors.centerIn: parent
+            opacity: root.asking ? 1 : 0
             visible: opacity > 0
             Behavior on opacity { NumberAnimation { duration: Config.morphDuration / 2 } }
         }
