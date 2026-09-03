@@ -5,9 +5,7 @@
             "family": "Terminus",
             "size": 18
         },
-        "screens": [
-            "HEADLESS-1"
-        ]
+        "screens": []
     },
     "body": {
         "opacity": 1.0,
