@@ -1,16 +1,15 @@
 #!/usr/bin/env bash
-# Hold maskinen vågen — også med lukket låg.
+# Hold maskinen vågen — låget må lukkes, og skærmen bliver tændt.
 #
-# Usage: koffein [-v] {on|off|toggle|status|signal|<varighed>}
+# Usage: koffein {on|off|toggle|status|signal|<varighed>}
 #   koffein            → tænd (samme som "on")
 #   koffein 2h         → tænd, sluk selv om 2 timer (2h / 45m / 30s / 90 = minutter)
-#   koffein -v on      → hold også skærmen tændt (fuld caffeine)
 #   koffein off        → slut
 #   koffein status     → menneske-linje i terminal, JSON når stdout ikke er tty
 #
-# Standard blokerer logind's låg-håndtering (HandleLidSwitch=suspend på batteri),
-# men lader hypridle slukke skærmen efter 5 min. -v tager også en idle-lås, som
-# hypridle respekterer (ignore_systemd_inhibit = false).
+# Låsen dækker både logind's låg-håndtering (HandleLidSwitch=suspend på batteri)
+# og idle, som hypridle respekterer (ignore_systemd_inhibit = false) — så
+# skærmen bliver tændt, så længe koffein er tændt. Én tilstand, intet flag.
 #
 # Bevidst dvale (bye-menuen, systemctl suspend) blokeres IKKE med vilje.
 # Låsen lever præcis så længe processen lever, så "off" = dræb processen.
@@ -25,7 +24,6 @@ RUNTIME="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
 STATE="$RUNTIME/koffein.state"
 
 PID=""
-MODE=""
 UNTIL=""
 
 die() {
@@ -33,10 +31,9 @@ die() {
 	exit 1
 }
 
-# Lever låsen? Sætter PID/MODE/UNTIL fra state-filen.
+# Lever låsen? Sætter PID/UNTIL fra state-filen.
 running() {
 	PID=""
-	MODE=""
 	UNTIL=""
 	[[ -r $STATE ]] || return 1
 	# shellcheck disable=SC1090
@@ -91,14 +88,7 @@ stop() {
 }
 
 start() {
-	local mode=$1 secs=$2 what why until_ pid
-	if [[ $mode == lid+idle ]]; then
-		what='handle-lid-switch:idle'
-		why='koffein: låget ignoreres, skærmen bliver tændt'
-	else
-		what='handle-lid-switch'
-		why='koffein: låget ignoreres'
-	fi
+	local secs=$1 until_ pid
 
 	if [[ $secs == inf ]]; then
 		until_=inf
@@ -108,7 +98,8 @@ start() {
 
 	# Skal startes fra den grafiske session (ikke som user-unit): polkit-reglen
 	# for lid-låsen er "implicit any: no", så en sessionsløs proces kan nægtes.
-	setsid systemd-inhibit --what="$what" --who=koffein --why="$why" --mode=block \
+	setsid systemd-inhibit --what='handle-lid-switch:idle' --who=koffein \
+		--why='koffein: låget ignoreres, skærmen bliver tændt' --mode=block \
 		sleep "${secs/inf/infinity}" </dev/null >/dev/null 2>&1 &
 	pid=$!
 
@@ -121,7 +112,7 @@ start() {
 		fi
 	fi
 
-	printf 'PID=%s\nMODE=%s\nUNTIL=%s\n' "$pid" "$mode" "$until_" >"$STATE"
+	printf 'PID=%s\nUNTIL=%s\n' "$pid" "$until_" >"$STATE"
 	signal_pillen
 }
 
@@ -131,11 +122,7 @@ human_status() {
 		if [[ $UNTIL != inf ]]; then
 			left=" (slukker om $(fmt_left $((UNTIL - $(date +%s)))))"
 		fi
-		if [[ $MODE == lid+idle ]]; then
-			printf 'koffein: tændt — låget ignoreres, skærmen bliver tændt%s\n' "$left"
-		else
-			printf 'koffein: tændt — låget ignoreres, skærmen slukker som normalt%s\n' "$left"
-		fi
+		printf 'koffein: tændt — låget ignoreres, skærmen bliver tændt%s\n' "$left"
 	else
 		printf 'koffein: slukket\n'
 	fi
@@ -143,12 +130,7 @@ human_status() {
 
 json_status() {
 	if running; then
-		local text tip left=''
-		if [[ $MODE == lid+idle ]]; then
-			text='koffein+'
-		else
-			text='koffein'
-		fi
+		local text='koffein' tip left=''
 		if [[ $UNTIL == inf ]]; then
 			tip='Slukker først når du siger til.'
 		else
@@ -156,11 +138,7 @@ json_status() {
 			text="$text $left"
 			tip="Slukker om $left ($(date -d "@$UNTIL" +%H:%M))."
 		fi
-		if [[ $MODE == lid+idle ]]; then
-			tip="Låget ignoreres. Skærmen bliver tændt.\n$tip"
-		else
-			tip="Låget ignoreres. Skærmen slukker som normalt.\n$tip"
-		fi
+		tip="Låget ignoreres. Skærmen bliver tændt.\n$tip"
 		printf '{"text":"%s","tooltip":"%s","class":"on"}\n' "$text" "$tip"
 	else
 		printf '{"text":"","tooltip":"","class":"off"}\n'
@@ -181,12 +159,10 @@ say_on() {
 }
 
 main() {
-	local mode=lid
 	while [[ ${1:-} == -* ]]; do
 		case $1 in
-		-v | --vågen | --vaagen) mode=lid+idle ;;
 		-h | --help)
-			sed -n '2,20p' "$0" | sed 's/^# \?//'
+			sed -n '2,19p' "$0" | sed 's/^# \?//'
 			exit 0
 			;;
 		*) die "ukendt flag: $1 (prøv -h)" ;;
@@ -211,7 +187,7 @@ main() {
 			stop
 			say_off
 		else
-			start "$mode" inf
+			start inf
 			say_on
 		fi
 		;;
@@ -225,7 +201,7 @@ main() {
 		if running; then
 			stop
 		fi
-		start "$mode" "$secs"
+		start "$secs"
 		say_on
 		;;
 	esac

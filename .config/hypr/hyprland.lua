@@ -407,8 +407,8 @@ hl.window_rule({
 hl.window_rule({
     match = { class = "^(scratchaios)$" },
     float = true,
-    size = { 1060, 960 },
-    center = true,
+    size = { 1411, 1018 },
+    move = { 201, 34 },
     workspace = "special:scratchaios",
 })
 
