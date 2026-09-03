@@ -328,6 +328,8 @@ Bare-repo git wrapper for tracked configs under `$HOME` (not a normal repo in `~
 - `dot pull` — pull from origin
 - Plain `dot commit …` / `dot push` also fine; prefer `dot up` when the user says “synkroniser”
 
+**`fatal: pathspec 'bootstrap' did not match any files` under `dot up` er støj, ikke en fejl.** Wrapperen prøver at stage bootstrap-kittet, og der er ikke tracket nogen `bootstrap/`-filer i det her repo. Commit og push kører videre bagefter — kig efter `master -> master`-linjen i stedet.
+
 **README dance:** before commit, script copies `~/.dotfiles/README.md` → `~/README.md`, stages it, commits; after the command it moves README back into the bare repo and `assume-unchanged`’s `~/README.md` so it doesn’t clutter the home tree. Don’t fight that.
 
 **Agent habits:**
