@@ -1,38 +1,40 @@
 {
-  "_": "Pillens skruer. bar.font.size traekker al luft og alle bredder med sig - se afsnittet 'Pillen' i ~/AGENTS.md. Slettede tal falder tilbage paa Config.qml; skriv et tal her for at laase det.",
-  "bar": {
-    "font": {
-      "family": "Terminus",
-      "size": 18
+    "_": "Pillens skruer. bar.font.size traekker al luft og alle bredder med sig - se afsnittet 'Pillen' i ~/AGENTS.md. Slettede tal falder tilbage paa Config.qml; skriv et tal her for at laase det.",
+    "bar": {
+        "font": {
+            "family": "Terminus",
+            "size": 18
+        },
+        "screens": [
+            "HEADLESS-1"
+        ]
     },
-    "screens": []
-  },
-  "body": {
-    "opacity": 1.00,
-    "margin": 7,
-    "align": "right",
-    "borderWidth": 1,
-    "borderTone": 0.7,
-    "morphDuration": 320,
-    "overlayHeight": 640,
-    "menuLines": 10,
-    "launchLines": 8,
-    "notifyLines": 6,
-    "notifyPeekLines": 3,
-    "notifyMax": 20,
-    "notifyLinger": 6000,
-    "levelLinger": 1600,
-    "workspaceLinger": 1200,
-    "peekDelay": 0,
-    "agentStale": 240000
-  },
-  "intervals": {
-    "whspr": 1000,
-    "perf": 0,
-    "keylock": 5000,
-    "net": 15000,
-    "backlight": 0,
-    "koffein": 30000,
-    "clock": 30000
-  }
+    "body": {
+        "opacity": 1.0,
+        "margin": 7,
+        "align": "right",
+        "borderWidth": 1,
+        "borderTone": 0.7,
+        "morphDuration": 320,
+        "overlayHeight": 640,
+        "menuLines": 10,
+        "launchLines": 8,
+        "notifyLines": 6,
+        "notifyPeekLines": 3,
+        "notifyMax": 20,
+        "notifyLinger": 6000,
+        "levelLinger": 1600,
+        "workspaceLinger": 1200,
+        "peekDelay": 0,
+        "agentStale": 240000
+    },
+    "intervals": {
+        "whspr": 1000,
+        "perf": 0,
+        "keylock": 5000,
+        "net": 15000,
+        "backlight": 0,
+        "koffein": 30000,
+        "clock": 30000
+    }
 }
